@@ -13,7 +13,8 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ asset('build/assets/app-Dc2lHwHR.css') }}">
+    <script src="{{ asset('build/assets/app-BWimq3f3.js') }}"></script> 
 
     </head>
     <body class="font-sans text-gray-900 antialiased bg-cover bg-center" style="background-image: url('{{ asset('images/bg-login.jpg') }}')">
