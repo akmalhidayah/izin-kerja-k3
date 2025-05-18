@@ -154,9 +154,6 @@ public function store(Request $request)
     return back()->with('success', 'Data Working Permit Umum berhasil disimpan!')->withInput();
 }
 
-
-    
-
     private function saveSignature($base64, $role)
     {
         if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
@@ -176,12 +173,20 @@ public function store(Request $request)
 
     public function preview($id)
     {
-        $permit = UmumWorkPermit::with('notification')->findOrFail($id);
+        $permit = UmumWorkPermit::where('notification_id', $id)->first();
         $detail = WorkPermitDetail::where('notification_id', $id)->first();
-        $closure = WorkPermitClosure::where('work_permit_detail_id', $detail?->id)->first();
+
+        if (!$permit && !$detail) {
+            abort(404, 'Data izin kerja umum tidak ditemukan.');
+        }
+
+        $closure = $detail
+            ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
+            : null;
 
         return Pdf::loadView('pengajuan-user.workingpermit.umumpdf', compact('permit', 'detail', 'closure'))
             ->setPaper('A4')
             ->stream('izin-kerja-umum.pdf');
     }
+
 }

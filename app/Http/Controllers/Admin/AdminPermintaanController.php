@@ -10,127 +10,130 @@ use App\Models\User;
 
 class AdminPermintaanController extends Controller
 {
-public function show($id)
-{
-    $notification = Notification::with(['user', 'handledBy'])->findOrFail($id);
+    public function show($id)
+    {
+        $notification = Notification::with(['user', 'handledBy'])->findOrFail($id);
 
-    $jsa = \App\Models\Jsa::where('notification_id', $id)->first();
-    $permit = \App\Models\UmumWorkPermit::where('notification_id', $id)->first();
-    $uploads = \App\Models\Upload::where('notification_id', $id)->get()->keyBy('step');
-    $approvals = StepApproval::where('notification_id', $id)->get()->keyBy('step');
+        $jsa = \App\Models\Jsa::where('notification_id', $id)->first();
+        $permit = \App\Models\UmumWorkPermit::where('notification_id', $id)->first();
+        $uploads = \App\Models\Upload::where('notification_id', $id)->get()->keyBy('step');
+        $approvals = StepApproval::where('notification_id', $id)->get()->keyBy('step');
 
-    // Inject file_path dari step_approvals kalau upload tidak ada
-    foreach ($approvals as $key => $approval) {
-        if (!isset($uploads[$key]) && $approval->file_path) {
-            $uploads[$key] = (object) [
-                'file_path' => $approval->file_path
-            ];
-        }
-    }
-
-    $stepTitles = [
-        'op_spk' => 'Buat Notifikasi/OP/SPK',
-        'bpjs' => 'Upload BPJS',
-        'jsa' => 'Input JSA',
-        'working_permit' => 'Input Working Permit',
-        'fakta_integritas' => 'Upload Fakta Integritas',
-        'sertifikasi_ak3' => 'Upload Sertifikasi AK3',
-        'ktp' => 'Upload KTP Personil K3',
-        'surat_kesehatan' => 'Upload Surat Kesehatan',
-        'struktur_organisasi' => 'Upload Struktur Organisasi',
-        'post_test' => 'Upload Post Test',
-        'sik' => 'Surat Izin Kerja',
-        'bukti_serah_terima' => 'Upload Bukti Serah Terima',
-    ];
-
-    $stepData = [];
-    foreach ($stepTitles as $step => $title) {
-        $status = $approvals[$step]->status ?? 'Menunggu';
-        $upload = $uploads[$step] ?? null;
-
-        if ($step === 'op_spk') {
-            $upload = (object)[
-                'file_path' => $notification->file ?? null,
-                'number' => $notification->number ?? null,
-                'type' => $notification->type ?? null,
-                'created_at' => $notification->created_at ?? null,
-            ];
+        // Inject file_path dari step_approvals kalau upload tidak ada
+        foreach ($approvals as $key => $approval) {
+            if (!isset($uploads[$key]) && $approval->file_path) {
+                $uploads[$key] = (object) [
+                    'file_path' => $approval->file_path
+                ];
+            }
         }
 
-        $statusClass = match ($status) {
-            'Disetujui' => 'bg-green-500 text-white',
-            'Perlu Revisi' => 'bg-yellow-500 text-white',
-            'Menunggu' => 'bg-gray-300 text-black',
-            default => 'bg-white text-black',
-        };
-
-        $stepData[] = [
-            'step' => $step,
-            'title' => $title,
-            'status' => $status,
-            'upload' => $upload,
-            'status_class' => $statusClass,
+        $stepTitles = [
+            'op_spk' => 'Buat Notifikasi/OP/SPK',
+            'bpjs' => 'Upload BPJS',
+            'jsa' => 'Input JSA',
+            'working_permit' => 'Input Working Permit',
+            'fakta_integritas' => 'Upload Fakta Integritas',
+            'sertifikasi_ak3' => 'Upload Sertifikasi AK3',
+            'ktp' => 'Upload KTP Personil K3',
+            'surat_kesehatan' => 'Upload Surat Kesehatan',
+            'struktur_organisasi' => 'Upload Struktur Organisasi',
+            'post_test' => 'Upload Post Test',
+            'sik' => 'Surat Izin Kerja',
+            'bukti_serah_terima' => 'Upload Bukti Serah Terima',
         ];
+
+        $stepData = [];
+        foreach ($stepTitles as $step => $title) {
+            $status = $approvals[$step]->status ?? 'Menunggu';
+            $upload = $uploads[$step] ?? null;
+
+            if ($step === 'op_spk') {
+                $upload = (object)[
+                    'file_path' => $notification->file ?? null,
+                    'number' => $notification->number ?? null,
+                    'type' => $notification->type ?? null,
+                    'created_at' => $notification->created_at ?? null,
+                ];
+            }
+
+            $statusClass = match ($status) {
+                'Disetujui' => 'bg-green-500 text-white',
+                'Perlu Revisi' => 'bg-yellow-500 text-white',
+                'Menunggu' => 'bg-gray-300 text-black',
+                default => 'bg-white text-black',
+            };
+
+            $stepData[] = [
+                'step' => $step,
+                'title' => $title,
+                'status' => $status,
+                'upload' => $upload,
+                'status_class' => $statusClass,
+            ];
+        }
+
+        // Tambahan: step aktif terakhir
+        $lastApprovedIndex = collect($stepData)->where('status', 'Disetujui')->keys()->last();
+        $stepSummary = $lastApprovedIndex !== null
+            ? 'Step ' . ($lastApprovedIndex + 1) . ' - ' . $stepData[$lastApprovedIndex]['title']
+            : 'Belum Diketahui';
+
+        $data = (object)[
+            'id' => $notification->id,
+            'user_name' => $notification->user->name ?? '-',
+            'tanggal' => $notification->created_at->format('d-m-Y H:i'),
+            'handled_by' => $notification->handledBy?->name ?? auth()->user()->name,
+            'status' => $notification->status ?? 'Menunggu',
+            'notification_file' => $notification->file ?? null,
+            'notification_id' => $notification->id,
+            'step_data' => $stepData,
+            'step_summary' => $stepSummary, // ✅ properti tambahan
+            'jsa' => $jsa,
+            'permit' => $permit,
+        ];
+
+        $admins = User::where('usertype', 'admin')->pluck('name');
+
+        return view('admin.detailpermintaan', compact('data', 'admins'));
     }
-
-    $data = (object)[
-        'id' => $notification->id,
-        'user_name' => $notification->user->name ?? '-',
-        'tanggal' => $notification->created_at->format('d-m-Y H:i'),
-        'handled_by' => $notification->handledBy?->name ?? auth()->user()->name,
-        'status' => $notification->status ?? 'Menunggu',
-        'notification_file' => $notification->file ?? null,
-        'notification_id' => $notification->id,
-        'step_data' => $stepData,
-        'jsa' => $jsa,
-        'permit' => $permit,
-    ];
-
-    $admins = User::where('usertype', 'admin')->pluck('name');
-
-    return view('admin.detailpermintaan', compact('data', 'admins'));
-}
-
 
     public function updateStatus(Request $request, $id, $step)
-{
-    $request->validate([
-        'status' => 'required|in:disetujui,revisi,menunggu',
-        'catatan' => 'nullable|string|max:500'
-    ]);
+    {
+        $request->validate([
+            'status' => 'required|in:disetujui,revisi,menunggu',
+            'catatan' => 'nullable|string|max:500'
+        ]);
 
-    StepApproval::updateOrCreate(
-        ['notification_id' => $id, 'step' => $step],
-        [
-            'status' => strtolower($request->status),
-            'catatan' => $request->catatan,
-            'approved_by' => auth()->id()
-        ]
-    );
+        StepApproval::updateOrCreate(
+            ['notification_id' => $id, 'step' => $step],
+            [
+                'status' => strtolower($request->status),
+                'catatan' => $request->catatan,
+                'approved_by' => auth()->id()
+            ]
+        );
 
-    return redirect()->back()->with('success', 'Status langkah ke-' . $step . ' berhasil diperbarui ke "' . $request->status . '"');
-}
-public function uploadSik(Request $request, $id)
-{
-    $request->validate([
-        'file_sik' => 'required|mimes:pdf|max:2048',
-    ]);
+        return redirect()->back()->with('success', 'Status langkah ke-' . $step . ' berhasil diperbarui ke "' . $request->status . '"');
+    }
 
-    // Simpan file ke storage
-    $path = $request->file('file_sik')->store('sik_files', 'public');
+    public function uploadSik(Request $request, $id)
+    {
+        $request->validate([
+            'file_sik' => 'required|mimes:pdf|max:2048',
+        ]);
 
-    // Update atau buat entri baru di step_approvals
-    StepApproval::updateOrCreate(
-        ['notification_id' => $id, 'step' => 'sik'],
-        [
-            'status' => 'disetujui',
-            'file_path' => $path,
-            'approved_by' => auth()->id(),
-        ]
-    );
+        $path = $request->file('file_sik')->store('sik_files', 'public');
 
-    return back()->with('success', 'Surat Izin Kerja berhasil diunggah.');
-}
+        StepApproval::updateOrCreate(
+            ['notification_id' => $id, 'step' => 'sik'],
+            [
+                'status' => 'disetujui',
+                'file_path' => $path,
+                'approved_by' => auth()->id(),
+            ]
+        );
 
-
+        return back()->with('success', 'Surat Izin Kerja berhasil diunggah.');
+    }
 }

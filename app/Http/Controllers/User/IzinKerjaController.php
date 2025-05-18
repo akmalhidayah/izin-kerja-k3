@@ -12,9 +12,9 @@ use App\Models\StepApproval;
 
 class IzinKerjaController extends Controller
 {
-   public function index()
+public function index()
 {
-    $notification = Notification::latest()->first();
+    $notification = Notification::where('user_id', auth()->id())->latest()->first();
     $jsa = $notification ? Jsa::where('notification_id', $notification->id)->first() : null;
     $permit = $notification?->umumWorkPermit;
 
@@ -63,4 +63,5 @@ class IzinKerjaController extends Controller
         'notification', 'jsa', 'permit', 'detail', 'closure', 'steps'
     ));
 }
+
 }

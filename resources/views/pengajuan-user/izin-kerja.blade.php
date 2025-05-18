@@ -220,7 +220,7 @@
     @else
         <div class="flex flex-col items-center space-y-2">
             @if ($permit)
-                <a href="{{ route('working-permit.umum.preview', ['id' => $permit->id]) }}" target="_blank"
+                <a href="{{ route('working-permit.umum.preview', ['id' => $permit->notification_id]) }}" target="_blank"
                     class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[10px] px-4 py-[5px] rounded-full">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -562,13 +562,6 @@
                                 @endif
                             @elseif ($index === 3)
                                 @include('components.steps.modal-working-permit', [
-                                    'label' => $label,
-                                    'id' => 'modal-' . $index,
-                                    'notification' => $notification,
-                                    'stepName' => $step['code']
-                                ])
-                            @elseif ($index === 11)
-                                @include('components.steps.modal-view-certificate', [
                                     'label' => $label,
                                     'id' => 'modal-' . $index,
                                     'notification' => $notification,

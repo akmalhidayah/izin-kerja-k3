@@ -52,7 +52,7 @@
             <h2 style="margin: 0;">IZIN KERJA UMUM</h2>
         </td>
         <td style="width: 20%; text-align: right;">
-            <span class="label">Nomor:</span> <span style="color:gray;">{{ $permit->id ?? '-' }}</span>
+            <span class="label">Nomor:</span> <span style="color:gray;">-</span>
         </td>
     </tr>
 </table>

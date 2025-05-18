@@ -97,7 +97,7 @@
                         @endif
 
                         @if ($stepKey === 'working_permit' && $data->permit)
-                            <a href="{{ route('working-permit.umum.preview', ['id' => $data->permit->id]) }}" target="_blank"
+                            <a href="{{ route('working-permit.umum.preview', ['id' => $data->permit->notification_id]) }}" target="_blank"
                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full w-fit text-xs flex items-center gap-1">
                                 <i class="fas fa-file-pdf"></i> Lihat PDF Working Permit
                             </a>
