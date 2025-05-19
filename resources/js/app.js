@@ -16,5 +16,34 @@ Alpine.store('signatureModal', {
         }
     }
 });
+window.formJSA = function (existing = []) {
+    return {
+        langkahKerja: existing.length ? existing : [{ langkah: '', bahaya: '', pengendalian: '' }],
+        tambahRow() {
+            this.langkahKerja.push({ langkah: '', bahaya: '', pengendalian: '' });
+        },
+        hapusRow(index) {
+            this.langkahKerja.splice(index, 1);
+        },
+        serializeLangkah() {
+            document.getElementById('langkah_kerja').value = JSON.stringify(this.langkahKerja);
+        }
+    };
+};
+window.isolasiData = function (existingListrik = [], existingNonListrik = []) {
+    let listrik = Array.isArray(existingListrik) ? existingListrik : (existingListrik ? JSON.parse(existingListrik) : []);
+    let nonListrik = Array.isArray(existingNonListrik) ? existingNonListrik : (existingNonListrik ? JSON.parse(existingNonListrik) : []);
+
+    return {
+        listrik: listrik.length ? listrik : [{ peralatan: '', nomor: '', tempat: '', locked: '', tested: '', signature: '' }],
+        nonListrik: nonListrik.length ? nonListrik : [{ peralatan: '', jenis: '', tempat: '', locked: '', tested: '', signature: '' }],
+        addListrik() {
+            this.listrik.push({ peralatan: '', nomor: '', tempat: '', locked: '', tested: '', signature: '' });
+        },
+        addNonListrik() {
+            this.nonListrik.push({ peralatan: '', jenis: '', tempat: '', locked: '', tested: '', signature: '' });
+        }
+    };
+};
 
 Alpine.start();

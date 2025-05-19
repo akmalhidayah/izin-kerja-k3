@@ -82,12 +82,21 @@
                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full w-fit text-xs flex items-center gap-1">
                                 <i class="fas fa-file-pdf"></i> Lihat Surat Izin Kerja
                             </a>
-                        @elseif (!in_array($stepKey, ['op_spk', 'sik']) && $upload && $upload->file_path)
-                            <a href="{{ asset('storage/' . $upload->file_path) }}" target="_blank"
-                               class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full w-fit text-xs flex items-center gap-1">
-                                <i class="fas fa-file-alt"></i> Lihat Dokumen
-                            </a>
-                        @endif
+                       @elseif (!in_array($stepKey, ['op_spk', 'sik']) && $upload && $upload->file_path)
+    <div class="flex items-center gap-2">
+        <a href="{{ asset('storage/' . $upload->file_path) }}" target="_blank"
+           class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-xs flex items-center gap-1">
+            <i class="fas fa-file-alt"></i> Lihat Dokumen
+        </a>
+        <form action="{{ route('admin.permintaansik.deleteFile', [$data->id, $stepKey]) }}"
+              method="POST" onsubmit="return confirm('Yakin ingin menghapus file ini?')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="text-red-500 text-xs underline">Hapus</button>
+        </form>
+    </div>
+@endif
+
 
                         @if ($stepKey === 'jsa' && $data->jsa)
                             <a href="{{ route('jsa.pdf.view', ['notification_id' => $data->notification_id]) }}" target="_blank"
@@ -128,9 +137,10 @@
                                 <option value="revisi" {{ $status == 'revisi' ? 'selected' : '' }}>Perlu Revisi</option>
                             </select>
 
-                            <textarea name="catatan"
-                                      class="catatan-field mt-2 text-xs w-full border rounded px-2 py-1 text-gray-700"
-                                      placeholder="Tulis alasan revisi..." style="display: {{ $status === 'revisi' ? 'block' : 'none' }};">{{ old('catatan') }}</textarea>
+                         <textarea name="catatan"
+    class="catatan-field mt-2 text-xs w-full border rounded px-2 py-1 text-gray-700"
+    placeholder="Tulis alasan revisi..." style="display: {{ $status === 'revisi' ? 'block' : 'none' }};">{{ $step['catatan'] ?? '' }}</textarea>
+
 
                             <button type="submit"
                                     class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow">

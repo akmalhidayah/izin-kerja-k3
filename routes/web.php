@@ -52,6 +52,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/permintaansik/{id}', [AdminPermintaanController::class, 'show'])->name('permintaansik.show');
 
     Route::post('/permintaansik/{id}/upload-sik', [AdminPermintaanController::class, 'uploadSik'])->name('permintaansik.uploadSik');
+    Route::delete('/permintaansik/{id}/delete-file/{step}', [AdminPermintaanController::class, 'deleteFile'])
+        ->name('permintaansik.deleteFile');
+
+
 
 });
 

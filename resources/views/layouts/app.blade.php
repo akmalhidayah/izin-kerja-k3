@@ -12,8 +12,9 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Styles & Vite -->
+             <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
     <link rel="stylesheet" href="{{ asset('build/assets/app-Dc2lHwHR.css') }}">
-    <script src="{{ asset('build/assets/app-BWimq3f3.js') }}"></script> 
+    <script src="{{ asset('build/assets/app-JnccHoe-.js') }}"></script> 
     </head>
     <body class="font-sans antialiased">
         <!-- Preload bg image -->

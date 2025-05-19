@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Upload;
 use App\Models\Notification;
 use App\Models\StepApproval;
 use App\Models\User;
@@ -70,6 +72,7 @@ class AdminPermintaanController extends Controller
                 'status' => $status,
                 'upload' => $upload,
                 'status_class' => $statusClass,
+                'catatan' => $approvals[$step]->catatan ?? '',
             ];
         }
 
@@ -136,4 +139,25 @@ class AdminPermintaanController extends Controller
 
         return back()->with('success', 'Surat Izin Kerja berhasil diunggah.');
     }
+
+    public function deleteFile($id, $step)
+{
+    // Hapus file dari table uploads
+    $upload = Upload::where('notification_id', $id)->where('step', $step)->first();
+    if ($upload) {
+        Storage::disk('public')->delete($upload->file_path);
+        $upload->delete();
+    }
+
+    // Hapus path dan status di StepApproval jika ada
+    StepApproval::where('notification_id', $id)
+        ->where('step', $step)
+        ->update([
+            'file_path' => null,
+            'status' => 'menunggu',
+        ]);
+
+    return back()->with('success', 'File berhasil dihapus dan status direset.');
 }
+}
+
