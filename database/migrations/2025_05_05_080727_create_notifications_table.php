@@ -15,7 +15,6 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->string('file')->nullable(); // Path file SPK jika ada
             $table->string('status')->default('menunggu');
-
             $table->timestamps();
         });
     }

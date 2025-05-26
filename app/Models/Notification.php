@@ -59,4 +59,5 @@ public function assignedAdmin()
     return $this->belongsTo(User::class, 'assigned_admin_id');
 }
 
+
 }
