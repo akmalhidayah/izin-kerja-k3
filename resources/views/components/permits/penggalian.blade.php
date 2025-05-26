@@ -306,7 +306,7 @@
                             class="text-blue-600 underline text-xs">
                             Tanda Tangan
                         </button>
-                        <input type="hidden" name="signature_Permit Issuer">
+                        <input type="hidden" name="signature_permit issuer">
                     </td>
                     <td class="border px-2 py-2 text-center">
                         <input type="date" name="permit_issuer_date" class="input w-full text-center">

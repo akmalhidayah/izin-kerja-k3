@@ -10,11 +10,13 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 
         <!-- Styles & Vite -->
              <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-Dc2lHwHR.css') }}">
-    <script src="{{ asset('build/assets/app-JnccHoe-.js') }}"></script> 
+    <link rel="stylesheet" href="{{ asset('build/assets/app-CP4tGefM.css') }}">
+    <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script> 
     </head>
     <body class="font-sans antialiased">
         <!-- Preload bg image -->

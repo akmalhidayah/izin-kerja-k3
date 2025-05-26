@@ -7,7 +7,7 @@
 
     <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
         <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
-            <div x-data="{ expanded: false, activeModal: null }">
+            <div x-data="{ expanded: false, activeModal: null, selectedPermit: 'umum' }">
                 @if(session('success'))
                     <div class="bg-green-500 text-white p-2 rounded mb-4">
                         {{ session('success') }}
@@ -17,7 +17,8 @@
                 <div class="flex flex-wrap justify-between items-center text-sm text-gray-800 mb-4">
                     <div>
                         <p><span class="font-semibold">Vendor/User:</span> {{ Auth::user()->name }}</p>
-                        <p><span class="font-semibold">Admin K3:</span> Budi Kurniawan</p>
+<p><span class="font-semibold">Admin K3:</span> {{ $notification?->assignedAdmin?->name ?? '-' }}</p>
+
                     </div>
                     <div>
                         <p><span class="font-semibold">Tanggal:</span> {{ now()->format('d-m-Y H:i') }}</p>
@@ -41,7 +42,7 @@
                                 'Input OP/SPK/Notification',
                                 'Upload Dokumen',
                                 'Buat JSA',
-                                'Buat Working Permit',
+                                'Buat Working Permit Umum',
                                 'Upload Dokumen',
                                 'Upload Dokumen',
                                 'Upload Dokumen',
@@ -82,45 +83,57 @@
                                         ($step['status'] === 'revisi' ? 'Revisi' : 'Pending') 
                                     }}
                                 </p>
-                                  @if ($index === 0)
-                                    @if ($notification)
-                                        <div class="text-center text-[11px] text-gray-700 font-medium leading-tight mt-1">
-                                            {{ strtoupper($notification->type) }}: {{ $notification->number }}<br>
-                                            Tanggal: {{ \Carbon\Carbon::parse($notification->created_at)->format('d-m-Y H:i') }}
-                                        </div>
+                             @if ($index === 0)
+    @if ($notification)
+        <div class="text-center text-[11px] text-gray-700 font-medium leading-tight mt-1">
+            {{ strtoupper($notification->type) }}: {{ $notification->number }}<br>
+            Tanggal: {{ \Carbon\Carbon::parse($notification->created_at)->format('d-m-Y H:i') }}
+        </div>
 
-                                        @if ($notification->file)
-                                            <a href="{{ asset('storage/' . $notification->file) }}" target="_blank"
-                                                class="flex items-center gap-1 mt-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                                Lihat File SPK/PO
-                                            </a>
-                                        @endif
-                                                @if ($step['status'] === 'revisi')
-            @php
-                $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                    ->where('step', 'op_spk')
-                    ->value('catatan');
-            @endphp
-            @if ($catatanRevisi)
-                <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
-            @endif
+        @if ($notification?->file)
+            <a href="{{ asset('storage/' . $notification->file) }}" target="_blank"
+                class="flex items-center gap-1 mt-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Lihat File SPK/PO
+            </a>
         @endif
-                                    @else
-                                        <div class="text-center text-[11px] text-gray-500 italic mt-1">
-                                            Belum ada notifikasi/PO/SPK
-                                        </div>
-                                        <button @click="activeModal = 'modal-{{ $index }}'"
-                                            class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                            </svg>
-                                            {{ $label }}
-                                        </button>
-                                    @endif
-                                @endif
+
+        <button @click="activeModal = 'modal-{{ $index }}'"
+            class="flex items-center gap-1 mt-1 bg-yellow-500 hover:bg-yellow-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-2 4h2m-2 4h2m-2 4h2m4-20a2 2 0 00-2 2v16a2 2 0 002 2h4a2 2 0 002-2V6l-6-6z"/>
+            </svg>
+            Edit OP/SPK
+        </button>
+
+        @php
+            $catatanRevisi = $notification
+                ? \App\Models\StepApproval::where('notification_id', $notification->id)
+                    ->where('step', 'op_spk')
+                    ->value('catatan')
+                : null;
+        @endphp
+
+        @if ($step['status'] === 'revisi' && $catatanRevisi)
+            <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
+        @endif
+
+    @else
+        <div class="text-center text-[11px] text-gray-500 italic mt-1">
+            Belum ada notifikasi/PO/SPK
+        </div>
+        <button @click="activeModal = 'modal-{{ $index }}'"
+            class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            {{ $label }}
+        </button>
+    @endif
+@endif
+
                                 @if ($index === 1)
     @php
         $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -207,55 +220,102 @@
 @endif
 @if ($index === 3)
     @php
-        $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-            ->where('step', 'jsa')->value('status') === 'disetujui';
+        $prevStepApproved = $notification
+            ? (\App\Models\StepApproval::where('notification_id', $notification->id)
+                ->where('step', 'jsa')
+                ->value('status') === 'disetujui')
+            : false;
 
-        $permit = optional($notification)->id 
-            ? \App\Models\UmumWorkPermit::where('notification_id', $notification->id)->first() 
+        $permitUmum = $notification
+            ? \App\Models\UmumWorkPermit::where('notification_id', $notification->id)->first()
+            : null;
+
+        $permitGas = $notification
+            ? \App\Models\WorkPermitGasPanas::where('notification_id', $notification->id)->first()
+            : null;
+
+        $permit = $notification
+            ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
             : null;
     @endphp
 
     @if (!$prevStepApproved)
-        <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
+        <span class="text-[10px] text-gray-400 italic mt-1">
+            Langkah perizinan harus dilakukan secara bertahap.
+        </span>
     @else
-        <div class="flex flex-col items-center space-y-2">
-            @if ($permit)
-                <a href="{{ route('working-permit.umum.preview', ['id' => $permit->notification_id]) }}" target="_blank"
-                    class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[10px] px-4 py-[5px] rounded-full">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Lihat PDF
-                </a>
-                <button @click="activeModal = 'modal-{{ $index }}'"
-                    class="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-[10px] px-4 py-[5px] rounded-full transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-2 4h2m-2 4h2m-2 4h2m4-20a2 2 0 00-2 2v16a2 2 0 002 2h4a2 2 0 002-2V6l-6-6z"/>
-                    </svg>
-                    Edit
-                </button>
+        <div class="flex flex-col items-center gap-2 mt-1">
+            {{-- Permit Umum --}}
+            @if ($permitUmum)
+                <div class="flex flex-col items-center">
+                    <span class="text-[10px] text-gray-600 mb-1">Permit Umum</span>
+                    <div class="flex gap-1">
+                        <a href="{{ route('working-permit.umum.preview', ['id' => $permitUmum->notification_id]) }}"
+                            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Umum">
+                            <i class="fas fa-file-pdf text-xs"></i>
+                        </a>
+                        <button @click="activeModal = 'modal-{{ $index }}'"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white p-1 rounded-full" title="Edit Umum">
+                            <i class="fas fa-edit text-xs"></i>
+                        </button>
+                    </div>
+                </div>
             @else
-                <button @click="activeModal = 'modal-{{ $index }}'"
-                    class="flex items-center gap-1 mt-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-4 py-[5px] rounded-full transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    {{ $label }}
-                </button>
+                <div class="flex flex-col items-center">
+                    <span class="text-[10px] text-gray-600 mb-1">Permit Umum</span>
+                    <button @click="activeModal = 'modal-{{ $index }}'"
+                        class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Buat Permit Umum">
+                        <i class="fas fa-plus text-xs"></i>
+                    </button>
+                </div>
             @endif
-               @if ($step['status'] === 'revisi')
-                    @php
-                        $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                            ->where('step', 'working_permit')
-                            ->value('catatan');
-                    @endphp
-                    @if ($catatanRevisi)
-                        <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
-                    @endif
-                @endif
+
+            {{-- Permit Gas Panas --}}
+            @if ($permitGas)
+                <div class="flex flex-col items-center">
+                    <span class="text-[10px] text-gray-600 mb-1">Permit Gas Panas</span>
+                    <div class="flex gap-1">
+                        <a href="{{ route('working-permit.gaspanas.preview', ['id' => $permitGas->notification_id]) }}"
+                            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Gas Panas">
+                            <i class="fas fa-fire text-xs"></i>
+                        </a>
+                        <button @click="activeModal = 'modal-{{ $index }}-gaspanas'"
+                            class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit Gas Panas">
+                            <i class="fas fa-edit text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Permit Air --}}
+            @if ($permit)
+                <div class="flex flex-col items-center">
+                    <span class="text-[10px] text-gray-600 mb-1">Permit Air</span>
+                    <div class="flex gap-1">
+                        <a href="{{ route('working-permit.air.preview', ['id' => $permit->notification_id]) }}"
+                            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Air">
+                            <i class="fas fa-water text-xs"></i>
+                        </a>
+                        <button @click="activeModal = 'modal-{{ $index }}-air'"
+                            class="bg-teal-600 hover:bg-teal-700 text-white p-1 rounded-full" title="Edit Air">
+                            <i class="fas fa-edit text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Tambah Permit Lain (Selalu Muncul di Bawah) --}}
+            <div class="flex flex-col items-center mt-2">
+                <span class="text-[10px] text-gray-600 mb-1">Tambah Permit Lain</span>
+                <button @click="activeModal = 'modal-tambah-lainnya'"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white p-1 rounded-full" title="Tambah Permit Lain">
+                    <i class="fas fa-plus text-xs"></i>
+                </button>
+            </div>
         </div>
     @endif
 @endif
+
 @if ($index === 4)
     @php
         $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -560,13 +620,59 @@
                                         'jsa' => $jsa
                                     ])
                                 @endif
-                            @elseif ($index === 3)
-                                @include('components.steps.modal-working-permit', [
-                                    'label' => $label,
-                                    'id' => 'modal-' . $index,
-                                    'notification' => $notification,
-                                    'stepName' => $step['code']
-                                ])
+@elseif ($index === 3)
+    @php
+        $permitUmum = optional($notification)->id 
+            ? \App\Models\UmumWorkPermit::where('notification_id', $notification->id)->first()
+            : null;
+
+        $permitGas = optional($notification)->id 
+            ? \App\Models\WorkPermitGasPanas::where('notification_id', $notification->id)->first()
+            : null;
+
+        $permit = optional($notification)->id 
+            ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
+            : null;
+    @endphp
+
+    {{-- Modal Permit Umum --}}
+    @include('components.steps.modal-working-permit', [
+        'label' => $label,
+        'id' => 'modal-' . $index,
+        'notification' => $notification,
+        'stepName' => $step['code'],
+        'permitUmum' => $permitUmum ?? null
+    ])
+
+    {{-- Modal Permit Gas Panas --}}
+    @include('components.steps.modal-working-permit-gaspanas', [
+        'label' => 'Edit Gas Panas',
+        'id' => 'modal-' . $index . '-gaspanas',
+        'notification' => $notification,
+        'stepName' => $step['code'],
+        'permitGas' => $permitGas ?? null
+    ])
+
+    {{-- Modal Permit Air --}}
+    @include('components.steps.modal-working-permit-air', [
+        'label' => 'Edit Air',
+        'id' => 'modal-' . $index . '-air',
+        'notification' => $notification,
+        'stepName' => $step['code'],
+        'permitAir' => $permit ?? null
+    ])
+
+    {{-- Modal Permit Lainnya --}}
+    @include('components.steps.modal-tambah-lainnya', [
+        'label' => 'Tambah Permit Lain',
+        'id' => 'modal-tambah-lainnya',
+        'notification' => $notification,
+        'stepName' => $step['code'],
+        'permits' => $permits ?? []
+    ])
+
+
+
                             @else
                                 @include('components.steps.modal-upload', [
                                     'label' => $label,
@@ -589,5 +695,6 @@
             </div>
         </div>
     </section>
+    
     @include('components.sign-pad')
 </x-app-layout>

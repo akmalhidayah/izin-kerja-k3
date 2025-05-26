@@ -1,7 +1,31 @@
 <x-admin-layout>
     <div class="mb-6">
         <h1 class="text-3xl font-extrabold text-red-700 tracking-wide">Permintaan Izin Kerja</h1>
-        <input type="text" placeholder="Cari nama user..." class="mt-4 px-4 py-2 w-96 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-red-400 focus:outline-none text-sm">
+       <div class="flex flex-wrap items-center gap-4 mb-6">
+    <form method="GET" action="{{ route('admin.permintaansik') }}" class="flex flex-wrap items-center gap-2">
+        <input type="text" name="search" placeholder="Cari user/vendor..."
+            value="{{ request('search') }}"
+            class="px-3 py-2 border rounded w-64 text-sm focus:ring focus:ring-red-400">
+
+        <select name="bulan" class="px-2 py-1 border rounded text-sm">
+            <option value="">Bulan</option>
+            @foreach ($bulanList as $num => $nama)
+                <option value="{{ $num }}" {{ request('bulan') == $num ? 'selected' : '' }}>{{ $nama }}</option>
+            @endforeach
+        </select>
+
+        <select name="tahun" class="px-2 py-1 border rounded text-sm">
+            <option value="">Tahun</option>
+            @foreach ($tahunList as $tahun)
+                <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>{{ $tahun }}</option>
+            @endforeach
+        </select>
+
+        <button type="submit"
+            class="bg-red-600 text-white text-sm px-4 py-2 rounded hover:bg-red-700 transition">Filter</button>
+    </form>
+</div>
+
     </div>
 
     <div class="bg-white p-6 rounded-xl shadow-md">
@@ -27,7 +51,8 @@
                                 <div class="font-semibold text-gray-900">{{ $request->user_name }}</div>
                             </td>
                             <td class="px-4 py-3 text-gray-700">{{ $request->tanggal }}</td>
-                            <td class="px-4 py-3 text-gray-700">{{ $request->handled_by ?? '-' }}</td>
+<td class="px-4 py-3 text-gray-700">{{ $request->handled_by ?? '-' }}</td>
+
                             <td class="px-4 py-3">
                                 @php
                                     $statusClass = match($request->status) {

@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->string('number')->nullable(); // Nomor PO / SPK / Notification, dibuat nullable supaya tidak wajib
             $table->text('description')->nullable();
             $table->string('file')->nullable(); // Path file SPK jika ada
+            $table->string('status')->default('menunggu')->after('file');
             $table->timestamps();
         });
     }

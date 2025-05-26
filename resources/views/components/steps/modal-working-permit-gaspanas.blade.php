@@ -8,13 +8,10 @@
         @click.away="activeModal = null" 
         class="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]"
     >
-        <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Form Working Permit</h2>
+        <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Edit Working Permit Gas Panas</h2>
 
-        {{-- Langsung tampilkan permit UMUM --}}
-        <div>
-@include('components.permits.umum', ['permit' => $permits['umum'] ?? null])
-
-        </div>
+        {{-- Include langsung permit gaspanas --}}
+        @include('components.permits.gaspanas', ['permit' => $permitGas ?? null])
 
         <div class="flex justify-end gap-2 mt-6">
             <button type="button" @click="activeModal = null" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">

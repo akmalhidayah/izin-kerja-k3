@@ -15,7 +15,7 @@ public function store(Request $request)
     $validated = $request->validate([
         'notification_id' => 'required|exists:notifications,id',
         'nama_perusahaan' => 'nullable|string',
-        'no_jsa' => 'nullable|string',
+        'no_jsa' => 'nullable|string', // akan diisi otomatis, jadi optional
         'nama_jsa' => 'nullable|string',
         'departemen' => 'nullable|string',
         'area_kerja' => 'nullable|string',
@@ -50,14 +50,28 @@ public function store(Request $request)
         return back()->withErrors($errors)->withInput();
     }
 
-    // Simpan tanda tangan ke file
+    // ✅ Generate nomor JSA otomatis: 001/JSA/ST/MMYYYY
+    $bulanTahun = now()->format('mY'); // contoh: 052025
+    $prefix = "JSA/ST/{$bulanTahun}";
+
+    $lastJsa = \App\Models\Jsa::where('no_jsa', 'like', "%$prefix")->orderBy('created_at', 'desc')->first();
+    $nextNumber = 1;
+
+    if ($lastJsa) {
+        $lastNo = (int)substr($lastJsa->no_jsa, 0, 3); // ambil 001
+        $nextNumber = $lastNo + 1;
+    }
+
+    $validated['no_jsa'] = str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . "/$prefix";
+
+    // ✅ Simpan tanda tangan ke file
     $validated['dibuat_signature'] = $this->saveSignatureFile($validated['dibuat_signature'], 'dibuat');
     $validated['disetujui_signature'] = $this->saveSignatureFile($validated['disetujui_signature'], 'disetujui');
     $validated['diverifikasi_signature'] = $this->saveSignatureFile($validated['diverifikasi_signature'], 'diverifikasi');
 
     $validated['langkah_kerja'] = json_encode(json_decode($validated['langkah_kerja'], true) ?? []);
 
-    Jsa::create($validated);
+    \App\Models\Jsa::create($validated);
 
     return back()->with('success', 'Data JSA berhasil disimpan!');
 }
@@ -111,30 +125,19 @@ public function store(Request $request)
     }
 
     public function showPdf($notification_id)
-    {
-        $jsa = Jsa::where('notification_id', $notification_id)->firstOrFail();
-        $jsa->langkah_kerja = json_decode($jsa->langkah_kerja, true);
+{
+    $jsa = Jsa::where('notification_id', $notification_id)->firstOrFail();
+    $jsa->langkah_kerja = json_decode($jsa->langkah_kerja, true);
 
-        $jsa->dibuat_signature = $jsa->dibuat_signature ? public_path($jsa->dibuat_signature) : null;
-        $jsa->disetujui_signature = $jsa->disetujui_signature ? public_path($jsa->disetujui_signature) : null;
-        $jsa->diverifikasi_signature = $jsa->diverifikasi_signature ? public_path($jsa->diverifikasi_signature) : null;
+    $jsa->dibuat_signature = $jsa->dibuat_signature ? public_path($jsa->dibuat_signature) : null;
+    $jsa->disetujui_signature = $jsa->disetujui_signature ? public_path($jsa->disetujui_signature) : null;
+    $jsa->diverifikasi_signature = $jsa->diverifikasi_signature ? public_path($jsa->diverifikasi_signature) : null;
 
-        $pdf = Pdf::loadView('pengajuan-user.jsa.pdfjsa', compact('jsa'));
-        return $pdf->stream('jsa_' . $jsa->no_jsa . '.pdf');
-    }
+    $pdf = Pdf::loadView('pengajuan-user.jsa.pdfjsa', compact('jsa'));
+    $filename = 'jsa_' . str_replace(['/', '\\'], '_', $jsa->no_jsa) . '.pdf';
+    return $pdf->stream($filename);
+}
 
-    public function downloadPdf($notification_id)
-    {
-        $jsa = Jsa::where('notification_id', $notification_id)->firstOrFail();
-        $jsa->langkah_kerja = json_decode($jsa->langkah_kerja, true);
-
-        $jsa->dibuat_signature = $jsa->dibuat_signature ? public_path($jsa->dibuat_signature) : null;
-        $jsa->disetujui_signature = $jsa->disetujui_signature ? public_path($jsa->disetujui_signature) : null;
-        $jsa->diverifikasi_signature = $jsa->diverifikasi_signature ? public_path($jsa->diverifikasi_signature) : null;
-
-        $pdf = Pdf::loadView('pengajuan-user.jsa.pdfjsa', compact('jsa'));
-        return $pdf->download('jsa_' . $jsa->no_jsa . '.pdf');
-    }
 
     private function saveSignatureFile($base64, $role, $notificationNumber = null)
     {
@@ -154,4 +157,22 @@ public function store(Request $request)
 
         return 'storage/' . $folder . $filename;
     }
+    // Tambah di dalam JsaController (di bawah saveSignatureFile misalnya)
+public function getGeneratedNoJsa()
+{
+    $bulanTahun = now()->format('m-Y'); // 🆗 Format bulan-tahun dengan strip: 05-2025
+    $prefix = "JSA/ST/{$bulanTahun}";
+
+    $lastJsa = \App\Models\Jsa::where('no_jsa', 'like', "%$prefix")->orderBy('created_at', 'desc')->first();
+    $nextNumber = 1;
+
+    if ($lastJsa) {
+        $lastNo = (int)substr($lastJsa->no_jsa, 0, 3); // ambil 001
+        $nextNumber = $lastNo + 1;
+    }
+
+    return str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . "/$prefix";
+}
+
+
 }

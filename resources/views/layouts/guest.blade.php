@@ -13,8 +13,8 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <!-- Scripts -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-Dc2lHwHR.css') }}">
-    <script src="{{ asset('build/assets/app-JnccHoe-.js') }}"></script> 
+    <link rel="stylesheet" href="{{ asset('build/assets/app-CP4tGefM.css') }}">
+    <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script> 
 
     </head>
     <body class="font-sans text-gray-900 antialiased bg-cover bg-center" style="background-image: url('{{ asset('images/bg-login.jpg') }}')">

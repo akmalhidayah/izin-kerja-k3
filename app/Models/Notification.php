@@ -14,6 +14,7 @@ class Notification extends Model
         'number',
         'description',
         'file',
+        'status',
         'user_id',             // tambahkan ini agar mass assignment bisa
         'assigned_admin_id',   // kalau mau sekalian
     ];
@@ -29,6 +30,16 @@ class Notification extends Model
     {
         return $this->hasOne(UmumWorkPermit::class, 'notification_id');
     }
+    public function WorkPermitGasPanas()
+    {
+        return $this->hasOne(\App\Models\WorkPermitGasPanas::class, 'notification_id');
+    }
+    // Relasi ke Working Permit Air
+public function workPermitAir()
+{
+    return $this->hasOne(\App\Models\WorkPermitAir::class, 'notification_id');
+}
+
 
     // Relasi ke user yang mengajukan (Vendor/User)
     public function user()
@@ -36,15 +47,16 @@ class Notification extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relasi ke admin yang ditugaskan menangani permintaan
-    public function handledBy()
-    {
-        return $this->belongsTo(User::class, 'assigned_admin_id');
-    }
 
     // Relasi ke seluruh step approval
     public function stepApprovals()
     {
         return $this->hasMany(StepApproval::class);
     }
+
+public function assignedAdmin()
+{
+    return $this->belongsTo(User::class, 'assigned_admin_id');
+}
+
 }

@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unit K3 - PT. Semen Tonasa</title>
-    <link rel="stylesheet" href="{{ asset('build/assets/app-Dc2lHwHR.css') }}">
-    <script src="{{ asset('build/assets/app-BWimq3f3.js') }}"></script> 
+    <link rel="stylesheet" href="{{ asset('build/assets/app-CP4tGefM.css') }}">
+    <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script> 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
     <style>

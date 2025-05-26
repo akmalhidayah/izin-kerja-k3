@@ -46,4 +46,15 @@ window.isolasiData = function (existingListrik = [], existingNonListrik = []) {
     };
 };
 
+window.pekerjaData = function (existing = []) {
+    let data = Array.isArray(existing) ? existing : (existing ? JSON.parse(existing) : []);
+    return {
+        pekerja: data.length ? data : [{ nama: '', signature: '' }],
+        addBaris() {
+            this.pekerja.push({ nama: '', signature: '' });
+        }
+    };
+};
+
+
 Alpine.start();

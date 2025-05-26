@@ -1,14 +1,27 @@
 <x-admin-layout>
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: {!! json_encode(session('success')) !!},
-                confirmButtonColor: '#3085d6'
-            });
-        </script>
-    @endif
+@if (session('success'))
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: {!! json_encode(session('success')) !!},
+            confirmButtonColor: '#3085d6'
+        });
+    </script>
+@endif
+
+@if ($showAlert)
+    <script>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Perhatian!',
+            html: 'Permintaan ini sudah ditangani oleh <b>{{ $assignedAdmin }}</b>. Anda tidak dapat mengubah status.',
+            confirmButtonColor: '#3085d6'
+        });
+    </script>
+@endif
+
+
 
     <div class="mb-6">
         <a href="{{ route('admin.permintaansik') }}"
@@ -104,13 +117,17 @@
                                 <i class="fas fa-file-pdf"></i> Lihat PDF JSA
                             </a>
                         @endif
+@if ($stepKey === 'working_permit' && $data->permits)
+    @foreach ($data->permits as $type => $permit)
+        @if ($permit)
+            <a href="{{ route('working-permit.' . $type . '.preview', ['id' => $permit->notification_id]) }}" target="_blank"
+               class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full w-fit text-xs flex items-center gap-1">
+                <i class="fas fa-file-pdf"></i> Lihat PDF {{ ucfirst(str_replace('_', ' ', $type)) }}
+            </a>
+        @endif
+    @endforeach
+@endif
 
-                        @if ($stepKey === 'working_permit' && $data->permit)
-                            <a href="{{ route('working-permit.umum.preview', ['id' => $data->permit->notification_id]) }}" target="_blank"
-                               class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full w-fit text-xs flex items-center gap-1">
-                                <i class="fas fa-file-pdf"></i> Lihat PDF Working Permit
-                            </a>
-                        @endif
                     </div>
 
                     @if ($stepKey === 'sik')

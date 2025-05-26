@@ -54,14 +54,21 @@
     </div>
 </div>
 <!-- Bagian 2: Titik Isolasi dan Penguncian -->
+ 
+@php
+    $rawListrik = old('isolasi_listrik') ?? $permit?->isolasi_listrik;
+    $rawNonListrik = old('isolasi_non_listrik') ?? $permit?->isolasi_non_listrik;
+
+    $listrik = is_array($rawListrik) ? $rawListrik : json_decode($rawListrik, true);
+    $nonListrik = is_array($rawNonListrik) ? $rawNonListrik : json_decode($rawNonListrik, true);
+@endphp
+
 <div 
     x-data="isolasiData(
-        @js(old('isolasi_listrik', $permit?->isolasi_listrik ?? '[]')),
-        @js(old('isolasi_non_listrik', $permit?->isolasi_non_listrik ?? '[]'))
+        @js($listrik ?? []),
+        @js($nonListrik ?? [])
     )"
 >
-
-
 
     <h3 class="font-bold bg-black text-white px-2 py-1">2. Titik Isolasi dan Penguncian</h3>
     <p class="text-sm italic text-gray-600">Diisi oleh Isolation Officer</p>

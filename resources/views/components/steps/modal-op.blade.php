@@ -7,7 +7,7 @@
         class="bg-white p-6 rounded-lg shadow-md w-full max-w-md"
         @click.away="activeModal = null"
     >
-        <div x-data="{ type: 'po' }">
+        <div x-data="{ type: '{{ old('type', $notification?->type) }}' }">
             <h2 class="text-lg font-semibold mb-4">Input OP/SPK/Notification</h2>
 
             <form action="{{ route('notification.store') }}" method="POST" enctype="multipart/form-data">
@@ -16,30 +16,41 @@
                 <!-- Dropdown Pilihan -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Inputan</label>
-                    <select x-model="type" name="type" class="w-full border rounded p-2">
-                        <option value="po">Order Purchase</option>
-                        <option value="spk">SPK</option>
-                        <option value="notif">Notification</option>
+                    <select name="type" class="w-full border rounded p-2" @change="type = $event.target.value" required>
+                        <option value="" disabled {{ old('type', $notification?->type) ? '' : 'selected' }}>Pilih jenis inputan</option>
+                        <option value="po" {{ old('type', $notification?->type) === 'po' ? 'selected' : '' }}>Order Purchase</option>
+                        <option value="spk" {{ old('type', $notification?->type) === 'spk' ? 'selected' : '' }}>SPK</option>
+                        <option value="notif" {{ old('type', $notification?->type) === 'notif' ? 'selected' : '' }}>Notification</option>
                     </select>
                 </div>
 
                 <!-- Jika Order Purchase -->
-                <div x-show="type === 'po'" x-cloak>
-                    <input type="text" name="number" placeholder="Masukkan Nomor Purchase Order" class="mb-4 border rounded p-2 w-full">
-                    <textarea name="description" placeholder="Deskripsi Pekerjaan" class="mb-4 border rounded p-2 w-full"></textarea>
-                </div>
+                <template x-if="type === 'po'">
+                    <div>
+                        <input type="text" name="number" placeholder="Masukkan Nomor Purchase Order *wajib"
+                               class="mb-4 border rounded p-2 w-full"
+                               value="{{ old('number', $notification?->number) }}">
+                        <textarea name="description" placeholder="Deskripsi Pekerjaan" class="mb-4 border rounded p-2 w-full">{{ old('description', $notification?->description) }}</textarea>
+                    </div>
+                </template>
 
                 <!-- Jika SPK -->
-                <div x-show="type === 'spk'" x-cloak>
-                    <input type="file" name="file" class="mb-4 border rounded p-2 w-full">
-                    <textarea name="description" placeholder="Deskripsi Pekerjaan" class="mb-4 border rounded p-2 w-full"></textarea>
-                </div>
+                <template x-if="type === 'spk'">
+                    <div>
+                        <input type="file" name="file" class="mb-4 border rounded p-2 w-full">
+                        <textarea name="description" placeholder="Deskripsi Pekerjaan" class="mb-4 border rounded p-2 w-full">{{ old('description', $notification?->description) }}</textarea>
+                    </div>
+                </template>
 
                 <!-- Jika Notification -->
-                <div x-show="type === 'notif'" x-cloak>
-                    <input type="text" name="number" placeholder="Masukkan Nomor Notification" class="mb-4 border rounded p-2 w-full">
-                    <textarea name="description" placeholder="Deskripsi Pekerjaan" class="mb-4 border rounded p-2 w-full"></textarea>
-                </div>
+                <template x-if="type === 'notif'">
+                    <div>
+                        <input type="text" name="number" placeholder="Masukkan Nomor Notification *wajib"
+                               class="mb-4 border rounded p-2 w-full"
+                               value="{{ old('number', $notification?->number) }}">
+                        <textarea name="description" placeholder="Deskripsi Pekerjaan" class="mb-4 border rounded p-2 w-full">{{ old('description', $notification?->description) }}</textarea>
+                    </div>
+                </template>
 
                 <!-- Tombol Aksi -->
                 <div class="flex justify-end gap-2">

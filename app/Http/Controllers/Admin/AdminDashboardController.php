@@ -9,7 +9,7 @@ class AdminDashboardController extends Controller
 {
 public function index()
 {
-    $notifications = \App\Models\Notification::with(['user', 'handledBy'])
+    $notifications = \App\Models\Notification::with(['user', 'assignedAdmin'])
         ->latest()
         ->take(5)
         ->get();
@@ -24,9 +24,9 @@ public function index()
         $approvals = \App\Models\StepApproval::where('notification_id', $notif->id)->get();
         $approvedSteps = $approvals->where('status', 'disetujui')->count();
         $currentStep = min($approvedSteps + 1, count($stepTitles));
-        $stepKey = array_keys($stepTitles)[$approvedSteps] ?? null;
+        $stepTitle = $stepTitles[$approvedSteps] ?? 'Belum Diketahui';
 
-        // Ambil file SIK dari step_approvals step 'sik'
+        // SIK file (optional)
         $sikApproval = $approvals->firstWhere('step', 'sik');
         $sikFile = $sikApproval?->file_path;
 
@@ -34,7 +34,8 @@ public function index()
             'id' => $notif->id,
             'user_name' => $notif->user->vendor_name ?? $notif->user->name ?? 'User',
             'tanggal' => $notif->created_at->format('d-m-Y H:i'),
-            'handled_by' => $notif->handledBy?->name ?? '-',
+'handled_by' => $notif->assignedAdmin?->name ?? '-',
+
             'status' => match(strtolower($notif->status)) {
                 'disetujui', 'selesai' => 'Terbit SIK',
                 'revisi' => 'Perlu Revisi',
@@ -42,7 +43,7 @@ public function index()
             },
             'progress' => round(($approvedSteps / count($stepTitles)) * 100),
             'current_step' => $currentStep,
-            'current_step_title' => $stepTitles[$stepKey] ?? 'Belum Diketahui',
+            'current_step_title' => $stepTitle,
             'sik_file' => $sikFile,
         ];
     });
@@ -50,10 +51,27 @@ public function index()
     return view('admin.dashboard', compact('requests'));
 }
 
-
-   public function permintaanSIK()
+public function permintaanSIK(Request $request)
 {
-    $notifications = \App\Models\Notification::with(['user', 'handledBy'])->latest()->get();
+    $query = \App\Models\Notification::with(['user', 'assignedAdmin']);
+
+    // ✅ Filter by nama user (bukan vendor)
+    if ($request->filled('search')) {
+        $query->whereHas('user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    // ✅ Filter Bulan & Tahun
+    if ($request->filled('bulan')) {
+        $query->whereMonth('created_at', $request->bulan);
+    }
+
+    if ($request->filled('tahun')) {
+        $query->whereYear('created_at', $request->tahun);
+    }
+
+    $notifications = $query->latest()->paginate(5)->withQueryString();
 
     $stepTitles = [
         'op_spk' => 'Buat Notifikasi/OP/SPK',
@@ -69,28 +87,41 @@ public function index()
         'sik' => 'Surat Izin Kerja',
         'bukti_serah_terima' => 'Upload Bukti Serah Terima',
     ];
+    $stepKeys = array_keys($stepTitles);
 
-    $requests = $notifications->map(function ($notif) use ($stepTitles) {
+    $requests = $notifications->getCollection()->map(function ($notif) use ($stepTitles, $stepKeys) {
         $approvals = \App\Models\StepApproval::where('notification_id', $notif->id)->get();
         $approvedSteps = $approvals->where('status', 'disetujui')->count();
-        $currentStep = min($approvedSteps + 1, count($stepTitles)); // Fix di sini
-        $stepKey = array_keys($stepTitles)[$approvedSteps] ?? null;
+        $currentStep = min($approvedSteps + 1, count($stepTitles));
+        $stepTitle = $stepTitles[$stepKeys[$approvedSteps] ?? null] ?? 'Belum Diketahui';
 
         return (object)[
             'id' => $notif->id,
-            'user_name' => $notif->user->name ?? 'User',
-            'vendor_name' => $notif->user->vendor_name ?? '-', // tambahkan vendor_name jika ada
+            'user_name' => $notif->user->name ?? 'User', // 🔥 Tetap pakai name
             'tanggal' => $notif->created_at->format('d-m-Y H:i'),
-            'handled_by' => $notif->handledBy?->name ?? '-', // fix: tampilkan default '-'
+            'handled_by' => $notif->assignedAdmin?->name ?? '-',
             'status' => ucfirst($notif->status ?? 'Menunggu'),
             'progress' => round(($approvedSteps / count($stepTitles)) * 100),
             'current_step' => $currentStep,
-            'current_step_title' => $stepTitles[$stepKey] ?? 'Belum Diketahui',
+            'current_step_title' => $stepTitle,
         ];
     });
+    $notifications->setCollection($requests);
 
-    return view('admin.permintaansik', compact('requests'));
+    $bulanList = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+    ];
+    $tahunList = range(date('Y'), date('Y') - 5);
+
+    return view('admin.permintaansik', [
+    'requests' => $notifications, // biar blade tetap jalan
+    'notifications' => $notifications, // kalau ada logic lain
+    'bulanList' => $bulanList,
+    'tahunList' => $tahunList,
+]);
+
 }
-
 }
 

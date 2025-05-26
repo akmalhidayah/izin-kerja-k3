@@ -12,8 +12,8 @@
     
     
     <!-- Tailwind & Alpine -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-Dc2lHwHR.css') }}">
-    <script src="{{ asset('build/assets/app-JnccHoe-.js') }}"></script> 
+    <link rel="stylesheet" href="{{ asset('build/assets/app-CP4tGefM.css') }}">
+    <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script> 
     <script src="https://cdn.jsdelivr.net/npm/alpinejs" defer></script>
 
     <!-- SweetAlert2 -->

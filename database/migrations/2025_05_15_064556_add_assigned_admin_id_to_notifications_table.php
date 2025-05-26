@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('notifications', function (Blueprint $table) {
-            $table->foreignId('assigned_admin_id')->nullable()->constrained('users')->nullOnDelete();
+        $table->foreignId('handled_by')->nullable()->constrained('users');
         });
     }
 

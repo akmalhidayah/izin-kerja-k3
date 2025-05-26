@@ -14,10 +14,33 @@ class AdminPermintaanController extends Controller
 {
     public function show($id)
     {
-        $notification = Notification::with(['user', 'handledBy'])->findOrFail($id);
+$notification = Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
+// Cek admin yang login vs yang assigned
+$loggedInAdmin = auth()->user()->name;
+$assignedAdmin = $notification->assignedAdmin?->name;
+
+$showAlert = false;
+if ($assignedAdmin && $assignedAdmin !== $loggedInAdmin) {
+    $showAlert = true;
+}
+
+        
+    // Auto-assign admin jika belum ada
+    if (!$notification->assigned_admin_id) {
+        $notification->assigned_admin_id = auth()->id();
+        $notification->save();
+    // Tambahkan ini supaya handledBy ke-load
+    $notification->refresh();
+}
 
         $jsa = \App\Models\Jsa::where('notification_id', $id)->first();
-        $permit = \App\Models\UmumWorkPermit::where('notification_id', $id)->first();
+$permits = [
+    'umum' => \App\Models\UmumWorkPermit::where('notification_id', $id)->first(),
+    'gaspanas' => \App\Models\WorkPermitGasPanas::where('notification_id', $id)->first(), 
+    'air' => \App\Models\WorkPermitAir::where('notification_id', $id)->first(),
+];
+
+
         $uploads = \App\Models\Upload::where('notification_id', $id)->get()->keyBy('step');
         $approvals = StepApproval::where('notification_id', $id)->get()->keyBy('step');
 
@@ -86,39 +109,51 @@ class AdminPermintaanController extends Controller
             'id' => $notification->id,
             'user_name' => $notification->user->name ?? '-',
             'tanggal' => $notification->created_at->format('d-m-Y H:i'),
-            'handled_by' => $notification->handledBy?->name ?? auth()->user()->name,
+'handled_by' => $notification->assignedAdmin?->name ?? '-',
             'status' => $notification->status ?? 'Menunggu',
             'notification_file' => $notification->file ?? null,
             'notification_id' => $notification->id,
             'step_data' => $stepData,
             'step_summary' => $stepSummary, // ✅ properti tambahan
             'jsa' => $jsa,
-            'permit' => $permit,
+    'permits' => $permits, // ← tambahkan permits di sini
         ];
 
         $admins = User::where('usertype', 'admin')->pluck('name');
 
-        return view('admin.detailpermintaan', compact('data', 'admins'));
-    }
+return view('admin.detailpermintaan', compact('data', 'admins', 'showAlert', 'assignedAdmin'));
 
-    public function updateStatus(Request $request, $id, $step)
-    {
-        $request->validate([
-            'status' => 'required|in:disetujui,revisi,menunggu',
-            'catatan' => 'nullable|string|max:500'
+    }
+public function updateStatus(Request $request, $id, $step)
+{
+    $request->validate([
+        'status' => 'required|in:disetujui,revisi,menunggu',
+        'catatan' => 'nullable|string|max:500'
+    ]);
+
+    $adminId = auth()->id();
+
+    // Cek apakah sudah ada handled_by
+    $notification = \App\Models\Notification::findOrFail($id);
+    if (!$notification->assigned_admin_id) {
+        $notification->update([
+            'assigned_admin_id' => $adminId,
         ]);
-
-        StepApproval::updateOrCreate(
-            ['notification_id' => $id, 'step' => $step],
-            [
-                'status' => strtolower($request->status),
-                'catatan' => $request->catatan,
-                'approved_by' => auth()->id()
-            ]
-        );
-
-        return redirect()->back()->with('success', 'Status langkah ke-' . $step . ' berhasil diperbarui ke "' . $request->status . '"');
+    } elseif ($notification->assigned_admin_id != $adminId) {
+        return back()->with('error', 'Hanya admin yang pertama kali menangani yang dapat mengubah status!');
     }
+
+    \App\Models\StepApproval::updateOrCreate(
+        ['notification_id' => $id, 'step' => $step],
+        [
+            'status' => strtolower($request->status),
+            'catatan' => $request->catatan,
+            'approved_by' => $adminId
+        ]
+    );
+
+    return redirect()->back()->with('success', 'Status langkah ke-' . $step . ' berhasil diperbarui ke "' . $request->status . '"');
+}
 
     public function uploadSik(Request $request, $id)
     {

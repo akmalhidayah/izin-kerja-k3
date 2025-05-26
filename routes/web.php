@@ -9,6 +9,9 @@ use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UploadController;
 use App\Http\Controllers\User\JsaController;
 use App\Http\Controllers\User\WorkingPermit\UmumPermitController;
+use App\Http\Controllers\User\WorkingPermit\GasPanasPermitController;
+use App\Http\Controllers\User\WorkingPermit\AirPermitController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -35,9 +38,16 @@ Route::patch('/user/jsa/{id}', [JsaController::class, 'update'])->name('jsa.upda
 Route::get('/user/jsa/pdf/{notification_id}', [JsaController::class, 'downloadPdf'])->name('jsa.pdf');
 Route::get('/user/jsa/pdf/view/{notification_id}', [JsaController::class, 'showPdf'])->name('jsa.pdf.view');
 
-// step 4
+// step 4 - Umum
 Route::post('/user/working-permit/umum/store', [UmumPermitController::class, 'store'])->name('working-permit.umum.store');
 Route::get('/user/permit/umum/preview/{id}', [UmumPermitController::class, 'preview'])->name('working-permit.umum.preview');
+
+Route::post('/user/working-permit/gaspanas/store', [GasPanasPermitController::class, 'store'])->name('working-permit.gaspanas.store');
+Route::get('/user/permit/gaspanas/preview/{id}', [GasPanasPermitController::class, 'preview'])->name('working-permit.gaspanas.preview');
+
+Route::post('/working-permit/air/store', [AirPermitController::class, 'store'])->name('working-permit.air.store');
+Route::get('/working-permit/air/preview/{id}', [AirPermitController::class, 'preview'])->name('working-permit.air.preview');
+
 
 
 // ✅ Admin-only routes
@@ -54,11 +64,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/permintaansik/{id}/upload-sik', [AdminPermintaanController::class, 'uploadSik'])->name('permintaansik.uploadSik');
     Route::delete('/permintaansik/{id}/delete-file/{step}', [AdminPermintaanController::class, 'deleteFile'])
         ->name('permintaansik.deleteFile');
-
-
-
 });
-
 
 // ✅ Profile
 Route::middleware('auth')->group(function () {
