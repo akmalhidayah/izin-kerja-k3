@@ -3,7 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\RoleMiddleware; // ✅ Tambahkan ini
+use App\Http\Middleware\CheckRole; 
+use App\Http\Middleware\UsertypeMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,7 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // ✅ Daftarkan middleware alias "role"
         $middleware->alias([
-            'role' => RoleMiddleware::class,
+            'role' => CheckRole::class,
+             'usertype' => UsertypeMiddleware::class, 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

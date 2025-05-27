@@ -118,8 +118,8 @@
             <a href="#" class="block px-3 py-2 rounded hover:bg-red-100">APD Ahli Daya</a>
         </div>
     </div>
-
-    <!-- User Panel (Paling Bawah) -->
+ @if (Auth::user() && Auth::user()->usertype === 'admin' && in_array(Auth::user()->role->name ?? '', ['Super Admin']))
+    <!-- User Panel (Super Admin Only) -->
     <div x-data="{ open: false }">
         <button @click="open = !open"
             class="flex items-center px-3 py-2 w-full rounded transition-all duration-200 hover:bg-red-100 text-gray-800 focus:outline-none">
@@ -128,10 +128,17 @@
             <i :class="open ? 'fas fa-chevron-up' : 'fas fa-chevron-down'" class="text-xs ml-auto"></i>
         </button>
         <div x-show="open" x-cloak class="pl-8 space-y-1">
-            <a href="#" class="block px-3 py-2 rounded hover:bg-red-100">Manajemen User</a>
-            <a href="#" class="block px-3 py-2 rounded hover:bg-red-100">Role & Permission</a>
+            <a href="{{ route('admin.userpanel.index') }}" class="block px-3 py-2 rounded hover:bg-red-100">
+                Manajemen User
+            </a>
+            <a href="{{ route('admin.role_permission.index') }}" class="block px-3 py-2 rounded hover:bg-red-100">
+                Role & Permission
+            </a>
         </div>
     </div>
+@endif
+
+
 </nav>
 </aside>
 <!-- Content -->
@@ -161,6 +168,11 @@
                 @click.away="open = false"
                 class="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md overflow-hidden z-50"
             >
+            <!-- Link ke Profile -->
+            <a href="{{ route('profile.edit') }}"
+            class="block w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-gray-800 hover:text-red-600">
+            <i class="fas fa-user mr-2"></i> Edit Profile
+            </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button
