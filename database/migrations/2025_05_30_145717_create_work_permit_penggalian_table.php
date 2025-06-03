@@ -52,11 +52,11 @@ return new class extends Migration {
             $table->date('permit_authorizer_date')->nullable();
             $table->time('permit_authorizer_time')->nullable();
 
-            // Bagian 9
-            $table->string('permit_authorizer_name')->nullable();
-            $table->string('signature_permit_authorizer')->nullable();
-            $table->date('permit_uthorizer_date')->nullable();
-            $table->time('permit_uthorizer_time')->nullable();
+            // // Bagian 9
+            // $table->string('permit_authorizer_name')->nullable();
+            // $table->string('signature_permit_authorizer')->nullable();
+            // $table->date('permit_uthorizer_date')->nullable();
+            // $table->time('permit_uthorizer_time')->nullable();
 
             $table->timestamps();
         });
