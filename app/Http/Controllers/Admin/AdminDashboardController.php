@@ -15,11 +15,11 @@ public function index()
         ->get();
 
     $stepTitles = [
-        'op_spk', 'bpjs', 'jsa', 'working_permit', 'fakta_integritas',
+        'op_spk', 'data_kontraktor', 'bpjs', 'jsa', 'working_permit', 'fakta_integritas',
         'sertifikasi_ak3', 'ktp', 'surat_kesehatan', 'struktur_organisasi',
         'post_test', 'sik', 'bukti_serah_terima'
     ];
-
+$totalSteps = count($stepTitles);
     $requests = $notifications->map(function ($notif) use ($stepTitles) {
         $approvals = \App\Models\StepApproval::where('notification_id', $notif->id)->get();
         $approvedSteps = $approvals->where('status', 'disetujui')->count();
@@ -48,7 +48,7 @@ public function index()
         ];
     });
 
-    return view('admin.dashboard', compact('requests'));
+    return view('admin.dashboard', compact('requests', 'totalSteps'));
 }
 
 public function permintaanSIK(Request $request)
@@ -75,6 +75,7 @@ public function permintaanSIK(Request $request)
 
     $stepTitles = [
         'op_spk' => 'Buat Notifikasi/OP/SPK',
+        'data_kontraktor' => 'Input Data Kontraktor',
         'bpjs' => 'Upload BPJS',
         'jsa' => 'Input JSA',
         'working_permit' => 'Input Working Permit',
@@ -114,12 +115,15 @@ public function permintaanSIK(Request $request)
         9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
     ];
     $tahunList = range(date('Y'), date('Y') - 5);
+    $totalSteps = count($stepTitles); // Tambahkan ini
+
 
     return view('admin.permintaansik', [
     'requests' => $notifications, // biar blade tetap jalan
     'notifications' => $notifications, // kalau ada logic lain
     'bulanList' => $bulanList,
     'tahunList' => $tahunList,
+     'totalSteps' => $totalSteps, // <-- Tambah ini
 ]);
 
 }

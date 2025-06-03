@@ -49,7 +49,7 @@
     <tr>
         <td class="border px-2 py-1 font-semibold">Job Safety Analysis No</td>
         <td class="border px-2 py-1">
-<input type="text" name="no_jsa" class="input w-full text-xs" value="{{ old('no_jsa', app('App\Http\Controllers\User\JsaController')->getGeneratedNoJsa()) }}" readonly>
+<input type="text" name="no_jsa" class="input w-full text-xs" value="{{ old('no_jsa', $generatedNoJsa) }}" readonly>
 
         </td>
         <td class="border px-2 py-1 font-semibold">Nama JSA</td>

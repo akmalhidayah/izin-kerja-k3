@@ -23,8 +23,7 @@ class UploadController extends Controller
 
             Upload::create([
                 'notification_id' => $request->notification_id,
-                'step' => $request->step_name,  // ← pakai kolom yg sesuai di DB
-                'file_path' => $filePath,
+                'step' => $request->step_name,                  'file_path' => $filePath,
                 'status' => 'pending',
             ]);
             

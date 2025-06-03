@@ -10,6 +10,7 @@ use App\Http\Controllers\User\IzinKerjaController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UploadController;
 use App\Http\Controllers\User\JsaController;
+use App\Http\Controllers\User\DataKontraktorController;
 use App\Http\Controllers\User\WorkingPermit\UmumPermitController;
 use App\Http\Controllers\User\WorkingPermit\GasPanasPermitController;
 use App\Http\Controllers\User\WorkingPermit\AirPermitController;
@@ -18,26 +19,30 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// ✅ USER SIDE (usertype = 'user')
-Route::middleware(['auth', 'verified', 'usertype:user'])->group(function () {
+// ✅ USER SIDE (usertype = 'user dan admin')
+Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function () {
+
     // Dashboard User
     Route::get('pengajuan-user/izin-kerja', [IzinKerjaController::class, 'index'])->name('dashboard');
 
     // Step 1: Create Notification
     Route::post('/pengajuan-user/izin-kerja/notification', [UserNotificationController::class, 'store'])->name('notification.store');
+    // Step 2: Data Kontraktor
+    Route::post('/pengajuan-user/izin-kerja/data-kontraktor/{notification}', [DataKontraktorController::class, 'store'])->name('izin-kerja.data-kontraktor');
+    Route::get('/pengajuan-user/izin-kerja/data-kontraktor/pdf/{notification_id}', [DataKontraktorController::class, 'previewPdf'])->name('izin-kerja.data-kontraktor.pdf');
 
-    // Step 2,5,6,7,8,9,12 Upload
+    // Step 3,6,7,8,9,10, 13 Upload
     Route::post('/user/upload', [UploadController::class, 'store'])->name('upload.store');
     Route::patch('/user/upload/{id}/status', [UploadController::class, 'updateStatus'])->name('upload.updateStatus');
 
-    // Step 3: JSA
+    // Step 4: JSA
     Route::post('/user/jsa/store', [JsaController::class, 'store'])->name('jsa.store');
     Route::get('/user/jsa/{id}/edit', [JsaController::class, 'edit'])->name('jsa.edit');
     Route::patch('/user/jsa/{id}', [JsaController::class, 'update'])->name('jsa.update');
     Route::get('/user/jsa/pdf/{notification_id}', [JsaController::class, 'downloadPdf'])->name('jsa.pdf');
     Route::get('/user/jsa/pdf/view/{notification_id}', [JsaController::class, 'showPdf'])->name('jsa.pdf.view');
 
-    // Step 4: Working Permit
+    // Step 5: Working Permit
     Route::post('/user/working-permit/umum/store', [UmumPermitController::class, 'store'])->name('working-permit.umum.store');
     Route::get('/user/permit/umum/preview/{id}', [UmumPermitController::class, 'preview'])->name('working-permit.umum.preview');
 
@@ -46,6 +51,11 @@ Route::middleware(['auth', 'verified', 'usertype:user'])->group(function () {
 
     Route::post('/working-permit/air/store', [AirPermitController::class, 'store'])->name('working-permit.air.store');
     Route::get('/working-permit/air/preview/{id}', [AirPermitController::class, 'preview'])->name('working-permit.air.preview');
+
+
+    Route::get('/izin-kerja/sik/pdf/{id}', [\App\Http\Controllers\Admin\AdminPermintaanController::class, 'viewSik'])
+    ->name('izin-kerja.sik.pdf');
+
 });
 
 // ✅ ADMIN SIDE (usertype = 'admin' + role = 'Admin' atau 'Super Admin')
@@ -55,7 +65,7 @@ Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Admin,Super Admin
 
     Route::post('/permintaansik/{id}/step/{step}/status', [AdminPermintaanController::class, 'updateStatus'])->name('permintaansik.updateStatus');
     Route::get('/permintaansik/{id}', [AdminPermintaanController::class, 'show'])->name('permintaansik.show');
-    Route::post('/permintaansik/{id}/upload-sik', [AdminPermintaanController::class, 'uploadSik'])->name('permintaansik.uploadSik');
+Route::get('/permintaansik/{id}/view-sik', [AdminPermintaanController::class, 'viewSik'])->name('permintaansik.viewSik');
     Route::delete('/permintaansik/{id}/delete-file/{step}', [AdminPermintaanController::class, 'deleteFile'])->name('permintaansik.deleteFile');
 });
 
@@ -88,5 +98,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
+Route::get('/permintaansik/{id}/download-sik', [AdminPermintaanController::class, 'downloadSik'])->name('permintaansik.downloadSik');
+
+// Route untuk form kontraktor dengan token
+Route::get('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::class, 'showByToken'])->name('izin-kerja.data-kontraktor.token');
+Route::post('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::class, 'storeByToken'])->name('izin-kerja.data-kontraktor.store');
+
+Route::get('/izin-kerja/jsa/form/{token}', [JsaController::class, 'showByToken'])->name('jsa.form.token');
+Route::post('/izin-kerja/jsa/form/{token}', [JsaController::class, 'storeByToken'])->name('jsa.form.token.store');
 
 require __DIR__.'/auth.php';

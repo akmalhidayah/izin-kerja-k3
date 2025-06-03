@@ -14,7 +14,7 @@ class Jsa extends Model
         'departemen', 'area_kerja', 'tanggal', 'dibuat_nama',
         'dibuat_signature', 'disetujui_nama', 'disetujui_signature',
         'diverifikasi_nama', 'diverifikasi_signature', // ✅ tambahkan
-        'langkah_kerja'
+        'langkah_kerja', 'token'
     ];
 
     protected $casts = [

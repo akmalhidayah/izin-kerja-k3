@@ -1,4 +1,14 @@
-{{-- ALERT SUCCESS / ERROR --}}
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-sm text-gray-800 dark:text-gray-200 leading-tight">
+            Form Data Kontraktor
+        </h2>
+    </x-slot>
+
+    <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
+        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+            <h1 class="text-lg font-semibold mb-4">Form Data Kontraktor</h1>
+            {{-- ALERT SUCCESS / ERROR --}}
 @if(session('success'))
     <div class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow z-50">
         {{ session('success') }}
@@ -11,24 +21,25 @@
     </div>
 @endif
 
+@php
+    $langkahKerjaOld = old('langkah_kerja')
+        ? json_decode(old('langkah_kerja'), true)
+        : (isset($jsa) && $jsa->langkah_kerja ? json_decode($jsa->langkah_kerja, true) : []);
+@endphp
+
+
 {{-- WRAP X-DATA DI LUAR --}}
 <div x-data="formJSA({{ $jsa->langkah_kerja ? $jsa->langkah_kerja : '[]' }})"
 x-init="console.log('✅ langkahKerja loaded (edit):', langkahKerja)">
     {{-- MODAL EDIT --}}
-    <div 
-        x-show="activeModal === '{{ $id }}'" 
-        x-cloak 
-        class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
-    >
-        <div 
-            class="bg-white p-6 rounded-lg shadow-md w-full max-w-5xl overflow-y-auto max-h-[90vh]"
-            @click.away="activeModal = null"
-        >
-            <h2 class="text-lg font-semibold mb-4">Edit Job Safety Analysis</h2>
+   <div
+    x-data="formJSA({{ json_encode($langkahKerjaOld) }})"
+    x-init="console.log('✅ Form JSA loaded', langkahKerja)"
+    class="bg-white p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto my-6"
+>
+    <form method="POST" action="{{ route('jsa.form.token.store', $jsa->token) }}" @submit.prevent="serializeLangkah(); $el.submit()">
 
-            <form method="POST" action="{{ route('jsa.update', $jsa->id) }}" @submit.prevent="serializeLangkah(); $el.submit()">
                 @csrf
-                @method('PATCH')
 
                 {{-- HIDDEN INPUT --}}
                 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
@@ -160,3 +171,5 @@ x-init="console.log('✅ langkahKerja loaded (edit):', langkahKerja)">
     };
 }
 </script>
+        @include('components.sign-pad')
+</x-app-layout>

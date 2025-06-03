@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('diverifikasi_nama')->nullable(); // ✅ tambah
             $table->text('diverifikasi_signature')->nullable(); // ✅ tambah
             $table->json('langkah_kerja'); // untuk array langkah, bahaya, pengendalian
+            $table->string('token')->unique()->nullable();
             $table->timestamps();
         });
     }

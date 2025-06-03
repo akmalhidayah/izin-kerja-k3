@@ -9,6 +9,7 @@ use App\Models\Upload;
 use App\Models\Notification;
 use App\Models\StepApproval;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminPermintaanController extends Controller
 {
@@ -32,7 +33,7 @@ if ($assignedAdmin && $assignedAdmin !== $loggedInAdmin) {
     // Tambahkan ini supaya handledBy ke-load
     $notification->refresh();
 }
-
+$dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $id)->first();
         $jsa = \App\Models\Jsa::where('notification_id', $id)->first();
 $permits = [
     'umum' => \App\Models\UmumWorkPermit::where('notification_id', $id)->first(),
@@ -55,6 +56,7 @@ $permits = [
 
         $stepTitles = [
             'op_spk' => 'Buat Notifikasi/OP/SPK',
+            'data_kontraktor' => 'Input Data Kontraktor',
             'bpjs' => 'Upload BPJS',
             'jsa' => 'Input JSA',
             'working_permit' => 'Input Working Permit',
@@ -64,8 +66,9 @@ $permits = [
             'surat_kesehatan' => 'Upload Surat Kesehatan',
             'struktur_organisasi' => 'Upload Struktur Organisasi',
             'post_test' => 'Upload Post Test',
-            'sik' => 'Surat Izin Kerja',
             'bukti_serah_terima' => 'Upload Bukti Serah Terima',
+            'sik' => 'Surat Izin Kerja',
+
         ];
 
         $stepData = [];
@@ -115,6 +118,7 @@ $permits = [
             'notification_id' => $notification->id,
             'step_data' => $stepData,
             'step_summary' => $stepSummary, // ✅ properti tambahan
+            'data_kontraktor' => $dataKontraktor,
             'jsa' => $jsa,
     'permits' => $permits, // ← tambahkan permits di sini
         ];
@@ -132,48 +136,34 @@ public function updateStatus(Request $request, $id, $step)
     ]);
 
     $adminId = auth()->id();
+    $notification = \App\Models\Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
 
-    // Cek apakah sudah ada handled_by
-    $notification = \App\Models\Notification::findOrFail($id);
     if (!$notification->assigned_admin_id) {
-        $notification->update([
-            'assigned_admin_id' => $adminId,
-        ]);
+        $notification->update(['assigned_admin_id' => $adminId]);
     } elseif ($notification->assigned_admin_id != $adminId) {
         return back()->with('error', 'Hanya admin yang pertama kali menangani yang dapat mengubah status!');
     }
 
-    \App\Models\StepApproval::updateOrCreate(
+    $dataUpdate = [
+        'status' => strtolower($request->status),
+        'catatan' => $request->catatan,
+        'approved_by' => $adminId,
+    ];
+
+    // 🚀 Tanpa simpan file, generate PDF hanya saat diminta download
+    if ($step === 'sik' && strtolower($request->status) === 'disetujui') {
+        // Tidak perlu Storage::put(), biarkan PDF hanya di-stream lewat route
+    }
+
+    StepApproval::updateOrCreate(
         ['notification_id' => $id, 'step' => $step],
-        [
-            'status' => strtolower($request->status),
-            'catatan' => $request->catatan,
-            'approved_by' => $adminId
-        ]
+        $dataUpdate
     );
 
     return redirect()->back()->with('success', 'Status langkah ke-' . $step . ' berhasil diperbarui ke "' . $request->status . '"');
 }
 
-    public function uploadSik(Request $request, $id)
-    {
-        $request->validate([
-            'file_sik' => 'required|mimes:pdf|max:2048',
-        ]);
 
-        $path = $request->file('file_sik')->store('sik_files', 'public');
-
-        StepApproval::updateOrCreate(
-            ['notification_id' => $id, 'step' => 'sik'],
-            [
-                'status' => 'disetujui',
-                'file_path' => $path,
-                'approved_by' => auth()->id(),
-            ]
-        );
-
-        return back()->with('success', 'Surat Izin Kerja berhasil diunggah.');
-    }
 
     public function deleteFile($id, $step)
 {
@@ -194,5 +184,14 @@ public function updateStatus(Request $request, $id, $step)
 
     return back()->with('success', 'File berhasil dihapus dan status direset.');
 }
+public function viewSik($id)
+{
+    $notification = \App\Models\Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
+    $dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $notification->id)->first();
+
+    $pdf = \PDF::loadView('admin.pdfsik', compact('notification', 'dataKontraktor'));
+    return $pdf->stream('Surat-Izin-Kerja.pdf'); // langsung buka PDF di browser
+}
+
 }
 

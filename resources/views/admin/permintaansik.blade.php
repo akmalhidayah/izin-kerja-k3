@@ -65,15 +65,16 @@
                                     {{ $request->current_step >= 12 ? 'Selesai' : $request->status }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-gray-800 text-sm font-medium">
-                                Step {{ $request->current_step >= 12 ? '12 - Selesai' : $request->current_step . ' - ' . ($request->current_step_title ?? 'Belum Diketahui') }}
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="h-2 rounded-full {{ $request->progress == 100 ? 'bg-green-500' : 'bg-yellow-500' }}" style="width: {{ $request->progress }}%"></div>
-                                </div>
-                                <div class="text-xs text-gray-500 mt-1">{{ $request->current_step }}/12</div>
-                            </td>
+                         <td class="px-4 py-3 text-gray-800 text-sm font-medium">
+    Step {{ $request->current_step >= $totalSteps ? $totalSteps . ' - Selesai' : $request->current_step . ' - ' . ($request->current_step_title ?? 'Belum Diketahui') }}
+</td>
+<td class="px-4 py-3">
+    <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="h-2 rounded-full {{ $request->progress == 100 ? 'bg-green-500' : 'bg-yellow-500' }}" style="width: {{ $request->progress }}%"></div>
+    </div>
+    <div class="text-xs text-gray-500 mt-1">{{ $request->current_step }}/{{ $totalSteps }}</div>
+</td>
+
                             <td class="px-4 py-3">
                                 <a href="{{ route('admin.permintaansik.show', $request->id) }}" class="text-blue-600 hover:underline font-medium text-sm">Lihat Detail</a>
                             </td>

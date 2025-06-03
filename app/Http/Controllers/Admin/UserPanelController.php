@@ -17,7 +17,7 @@ class UserPanelController extends Controller
         $query->where('usertype', $request->usertype);
     }
 
-    $users = $query->paginate(10);
+    $users = $query->paginate(15);
 
     return view('admin.user-panel.index', compact('users'));
 }

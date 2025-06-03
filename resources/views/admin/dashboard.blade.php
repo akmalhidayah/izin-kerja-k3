@@ -27,7 +27,7 @@
             </div>
             <div>
                 <p class="text-sm text-white">SIK Terbit</p>
-                <p class="text-xl font-bold text-white">{{ $requests->where('current_step', '>=', 12)->count() }} SIK</p>
+              <p class="text-xl font-bold text-white">{{ $requests->where('current_step', '>=', $totalSteps)->count() }} SIK</p>
             </div>
         </div>
         <div class="bg-red-700 p-6 rounded-xl shadow-lg flex items-center gap-4">
@@ -74,7 +74,8 @@
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="h-2 rounded-full {{ $request->progress == 100 ? 'bg-green-500' : 'bg-yellow-500' }}" style="width: {{ $request->progress }}%"></div>
                                 </div>
-                                <div class="text-xs text-gray-500 mt-1">{{ $request->current_step }}/12</div>
+                               <div class="text-xs text-gray-500 mt-1">{{ $request->current_step }}/{{ $totalSteps }}</div>
+
                             </td>
                             <td class="px-4 py-2">
                                 @if($request->sik_file)
