@@ -233,7 +233,7 @@
         @endif
     @endif
 
-  @if ($index === 3)
+    @if ($index === 3)
     @php
         $prevStepCode = $steps[$index - 1]['code'] ?? null;
         $prevStepApproved = $prevStepCode 
@@ -299,7 +299,6 @@
         </div>
     @endif
 @endif
-
     @if ($index === 4)
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;

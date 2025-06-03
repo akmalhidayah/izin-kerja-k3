@@ -14,7 +14,6 @@
         <script src="//unpkg.com/alpinejs" defer></script>
 
         <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
-        <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
     <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
     <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
     </head>

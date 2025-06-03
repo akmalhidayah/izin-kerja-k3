@@ -12,12 +12,11 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <!-- PANGGIL SEKALI DI APP BLADE -->
-        <script src="//unpkg.com/alpinejs" defer></script>
 
         <!-- Styles & Vite -->
-        <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
-    <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
+             @vite(['resources/css/app.css', 'resources/js/app.js']) 
+    <!--<link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">-->
+    <!--<script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> -->
     </head>
     <body class="font-sans antialiased">
         <!-- Preload bg image -->
