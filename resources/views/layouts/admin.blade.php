@@ -13,8 +13,9 @@
     
     <!-- Tailwind & Alpine -->
     <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
+        <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
     <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs" defer></script>
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

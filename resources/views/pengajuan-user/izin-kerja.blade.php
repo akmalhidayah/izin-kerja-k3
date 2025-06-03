@@ -7,7 +7,7 @@
 
         <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
             <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
-                <div x-data="{ expanded: false, activeModal: null, selectedPermit: 'umum' }">
+                <div x-data="{ expanded: true, activeModal: null, selectedPermit: 'umum' }">
                     @if(session('success'))
                         <div class="bg-green-500 text-white p-2 rounded mb-4">
                             {{ session('success') }}
@@ -233,68 +233,73 @@
         @endif
     @endif
 
-    @if ($index === 3)
-        @php
-                $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui';
-        @endphp
-        @if (!$prevStepApproved)
-            <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
-        @else
-            <div class="flex flex-col items-center space-y-2">
-                @if (!$jsa)
-                    <button @click="activeModal = 'modal-jsa-create'"
-                        class="flex items-center gap-1 mt-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-4 py-[5px] rounded-full transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        {{ $label }}
-                    </button>
-                @else
-                    <a href="{{ route('jsa.pdf.view', ['notification_id' => $notification->id]) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[10px] px-4 py-[5px] rounded-full">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Lihat PDF
-                    </a>
-                    <button @click="activeModal = 'modal-jsa-edit'"
-                        class="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-[10px] px-4 py-[5px] rounded-full transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-2 4h2m-2 4h2m-2 4h2m4-20a2 2 0 00-2 2v16a2 2 0 002 2h4a2 2 0 002-2V6l-6-6z"/>
-                        </svg>
-                        Edit JSA
-                    </button>
-                     {{-- Salin link untuk TTD --}}
-                @if ($jsa && $jsa->token)
-    <div class="mt-2 text-xs text-gray-700">
-        Salin link berikut dan kirimkan ke pihak terkait untuk tanda tangan:
-        <div class="flex items-center gap-2 mt-1">
-            <input type="text" value="{{ route('jsa.form.token', $jsa->token) }}" readonly
-                class="text-xs border-gray-300 rounded p-1 w-full bg-gray-100">
-            <button type="button" onclick="navigator.clipboard.writeText('{{ route('jsa.form.token', $jsa->token) }}'); alert('Link berhasil disalin!')"
-                class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                Salin
-            </button>
+  @if ($index === 3)
+    @php
+        $prevStepCode = $steps[$index - 1]['code'] ?? null;
+        $prevStepApproved = $prevStepCode 
+            ? (\App\Models\StepApproval::where('notification_id', $notification?->id)
+                ->where('step', $prevStepCode)->value('status') === 'disetujui')
+            : false;
+        $label = 'Tambah Data'; // Default label
+    @endphp
+
+    @if (!$prevStepApproved)
+        <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
+    @else
+        <div class="flex flex-col items-center space-y-2">
+            @if (!$jsa)
+                <button @click="activeModal = 'modal-jsa-create'"
+                    class="flex items-center gap-1 mt-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-4 py-[5px] rounded-full transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    {{ $label }}
+                </button>
+            @else
+                <a href="{{ route('jsa.pdf.view', ['notification_id' => $notification->id]) }}" target="_blank"
+                    class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[10px] px-4 py-[5px] rounded-full">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Lihat PDF
+                </a>
+                <button @click="activeModal = 'modal-jsa-edit'"
+                    class="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-[10px] px-4 py-[5px] rounded-full transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-2 4h2m-2 4h2m-2 4h2m4-20a2 2 0 00-2 2v16a2 2 0 002 2h4a2 2 0 002-2V6l-6-6z"/>
+                    </svg>
+                    Edit JSA
+                </button>
+
+                @if ($jsa->token)
+                    <div class="mt-2 text-xs text-gray-700">
+                        Salin link berikut dan kirimkan ke pihak terkait untuk tanda tangan:
+                        <div class="flex items-center gap-2 mt-1">
+                            <input type="text" value="{{ route('jsa.form.token', $jsa->token) }}" readonly
+                                class="text-xs border-gray-300 rounded p-1 w-full bg-gray-100">
+                            <button type="button" onclick="navigator.clipboard.writeText('{{ route('jsa.form.token', $jsa->token) }}'); alert('Link berhasil disalin!')"
+                                class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+                                Salin
+                            </button>
+                        </div>
+                    </div>
+                @endif
+            @endif
+
+            @if ($step['status'] === 'revisi')
+                @php
+                    $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
+                        ->where('step', 'jsa')
+                        ->value('catatan');
+                @endphp
+                @if ($catatanRevisi)
+                    <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
+                @endif
+            @endif
         </div>
-    </div>
+    @endif
 @endif
 
-            @endif
-                @endif
-                            @if ($step['status'] === 'revisi')
-        @php
-            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                ->where('step', $prevStepCode)
-                ->value('catatan');
-        @endphp
-        @if ($catatanRevisi)
-            <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
-        @endif
-    @endif
-            </div>
-        @endif
     @if ($index === 4)
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;

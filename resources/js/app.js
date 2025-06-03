@@ -74,6 +74,4 @@ window.formKontraktor = function(tenagaKerjaInit = [], peralatanKerjaInit = [], 
     }
 }
 
-
-
 Alpine.start();
