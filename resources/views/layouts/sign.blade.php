@@ -13,7 +13,9 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script src="//unpkg.com/alpinejs" defer></script>
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
+             <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
+    <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script> 
     </head>
 
     <body class="font-sans antialiased bg-blue-100 dark:bg-gray-900">

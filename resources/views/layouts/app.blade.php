@@ -15,9 +15,9 @@
         <script src="//unpkg.com/alpinejs" defer></script>
 
         <!-- Styles & Vite -->
-             @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <!-- <link rel="stylesheet" href="{{ asset('build/assets/app-CP4tGefM.css') }}">
-    <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script>  -->
+             <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
+    <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script> 
     </head>
     <body class="font-sans antialiased">
         <!-- Preload bg image -->

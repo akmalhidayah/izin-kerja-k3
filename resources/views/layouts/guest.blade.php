@@ -13,7 +13,7 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <!-- Scripts -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-CP4tGefM.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
     <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script> 
 
     </head>
