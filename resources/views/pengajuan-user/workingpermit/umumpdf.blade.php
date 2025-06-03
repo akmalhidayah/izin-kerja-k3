@@ -100,7 +100,7 @@
 {{-- Izin Kerja Khusus --}}
 @php
     $check = '<span style="font-family: DejaVu Sans; font-weight: bold;">✓</span>';
-    $specials = json_decode($permit->izin_khusus ?? '[]', true);
+    $specials = $permit->izin_khusus ?? []; // Tidak perlu json_decode jika sudah array
 @endphp
 
 <div class="section-title">
@@ -128,6 +128,7 @@
         <td>@if(in_array('gaspanas', $specials)) {!! $check !!} @endif Material/gas panas ≥ 150°C</td>
     </tr>
 </table>
+
 {{-- 2. Titik Isolasi dan Penguncian jika Diperlukan --}}
 <div class="section-title">
     2. Titik Isolasi dan Penguncian jika Diperlukan
@@ -153,17 +154,20 @@
         </tr>
     </thead>
     <tbody>
-      @foreach($isolasiListrik as $item)
-<tr>
-    <td style="height: 25px;">{{ $item['peralatan'] ?? '' }}</td>
-    <td>{{ $item['nomor'] ?? '' }}</td>
-    <td>{{ $item['tempat'] ?? '' }}</td>
-    <td>{{ $item['locked'] ?? '' }}</td>
-    <td>{{ $item['tested'] ?? '' }}</td>
-    <td></td>
-</tr>
-@endforeach
-
+        @foreach($isolasiListrik as $item)
+            <tr>
+                <td style="height: 25px;">{{ $item['peralatan'] ?? '' }}</td>
+                <td>{{ $item['nomor'] ?? '' }}</td>
+                <td>{{ $item['tempat'] ?? '' }}</td>
+                <td>{{ $item['locked'] ?? '' }}</td>
+                <td>{{ $item['tested'] ?? '' }}</td>
+                <td>
+                    @if(!empty($item['signature']) && str_starts_with($item['signature'], 'data:image'))
+                        <img src="{{ $item['signature'] }}" style="height: 40px;">
+                    @endif
+                </td>
+            </tr>
+        @endforeach
     </tbody>
 </table>
 
@@ -189,19 +193,23 @@
         </tr>
     </thead>
     <tbody>
-      @foreach($isolasiNon as $item)
-<tr>
-    <td style="height: 25px;">{{ $item['peralatan'] ?? '' }}</td>
-    <td>{{ $item['jenis'] ?? '' }}</td>
-    <td>{{ $item['tempat'] ?? '' }}</td>
-    <td>{{ $item['locked'] ?? '' }}</td>
-    <td>{{ $item['tested'] ?? '' }}</td>
-    <td></td>
-</tr>
-@endforeach
-
+        @foreach($isolasiNon as $item)
+            <tr>
+                <td style="height: 25px;">{{ $item['peralatan'] ?? '' }}</td>
+                <td>{{ $item['jenis'] ?? '' }}</td>
+                <td>{{ $item['tempat'] ?? '' }}</td>
+                <td>{{ $item['locked'] ?? '' }}</td>
+                <td>{{ $item['tested'] ?? '' }}</td>
+                <td>
+                    @if(!empty($item['signature']) && str_starts_with($item['signature'], 'data:image'))
+                        <img src="{{ $item['signature'] }}" style="height: 40px;">
+                    @endif
+                </td>
+            </tr>
+        @endforeach
     </tbody>
 </table>
+
 {{-- 3. Persyaratan Kerja Aman --}}
 <div class="section-title">3. Persyaratan Kerja Aman</div>
 <table class="table">
@@ -537,6 +545,7 @@
     $req_sign = $closure?->requestor_sign ?? null;
     $iss_name = $closure?->issuer_name ?? '-';
     $iss_sign = $closure?->issuer_sign ?? null;
+    $rfid = $closure?->jumlah_rfid ?? '-';
 @endphp
 
 <table class="table">
@@ -588,6 +597,10 @@
                 @endif
                 <div><i>Permit Issuer</i></div>
             </td>
+        </tr>
+         <tr>
+            <td colspan="2" style="font-weight: bold;">Jumlah RFID yang digunakan</td>
+            <td colspan="2" style="text-align: center;">{{ $rfid }}</td>
         </tr>
     </tbody>
 </table>

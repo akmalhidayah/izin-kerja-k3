@@ -67,6 +67,7 @@ public function store(Request $request)
             'signature_close_requestor' => 'nullable|string',
             'close_issuer_name' => 'nullable|string',
             'signature_close_issuer' => 'nullable|string',
+            'jumlah_rfid' => 'nullable|integer|min:0',
         ])->validate();
     } catch (ValidationException $e) {
         return back()->withErrors($e->errors())->withInput();
@@ -148,8 +149,13 @@ public function store(Request $request)
             'requestor_sign' => $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor'),
             'issuer_name' => $request->input('close_issuer_name'),
             'issuer_sign' => $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer'),
+                    'jumlah_rfid' => $request->input('jumlah_rfid'),
         ], fn ($v) => $v !== null && $v !== '')
     );
+if (!$permit->token) {
+    $permit->token = Str::uuid();
+    $permit->save();
+}
 
     return back()->with('success', 'Data Working Permit Umum berhasil disimpan!')->withInput();
 }
@@ -169,6 +175,117 @@ public function store(Request $request)
         file_put_contents($path . $filename, base64_decode($image));
 
         return 'storage/' . $folder . $filename;
+    }
+ public function showByToken($token)
+{
+    $permit = UmumWorkPermit::where('token', $token)->firstOrFail();
+    $notification = $permit->notification;
+
+    // Fix: Ambil dari relasi langsung ke permit
+    $detail = $permit->detail;
+    $closure = $permit->closure;
+
+    return view('pengajuan-user.workingpermit.formpermitumum', compact('permit', 'notification', 'detail', 'closure'));
+}
+
+
+    public function storeByToken(Request $request, $token)
+    {
+        $permit = UmumWorkPermit::where('token', $token)->firstOrFail();
+
+        try {
+            $validated = $request->validate([
+                'izin_khusus' => 'nullable|array',
+                'isolasi_listrik' => 'nullable|array',
+                'isolasi_non_listrik' => 'nullable|array',
+                'checklist_kerja_aman' => 'nullable|array',
+                'rekomendasi_tambahan' => 'nullable|string',
+                'rekomendasi_status' => 'nullable|string',
+
+                'permit_requestor_name' => 'nullable|string',
+                'permit_requestor_sign' => 'nullable|string',
+                'permit_requestor_date' => 'nullable|date',
+                'permit_requestor_time' => 'nullable',
+
+                'permit_issuer_name' => 'nullable|string',
+                'permit_issuer_sign' => 'nullable|string',
+                'permit_issuer_date' => 'nullable|date',
+                'permit_issuer_time' => 'nullable',
+                'izin_berlaku_dari' => 'nullable|date',
+                'izin_berlaku_jam_dari' => 'nullable',
+                'izin_berlaku_sampai' => 'nullable|date',
+                'izin_berlaku_jam_sampai' => 'nullable',
+
+                'permit_authorizer_name' => 'nullable|string',
+                'permit_authorizer_sign' => 'nullable|string',
+                'permit_authorizer_date' => 'nullable|date',
+                'permit_authorizer_time' => 'nullable',
+
+                'permit_receiver_name' => 'nullable|string',
+                'permit_receiver_sign' => 'nullable|string',
+                'permit_receiver_date' => 'nullable|date',
+                'permit_receiver_time' => 'nullable',
+
+                'live_testing_items' => 'nullable|array',
+                'live_testing_name' => 'nullable|string',
+                'live_testing_sign' => 'nullable|string',
+                'live_testing_date' => 'nullable|date',
+                'live_testing_time' => 'nullable',
+                
+            ]);
+            
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        }
+
+        // Handle signature uploads
+$validated['permit_requestor_sign'] = $this->saveSignature($request->input('signature_permit_requestor'), 'requestor');
+$validated['permit_issuer_sign'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer');
+$validated['permit_authorizer_sign'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer');
+$validated['permit_receiver_sign'] = $this->saveSignature($request->input('signature_permit_receiver'), 'receiver');
+$validated['live_testing_sign'] = $this->saveSignature($request->input('signature_live_testing'), 'testing');
+
+
+        // JSON fields
+        $validated['izin_khusus'] = $request->input('izin_khusus', []);
+        $validated['isolasi_listrik'] = json_encode($request->input('isolasi_listrik', []));
+        $validated['isolasi_non_listrik'] = json_encode($request->input('isolasi_non_listrik', []));
+        $validated['checklist_kerja_aman'] = json_encode($request->input('checklist_kerja_aman', []));
+$validated['live_testing_items'] = json_encode($request->input('live_testing', []));
+
+
+        $permit->update(array_filter($validated, fn ($v) => $v !== null && $v !== ''));
+ // ✅ Tambahkan bagian ini SETELAH update permit:
+    $detail = WorkPermitDetail::updateOrCreate(
+        ['notification_id' => $permit->notification_id],
+        array_filter([
+            'permit_type' => 'umum',
+            'location' => $request->input('lokasi_pekerjaan'),
+            'work_date' => $request->input('tanggal_pekerjaan'),
+            'job_description' => $request->input('uraian_pekerjaan'),
+            'equipment' => $request->input('peralatan_digunakan'),
+            'worker_count' => is_numeric($request->input('jumlah_pekerja')) ? (int) $request->input('jumlah_pekerja') : null,
+            'emergency_contact' => $request->input('nomor_darurat'),
+        ], fn ($v) => $v !== null && $v !== '')
+    );
+
+    WorkPermitClosure::updateOrCreate(
+        ['work_permit_detail_id' => $detail->id],
+        array_filter([
+            'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
+            'equipment_cleaned' => $request->input('close_tools') === 'ya',
+            'guarding_restored' => $request->input('close_guarding') === 'ya',
+            'closed_date' => $request->input('close_date'),
+            'closed_time' => $request->input('close_time'),
+            'requestor_name' => $request->input('close_requestor_name'),
+            'requestor_sign' => $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor'),
+            'issuer_name' => $request->input('close_issuer_name'),
+            'issuer_sign' => $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer'),
+                                'jumlah_rfid' => $request->input('jumlah_rfid'),
+ 
+        ], fn ($v) => $v !== null && $v !== '')
+    );
+        return back()->with('success', 'Form Working Permit Umum berhasil diperbarui.');
     }
 
     public function preview($id)

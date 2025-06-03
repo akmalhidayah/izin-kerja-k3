@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('requestor_sign')->nullable(); // simpan path file atau base64
             $table->string('issuer_name')->nullable();
             $table->string('issuer_sign')->nullable();
+            $table->unsignedInteger('jumlah_rfid')->nullable();
             $table->timestamps();
         });
     }

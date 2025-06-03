@@ -66,7 +66,7 @@
                                     </p>
                               @if ($index === 0)
     @php
-        $label = $step['label'] ?? 'Tambah Data'; // Default label aman
+        $label = $step['label'] ?? 'Input Notification/PO/SPK'; // Default label aman
         $catatanRevisi = $notification
             ? \App\Models\StepApproval::where('notification_id', $notification->id)
                 ->where('step', 'op_spk')
@@ -351,6 +351,21 @@
                         </button>
                     </div>
                 @endif
+                @if ($permitUmum && $permitUmum->token)
+    <div class="mt-2 text-[10px] text-gray-700 text-center">
+        Salin link berikut dan kirim ke pihak terkait untuk mengisi atau tanda tangan:
+        <div class="flex items-center gap-2 mt-1">
+            <input type="text" value="{{ route('working-permit.umum.token', $permitUmum->token) }}" readonly
+                class="text-[10px] border-gray-300 rounded p-1 w-full bg-gray-100">
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.umum.token', $permitUmum->token) }}'); alert('Link berhasil disalin!')"
+                class="px-2 py-1 bg-blue-600 text-white text-[10px] rounded hover:bg-blue-700">
+                Salin
+            </button>
+        </div>
+    </div>
+@endif
+
 
                 {{-- Permit Gas Panas --}}
                 @if ($permitGas)

@@ -53,6 +53,8 @@ class UmumWorkPermit extends Model
         'live_testing_sign',
         'live_testing_date',
         'live_testing_time',
+
+        'token',
     ];
 
     protected $casts = [
@@ -74,4 +76,24 @@ class UmumWorkPermit extends Model
     {
         return $this->belongsTo(Notification::class);
     }
+// Relasi ke detail
+public function detail()
+{
+    return $this->hasOne(\App\Models\WorkPermitDetail::class, 'notification_id', 'notification_id')
+        ->where('permit_type', 'umum');
+}
+
+// Relasi ke closure melalui detail
+public function closure()
+{
+    return $this->hasOneThrough(
+        \App\Models\WorkPermitClosure::class,
+        \App\Models\WorkPermitDetail::class,
+        'notification_id',           // Foreign key on WorkPermitDetail
+        'work_permit_detail_id',     // Foreign key on WorkPermitClosure
+        'notification_id',           // Local key on UmumWorkPermit
+        'id'                         // Local key on WorkPermitDetail
+    )->where('permit_type', 'umum');
+}
+
 }

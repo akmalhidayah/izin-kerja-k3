@@ -109,4 +109,7 @@ Route::post('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::cl
 Route::get('/izin-kerja/jsa/form/{token}', [JsaController::class, 'showByToken'])->name('jsa.form.token');
 Route::post('/izin-kerja/jsa/form/{token}', [JsaController::class, 'storeByToken'])->name('jsa.form.token.store');
 
+Route::get('/izin-kerja/working-permit/umum/{token}', [UmumPermitController::class, 'showByToken'])->name('working-permit.umum.token');
+Route::post('/izin-kerja/working-permit/umum/{token}', [UmumPermitController::class, 'storeByToken'])->name('working-permit.umum.token.store');
+
 require __DIR__.'/auth.php';

@@ -20,6 +20,8 @@ class WorkPermitClosure extends Model
         'requestor_sign',
         'issuer_name',
         'issuer_sign',
+        'jumlah_rfid',
+
     ];
 
     public function detail()

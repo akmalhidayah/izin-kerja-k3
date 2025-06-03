@@ -60,6 +60,8 @@ return new class extends Migration {
             $table->date('live_testing_date')->nullable();
             $table->time('live_testing_time')->nullable();
 
+            $table->string('token')->unique()->nullable();
+
             $table->timestamps();
         });
     }
