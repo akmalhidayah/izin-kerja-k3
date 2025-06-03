@@ -55,6 +55,25 @@ window.pekerjaData = function (existing = []) {
         }
     };
 };
+window.formKontraktor = function(tenagaKerjaInit = [], peralatanKerjaInit = [], apdInit = []) {
+    return {
+        tenagaKerja: tenagaKerjaInit && tenagaKerjaInit.length ? tenagaKerjaInit : [],
+        peralatanKerja: peralatanKerjaInit && peralatanKerjaInit.length ? peralatanKerjaInit : [],
+        apd: apdInit && apdInit.length ? apdInit : [],
+        tambahTenagaKerja() { this.tenagaKerja.push({ nama: '', jumlah: '', satuan: '' }); },
+        hapusTenagaKerja(index) { this.tenagaKerja.splice(index, 1); },
+        tambahPeralatan() { this.peralatanKerja.push({ nama: '', jumlah: '', satuan: '' }); },
+        hapusPeralatan(index) { this.peralatanKerja.splice(index, 1); },
+        tambahApd() { this.apd.push({ nama: '', jumlah: '', satuan: '' }); },
+        hapusApd(index) { this.apd.splice(index, 1); },
+        serializeData() {
+            document.getElementById('tenaga_kerja').value = JSON.stringify(this.tenagaKerja);
+            document.getElementById('peralatan_kerja').value = JSON.stringify(this.peralatanKerja);
+            document.getElementById('apd').value = JSON.stringify(this.apd);
+        }
+    }
+}
+
 
 
 Alpine.start();

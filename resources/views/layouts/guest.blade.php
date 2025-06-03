@@ -14,7 +14,7 @@
 
         <!-- Scripts -->
     <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
-    <script src="{{ asset('build/assets/app-C7JkqvC6.js') }}"></script> 
+    <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
 
     </head>
     <body class="font-sans text-gray-900 antialiased bg-cover bg-center" style="background-image: url('{{ asset('images/bg-login.jpg') }}')">
