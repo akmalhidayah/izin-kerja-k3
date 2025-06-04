@@ -27,6 +27,8 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function (
 
     // Step 1: Create Notification
     Route::post('/pengajuan-user/izin-kerja/notification', [UserNotificationController::class, 'store'])->name('notification.store');
+
+
     // Step 2: Data Kontraktor
     Route::post('/pengajuan-user/izin-kerja/data-kontraktor/{notification}', [DataKontraktorController::class, 'store'])->name('izin-kerja.data-kontraktor');
     Route::get('/pengajuan-user/izin-kerja/data-kontraktor/pdf/{notification_id}', [DataKontraktorController::class, 'previewPdf'])->name('izin-kerja.data-kontraktor.pdf');
@@ -34,6 +36,8 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function (
     // Step 3,6,7,8,9,10, 13 Upload
     Route::post('/user/upload', [UploadController::class, 'store'])->name('upload.store');
     Route::patch('/user/upload/{id}/status', [UploadController::class, 'updateStatus'])->name('upload.updateStatus');
+    Route::delete('/user/upload/{id}', [UploadController::class, 'destroy'])->name('upload.delete');
+
 
     // Step 4: JSA
     Route::post('/user/jsa/store', [JsaController::class, 'store'])->name('jsa.store');

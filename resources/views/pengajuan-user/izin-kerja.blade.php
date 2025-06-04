@@ -8,6 +8,38 @@
         <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
             <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
                 <div x-data="{ expanded: true, activeModal: null, selectedPermit: 'umum' }">
+                    <div class="flex justify-between items-center mb-4">
+    <!-- Dropdown Pilih Notifikasi -->
+<form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-3">
+    <label for="notification_id" class="text-sm font-semibold text-gray-800 whitespace-nowrap">Pilih Pengajuan</label>
+    
+    <div class="relative w-[280px]">
+        <select name="notification_id" id="notification_id" onchange="this.form.submit()"
+            class="appearance-none w-full bg-white border border-gray-300 text-sm rounded-lg py-2 px-4 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            @foreach ($notifications as $notif)
+                <option value="{{ $notif->id }}" {{ $notif->id == $selectedId ? 'selected' : '' }}>
+                    {{ $notif->number }} - {{ $notif->created_at->format('d/m/Y') }}
+                </option>
+            @endforeach
+        </select>
+
+        <!-- Custom dropdown arrow -->
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+        </div>
+    </div>
+</form>
+
+    <!-- Tombol Buat Notifikasi Baru -->
+<button @click="activeModal = 'modal-0'"
+    class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded shadow">
+    + Buat Pengajuan Baru
+</button>
+
+</div>
+
                     @if(session('success'))
                         <div class="bg-green-500 text-white p-2 rounded mb-4">
                             {{ session('success') }}
@@ -89,15 +121,6 @@
                 Lihat File SPK/PO
             </a>
         @endif
-
-        <button @click="activeModal = 'modal-{{ $index }}'"
-            class="flex items-center gap-1 mt-1 bg-yellow-500 hover:bg-yellow-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-2 4h2m-2 4h2m-2 4h2m4-20a2 2 0 00-2 2v16a2 2 0 002 2h4a2 2 0 002-2V6l-6-6z"/>
-            </svg>
-            Edit OP/SPK
-        </button>
-
         @if ($step['status'] === 'revisi' && $catatanRevisi)
             <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
         @endif
@@ -197,41 +220,54 @@
             ? (\App\Models\StepApproval::where('notification_id', $notification?->id)
                 ->where('step', $prevStepCode)->value('status') === 'disetujui')
             : true;
+
+        $bpjsFiles = \App\Models\Upload::where('notification_id', $notification->id)
+            ->where('step', 'bpjs')->get();
     @endphp
 
     @if (!$prevStepApproved)
         <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
     @else
-            {{-- BPJS --}}
-            @if ($notification)
-                @if ($bpjsFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'bpjs')->first())
-                    <a href="{{ asset('storage/' . $bpjsFile->file_path) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                        Lihat BPJS
-                    </a>
-                @else
-                    <button @click="activeModal = 'modal-{{ $index }}'"
-                        class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
-                        Upload BPJS
-                    </button>
-                    <span class="text-[10px] text-gray-400 italic mt-1">Upload File dalam Bentuk PDF/JPG</span>
-                @endif
-                @if ($step['status'] === 'revisi')
-        @php
-            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                ->where('step', 'bpjs')
-                ->value('catatan');
-        @endphp
-        @if ($catatanRevisi)
-            <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
-        @endif
-    @endif
-
-            @else
-                <div class="text-center text-[11px] text-gray-500 italic mt-1">Belum ada notifikasi/PO/SPK</div>
+        <div class="flex flex-col items-center space-y-2">
+            @if ($bpjsFiles->count())
+                @foreach ($bpjsFiles as $file)
+                    <div class="flex items-center gap-2">
+                        <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                            class="bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+                            Lihat BPJS
+                        </a>
+                        <form action="{{ route('upload.delete', $file->id) }}" method="POST" onsubmit="return confirm('Hapus file ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 text-[9px] px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+                @endforeach
             @endif
-        @endif
+
+            {{-- Tombol Upload Baru --}}
+            <button @click="activeModal = 'modal-{{ $index }}'"
+                class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
+                +
+            </button>
+            <span class="text-[10px] text-gray-400 italic mt-1">Upload File dalam Bentuk PDF/JPG</span>
+
+            {{-- Catatan revisi --}}
+            @if ($step['status'] === 'revisi')
+                @php
+                    $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
+                        ->where('step', 'bpjs')->value('catatan');
+                @endphp
+                @if ($catatanRevisi)
+                    <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
+                @endif
+            @endif
+        </div>
     @endif
+@endif
+
 
     @if ($index === 3)
     @php
@@ -489,44 +525,62 @@
             @endif
         @endif
     @endif
-    @if ($index === 7)
-        @php
-                        $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui';
-        @endphp
+@if ($index === 7)
+    @php
+        $prevStepCode = $steps[$index - 1]['code'] ?? null;
+        $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
+            ->where('step', $prevStepCode)->value('status') === 'disetujui';
 
-        @if (!$prevStepApproved)
-            <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
-        @else
-            @if ($notification)
-                @if ($ktpFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'ktp')->first())
-                    <a href="{{ asset('storage/' . $ktpFile->file_path) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+        $ktpFiles = \App\Models\Upload::where('notification_id', $notification->id)
+            ->where('step', 'ktp')->get();
+    @endphp
+
+    @if (!$prevStepApproved)
+        <span class="text-[10px] text-gray-400 italic mt-1">
+            Langkah perizinan harus dilakukan secara bertahap.
+        </span>
+    @else
+        <div class="flex flex-col items-center space-y-2">
+            @foreach ($ktpFiles as $file)
+                <div class="flex items-center gap-2">
+                    <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                        class="bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
                         Lihat KTP
                     </a>
-                @else
-                    <button @click="activeModal = 'modal-{{ $index }}'"
-                        class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
-                        Upload KTP
-                    </button>
-                    <span class="text-[10px] text-gray-400 italic mt-1">*Diharapkan menggabungkan File KTP dalam 1 File PDF.</span>
+                    <form action="{{ route('upload.delete', $file->id) }}" method="POST"
+                        onsubmit="return confirm('Hapus file ini?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="text-red-500 text-[9px] px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                            Hapus
+                        </button>
+                    </form>
+                </div>
+            @endforeach
+
+            {{-- Tombol Upload Baru --}}
+            <button @click="activeModal = 'modal-{{ $index }}'"
+                class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
+                +
+            </button>
+
+            <span class="text-[10px] text-gray-400 italic mt-1">*Diharapkan menggabungkan File KTP dalam 1 File PDF.</span>
+
+            @if ($step['status'] === 'revisi')
+                @php
+                    $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
+                        ->where('step', 'ktp')->value('catatan');
+                @endphp
+                @if ($catatanRevisi)
+                    <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
                 @endif
-                @if ($step['status'] === 'revisi')
-                        @php
-                            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                                ->where('step', 'ktp')
-                                ->value('catatan');
-                        @endphp
-                        @if ($catatanRevisi)
-                            <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
-                        @endif
-                    @endif
-            @else
-                <div class="text-center text-[11px] text-gray-500 italic mt-1">Belum ada notifikasi/PO/SPK</div>
             @endif
-        @endif
+        </div>
     @endif
+@endif
+
+
+
     @if ($index === 8)
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
@@ -788,10 +842,11 @@
             'permits' => $permits ?? []
         ])
                                 @else
-                                    @include('components.steps.modal-upload', [
+                                   @include('components.steps.modal-upload', [
                                         'id' => 'modal-' . $index,
                                         'notification' => $notification,
-                                        'stepName' => $step['code']
+                                        'stepName' => $step['code'],
+                                        'label' => $step['title'] // ⬅️ Tambahkan ini
                                     ])
                                 @endif
                                 </div>

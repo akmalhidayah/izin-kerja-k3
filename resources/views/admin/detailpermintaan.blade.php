@@ -105,20 +105,44 @@
                                 <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow">Simpan</button>
                             </form>
                         @else
-                            {{-- Dokumen Lain --}}
-                            @if (!in_array($stepKey, ['op_spk', 'sik']) && $upload && $upload->file_path)
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ asset('storage/' . $upload->file_path) }}" target="_blank"
-                                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                                        <i class="fas fa-file-alt"></i> Lihat Dokumen
-                                    </a>
-                                    <form action="{{ route('admin.permintaansik.deleteFile', [$data->id, $stepKey]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus file ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 text-xs underline">Hapus</button>
-                                    </form>
-                                </div>
-                            @endif
+                         @if (in_array($stepKey, ['bpjs', 'ktp']))
+    @php
+        $uploadFiles = \App\Models\Upload::where('notification_id', $data->notification_id)
+            ->where('step', $stepKey)
+            ->get();
+    @endphp
+
+    @foreach ($uploadFiles as $file)
+        <div class="flex items-center gap-2">
+            <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+               class="bg-green-500 hover:bg-green-600 text-white px-3 py-[3px] rounded-full text-xs flex items-center gap-1">
+                <i class="fas fa-file-alt"></i> Lihat Dokumen
+            </a>
+            <form action="{{ route('admin.permintaansik.deleteFile', [$data->id, $stepKey]) }}" method="POST"
+                  onsubmit="return confirm('Yakin ingin menghapus file ini?')">
+                @csrf
+                @method('DELETE')
+                <input type="hidden" name="file_id" value="{{ $file->id }}">
+                <button type="submit" class="text-red-500 text-xs px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                    Hapus
+                </button>
+            </form>
+        </div>
+    @endforeach
+@elseif (!in_array($stepKey, ['op_spk', 'sik']) && $upload && $upload->file_path)
+    <div class="flex items-center gap-2">
+        <a href="{{ asset('storage/' . $upload->file_path) }}" target="_blank"
+           class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-xs flex items-center gap-1">
+            <i class="fas fa-file-alt"></i> Lihat Dokumen
+        </a>
+        <form action="{{ route('admin.permintaansik.deleteFile', [$data->id, $stepKey]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus file ini?')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="text-red-500 text-xs underline">Hapus</button>
+        </form>
+    </div>
+@endif
+
 
                             @if ($stepKey === 'data_kontraktor' && $data->data_kontraktor)
                                 <a href="{{ route('izin-kerja.data-kontraktor.pdf', ['notification_id' => $data->data_kontraktor->notification_id]) }}" target="_blank"

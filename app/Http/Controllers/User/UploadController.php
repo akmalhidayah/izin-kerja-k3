@@ -34,6 +34,17 @@ class UploadController extends Controller
             return back()->with('error', 'Terjadi kesalahan saat upload: ' . $e->getMessage());
         }
     }
+    public function destroy($id)
+{
+    $upload = \App\Models\Upload::findOrFail($id);
+    if ($upload->file_path && \Storage::disk('public')->exists($upload->file_path)) {
+        \Storage::disk('public')->delete($upload->file_path);
+    }
+    $upload->delete();
+
+    return back()->with('success', 'File berhasil dihapus!');
+}
+
 
     public function updateStatus(Request $request, $id)
     {
