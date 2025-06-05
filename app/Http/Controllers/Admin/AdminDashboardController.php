@@ -70,7 +70,7 @@ public function permintaanSIK(Request $request)
         $query->whereYear('created_at', $request->tahun);
     }
 
-    $notifications = $query->latest()->paginate(5)->withQueryString();
+    $notifications = $query->latest()->paginate(10)->withQueryString();
 
     $stepTitles = [
         'op_spk' => 'Buat Notifikasi/OP/SPK',

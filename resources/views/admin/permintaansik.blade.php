@@ -84,7 +84,6 @@
     </div>
     <div class="text-xs text-gray-500 mt-1">{{ $request->current_step }}/{{ $totalSteps }}</div>
 </td>
-
                             <td class="px-4 py-3">
                                 <a href="{{ route('admin.permintaansik.show', $request->id) }}" class="text-blue-600 hover:underline font-medium text-sm">Lihat Detail</a>
                             </td>
@@ -92,6 +91,10 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="mt-4">
+    {{ $requests->links() }}
+</div>
+
         </div>
     </div>
 </x-admin-layout>
