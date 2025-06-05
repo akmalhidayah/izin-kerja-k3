@@ -214,16 +214,21 @@
         @endif
     @endif
 @if ($index === 2)
-    @php
-        $prevStepCode = $steps[$index - 1]['code'] ?? null;
-        $prevStepApproved = $prevStepCode 
-            ? (\App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui')
-            : true;
+   @php
+    $prevStepCode = $steps[$index - 1]['code'] ?? null;
 
-        $bpjsFiles = \App\Models\Upload::where('notification_id', $notification->id)
-            ->where('step', 'bpjs')->get();
-    @endphp
+    $prevStepApproved = $prevStepCode 
+        ? (\App\Models\StepApproval::where('notification_id', $notification?->id)
+            ->where('step', $prevStepCode)->value('status') === 'disetujui')
+        : true;
+
+    $notifId = $notification?->id;
+    $bpjsFiles = $notifId
+        ? \App\Models\Upload::where('notification_id', $notifId)
+            ->where('step', 'bpjs')->get()
+        : collect();
+@endphp
+
 
     @if (!$prevStepApproved)
         <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
