@@ -539,7 +539,7 @@
         ? (\App\Models\StepApproval::where('notification_id', $notifId)
             ->where('step', $prevStepCode)
             ->value('status') === 'disetujui')
-        : true;
+        : false;
 
     $ktpFiles = $notifId
         ? \App\Models\Upload::where('notification_id', $notifId)
