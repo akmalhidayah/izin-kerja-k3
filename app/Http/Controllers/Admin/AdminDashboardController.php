@@ -34,8 +34,7 @@ $totalSteps = count($stepTitles);
             'id' => $notif->id,
             'user_name' => $notif->user->vendor_name ?? $notif->user->name ?? 'User',
             'tanggal' => $notif->created_at->format('d-m-Y H:i'),
-'handled_by' => $notif->assignedAdmin?->name ?? '-',
-
+            'handled_by' => $notif->assignedAdmin?->name ?? '-',
             'status' => match(strtolower($notif->status)) {
                 'disetujui', 'selesai' => 'Terbit SIK',
                 'revisi' => 'Perlu Revisi',
@@ -99,6 +98,8 @@ public function permintaanSIK(Request $request)
         return (object)[
             'id' => $notif->id,
             'user_name' => $notif->user->name ?? 'User', // 🔥 Tetap pakai name
+             'number' => $notif->number, // ✅ Tambahkan ini
+            'file' => $notif->file,
             'tanggal' => $notif->created_at->format('d-m-Y H:i'),
             'handled_by' => $notif->assignedAdmin?->name ?? '-',
             'status' => ucfirst($notif->status ?? 'Menunggu'),

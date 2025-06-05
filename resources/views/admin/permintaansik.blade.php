@@ -35,7 +35,8 @@
             <table class="min-w-full text-sm table-auto border border-gray-200 rounded">
                 <thead class="bg-gray-50 text-gray-700 text-[13px] uppercase tracking-wider">
                     <tr>
-                        <th class="px-4 py-3 text-left">User</th>
+                        <th class="px-4 py-3 text-left">Vendor</th>
+                          <th class="px-4 py-3 text-left">No. PO/NOTIF/SPK</th>
                         <th class="px-4 py-3 text-left">Tanggal Pengajuan</th>
                         <th class="px-4 py-3 text-left">Ditangani Oleh</th>
                         <th class="px-4 py-3 text-left">Status</th>
@@ -50,6 +51,15 @@
                             <td class="px-4 py-3">
                                 <div class="font-semibold text-gray-900">{{ $request->user_name }}</div>
                             </td>
+                         <td class="px-4 py-3 text-gray-700">
+    {{ $request->number }}
+    @if ($request->file)
+        <a href="{{ asset('storage/' . $request->file) }}" target="_blank" class="text-blue-600 hover:underline text-xs ml-1">
+            📄 File
+        </a>
+    @endif
+</td>
+
                             <td class="px-4 py-3 text-gray-700">{{ $request->tanggal }}</td>
 <td class="px-4 py-3 text-gray-700">{{ $request->handled_by ?? '-' }}</td>
 
