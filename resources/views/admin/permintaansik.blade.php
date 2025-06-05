@@ -51,8 +51,8 @@
                             <td class="px-4 py-3">
                                 <div class="font-semibold text-gray-900">{{ $request->user_name }}</div>
                             </td>
-<td class="px-4 py-3 text-gray-700 leading-tight">
-    <div class="break-words text-sm font-medium text-gray-900">
+<td class="px-4 py-3 text-gray-700 text-sm align-top max-w-[200px] break-all">
+    <div class="font-medium text-gray-900 leading-tight">
         {{ $request->number }}
     </div>
     @if ($request->file)
@@ -65,6 +65,7 @@
         </div>
     @endif
 </td>
+
 
                             <td class="px-4 py-3 text-gray-700">{{ $request->tanggal }}</td>
 <td class="px-4 py-3 text-gray-700">{{ $request->handled_by ?? '-' }}</td>
