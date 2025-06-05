@@ -51,12 +51,18 @@
                             <td class="px-4 py-3">
                                 <div class="font-semibold text-gray-900">{{ $request->user_name }}</div>
                             </td>
-                         <td class="px-4 py-3 text-gray-700">
-    {{ $request->number }}
+<td class="px-4 py-3 text-gray-700 leading-tight">
+    <div class="break-words text-sm font-medium text-gray-900">
+        {{ $request->number }}
+    </div>
     @if ($request->file)
-        <a href="{{ asset('storage/' . $request->file) }}" target="_blank" class="text-blue-600 hover:underline text-xs ml-1">
-            📄 File
-        </a>
+        <div class="mt-1 text-xs">
+            <a href="{{ asset('storage/' . $request->file) }}"
+               target="_blank"
+               class="text-blue-600 hover:underline inline-flex items-center gap-1">
+                📄 File
+            </a>
+        </div>
     @endif
 </td>
 
@@ -94,7 +100,6 @@
             <div class="mt-4">
     {{ $requests->links() }}
 </div>
-
         </div>
     </div>
 </x-admin-layout>

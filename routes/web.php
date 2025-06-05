@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPermintaanController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Admin\ApproveSikController;
 use App\Http\Controllers\User\IzinKerjaController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UploadController;
@@ -73,28 +74,33 @@ Route::get('/permintaansik/{id}/view-sik', [AdminPermintaanController::class, 'v
     Route::delete('/permintaansik/{id}/delete-file/{step}', [AdminPermintaanController::class, 'deleteFile'])->name('permintaansik.deleteFile');
 });
 
-// ✅ SUPER ADMIN (usertype = 'admin' + role = 'Super Admin') untuk manajemen user
+// ✅ SUPER ADMIN - Manajemen User Panel
 Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Super Admin'])
     ->prefix('admin/userpanel')
     ->name('admin.userpanel.')
     ->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\UserPanelController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\Admin\UserPanelController::class, 'create'])->name('create');
-        Route::post('/store', [\App\Http\Controllers\Admin\UserPanelController::class, 'store'])->name('store');
-        Route::get('/{user}/edit', [\App\Http\Controllers\Admin\UserPanelController::class, 'edit'])->name('edit');
-        Route::patch('/{user}', [\App\Http\Controllers\Admin\UserPanelController::class, 'update'])->name('update');
-        Route::delete('/{user}', [\App\Http\Controllers\Admin\UserPanelController::class, 'destroy'])->name('destroy');
+        Route::get('/', [UserPanelController::class, 'index'])->name('index');
+        Route::get('/create', [UserPanelController::class, 'create'])->name('create');
+        Route::post('/store', [UserPanelController::class, 'store'])->name('store');
+        Route::get('/{user}/edit', [UserPanelController::class, 'edit'])->name('edit');
+        Route::patch('/{user}', [UserPanelController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserPanelController::class, 'destroy'])->name('destroy');
     });
+
+// ✅ SUPER ADMIN - Role Permission & Approve SIK
 Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Super Admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // Role Permission
         Route::get('/role-permission', [RolePermissionController::class, 'index'])->name('role_permission.index');
         Route::get('/role-permission/{notification}/edit', [RolePermissionController::class, 'edit'])->name('role_permission.edit');
         Route::patch('/role-permission/{notification}', [RolePermissionController::class, 'update'])->name('role_permission.update');
-        Route::delete('/role-permission/{notification}', [RolePermissionController::class, 'destroy'])->name('role_permission.destroy'); // ✅ Tambahkan ini!
-    });
+        Route::delete('/role-permission/{notification}', [RolePermissionController::class, 'destroy'])->name('role_permission.destroy');
 
+        // ✅ Tambahan route untuk Approve SIK
+        Route::get('/approvesik', [ApproveSikController::class, 'index'])->name('approvesik.index');
+    });
 
 // ✅ Profile (semua user bisa akses)
 Route::middleware('auth')->group(function () {

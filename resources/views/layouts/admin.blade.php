@@ -64,6 +64,16 @@
         <i class="fas fa-clipboard-list w-5 text-center"></i>
         <span x-show="sidebarOpen" class="ml-3">Permintaan Izin Kerja</span>
     </a>
+@if (Auth::user() && Auth::user()->usertype === 'admin' && in_array(Auth::user()->role->name ?? '', ['Super Admin']))
+    <!-- Approve SIK (Super Admin Only) -->
+    <a href="{{ route('admin.approvesik.index') }}"
+       class="flex items-center px-3 py-2 rounded transition-all duration-200
+              hover:bg-red-100 {{ request()->routeIs('admin.approvesik.index') ? 'bg-red-200 font-semibold text-red-700' : 'text-gray-800' }}">
+        <i class="fas fa-file-signature w-5 text-center"></i>
+        <span x-show="sidebarOpen" class="ml-3">Approve SIK</span>
+    </a>
+@endif
+
 
     <!-- Checklist Inspeksi -->
     <div x-data="{ open: false }">
@@ -138,8 +148,6 @@
         </div>
     </div>
 @endif
-
-
 </nav>
 </aside>
 <!-- Content -->

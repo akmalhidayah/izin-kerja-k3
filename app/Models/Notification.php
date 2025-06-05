@@ -59,5 +59,10 @@ public function assignedAdmin()
     return $this->belongsTo(User::class, 'assigned_admin_id');
 }
 
-
+public function sikStep()
+{
+    return $this->hasOne(StepApproval::class, 'notification_id')
+                ->where('step', 'sik')
+                ->where('status', 'disetujui');
+}
 }
