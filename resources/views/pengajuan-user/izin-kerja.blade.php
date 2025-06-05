@@ -9,28 +9,21 @@
             <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
                 <div x-data="{ expanded: true, activeModal: null, selectedPermit: 'umum' }">
                     <div class="flex justify-between items-center mb-4">
-    <!-- Dropdown Pilih Notifikasi -->
 <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-3">
-    <label for="notification_id" class="text-sm font-semibold text-gray-800 whitespace-nowrap">Pilih Pengajuan</label>
-    
-    <div class="relative w-[280px]">
-        <select name="notification_id" id="notification_id" onchange="this.form.submit()"
-            class="appearance-none w-full bg-white border border-gray-300 text-sm rounded-lg py-2 px-4 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            @foreach ($notifications as $notif)
-                <option value="{{ $notif->id }}" {{ $notif->id == $selectedId ? 'selected' : '' }}>
-                    {{ $notif->number }} - {{ $notif->created_at->format('d/m/Y') }}
-                </option>
-            @endforeach
-        </select>
+    <label for="notification_id" class="text-sm font-semibold text-gray-800 whitespace-nowrap">
+        Pilih Pengajuan
+    </label>
 
-        <!-- Custom dropdown arrow -->
-        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-        </div>
-    </div>
+    <select name="notification_id" id="notification_id" onchange="this.form.submit()"
+        class="w-[280px] border border-gray-300 text-sm rounded px-3 py-2 shadow focus:outline-none focus:ring-1 focus:ring-blue-500">
+        @foreach ($notifications as $notif)
+            <option value="{{ $notif->id }}" {{ $notif->id == $selectedId ? 'selected' : '' }}>
+                {{ $notif->number }} - {{ $notif->created_at->format('d/m/Y') }}
+            </option>
+        @endforeach
+    </select>
 </form>
+
 
     <!-- Tombol Buat Notifikasi Baru -->
 <button @click="activeModal = 'modal-0'"
