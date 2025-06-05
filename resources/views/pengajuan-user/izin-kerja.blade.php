@@ -531,14 +531,22 @@
         @endif
     @endif
 @if ($index === 7)
-    @php
-        $prevStepCode = $steps[$index - 1]['code'] ?? null;
-        $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-            ->where('step', $prevStepCode)->value('status') === 'disetujui';
+  @php
+    $notifId = $notification?->id;
+    $prevStepCode = $steps[$index - 1]['code'] ?? null;
 
-        $ktpFiles = \App\Models\Upload::where('notification_id', $notification->id)
-            ->where('step', 'ktp')->get();
-    @endphp
+    $prevStepApproved = $notifId && $prevStepCode
+        ? (\App\Models\StepApproval::where('notification_id', $notifId)
+            ->where('step', $prevStepCode)
+            ->value('status') === 'disetujui')
+        : true;
+
+    $ktpFiles = $notifId
+        ? \App\Models\Upload::where('notification_id', $notifId)
+            ->where('step', 'ktp')
+            ->get()
+        : collect();
+@endphp
 
     @if (!$prevStepApproved)
         <span class="text-[10px] text-gray-400 italic mt-1">
