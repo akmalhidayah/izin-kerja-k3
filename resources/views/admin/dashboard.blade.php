@@ -44,7 +44,7 @@
 
     <!-- Table of Users and Their Progress -->
     <div class="bg-white p-6 rounded-xl shadow mb-8">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Status Izin Kerja Per User</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Izin Kerja Yang Sudah Terbit SIKr</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full table-auto text-sm">
                 <thead>
