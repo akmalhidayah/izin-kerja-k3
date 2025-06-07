@@ -1,9 +1,9 @@
 <x-admin-layout>
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Manajemen User</h1>
-        <a href="{{ route('admin.userpanel.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <!-- <a href="{{ route('admin.userpanel.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <i class="fas fa-plus mr-2"></i> Tambah User
-        </a>
+        </a> -->
     </div>
 
     @if (session('success'))
