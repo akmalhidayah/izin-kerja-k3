@@ -189,8 +189,13 @@ public function viewSik($id)
     $notification = \App\Models\Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
     $dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $notification->id)->first();
 
-    $pdf = \PDF::loadView('admin.pdfsik', compact('notification', 'dataKontraktor'));
-    return $pdf->stream('Surat-Izin-Kerja.pdf'); // langsung buka PDF di browser
+    // Tambahan: ambil tanda tangan SIK
+    $sikStep = StepApproval::where('notification_id', $notification->id)
+        ->where('step', 'sik')
+        ->first();
+
+    $pdf = \PDF::loadView('admin.pdfsik', compact('notification', 'dataKontraktor', 'sikStep'));
+    return $pdf->stream('Surat-Izin-Kerja.pdf');
 }
 
 }

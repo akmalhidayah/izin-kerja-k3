@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPermintaanController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserPanelController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\ApproveSikController;
 use App\Http\Controllers\User\IzinKerjaController;
@@ -100,6 +101,9 @@ Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Super Admin'])
 
         // ✅ Tambahan route untuk Approve SIK
         Route::get('/approvesik', [ApproveSikController::class, 'index'])->name('approvesik.index');
+Route::post('/approvesik/{id}/ttd', [ApproveSikController::class, 'storeSignature'])->name('approvesik.signature');
+
+
     });
 
 // ✅ Profile (semua user bisa akses)

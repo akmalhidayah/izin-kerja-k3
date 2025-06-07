@@ -62,12 +62,18 @@
         <p>Demikian Surat Izin Kerja ini diberikan untuk dipergunakan sebagaimana mestinya kepada Perusahaan di atas dan tidak diperkenankan untuk dipindahtangankan kepada pihak lain.</p>
     </div>
 
-    <div class="signature">
-        <p>Tonasa, {{ now()->translatedFormat('d F Y') }}</p>
+   <div class="signature">
+    <p>Tonasa, {{ now()->translatedFormat('d F Y') }}</p>
+    
+    @if($sikStep && $sikStep->signature_senior_manager)
+        <img src="{{ public_path($sikStep->signature_senior_manager) }}" alt="TTD Senior Manager" style="height: 60px; margin-top: 20px;">
+    @else
         <br><br><br>
-        <p><strong>M. ALIANTO M., ST</strong></p>
-        <p>SJP/Surat Izin Kerja</p>
-    </div>
+    @endif
+
+    <p><strong>M. ALIANTO M., ST</strong></p>
+    <p>SJP/Surat Izin Kerja</p>
+</div>
 
 </body>
 </html>

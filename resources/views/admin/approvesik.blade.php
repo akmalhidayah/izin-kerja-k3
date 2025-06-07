@@ -1,11 +1,35 @@
 <x-admin-layout>
     <div class="mb-6">
         <h1 class="text-3xl font-extrabold text-red-700 tracking-wide">Daftar Approve Surat Izin Kerja (SIK)</h1>
-        <p class="text-sm text-gray-500 mt-1">Halaman ini khusus Super Admin untuk mengecek dan menyetujui pengajuan SIK.</p>
+        <p class="text-sm text-gray-500 mt-1">Halaman ini khusus Senior Manager untuk mengecek dan menyetujui pengajuan SIK.</p>
     </div>
 
     <div class="bg-white p-6 rounded-xl shadow-md">
         <div class="overflow-x-auto">
+            <form method="GET" class="mb-4 flex gap-2 items-center">
+                <select name="bulan" class="border rounded px-2 py-1 text-sm">
+                    <option value="">Bulan</option>
+                    @for ($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}" {{ request('bulan', now()->month) == $i ? 'selected' : '' }}>
+                            {{ DateTime::createFromFormat('!m', $i)->format('F') }}
+                        </option>
+                    @endfor
+                </select>
+                <select name="tahun" class="border rounded px-2 py-1 text-sm">
+                    @for ($y = now()->year; $y >= 2023; $y--)
+                        <option value="{{ $y }}" {{ request('tahun', now()->year) == $y ? 'selected' : '' }}>
+                            {{ $y }}
+                        </option>
+                    @endfor
+                </select>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Filter</button>
+            </form>
+
+            @if(session('success'))
+                <div class="mb-4 p-3 bg-green-100 border border-green-300 rounded text-green-800">
+                    {{ session('success') }}
+                </div>
+            @endif
             <table class="min-w-full text-sm table-auto border border-gray-200 rounded">
                 <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
                     <tr>
@@ -24,21 +48,19 @@
                             <td class="px-4 py-3 text-gray-800">
                                 {{ $row->number }}
                                 @if ($row->file)
-                                    <a href="{{ asset('storage/' . $row->file) }}" target="_blank" class="text-blue-600 hover:underline text-xs ml-1">📄 File</a>
+                                    <a href="{{ asset('storage/' . $row->file) }}" target="_blank"
+                                       class="text-blue-600 hover:underline text-xs ml-1">📄 File</a>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-gray-800">
-                                {{ $row->assignedAdmin->name ?? 'Belum Ditugaskan' }}
-                            </td>
+                            <td class="px-4 py-3 text-gray-800">{{ $row->assignedAdmin->name ?? 'Belum Ditugaskan' }}</td>
                             <td class="px-4 py-3">
                                 <span class="{{ $row->sikStep ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">
-                                    {{ $row->sikStep ? 'Disetujui' : 'Belum' }}
+                                    {{ $row->sikStep ? 'Sudah Terbit' : 'Belum' }}
                                 </span>
                             </td>
                             <td class="px-4 py-3">
                                 @if ($row->sikStep)
-                                    <a href="{{ route('admin.permintaansik.viewSik', $row->id) }}"
-                                       target="_blank"
+                                    <a href="{{ route('admin.permintaansik.viewSik', $row->id) }}" target="_blank"
                                        class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded shadow">
                                         <i class="fas fa-eye mr-1"></i> Lihat SIK
                                     </a>
@@ -47,13 +69,20 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                <button type="button"
-                                        onclick="openSignPad('signature_{{ $row->id }}')"
-                                        class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded shadow">
-                                    <i class="fas fa-pen mr-1"></i> Tanda Tangani Dokumen
-                                </button>
-                                <input type="hidden" name="signature_{{ $row->id }}" id="signature_{{ $row->id }}" value="{{ $row->signature_super_admin ?? '' }}">
-                            </td>
+    @if ($row->sikStep && $row->sikStep->signature_senior_manager)
+        <span class="text-green-600 text-sm font-medium">Dokumen telah ditandatangani</span>
+    @else
+        <form id="form_signature_{{ $row->id }}" method="POST" action="{{ route('admin.approvesik.signature', $row->id) }}">
+            @csrf
+            <input type="hidden" name="signature" id="signature_{{ $row->id }}">
+            <button type="button" onclick="openSignPad('signature_{{ $row->id }}')"
+                class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded shadow">
+                <i class="fas fa-pen mr-1"></i> Tanda Tangani Dokumen
+            </button>
+        </form>
+    @endif
+</td>
+
                         </tr>
                     @endforeach
                 </tbody>
@@ -106,26 +135,30 @@
 
         function closeSignPad() {
             document.getElementById('signPadModal').classList.add('hidden');
-            signaturePadInstance.clear();
+            if (signaturePadInstance) signaturePadInstance.clear();
         }
 
         function clearSignature() {
-            signaturePadInstance.clear();
+            if (signaturePadInstance) signaturePadInstance.clear();
         }
 
         function saveSignature() {
-            if (signaturePadInstance.isEmpty()) {
+            if (!signaturePadInstance || signaturePadInstance.isEmpty()) {
                 alert('Tanda tangan belum diisi!');
                 return;
             }
             const dataURL = signaturePadInstance.toDataURL();
-            const targetInput = document.getElementById(document.getElementById('currentSignatureField').value);
-            if (targetInput) {
-                targetInput.value = dataURL;
-                alert('✅ Tanda tangan berhasil tersimpan!');
+            const inputId = document.getElementById('currentSignatureField').value;
+            const inputEl = document.getElementById(inputId);
+
+            if (inputEl) {
+                inputEl.value = dataURL;
+                const formId = 'form_signature_' + inputId.split('signature_')[1];
+                document.getElementById(formId).submit();
             } else {
                 alert('❌ Input target tidak ditemukan!');
             }
+
             closeSignPad();
         }
     </script>

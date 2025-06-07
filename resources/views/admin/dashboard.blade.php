@@ -10,36 +10,37 @@
         </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div class="bg-yellow-500 p-6 rounded-xl shadow-lg flex items-center gap-4">
-            <div class="bg-white text-yellow-600 p-4 rounded-full shadow">
-                <i class="fas fa-spinner text-2xl"></i>
-            </div>
-            <div>
-                <p class="text-sm text-white">Pengajuan Proses</p>
-                <p class="text-xl font-bold text-white">{{ $requests->where('status', 'Menunggu')->count() }} Pengajuan</p>
-            </div>
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="bg-yellow-500 p-6 rounded-xl shadow-lg flex items-center gap-4">
+        <div class="bg-white text-yellow-600 p-4 rounded-full shadow">
+            <i class="fas fa-spinner text-2xl"></i>
         </div>
-        <div class="bg-green-500 p-6 rounded-xl shadow-lg flex items-center gap-4">
-            <div class="bg-white text-green-600 p-4 rounded-full shadow">
-                <i class="fas fa-thumbs-up text-2xl"></i>
-            </div>
-            <div>
-                <p class="text-sm text-white">SIK Terbit</p>
-              <p class="text-xl font-bold text-white">{{ $requests->where('current_step', '>=', $totalSteps)->count() }} SIK</p>
-            </div>
-        </div>
-        <div class="bg-red-700 p-6 rounded-xl shadow-lg flex items-center gap-4">
-            <div class="bg-white text-red-600 p-4 rounded-full shadow">
-                <i class="fas fa-edit text-2xl"></i>
-            </div>
-            <div>
-                <p class="text-sm text-white">Pengajuan Perlu Revisi</p>
-                <p class="text-xl font-bold text-white">{{ $requests->where('status', 'Perlu Revisi')->count() }} Pengajuan</p>
-            </div>
+        <div>
+            <p class="text-sm text-white">Pengajuan Proses</p>
+            <p class="text-xl font-bold text-white">{{ $summaryRequests->where('status', 'Menunggu')->count() }} Pengajuan</p>
         </div>
     </div>
+    <div class="bg-green-500 p-6 rounded-xl shadow-lg flex items-center gap-4">
+        <div class="bg-white text-green-600 p-4 rounded-full shadow">
+            <i class="fas fa-thumbs-up text-2xl"></i>
+        </div>
+        <div>
+            <p class="text-sm text-white">SIK Terbit</p>
+            <p class="text-xl font-bold text-white">{{ $summaryRequests->where('current_step', '>=', $totalSteps)->count() }} SIK</p>
+        </div>
+    </div>
+    <div class="bg-red-700 p-6 rounded-xl shadow-lg flex items-center gap-4">
+        <div class="bg-white text-red-600 p-4 rounded-full shadow">
+            <i class="fas fa-edit text-2xl"></i>
+        </div>
+        <div>
+            <p class="text-sm text-white">Pengajuan Perlu Revisi</p>
+            <p class="text-xl font-bold text-white">{{ $summaryRequests->where('status', 'Perlu Revisi')->count() }} Pengajuan</p>
+        </div>
+    </div>
+</div>
+
 
     <!-- Table of Users and Their Progress -->
     <div class="bg-white p-6 rounded-xl shadow mb-8">

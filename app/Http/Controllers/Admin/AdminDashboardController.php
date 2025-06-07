@@ -9,24 +9,22 @@ class AdminDashboardController extends Controller
 {
 public function index()
 {
-    $notifications = \App\Models\Notification::with(['user', 'assignedAdmin'])
-        ->latest()
-        ->take(5)
-        ->get();
+    // 🔸 Untuk summary (tanpa filter bulan/tahun)
+    $allNotifications = \App\Models\Notification::with(['user', 'assignedAdmin'])->latest()->get();
 
     $stepTitles = [
         'op_spk', 'data_kontraktor', 'bpjs', 'jsa', 'working_permit', 'fakta_integritas',
         'sertifikasi_ak3', 'ktp', 'surat_kesehatan', 'struktur_organisasi',
         'post_test', 'sik', 'bukti_serah_terima'
     ];
-$totalSteps = count($stepTitles);
-    $requests = $notifications->map(function ($notif) use ($stepTitles) {
+    $totalSteps = count($stepTitles);
+
+    $summaryRequests = $allNotifications->map(function ($notif) use ($stepTitles) {
         $approvals = \App\Models\StepApproval::where('notification_id', $notif->id)->get();
         $approvedSteps = $approvals->where('status', 'disetujui')->count();
         $currentStep = min($approvedSteps + 1, count($stepTitles));
         $stepTitle = $stepTitles[$approvedSteps] ?? 'Belum Diketahui';
 
-        // SIK file (optional)
         $sikApproval = $approvals->firstWhere('step', 'sik');
         $sikFile = $sikApproval?->file_path;
 
@@ -44,11 +42,23 @@ $totalSteps = count($stepTitles);
             'current_step' => $currentStep,
             'current_step_title' => $stepTitle,
             'sik_file' => $sikFile,
+            'created_at' => $notif->created_at
         ];
     });
 
-    return view('admin.dashboard', compact('requests', 'totalSteps'));
+    // 🔸 Filter yang sudah ada SIK dan bulan ini untuk tabel saja
+    $filteredRequests = $summaryRequests->filter(function ($req) {
+        return $req->sik_file &&
+               $req->created_at->format('Y-m') === now()->format('Y-m');
+    });
+
+    return view('admin.dashboard', [
+        'requests' => $filteredRequests,
+        'summaryRequests' => $summaryRequests,
+        'totalSteps' => $totalSteps,
+    ]);
 }
+
 
 public function permintaanSIK(Request $request)
 {
