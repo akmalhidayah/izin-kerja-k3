@@ -97,15 +97,15 @@
                     </tr>
                     <tr>
                         <td class="border p-2 text-center">
-                            <input type="text" name="dibuat_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('dibuat_nama') }}">
+                            <input type="text" name="dibuat_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('dibuat_nama') }}" required>
                             <button type="button" onclick="openSignPad('dibuat_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                         </td>
                         <td class="border p-2 text-center">
-                            <input type="text" name="disetujui_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('disetujui_nama') }}">
+                            <input type="text" name="disetujui_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('disetujui_nama') }}" required>
                             <button type="button" onclick="openSignPad('disetujui_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                         </td>
                         <td class="border p-2 text-center">
-                            <input type="text" name="diverifikasi_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('diverifikasi_nama') }}">
+                            <input type="text" name="diverifikasi_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('diverifikasi_nama') }}" required>
                             <button type="button" onclick="openSignPad('diverifikasi_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                         </td>
                     </tr>

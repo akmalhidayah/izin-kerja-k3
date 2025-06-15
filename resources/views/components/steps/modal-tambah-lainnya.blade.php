@@ -85,7 +85,6 @@
     @include('components.permits.procedures', ['permit' => $permits['procedures'] ?? null])
 </div>
         </div>
-
         <!-- Tombol -->
         <div class="flex justify-end gap-2 mt-6">
             <button type="button" @click="activeModal = null" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">

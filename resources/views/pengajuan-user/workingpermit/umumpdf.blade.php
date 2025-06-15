@@ -100,7 +100,7 @@
 {{-- Izin Kerja Khusus --}}
 @php
     $check = '<span style="font-family: DejaVu Sans; font-weight: bold;">✓</span>';
-    $specials = $permit->izin_khusus ?? []; // Tidak perlu json_decode jika sudah array
+   $specials = $permit->izin_khusus ?? [];
 @endphp
 
 <div class="section-title">

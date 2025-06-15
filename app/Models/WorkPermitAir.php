@@ -62,4 +62,8 @@ class WorkPermitAir extends Model
         'persyaratan_perairan' => 'array',
         'verified_workers' => 'array',
     ];
+        public function detail()
+    {
+        return $this->belongsTo(WorkPermitDetail::class, 'work_permit_detail_id');
+    }
 }

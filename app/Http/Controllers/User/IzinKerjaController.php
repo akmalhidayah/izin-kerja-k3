@@ -11,6 +11,14 @@ use App\Models\Jsa;
 use App\Models\UmumWorkPermit;
 use App\Models\WorkPermitGasPanas;
 use App\Models\WorkPermitAir;
+use App\Models\WorkPermitKetinggian;
+// use App\Models\WorkPermitPengangkatan;
+// use App\Models\WorkPermitPenggalian;
+// use App\Models\WorkPermiRisikoPanas;
+// use App\Models\WorkPermitRuangTertutup;
+// use App\Models\WorkPermitLifesaving;
+// use App\Models\WorkPermitPerancah;
+// use App\Models\WorkPermitProsedurKhusus;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
 use App\Models\StepApproval;
@@ -80,7 +88,7 @@ class IzinKerjaController extends Controller
         'working_permit' => 'Input Working Permit',
         'fakta_integritas' => 'Upload Fakta Integritas',
         'sertifikasi_ak3' => 'Upload Sertifikasi AK3',
-        'ktp' => 'Upload KTP',
+        'ktp' => 'Upload KTP Pekerja',
         'surat_kesehatan' => 'Upload Surat Hasil MCU',
         'struktur_organisasi' => 'Upload Struktur Organisasi',
         'post_test' => 'Upload Dokumen Safety Induction',
@@ -90,11 +98,20 @@ class IzinKerjaController extends Controller
 
     $dataKontraktor = DataKontraktor::where('notification_id', $selectedId)->first();
     $jsa = Jsa::where('notification_id', $selectedId)->first();
-    $permits = [
-        'umum' => UmumWorkPermit::where('notification_id', $selectedId)->first(),
-        'gaspanas' => WorkPermitGasPanas::where('notification_id', $selectedId)->first(),
-        'air' => WorkPermitAir::where('notification_id', $selectedId)->first(),
-    ];
+   $permits = [
+    'umum' => UmumWorkPermit::where('notification_id', $selectedId)->first(),
+    'gaspanas' => WorkPermitGasPanas::where('notification_id', $selectedId)->first(),
+    'air' => WorkPermitAir::where('notification_id', $selectedId)->first(),
+    'ketinggian' => WorkPermitKetinggian::where('notification_id', $selectedId)->first(),
+    // 'pengangkatan' => WorkPermitPengangkatan::where('notification_id', $selectedId)->first(),
+    // 'penggalian' => WorkPermitPenggalian::where('notification_id', $selectedId)->first(),
+    // 'panas-risiko' => WorkPermitRisikoPanas::where('notification_id', $selectedId)->first(),
+    // 'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first(),
+    // 'lifesaving' => WorkPermitLifesaving::where('notification_id', $selectedId)->first(),
+    // 'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first(),
+    // 'procedures' => WorkPermitProsedures::where('notification_id', $selectedId)->first(),
+];
+
     $detail = WorkPermitDetail::where('notification_id', $selectedId)->first();
     $closure = $detail ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first() : null;
 

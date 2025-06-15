@@ -16,7 +16,7 @@ class UploadController extends Controller
             $request->validate([
                 'notification_id' => 'required|exists:notifications,id',
                 'step_name' => 'required|string|max:255',
-                'file' => 'required|file|mimes:pdf,jpg,png|max:2048',
+                'file' => 'required|file|mimes:pdf,jpg,png|max:5120',
             ]);
 
             $filePath = $request->file('file')->store('uploads', 'public');

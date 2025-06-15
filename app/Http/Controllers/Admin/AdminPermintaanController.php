@@ -16,6 +16,18 @@ class AdminPermintaanController extends Controller
     public function show($id)
     {
 $notification = Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
+// ✅ Fallback: jika kolom `file` kosong, ambil dari uploads step 'op_spk'
+if (!$notification->file) {
+    $fallbackUpload = Upload::where('notification_id', $id)
+        ->where('step', 'op_spk')
+        ->latest()
+        ->first();
+
+    if ($fallbackUpload && $fallbackUpload->file_path) {
+        $notification->file = $fallbackUpload->file_path;
+    }
+}
+
 // Cek admin yang login vs yang assigned
 $loggedInAdmin = auth()->user()->name;
 $assignedAdmin = $notification->assignedAdmin?->name;
@@ -62,7 +74,7 @@ $permits = [
             'working_permit' => 'Input Working Permit',
             'fakta_integritas' => 'Upload Fakta Integritas',
             'sertifikasi_ak3' => 'Upload Sertifikasi AK3',
-            'ktp' => 'Upload KTP Personil K3',
+            'ktp' => 'Upload KTP Pekerja',
             'surat_kesehatan' => 'Upload Surat Kesehatan',
             'struktur_organisasi' => 'Upload Struktur Organisasi',
             'post_test' => 'Upload Post Test',
@@ -77,13 +89,20 @@ $permits = [
             $upload = $uploads[$step] ?? null;
 
             if ($step === 'op_spk') {
-                $upload = (object)[
-                    'file_path' => $notification->file ?? null,
-                    'number' => $notification->number ?? null,
-                    'type' => $notification->type ?? null,
-                    'created_at' => $notification->created_at ?? null,
-                ];
-            }
+    // Ambil dari upload op_spk, fallback ke notification->file
+    $fileUpload = Upload::where('notification_id', $id)
+        ->where('step', 'op_spk')
+        ->latest()
+        ->first();
+
+    $upload = (object)[
+        'file_path' => $fileUpload?->file_path ?? $notification->file ?? null,
+        'number' => $notification->number ?? null,
+        'type' => $notification->type ?? null,
+        'created_at' => $notification->created_at ?? null,
+    ];
+}
+
 
             $statusClass = match ($status) {
                 'Disetujui' => 'bg-green-500 text-white',

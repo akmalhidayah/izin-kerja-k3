@@ -288,22 +288,31 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
         return back()->with('success', 'Form Working Permit Umum berhasil diperbarui.');
     }
 
-    public function preview($id)
-    {
-        $permit = UmumWorkPermit::where('notification_id', $id)->first();
-        $detail = WorkPermitDetail::where('notification_id', $id)->first();
+ public function preview($id)
+{
+    $permit = UmumWorkPermit::where('notification_id', $id)->first();
+    $detail = WorkPermitDetail::where('notification_id', $id)->first();
 
-        if (!$permit && !$detail) {
-            abort(404, 'Data izin kerja umum tidak ditemukan.');
-        }
-
-        $closure = $detail
-            ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-            : null;
-
-        return Pdf::loadView('pengajuan-user.workingpermit.umumpdf', compact('permit', 'detail', 'closure'))
-            ->setPaper('A4')
-            ->stream('izin-kerja-umum.pdf');
+    if (!$permit && !$detail) {
+        abort(404, 'Data izin kerja umum tidak ditemukan.');
     }
+
+    $closure = $detail
+        ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
+        : null;
+
+    // ✅ Tambahan: konversi izin_khusus menjadi array
+    $permit->izin_khusus = is_array($permit->izin_khusus)
+        ? $permit->izin_khusus
+        : json_decode($permit->izin_khusus ?? '[]', true);
+
+    if (!is_array($permit->izin_khusus)) {
+        $permit->izin_khusus = []; // fallback hardening
+    }
+
+    return Pdf::loadView('pengajuan-user.workingpermit.umumpdf', compact('permit', 'detail', 'closure'))
+        ->setPaper('A4')
+        ->stream('izin-kerja-umum.pdf');
+}
 
 }

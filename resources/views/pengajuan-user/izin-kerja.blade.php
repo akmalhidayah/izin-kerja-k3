@@ -353,6 +353,9 @@
             $permit = $notification
                 ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
                 : null;
+            $permitKetinggian = $notification
+                ? \App\Models\WorkPermitKetinggian::where('notification_id', $notification->id)->first()
+                : null;
         @endphp
 
         @if (!$prevStepApproved)
@@ -429,6 +432,22 @@
                             </a>
                             <button @click="activeModal = 'modal-{{ $index }}-air'"
                                 class="bg-teal-600 hover:bg-teal-700 text-white p-1 rounded-full" title="Edit Air">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                @endif
+                {{-- Permit Ketinggian --}}
+                @if ($permitKetinggian)
+                    <div class="flex flex-col items-center">
+                        <span class="text-[10px] text-gray-600 mb-1">Permit Ketinggian</span>
+                        <div class="flex gap-1">
+                            <a href="{{ route('working-permit.ketinggian.preview', ['id' => $permitKetinggian->notification_id]) }}"
+                                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Gas Panas">
+                                <i class="fas fa-fire text-xs"></i>
+                            </a>
+                            <button @click="activeModal = 'modal-{{ $index }}-ketinggian'"
+                                class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit Ketinggian">
                                 <i class="fas fa-edit text-xs"></i>
                             </button>
                         </div>
@@ -837,6 +856,14 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitAir' => $permit ?? null
+        ])
+                {{-- Modal Permit Ketinggian --}}
+        @include('components.steps.modal-working-permit-ketinggian', [
+            'label' => 'Edit Ketinggian',
+            'id' => 'modal-' . $index . '-ketinggian',
+            'notification' => $notification,
+            'stepName' => $step['code'],
+            'permitKetinggian' => $permitKetinggian ?? null
         ])
 
         {{-- Modal Permit Lainnya --}}

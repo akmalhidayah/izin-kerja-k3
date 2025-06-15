@@ -15,11 +15,11 @@ class WorkPermitKetinggian extends Model
         'notification_id',
 
         // Bagian 2
-        'daftar_pekerja',
-        'sketsa_pekerjaan',
+        'nama_pekerja',
+        'paraf_pekerja',
 
         // Bagian 3
-        'persyaratan_ketinggian',
+        'kerja_aman_ketinggian',
 
         // Bagian 4
         'rekomendasi_tambahan',
@@ -62,8 +62,12 @@ class WorkPermitKetinggian extends Model
     ];
 
     protected $casts = [
-        'daftar_pekerja' => 'array',
-        'persyaratan_ketinggian' => 'array',
+        'nama_pekerja' => 'array',
+        'kerja_aman_ketinggian' => 'array',
         'authorized_workers' => 'array',
     ];
+        public function detail()
+    {
+        return $this->belongsTo(WorkPermitDetail::class, 'work_permit_detail_id');
+    }
 }

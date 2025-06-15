@@ -18,7 +18,8 @@
         </div>
         <div>
             <p class="text-sm text-white">Pengajuan Proses</p>
-            <p class="text-xl font-bold text-white">{{ $summaryRequests->where('status', 'Menunggu')->count() }} Pengajuan</p>
+            <p class="text-xl font-bold text-white">{{ $summaryRequests->whereIn('status', ['Menunggu', 'Perlu Revisi'])->count() }}
+ Pengajuan</p>
         </div>
     </div>
     <div class="bg-green-500 p-6 rounded-xl shadow-lg flex items-center gap-4">
