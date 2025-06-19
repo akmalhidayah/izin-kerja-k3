@@ -14,10 +14,10 @@ use App\Models\WorkPermitAir;
 use App\Models\WorkPermitKetinggian;
 // use App\Models\WorkPermitPengangkatan;
 // use App\Models\WorkPermitPenggalian;
-// use App\Models\WorkPermiRisikoPanas;
-// use App\Models\WorkPermitRuangTertutup;
+use App\Models\WorkPermitRisikoPanas;
+use App\Models\WorkPermitRuangTertutup;
 // use App\Models\WorkPermitLifesaving;
-// use App\Models\WorkPermitPerancah;
+use App\Models\WorkPermitPerancah;
 // use App\Models\WorkPermitProsedurKhusus;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
@@ -105,10 +105,10 @@ class IzinKerjaController extends Controller
     'ketinggian' => WorkPermitKetinggian::where('notification_id', $selectedId)->first(),
     // 'pengangkatan' => WorkPermitPengangkatan::where('notification_id', $selectedId)->first(),
     // 'penggalian' => WorkPermitPenggalian::where('notification_id', $selectedId)->first(),
-    // 'panas-risiko' => WorkPermitRisikoPanas::where('notification_id', $selectedId)->first(),
-    // 'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first(),
+    'risiko-panas' => WorkPermitRisikoPanas::where('notification_id', $selectedId)->first(),
+    'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first(),
     // 'lifesaving' => WorkPermitLifesaving::where('notification_id', $selectedId)->first(),
-    // 'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first(),
+    'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first(),
     // 'procedures' => WorkPermitProsedures::where('notification_id', $selectedId)->first(),
 ];
 

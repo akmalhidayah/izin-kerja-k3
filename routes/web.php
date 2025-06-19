@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPermintaanController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserPanelController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\ApproveSikController;
 use App\Http\Controllers\User\IzinKerjaController;
@@ -17,6 +18,8 @@ use App\Http\Controllers\User\WorkingPermit\GasPanasPermitController;
 use App\Http\Controllers\User\WorkingPermit\AirPermitController;
 use App\Http\Controllers\User\WorkingPermit\KetinggianPermitController;
 use App\Http\Controllers\User\WorkingPermit\RuangTertutupPermitController;
+use App\Http\Controllers\User\WorkingPermit\PerancahPermitController;
+use App\Http\Controllers\User\WorkingPermit\PanasRisikoPermitController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -59,11 +62,17 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function (
     Route::post('/working-permit/air/store', [AirPermitController::class, 'store'])->name('working-permit.air.store');
     Route::get('/working-permit/air/preview/{id}', [AirPermitController::class, 'preview'])->name('working-permit.air.preview');
 
-     Route::post('/working-permit/ketinggian/store', [KetinggianPermitController::class, 'store'])->name('working-permit.ketinggian.store');
-     Route::get('/user/permit/ketinggian/preview/{id}', [KetinggianPermitController::class, 'preview'])->name('working-permit.ketinggian.preview');
+    Route::post('/working-permit/ketinggian/store', [KetinggianPermitController::class, 'store'])->name('working-permit.ketinggian.store');
+    Route::get('/user/permit/ketinggian/preview/{id}', [KetinggianPermitController::class, 'preview'])->name('working-permit.ketinggian.preview');
 
-    Route::post('/working-permit/ruang-tertutup/store', [RuangTertutupPermitController::class, 'store'])->name('working-permit.ruangtertutup.store');
-    Route::get('/working-permit/ruang-tertutup/preview/{id}', [RuangTertutupPermitController::class, 'preview'])->name('working-permit.ruangtertutup.preview');
+    Route::post('/user/working-permit/ruang-tertutup/store', [RuangTertutupPermitController::class, 'store'])->name('working-permit.ruangtertutup.store');
+    Route::get('/user/permit/ruang-tertutup/preview/{id}', [RuangTertutupPermitController::class, 'preview'])->name('working-permit.ruangtertutup.preview');
+
+    Route::post('/user/working-permit/perancah/store', [PerancahPermitController::class, 'store'])->name('working-permit.perancah.store');
+    Route::get('/user/permit/perancah/preview/{id}', [PerancahPermitController::class, 'preview'])->name('working-permit.perancah.preview');
+
+    Route::post('/user/working-permit/risiko-panas/store', [PanasRisikoPermitController::class, 'store'])->name('working-permit.risiko-panas.store');
+    Route::get('/user/permit/risiko-panas/preview/{id}', [PanasRisikoPermitController::class, 'preview'])->name('working-permit.risiko-panas.preview');
 
      Route::get('/izin-kerja/sik/pdf/{id}', [\App\Http\Controllers\Admin\AdminPermintaanController::class, 'viewSik'])
     ->name('izin-kerja.sik.pdf');

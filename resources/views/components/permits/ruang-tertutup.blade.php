@@ -1,17 +1,7 @@
 <form method="POST" action="{{ route('working-permit.ruangtertutup.store') }}" enctype="multipart/form-data">
+ @csrf
 
-@php
-    $jsonIsolasiListrik = old('isolasi_listrik', json_encode($permit->isolasi_listrik ?? [['peralatan' => '', 'nomor' => '', 'tempat' => '', 'locked' => '', 'tested' => '', 'signature' => '']]));
-    $jsonIsolasiNonListrik = old('isolasi_non_listrik', json_encode($permit->isolasi_non_listrik ?? [['peralatan' => '', 'jenis' => '', 'tempat' => '', 'locked' => '', 'tested' => '', 'signature' => '']]));
-    $pengukuranGas = old('pengukuran_gas', json_encode($permit->pengukuran_gas ?? [
-        'O2 (19.5% - 23.5%)' => [],
-        'LEL (< 5%)' => [],
-        'CO (≤ 25ppm)' => [],
-        'H2S (≤ 1ppm)' => [],
-        'O3 (≤ 0.2ppm)' => []
-    ]));
-@endphp
-
+<input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 <div class="text-center">
     <h2 class="text-2xl font-bold uppercase">IZIN KERJA</h2>
     <h3 class="text-xl font-semibold text-gray-700">Bekerja di Ruang Tertutup/Terbatas</h3>
@@ -22,129 +12,189 @@
         dan <em>major hazards & control</em> disosialisasikan oleh <em>Permit Receiver</em>.
     </p>
 </div>
-
 {{-- BAGIAN 1 --}}
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6 space-y-4">
     <h3 class="bg-black text-white px-2 py-1 font-bold">1. Detail Pekerjaan</h3>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
             <label class="font-semibold">Lokasi pekerjaan:</label>
-            <input type="text" name="lokasi_pekerjaan" class="input w-full text-sm" value="{{ old('lokasi_pekerjaan', $permit->lokasi_pekerjaan ?? '') }}">
+            <input type="text" name="lokasi_pekerjaan" class="input w-full text-sm"
+                value="{{ old('lokasi_pekerjaan', $detail?->location) }}">
         </div>
         <div>
             <label class="font-semibold">Tanggal:</label>
-            <input type="date" name="tanggal_pekerjaan" class="input w-full text-sm" value="{{ old('tanggal_pekerjaan', $permit->tanggal_pekerjaan ?? '') }}">
+            <input type="date" name="tanggal_pekerjaan" class="input w-full text-sm"
+                value="{{ old('tanggal_pekerjaan', $detail?->work_date ? \Carbon\Carbon::parse($detail->work_date)->format('Y-m-d') : '') }}">
         </div>
     </div>
 
     <div>
         <label class="font-semibold">Uraian pekerjaan:</label>
-        <textarea name="uraian_pekerjaan" class="textarea w-full text-sm" rows="3">{{ old('uraian_pekerjaan', $permit->uraian_pekerjaan ?? '') }}</textarea>
+        <textarea name="uraian_pekerjaan" class="textarea w-full text-sm" rows="3">{{ old('uraian_pekerjaan', $detail?->job_description) }}</textarea>
     </div>
 
     <div>
         <label class="font-semibold">Peralatan/perlengkapan yang akan digunakan pada pekerjaan:</label>
-        <textarea name="peralatan_digunakan" class="textarea w-full text-sm" rows="2">{{ old('peralatan_digunakan', $permit->peralatan_digunakan ?? '') }}</textarea>
+        <textarea name="peralatan_digunakan" class="textarea w-full text-sm" rows="2">{{ old('peralatan_digunakan', $detail?->equipment) }}</textarea>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
             <label class="font-semibold">Perkiraan jumlah pekerja yang akan terlibat:</label>
-            <input type="number" name="jumlah_pekerja" class="input w-full text-sm" value="{{ old('jumlah_pekerja', $permit->jumlah_pekerja ?? '') }}">
+            <input type="number" name="jumlah_pekerja" class="input w-full text-sm"
+                value="{{ old('jumlah_pekerja', $detail?->worker_count) }}">
         </div>
         <div>
             <label class="font-semibold">Nomor gawat darurat yang dapat dihubungi:</label>
-            <input type="text" name="nomor_darurat" class="input w-full text-sm" value="{{ old('nomor_darurat', $permit->nomor_darurat ?? '') }}">
+            <input type="text" name="nomor_darurat" class="input w-full text-sm"
+                value="{{ old('nomor_darurat', $detail?->emergency_contact) }}">
         </div>
     </div>
 </div>
+@php
+    $rawListrik = old('isolasi_listrik') ?? $permit->isolasi_listrik ?? [];
+    $listrik = is_string($rawListrik) ? json_decode($rawListrik, true) : $rawListrik;
 
-{{-- BAGIAN 2 --}}
-<div x-data="{
-    isolasiListrik: {{ $jsonIsolasiListrik }},
-    isolasiNonListrik: {{ $jsonIsolasiNonListrik }}
-}" class="border border-gray-800 rounded-md p-4 bg-white shadow space-y-6 mt-6">
+    if (!is_array($listrik) || empty($listrik)) {
+        $listrik = [['peralatan' => '', 'nomor' => '', 'tempat' => '', 'locked' => '', 'tested' => '', 'signature' => '']];
+    }
+
+    $rawNonListrik = old('isolasi_non_listrik') ?? $permit->isolasi_non_listrik ?? [];
+    $nonListrik = is_string($rawNonListrik) ? json_decode($rawNonListrik, true) : $rawNonListrik;
+
+    if (!is_array($nonListrik) || empty($nonListrik)) {
+        $nonListrik = [['peralatan' => '', 'jenis' => '', 'tempat' => '', 'locked' => '', 'tested' => '', 'signature' => '']];
+    }
+
+    $jsonListrik = json_encode($listrik);
+    $jsonNonListrik = json_encode($nonListrik);
+@endphp
+
+<div
+    x-data="{
+        listrik: JSON.parse(@js($jsonListrik)),
+        nonListrik: JSON.parse(@js($jsonNonListrik)),
+
+        addListrik() {
+            this.listrik.push({ peralatan: '', nomor: '', tempat: '', locked: '', tested: '', signature: '' });
+        },
+        addNonListrik() {
+            this.nonListrik.push({ peralatan: '', jenis: '', tempat: '', locked: '', tested: '', signature: '' });
+        }
+    }"
+    class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6"
+>
     <h3 class="font-bold bg-black text-white px-2 py-1">
         2. Titik Isolasi dan Penguncian jika Diperlukan 
         <span class="text-xs font-normal italic">(diisi oleh <strong>Isolation Officer</strong>)</span>
     </h3>
 
-    <!-- Listrik -->
-    <div>
-        <h4 class="font-semibold mt-2">Isolasi Energi Listrik</h4>
-        <table class="table-auto w-full text-sm border mt-2">
-            <thead class="bg-gray-100">
+    <!-- ISOLASI LISTRIK -->
+    <h4 class="font-semibold mt-2">Isolasi Energi Listrik</h4>
+    <table class="table-auto w-full text-sm border mt-2">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="border p-2">Peralatan / Mesin</th>
+                <th class="border p-2">Nomor</th>
+                <th class="border p-2">Tempat</th>
+                <th class="border p-2">Locked, Tagged</th>
+                <th class="border p-2">Tested</th>
+                <th class="border p-2">TTD</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="(row, i) in listrik" :key="i">
                 <tr>
-                    <th class="border p-2">Peralatan / Mesin</th>
-                    <th class="border p-2">Nomor</th>
-                    <th class="border p-2">Tempat</th>
-                    <th class="border p-2">Locked, Tagged</th>
-                    <th class="border p-2">Tested</th>
-                    <th class="border p-2">TTD</th>
+                    <td class="border p-1"><input type="text" :name="'isolasi_listrik['+i+'][peralatan]'" x-model="row.peralatan" class="input w-full"></td>
+                    <td class="border p-1"><input type="text" :name="'isolasi_listrik['+i+'][nomor]'" x-model="row.nomor" class="input w-full"></td>
+                    <td class="border p-1"><input type="text" :name="'isolasi_listrik['+i+'][tempat]'" x-model="row.tempat" class="input w-full"></td>
+                    <td class="border p-1"><input type="text" :name="'isolasi_listrik['+i+'][locked]'" x-model="row.locked" class="input w-full"></td>
+                    <td class="border p-1"><input type="text" :name="'isolasi_listrik['+i+'][tested]'" x-model="row.tested" class="input w-full"></td>
+                    <td class="border p-1 text-center">
+                        <button type="button" @click="openSignPad('isolasi_listrik_signature_' + i)" class="text-blue-600 underline text-xs">TTD</button>
+                        <input type="hidden" :id="'isolasi_listrik_signature_' + i" :name="'isolasi_listrik['+i+'][signature]'" :value="row.signature">
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                <template x-for="(item, index) in isolasiListrik" :key="index">
-                    <tr>
-                        <td class="border p-1"><input type="text" x-model="item.peralatan" :name="'isolasi_listrik['+index+'][peralatan]'" class="input w-full"></td>
-                        <td class="border p-1"><input type="text" x-model="item.nomor" :name="'isolasi_listrik['+index+'][nomor]'" class="input w-full"></td>
-                        <td class="border p-1"><input type="text" x-model="item.tempat" :name="'isolasi_listrik['+index+'][tempat]'" class="input w-full"></td>
-                        <td class="border p-1"><input type="text" x-model="item.locked" :name="'isolasi_listrik['+index+'][locked]'" class="input w-full"></td>
-                        <td class="border p-1"><input type="text" x-model="item.tested" :name="'isolasi_listrik['+index+'][tested]'" class="input w-full"></td>
-                        <td class="border p-1 text-center">
-                            <button @click="Alpine.store('signatureModal').openModal('Listrik - ' + (index + 1))" class="text-blue-600 underline text-xs">TTD</button>
-                            <input type="hidden" :name="'isolasi_listrik[' + index + '][signature]'" :value="item.signature ?? ''">
-                        </td>
-                    </tr>
-                </template>
-            </tbody>
-        </table>
-        <button @click="isolasiListrik.push({})" class="mt-2 text-xs bg-blue-500 text-white px-3 py-1 rounded">+ Tambah Baris</button>
-    </div>
+            </template>
+        </tbody>
+    </table>
+    <button type="button" @click="addListrik()" class="mt-2 text-xs bg-blue-500 text-white px-3 py-1 rounded">+ Tambah Baris</button>
 
-    <!-- Non Listrik -->
-    <div>
-        <h4 class="font-semibold mt-4">Isolasi Energi Non Listrik</h4>
-        <table class="table-auto w-full text-sm border mt-2">
-            <thead class="bg-gray-100">
+    <!-- ISOLASI NON LISTRIK -->
+    <h4 class="font-semibold mt-4">Isolasi Energi Non Listrik</h4>
+    <table class="table-auto w-full text-sm border mt-2">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="border p-2">Peralatan / Energi</th>
+                <th class="border p-2">Jenis</th>
+                <th class="border p-2">Tempat</th>
+                <th class="border p-2">Locked, Tagged</th>
+                <th class="border p-2">Tested</th>
+                <th class="border p-2">TTD</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="(row, i) in nonListrik" :key="i">
                 <tr>
-                    <th class="border p-2">Peralatan / Energi</th>
-                    <th class="border p-2">Jenis</th>
-                    <th class="border p-2">Tempat</th>
-                    <th class="border p-2">Locked, Tagged</th>
-                    <th class="border p-2">Tested</th>
-                    <th class="border p-2">TTD</th>
+                    <td class="border p-1"><input type="text" :name="'isolasi_non_listrik['+i+'][peralatan]'" x-model="row.peralatan" class="input w-full"></td>
+                    <td class="border p-1"><input type="text" :name="'isolasi_non_listrik['+i+'][jenis]'" x-model="row.jenis" class="input w-full"></td>
+                    <td class="border p-1"><input type="text" :name="'isolasi_non_listrik['+i+'][tempat]'" x-model="row.tempat" class="input w-full"></td>
+                    <td class="border p-1"><input type="text" :name="'isolasi_non_listrik['+i+'][locked]'" x-model="row.locked" class="input w-full"></td>
+                    <td class="border p-1"><input type="text" :name="'isolasi_non_listrik['+i+'][tested]'" x-model="row.tested" class="input w-full"></td>
+                    <td class="border p-1 text-center">
+                        <button type="button" @click="openSignPad('isolasi_non_listrik_signature_' + i)" class="text-blue-600 underline text-xs">TTD</button>
+                        <input type="hidden" :id="'isolasi_non_listrik_signature_' + i" :name="'isolasi_non_listrik['+i+'][signature]'" :value="row.signature">
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                <template x-for="(item, index) in isolasiNonListrik" :key="index">
-                    <tr>
-                        <td class="border p-1"><input type="text" x-model="item.peralatan" :name="'isolasi_non_listrik['+index+'][peralatan]'" class="input w-full"></td>
-                        <td class="border p-1"><input type="text" x-model="item.jenis" :name="'isolasi_non_listrik['+index+'][jenis]'" class="input w-full"></td>
-                        <td class="border p-1"><input type="text" x-model="item.tempat" :name="'isolasi_non_listrik['+index+'][tempat]'" class="input w-full"></td>
-                        <td class="border p-1"><input type="text" x-model="item.locked" :name="'isolasi_non_listrik['+index+'][locked]'" class="input w-full"></td>
-                        <td class="border p-1"><input type="text" x-model="item.tested" :name="'isolasi_non_listrik['+index+'][tested]'" class="input w-full"></td>
-                        <td class="border p-1 text-center">
-                            <button @click="Alpine.store('signatureModal').openModal('Non Listrik - ' + (index + 1))" class="text-blue-600 underline text-xs">TTD</button>
-                            <input type="hidden" :name="'isolasi_non_listrik[' + index + '][signature]'" :value="item.signature ?? ''">
-                        </td>
-                    </tr>
-                </template>
-            </tbody>
-        </table>
-        <button @click="isolasiNonListrik.push({})" class="mt-2 text-xs bg-blue-500 text-white px-3 py-1 rounded">+ Tambah Baris</button>
-    </div>
+            </template>
+        </tbody>
+    </table>
+    <button type="button" @click="addNonListrik()" class="mt-2 text-xs bg-blue-500 text-white px-3 py-1 rounded">+ Tambah Baris</button>
 </div>
 
-{{-- BAGIAN 3 --}}
-<div x-data="{
-    dataGas: {{ $pengukuranGas }},
-    addRow(gas) {
-        this.dataGas[gas].push({ tgl: '', hasil: '', jam: '', sign: '' });
+@php
+    // Ambil data dari old input / database
+    $rawPengukuranGas = old('pengukuran_gas') ?? $permit->pengukuran_gas ?? [];
+
+    // Decode jika string JSON, atau langsung array
+    if (is_string($rawPengukuranGas)) {
+        $parsedGas = json_decode($rawPengukuranGas, true) ?? [];
+    } else {
+        $parsedGas = $rawPengukuranGas;
     }
-}" class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto text-sm">
+
+    // Default structure untuk gas
+    $gasKeys = ['O2 (19.5% - 23.5%)', 'LEL (< 5%)', 'CO (≤ 25ppm)', 'H2S (≤ 1ppm)', 'O3 (≤ 0.2ppm)'];
+    foreach ($gasKeys as $key) {
+        if (!isset($parsedGas[$key]) || !is_array($parsedGas[$key])) {
+            $parsedGas[$key] = [];
+        }
+    }
+
+    // Encode ke string JSON aman
+    $jsonPengukuranGas = json_encode($parsedGas);
+@endphp
+
+<div
+    x-data="{
+        defaultKeys: ['O2 (19.5% - 23.5%)', 'LEL (< 5%)', 'CO (≤ 25ppm)', 'H2S (≤ 1ppm)', 'O3 (≤ 0.2ppm)'],
+        rawData: JSON.parse(@js($jsonPengukuranGas)),
+        dataGas: {},
+        init() {
+            this.defaultKeys.forEach(key => {
+                this.dataGas[key] = this.rawData[key] ?? [];
+            });
+        },
+        addRow(gas) {
+            this.dataGas[gas].push({ tgl: '', hasil: '', jam: '', sign: '' });
+        }
+    }"
+    x-init="init()"
+    class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto text-sm mt-6"
+>
     <h3 class="font-bold bg-black text-white px-2 py-1">
-        3. Pengukuran Berkala Kadar Gas di Udara 
+        3. Pengukuran Berkala Kadar Gas di Udara
         <span class="text-xs font-normal italic">(diisi oleh <strong>Permit Verificator</strong>)</span>
     </h3>
 
@@ -163,23 +213,31 @@
                 <tbody>
                     <template x-for="(row, index) in rows" :key="index">
                         <tr>
-                            <td class="border px-2 py-1"><input type="date" x-model="row.tgl" :name="'pengukuran_gas['+gas+']['+index+'][tgl]'" class="input w-full text-xs"></td>
-                            <td class="border px-2 py-1"><input type="text" x-model="row.hasil" :name="'pengukuran_gas['+gas+']['+index+'][hasil]'" class="input w-full text-xs"></td>
-                            <td class="border px-2 py-1"><input type="time" x-model="row.jam" :name="'pengukuran_gas['+gas+']['+index+'][jam]'" class="input w-full text-xs"></td>
-                            <td class="border px-2 py-1 text-center">
-                                <button @click="Alpine.store('signatureModal').openModal(gas + ' - ' + (index + 1))" class="text-blue-600 underline text-xs">TTD</button>
-                                <input type="hidden" :name="'pengukuran_gas['+gas+']['+index+'][sign]'" :value="row.sign">
+                            <td class="border px-1 py-1">
+                                <input type="date" x-model="row.tgl" :name="'pengukuran_gas['+gas+']['+index+'][tgl]'" class="input w-full text-xs">
+                            </td>
+                            <td class="border px-1 py-1">
+                                <input type="text" x-model="row.hasil" :name="'pengukuran_gas['+gas+']['+index+'][hasil]'" class="input w-full text-xs">
+                            </td>
+                            <td class="border px-1 py-1">
+                                <input type="time" x-model="row.jam" :name="'pengukuran_gas['+gas+']['+index+'][jam]'" class="input w-full text-xs">
+                            </td>
+                            <td class="border px-1 py-1 text-center">
+                                <button type="button" @click="Alpine.store('signatureModal').openModal(gas + ' - ' + (index + 1))" class="text-blue-600 underline text-xs">TTD</button>
+                                <input type="hidden" :name="'pengukuran_gas['+gas+']['+index+'][sign]'" :value="row.sign ?? ''">
                             </td>
                         </tr>
                     </template>
                 </tbody>
             </table>
-            <button @click="addRow(gas)" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">+ Tambah Baris</button>
+            <button type="button" @click="addRow(gas)" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">
+                + Tambah Baris
+            </button>
         </div>
     </template>
 </div>
 @php
-    $syaratRuangTertutup = [
+    $syaratList = [
         'Area kerja sudah diperiksa, semua bahaya dan risiko yang bisa diketahui sudah diidentifikasi.',
         'Lubang/bukaan akses keluar masuk sudah tersedia, semua bukaan/ventilasi yang mampu dibuka sudah dibuka atau dipasang <em>exhaust fan</em> untuk sirkulasi udara, lubang/bukaan untuk evakuasi saat terjadi kondisi gawat darurat sudah ditentukan.',
         'Bukaan/akses gawat darurat tidak terhalang oleh sesuatu yang bisa menghalangi keperluan evakuasi.',
@@ -198,11 +256,16 @@
         'Pekerjaan tertentu didalam silo pekerja menggunakan FBH yang terhubung dengan <em>anchorage point</em>.'
     ];
 
-    $syaratPrefill = old('syarat_ruang_tertutup', $permit->syarat_ruang_tertutup ?? []);
+    $syaratSelected = old('syarat_ruang_tertutup') ?? $permit->syarat_ruang_tertutup ?? [];
+    $syaratSelected = is_string($syaratSelected) ? json_decode($syaratSelected, true) : $syaratSelected;
 @endphp
 
-{{-- BAGIAN 4 --}}
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto text-sm mt-6">
+<div x-data="{
+    list: @js($syaratList),
+    selected: @js($syaratSelected),
+    getVal(i) { return this.selected[i] ?? '' }
+}" class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto text-sm mt-6">
+
     <h3 class="font-bold bg-black text-white px-2 py-1">4. Persyaratan Kerja Aman</h3>
 
     <table class="table-auto w-full text-sm border mt-3">
@@ -214,19 +277,23 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($syaratRuangTertutup as $index => $syarat)
+            <template x-for="(text, index) in list" :key="index">
                 <tr>
-                    <td class="border px-2 py-1">{!! $syarat !!}</td>
+                    <td class="border px-2 py-1" x-html="text"></td>
                     <td class="border px-2 py-1 text-center">
-                        <input type="radio" name="syarat_ruang_tertutup[{{ $index }}]" value="ya"
-                            {{ old("syarat_ruang_tertutup.$index", $syaratPrefill[$index] ?? '') === 'ya' ? 'checked' : '' }}>
+                        <input type="radio"
+                            :name="'syarat_ruang_tertutup['+index+']'"
+                            value="ya"
+                            :checked="getVal(index) === 'ya'">
                     </td>
                     <td class="border px-2 py-1 text-center">
-                        <input type="radio" name="syarat_ruang_tertutup[{{ $index }}]" value="na"
-                            {{ old("syarat_ruang_tertutup.$index", $syaratPrefill[$index] ?? '') === 'na' ? 'checked' : '' }}>
+                        <input type="radio"
+                            :name="'syarat_ruang_tertutup['+index+']'"
+                            value="na"
+                            :checked="getVal(index) === 'na'">
                     </td>
                 </tr>
-            @endforeach
+            </template>
         </tbody>
     </table>
 </div>
@@ -273,7 +340,7 @@
         <thead class="bg-gray-100">
             <tr>
                 <th class="border px-2 py-1 text-center w-1/4">Nama:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanda tangan:</th>
+                <th class="border px-2 py-1 text-center w-1/4">Tanda Tangan:</th>
                 <th class="border px-2 py-1 text-center w-1/4">Tanggal:</th>
                 <th class="border px-2 py-1 text-center w-1/4">Jam:</th>
             </tr>
@@ -285,8 +352,7 @@
                         value="{{ old('permit_requestor_name', $permit->permit_requestor_name ?? '') }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
-                    <button 
-                        type="button"
+                    <button type="button"
                         @click="Alpine.store('signatureModal').openModal('Permit Requestor')"
                         class="text-blue-600 underline text-xs">
                         Tanda Tangan
@@ -306,6 +372,7 @@
         </tbody>
     </table>
 </div>
+
 {{-- BAGIAN 7: Verifikasi --}}
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
     <h3 class="font-bold bg-black text-white px-2 py-1">7. Verifikasi Izin Kerja</h3>
@@ -335,8 +402,7 @@
                         value="{{ old('confined_verificator_name', $permit->confined_verificator_name ?? '') }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
-                    <button 
-                        type="button"
+                    <button type="button"
                         @click="Alpine.store('signatureModal').openModal('Confined Space Verificator')"
                         class="text-blue-600 underline text-xs">
                         Tanda Tangan
@@ -356,8 +422,6 @@
         </tbody>
     </table>
 </div>
-
-{{-- BAGIAN 8: Penerbitan --}}
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
     <h3 class="font-bold bg-black text-white px-2 py-1">8. Penerbitan Izin Kerja</h3>
 
@@ -384,8 +448,7 @@
                         value="{{ old('permit_issuer_name', $permit->permit_issuer_name ?? '') }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
-                    <button 
-                        type="button"
+                    <button type="button"
                         @click="Alpine.store('signatureModal').openModal('Permit Issuer')"
                         class="text-blue-600 underline text-xs">
                         Tanda Tangan
@@ -405,7 +468,6 @@
         </tbody>
     </table>
 
-    {{-- Baris waktu izin berlaku --}}
     <div class="mt-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <div class="flex items-center gap-2">
@@ -480,7 +542,6 @@
         </tbody>
     </table>
 </div>
-
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
     <h3 class="font-bold bg-black text-white px-2 py-1">10. Pelaksanaan Pekerjaan</h3>
 
@@ -505,7 +566,8 @@
         <tbody>
             <tr>
                 <td class="border px-2 py-2 text-center">
-                    <input type="text" name="permit_receiver_name" class="input w-full text-center">
+                    <input type="text" name="permit_receiver_name" class="input w-full text-center"
+                        value="{{ old('permit_receiver_name', $permit->permit_receiver_name ?? '') }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
                     <button 
@@ -514,39 +576,41 @@
                         class="text-blue-600 underline text-xs">
                         Tanda Tangan
                     </button>
-                    <input type="hidden" name="signature_permit_receiver">
+                    <input type="hidden" name="signature_permit_receiver"
+                        value="{{ old('signature_permit_receiver', $permit->signature_permit_receiver ?? '') }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
-                    <input type="date" name="permit_receiver_date" class="input w-full text-center">
+                    <input type="date" name="permit_receiver_date" class="input w-full text-center"
+                        value="{{ old('permit_receiver_date', $permit->permit_receiver_date ?? '') }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
-                    <input type="time" name="permit_receiver_time" class="input w-full text-center">
+                    <input type="time" name="permit_receiver_time" class="input w-full text-center"
+                        value="{{ old('permit_receiver_time', $permit->permit_receiver_time ?? '') }}">
                 </td>
             </tr>
         </tbody>
     </table>
 </div>
-<div x-data="{
-    pekerjaList: [{
-        nama: '',
-        perusahaan: '',
-        tanggal: '',
-        masuk: '',
-        keluar: '',
-        sign: ''
-    }],
-    addRow() {
-        this.pekerjaList.push({
-            nama: '',
-            perusahaan: '',
-            tanggal: '',
-            masuk: '',
-            keluar: '',
-            sign: ''
-        });
+@php
+    $defaultPekerja = [['nama'=>'', 'perusahaan'=>'', 'tanggal'=>'', 'masuk'=>'', 'keluar'=>'', 'sign'=>'']];
+    $rawPekerja = old('pekerja_masuk_keluar') ?? $permit->pekerja_masuk_keluar ?? $defaultPekerja;
+    $pekerjaList = is_string($rawPekerja) ? json_decode($rawPekerja, true) : $rawPekerja;
+    if (!is_array($pekerjaList) || count($pekerjaList) === 0) {
+        $pekerjaList = $defaultPekerja;
     }
-}" class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6 text-sm">
+@endphp
 
+<div
+    x-data="{
+        pekerjaList: {{ Js::from($pekerjaList) }},
+        addRow() {
+            this.pekerjaList.push({
+                nama: '', perusahaan: '', tanggal: '', masuk: '', keluar: '', sign: ''
+            });
+        }
+    }"
+    class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6 text-sm"
+>
     <h3 class="font-bold bg-black text-white px-2 py-1">
         11. Daftar Pekerja Masuk/Keluar Ruang Tertutup/Terbatas
         <span class="italic text-xs font-normal">(tanda tangan di akhir shift, bisa dengan lampiran terpisah)</span>
@@ -567,25 +631,25 @@
             <template x-for="(pekerja, index) in pekerjaList" :key="index">
                 <tr>
                     <td class="border px-1 py-1">
-                        <input type="text" x-model="pekerja.nama" class="input w-full text-xs">
+                        <input type="text" :name="'pekerja_masuk_keluar['+index+'][nama]'" x-model="pekerja.nama" class="input w-full text-xs">
                     </td>
                     <td class="border px-1 py-1">
-                        <input type="text" x-model="pekerja.perusahaan" class="input w-full text-xs">
+                        <input type="text" :name="'pekerja_masuk_keluar['+index+'][perusahaan]'" x-model="pekerja.perusahaan" class="input w-full text-xs">
                     </td>
                     <td class="border px-1 py-1">
-                        <input type="date" x-model="pekerja.tanggal" class="input w-full text-xs">
+                        <input type="date" :name="'pekerja_masuk_keluar['+index+'][tanggal]'" x-model="pekerja.tanggal" class="input w-full text-xs">
                     </td>
                     <td class="border px-1 py-1">
-                        <input type="time" x-model="pekerja.masuk" class="input w-full text-xs">
+                        <input type="time" :name="'pekerja_masuk_keluar['+index+'][masuk]'" x-model="pekerja.masuk" class="input w-full text-xs">
                     </td>
                     <td class="border px-1 py-1">
-                        <input type="time" x-model="pekerja.keluar" class="input w-full text-xs">
+                        <input type="time" :name="'pekerja_masuk_keluar['+index+'][keluar]'" x-model="pekerja.keluar" class="input w-full text-xs">
                     </td>
                     <td class="border px-1 py-1 text-center">
                         <button type="button"
                             @click="Alpine.store('signatureModal').openModal('Pekerja - ' + (index + 1))"
                             class="text-blue-600 underline text-xs">TTD</button>
-                        <input type="hidden" :name="'signature_pekerja[' + index + ']'">
+                        <input type="hidden" :name="'pekerja_masuk_keluar['+index+'][sign]'" x-model="pekerja.sign">
                     </td>
                 </tr>
             </template>
@@ -593,13 +657,14 @@
     </table>
 
     <div class="mt-3 text-right">
-        <button @click="addRow()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1 rounded shadow">
+        <button @click="addRow()" type="button" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1 rounded shadow">
             + Tambah Baris Pekerja
         </button>
     </div>
 </div>
-<div x-data="{
-    checklistLiveTesting: [
+
+@php
+    $defaultChecklist = [
         'Peralatan/permesinan yang akan dinyalakan kembali (re-energize) sudah diidentifikasi.',
         'Semua peralatan kerja sudah dipindahkan/diamankan dari peralatan / permesinan yang akan dinyalakan kembali.',
         'Semua orang yang dekat dengan area kerja sudah diinformasikan akan adanya peralatan/permesinan yang akan dinyalakan.',
@@ -609,17 +674,27 @@
         'Standby person telah ditunjuk untuk memastikan bahwa tidak ada orang berada di sekitar area dimana terdapat peralatan mesin tanpa machine guarding.',
         'Peralatan/permesinan sudah dinyalakan kembali.',
         'Setelah live testing, isolasi & penguncian harus kembali dipasang apabila pekerjaan belum selesai.'
-    ]
-}" class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6 text-sm">
+    ];
 
+    $rawChecklist = old('live_testing_checklist') ?? $permit->live_testing_checklist ?? [];
+    $selectedChecklist = is_string($rawChecklist) ? json_decode($rawChecklist, true) : $rawChecklist;
+    if (!is_array($selectedChecklist)) $selectedChecklist = [];
+@endphp
+
+<div 
+    x-data="{
+        checklist: {{ Js::from($defaultChecklist) }},
+        selected: {{ Js::from($selectedChecklist) }}
+    }"
+    class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6 text-sm"
+>
     <h3 class="font-bold bg-black text-white px-2 py-1">
         12. <em>Live Testing</em> 
         <span class="italic text-xs font-normal">(Jika ada dan diisi oleh <strong>Isolation Officer</strong>)</span>
     </h3>
 
     <p class="text-xs italic mt-1 mb-2 text-gray-600">
-        Jika peralatan/permesinan harus dinyalakan kembali (live testing), hal-hal berikut harus dilengkapi untuk memastikan pekerjaan dan kondisi area aman. 
-        Petugas Isolasi HIL harus memberi paraf untuk setiap tahap apabila sudah dilengkapi.
+        Jika peralatan/permesinan harus dinyalakan kembali (live testing), hal-hal berikut harus dilengkapi...
     </p>
 
     <table class="table-auto w-full border text-sm">
@@ -630,54 +705,78 @@
             </tr>
         </thead>
         <tbody>
-            <template x-for="(item, index) in checklistLiveTesting" :key="index">
+            <template x-for="(item, index) in checklist" :key="index">
                 <tr>
                     <td class="border px-2 py-1" x-text="item"></td>
                     <td class="border px-2 py-1 text-center">
-                        <input type="checkbox" :name="'live_testing[' + index + ']'" value="ya">
+                        <input 
+                            type="checkbox"
+                            :name="'live_testing_checklist[' + index + ']'"
+                            value="ya"
+                            x-bind:checked="selected[index] === 'ya'"
+                            @change="selected[index] = $event.target.checked ? 'ya' : null"
+                        >
                     </td>
                 </tr>
             </template>
         </tbody>
     </table>
+{{-- Nama, TTD, Tanggal, Jam --}}
+<table class="table-auto w-full text-sm border mt-4">
+    <thead class="bg-gray-100">
+        <tr>
+            <th class="border px-2 py-1 text-center w-1/4">Nama:</th>
+            <th class="border px-2 py-1 text-center w-1/4">Tanda Tangan:</th>
+            <th class="border px-2 py-1 text-center w-1/4">Tanggal:</th>
+            <th class="border px-2 py-1 text-center w-1/4">Jam:</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="border px-2 py-2 text-center">
+                <input type="text" name="live_testing_name" class="input w-full text-center"
+                    value="{{ old('live_testing_name', $permit->live_testing_name ?? '') }}">
+            </td>
+            <td class="border px-2 py-2 text-center">
+                <button type="button"
+                    @click="Alpine.store('signatureModal').openModal('Live Testing Officer')"
+                    class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                <input type="hidden" name="live_testing_signature"
+                    value="{{ old('live_testing_signature', $permit->live_testing_signature ?? '') }}">
+            </td>
+            <td class="border px-2 py-2 text-center">
+                <input type="date" name="live_testing_date" class="input w-full text-center"
+                    value="{{ old('live_testing_date', $permit->live_testing_date ?? '') }}">
+            </td>
+            <td class="border px-2 py-2 text-center">
+                <input type="time" name="live_testing_time" class="input w-full text-center"
+                    value="{{ old('live_testing_time', $permit->live_testing_time ?? '') }}">
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-    <table class="table-auto w-full text-sm border mt-4">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-2 py-1 text-center w-1/4">Nama:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanda Tangan:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanggal:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Jam:</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="border px-2 py-2 text-center">
-                    <input type="text" name="live_testing_name" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <button type="button"
-                        @click="Alpine.store('signatureModal').openModal('Live Testing Officer')"
-                        class="text-blue-600 underline text-xs">
-                        Tanda Tangan
-                    </button>
-                    <input type="hidden" name="live_testing_signature">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="date" name="live_testing_date" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="time" name="live_testing_time" class="input w-full text-center">
-                </td>
-            </tr>
-        </tbody>
-    </table>
 </div>
+
+@php
+    $closeDate = old('close_date') ?? ($closure?->closed_date ? \Carbon\Carbon::parse($closure->closed_date)->format('Y-m-d') : '');
+    $closeTime = old('close_time') ?? $closure?->closed_time;
+    $closeRequestorName = old('close_requestor_name') ?? $closure?->requestor_name;
+    $closeIssuerName = old('close_issuer_name') ?? $closure?->issuer_name;
+    $closeRequestorSign = old('signature_close_requestor') ?? ($closure?->requestor_sign ?? '');
+    $closeIssuerSign = old('signature_close_issuer') ?? ($closure?->issuer_sign ?? '');
+    $jumlahRfid = old('jumlah_rfid') ?? $closure?->jumlah_rfid;
+
+    $closeLock = old('close_lock_tag') ?? ($closure?->lock_tag_removed ? 'ya' : 'na');
+    $closeTools = old('close_tools') ?? ($closure?->equipment_cleaned ? 'ya' : 'na');
+    $closeGuarding = old('close_guarding') ?? ($closure?->guarding_restored ? 'ya' : 'na');
+@endphp
 
 <!-- Bagian 13: Penutupan Izin Kerja -->
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
     <h3 class="font-bold bg-black text-white px-2 py-1">13. Penutupan Izin Kerja</h3>
 
+    <!-- Checklist -->
     <table class="table-auto w-full text-sm border mt-3">
         <thead class="bg-gray-100">
             <tr>
@@ -687,34 +786,24 @@
             </tr>
         </thead>
         <tbody>
+            @foreach([
+                'close_lock_tag' => ['label' => 'Lock & Tag', 'desc' => 'Semua <em>lock & tag</em> sudah dilepas', 'val' => $closeLock],
+                'close_tools' => ['label' => 'Sampah & Peralatan Kerja', 'desc' => 'Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan', 'val' => $closeTools],
+                'close_guarding' => ['label' => 'Machine Guarding', 'desc' => 'Semua <em>machine guarding</em> sudah dipasang kembali', 'val' => $closeGuarding],
+            ] as $name => $item)
             <tr>
-                <td class="border px-2 py-1 font-semibold">Lock & Tag</td>
-                <td class="border px-2 py-1">Semua <em>lock & tag</em> sudah dilepas</td>
+                <td class="border px-2 py-1 font-semibold">{{ $item['label'] }}</td>
+                <td class="border px-2 py-1">{!! $item['desc'] !!}</td>
                 <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_lock_tag" value="ya"> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_lock_tag" value="na"> N/A</label>
+                    <label><input type="radio" name="{{ $name }}" value="ya" {{ $item['val'] === 'ya' ? 'checked' : '' }}> Ya</label>
+                    <label class="ml-2"><input type="radio" name="{{ $name }}" value="na" {{ $item['val'] === 'na' ? 'checked' : '' }}> N/A</label>
                 </td>
             </tr>
-            <tr>
-                <td class="border px-2 py-1 font-semibold">Sampah & Peralatan Kerja</td>
-                <td class="border px-2 py-1">Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan</td>
-                <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_tools" value="ya"> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_tools" value="na"> N/A</label>
-                </td>
-            </tr>
-            <tr>
-                <td class="border px-2 py-1 font-semibold">Machine Guarding</td>
-                <td class="border px-2 py-1">Semua <em>machine guarding</em> sudah dipasang kembali</td>
-                <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_guarding" value="ya"> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_guarding" value="na"> N/A</label>
-                </td>
-            </tr>
+            @endforeach
         </tbody>
     </table>
 
-    <!-- Tanda tangan -->
+    <!-- Tanggal, Jam, TTD -->
     <table class="table-auto w-full text-sm border mt-4">
         <thead class="bg-gray-100">
             <tr>
@@ -726,26 +815,53 @@
         </thead>
         <tbody>
             <tr>
-                <td class="border text-center px-2 py-2"><input type="date" name="close_date" class="input w-full text-center"></td>
-                <td class="border text-center px-2 py-2"><input type="time" name="close_time" class="input w-full text-center"></td>
                 <td class="border text-center px-2 py-2">
-                    <button 
-                        type="button"
-                        @click="Alpine.store('signatureModal').openModal('Penutup - Requestor')"
-                        class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_close_requestor">
+                    <input type="date" name="close_date" class="input w-full text-center" value="{{ $closeDate }}">
                 </td>
                 <td class="border text-center px-2 py-2">
-                    <button 
-                        type="button"
-                        @click="Alpine.store('signatureModal').openModal('Penutup - Issuer')"
-                        class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_close_issuer">
+                    <input type="time" name="close_time" class="input w-full text-center" value="{{ $closeTime }}">
+                </td>
+
+                <!-- Requestor -->
+                <td class="border text-center px-2 py-2">
+                    <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
+                    @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
+                        <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
+                    @else
+                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                    @endif
+                    <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}">
+                </td>
+
+                <!-- Issuer -->
+                <td class="border text-center px-2 py-2">
+                    <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
+                    @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
+                        <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
+                    @else
+                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                    @endif
+                    <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}">
                 </td>
             </tr>
         </tbody>
     </table>
+
+    <!-- Jumlah RFID -->
+    <table class="table-auto w-full text-sm border mt-4">
+        <tr>
+            <td class="border px-2 py-1 font-semibold w-64">Jumlah RFID yang diberikan ke kontraktor</td>
+            <td class="border px-2 py-1 text-left" colspan="3">
+                <div class="flex items-center gap-2">
+                    <input type="number" name="jumlah_rfid" min="0" class="input w-28 text-center"
+                        value="{{ $jumlahRfid }}">
+                    <span class="text-sm">buah</span>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
+
 <!-- Tombol Simpan -->
 <div class="flex justify-center mt-8">
     <button type="submit" name="action" value="save"
@@ -754,4 +870,3 @@
     </button>
 </div>
 </form>
-

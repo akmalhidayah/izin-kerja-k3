@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->text('catatan')->nullable(); // Alasan revisi jika ada
             $table->string('file_path')->nullable(); // Lokasi file yang diupload (misalnya SIK)
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->longText('signature_senior_manager')->nullable()->after('approved_by');
+            $table->longText('signature_senior_manager')->nullable();
             $table->timestamps();
         });
     }

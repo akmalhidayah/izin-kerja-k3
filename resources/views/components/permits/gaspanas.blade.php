@@ -4,8 +4,6 @@
     @csrf
 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 
-
-
     <!-- Bagian 1: Detail Pekerjaan -->
     <div class="text-center mb-4">
         <h2 class="text-2xl font-bold uppercase">IZIN KERJA</h2>
@@ -477,63 +475,57 @@ $receiverTime = $receiverTimeRaw ? Carbon::parse($receiverTimeRaw)->format('H:i'
         </tbody>
     </table>
 </div>
-
-
-<!-- Bagian 10: Penutupan Izin Kerja -->
 @php
-    $closeDate = old('close_date', $closure?->closed_date ?? '');
-    $closeTime = old('close_time', $closure?->closed_time ?? '');
-    $closeRequestorSign = old('signature_close_requestor', $closure?->requestor_sign ?? '');
-    $closeIssuerSign = old('signature_close_issuer', $closure?->issuer_sign ?? '');
-    $closeLock = old('close_lock_tag', $closure?->lock_tag_removed ? 'ya' : '');
-    $closeTools = old('close_tools', $closure?->equipment_cleaned ? 'ya' : '');
-    $closeGuarding = old('close_guarding', $closure?->guarding_restored ? 'ya' : '');
+    $closeDate = old('close_date') ?? ($closure?->closed_date ? \Carbon\Carbon::parse($closure->closed_date)->format('Y-m-d') : '');
+    $closeTime = old('close_time') ?? $closure?->closed_time;
+    $closeRequestorName = old('close_requestor_name') ?? $closure?->requestor_name;
+    $closeIssuerName = old('close_issuer_name') ?? $closure?->issuer_name;
+    $closeRequestorSign = old('signature_close_requestor') ?? ($closure?->requestor_sign ?? '');
+    $closeIssuerSign = old('signature_close_issuer') ?? ($closure?->issuer_sign ?? '');
+    $jumlahRfid = old('jumlah_rfid') ?? $closure?->jumlah_rfid;
+
+    $closeLock = old('close_lock_tag') ?? ($closure?->lock_tag_removed ? 'ya' : 'na');
+    $closeTools = old('close_tools') ?? ($closure?->equipment_cleaned ? 'ya' : 'na');
+    $closeGuarding = old('close_guarding') ?? ($closure?->guarding_restored ? 'ya' : 'na');
 @endphp
 
+<!-- Bagian 10: Penutupan Izin Kerja -->
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
     <h3 class="font-bold bg-black text-white px-2 py-1">10. Penutupan Izin Kerja</h3>
 
+    <!-- Checklist -->
     <table class="table-auto w-full text-sm border mt-3">
         <thead class="bg-gray-100">
             <tr>
-                <th class="border px-2 py-1">Item</th>
-                <th class="border px-2 py-1">Keterangan</th>
+                <th class="border px-2 py-1 text-left">Item</th>
+                <th class="border px-2 py-1 text-left">Keterangan</th>
                 <th class="border px-2 py-1 text-center w-20">(O)</th>
             </tr>
         </thead>
         <tbody>
+            @foreach([
+                'close_lock_tag' => ['label' => 'Lock & Tag', 'desc' => 'Semua <em>lock & tag</em> sudah dilepas', 'val' => $closeLock],
+                'close_tools' => ['label' => 'Sampah & Peralatan Kerja', 'desc' => 'Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan', 'val' => $closeTools],
+                'close_guarding' => ['label' => 'Machine Guarding', 'desc' => 'Semua <em>machine guarding</em> sudah dipasang kembali', 'val' => $closeGuarding],
+            ] as $name => $item)
             <tr>
-                <td class="border px-2 py-1 font-semibold">Lock & Tag</td>
-                <td class="border px-2 py-1">Semua <em>lock & tag</em> sudah dilepas</td>
+                <td class="border px-2 py-1 font-semibold">{{ $item['label'] }}</td>
+                <td class="border px-2 py-1">{!! $item['desc'] !!}</td>
                 <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_lock_tag" value="ya" {{ $closeLock == 'ya' ? 'checked' : '' }}> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_lock_tag" value="na" {{ $closeLock == 'na' ? 'checked' : '' }}> N/A</label>
+                    <label><input type="radio" name="{{ $name }}" value="ya" {{ $item['val'] === 'ya' ? 'checked' : '' }}> Ya</label>
+                    <label class="ml-2"><input type="radio" name="{{ $name }}" value="na" {{ $item['val'] === 'na' ? 'checked' : '' }}> N/A</label>
                 </td>
             </tr>
-            <tr>
-                <td class="border px-2 py-1 font-semibold">Sampah & Peralatan Kerja</td>
-                <td class="border px-2 py-1">Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan</td>
-                <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_tools" value="ya" {{ $closeTools == 'ya' ? 'checked' : '' }}> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_tools" value="na" {{ $closeTools == 'na' ? 'checked' : '' }}> N/A</label>
-                </td>
-            </tr>
-            <tr>
-                <td class="border px-2 py-1 font-semibold">Machine Guarding</td>
-                <td class="border px-2 py-1">Semua <em>machine guarding</em> sudah dipasang kembali</td>
-                <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_guarding" value="ya" {{ $closeGuarding == 'ya' ? 'checked' : '' }}> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_guarding" value="na" {{ $closeGuarding == 'na' ? 'checked' : '' }}> N/A</label>
-                </td>
-            </tr>
+            @endforeach
         </tbody>
     </table>
 
+    <!-- Tanggal, Jam, TTD -->
     <table class="table-auto w-full text-sm border mt-4">
         <thead class="bg-gray-100">
             <tr>
-                <th class="border px-2 py-1 text-center w-32">Tanggal</th>
-                <th class="border px-2 py-1 text-center w-32">Jam</th>
+                <th class="border px-2 py-1 text-center w-32">Tanggal:</th>
+                <th class="border px-2 py-1 text-center w-32">Jam:</th>
                 <th class="border px-2 py-1 text-center">Permit Requestor</th>
                 <th class="border px-2 py-1 text-center">Permit Issuer</th>
             </tr>
@@ -546,22 +538,47 @@ $receiverTime = $receiverTimeRaw ? Carbon::parse($receiverTimeRaw)->format('H:i'
                 <td class="border text-center px-2 py-2">
                     <input type="time" name="close_time" class="input w-full text-center" value="{{ $closeTime }}">
                 </td>
+
+                <!-- Requestor -->
                 <td class="border text-center px-2 py-2">
-                    <button type="button"
-                        @click="Alpine.store('signatureModal').openModal('Penutup - Requestor')"
-                        class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_close_requestor" value="{{ $closeRequestorSign }}">
+                    <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
+                    @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
+                        <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
+                    @else
+                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                    @endif
+                    <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}">
                 </td>
+
+                <!-- Issuer -->
                 <td class="border text-center px-2 py-2">
-                    <button type="button"
-                        @click="Alpine.store('signatureModal').openModal('Penutup - Issuer')"
-                        class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_close_issuer" value="{{ $closeIssuerSign }}">
+                    <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
+                    @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
+                        <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
+                    @else
+                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                    @endif
+                    <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}">
                 </td>
             </tr>
         </tbody>
     </table>
+
+    <!-- Jumlah RFID -->
+    <table class="table-auto w-full text-sm border mt-4">
+        <tr>
+            <td class="border px-2 py-1 font-semibold w-64">Jumlah RFID yang diberikan ke kontraktor</td>
+            <td class="border px-2 py-1 text-left" colspan="3">
+                <div class="flex items-center gap-2">
+                    <input type="number" name="jumlah_rfid" min="0" class="input w-28 text-center"
+                        value="{{ $jumlahRfid }}">
+                    <span class="text-sm">buah</span>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
+
 
 <!-- Tombol Simpan -->
 <div class="flex justify-center mt-8">

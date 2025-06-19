@@ -70,7 +70,7 @@
     @include('components.permits.beban', ['permit' => $permits['beban'] ?? null])
 </div>
 <div x-show="selectedPermit === 'panas-risiko'" x-cloak>
-    @include('components.permits.panas-risiko', ['permit' => $permits['panas-risiko'] ?? null])
+    @include('components.permits.risiko-panas', ['permit' => $permits['panas-risiko'] ?? null])
 </div>
 <div x-show="selectedPermit === 'ruang-tertutup'" x-cloak>
     @include('components.permits.ruang-tertutup', ['permit' => $permits['ruang-tertutup'] ?? null])

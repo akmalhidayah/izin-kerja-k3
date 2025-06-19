@@ -334,29 +334,43 @@
     @endif
 @endif
     @if ($index === 4)
-        @php
-                        $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = $notification
-                ? (\App\Models\StepApproval::where('notification_id', $notification->id)
-                    ->where('step', $prevStepCode)
-                    ->value('status') === 'disetujui')
-                : false;
+       @php
+    $prevStepCode = $steps[$index - 1]['code'] ?? null;
 
-            $permitUmum = $notification
-                ? \App\Models\UmumWorkPermit::where('notification_id', $notification->id)->first()
-                : null;
+    $prevStepApproved = $notification
+        ? \App\Models\StepApproval::where('notification_id', $notification->id)
+            ->where('step', $prevStepCode)
+            ->value('status') === 'disetujui'
+        : false;
 
-            $permitGas = $notification
-                ? \App\Models\WorkPermitGasPanas::where('notification_id', $notification->id)->first()
-                : null;
+    $permitUmum = $notification
+        ? \App\Models\UmumWorkPermit::where('notification_id', $notification->id)->first()
+        : null;
 
-            $permit = $notification
-                ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
-                : null;
-            $permitKetinggian = $notification
-                ? \App\Models\WorkPermitKetinggian::where('notification_id', $notification->id)->first()
-                : null;
-        @endphp
+    $permitGas = $notification
+        ? \App\Models\WorkPermitGasPanas::where('notification_id', $notification->id)->first()
+        : null;
+
+    $permit = $notification
+        ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
+        : null;
+
+    $permitKetinggian = $notification
+        ? \App\Models\WorkPermitKetinggian::where('notification_id', $notification->id)->first()
+        : null;
+
+    $permitRuangTertutup = $notification
+        ? \App\Models\WorkPermitRuangTertutup::where('notification_id', $notification->id)->first()
+        : null;
+
+    $permitPerancah = $notification
+        ? \App\Models\WorkPermitPerancah::where('notification_id', $notification->id)->first()
+        : null;
+
+    $permitRisikoPanas = $notification
+        ? \App\Models\WorkPermitRisikoPanas::where('notification_id', $notification->id)->first()
+        : null;
+@endphp
 
         @if (!$prevStepApproved)
             <span class="text-[10px] text-gray-400 italic mt-1">
@@ -444,7 +458,7 @@
                         <div class="flex gap-1">
                             <a href="{{ route('working-permit.ketinggian.preview', ['id' => $permitKetinggian->notification_id]) }}"
                                 class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Gas Panas">
-                                <i class="fas fa-fire text-xs"></i>
+                                <i class="fa-solid fa-person-falling"></i>
                             </a>
                             <button @click="activeModal = 'modal-{{ $index }}-ketinggian'"
                                 class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit Ketinggian">
@@ -453,6 +467,54 @@
                         </div>
                     </div>
                 @endif
+                {{-- Permit Ruang Tertutup --}}
+                @if ($permitRuangTertutup)
+                    <div class="flex flex-col items-center">
+                        <span class="text-[10px] text-gray-600 mb-1">Permit Ruang Tertutup</span>
+                        <div class="flex gap-1">
+                           <a href="{{ route('working-permit.ruangtertutup.preview', ['id' => $permitRuangTertutup->notification_id]) }}"
+                                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Ruang Tertutup">
+                                <i class="fas fa-door-closed text-xs"></i>
+                            </a>
+                            <button @click="activeModal = 'modal-{{ $index }}-ruang-tertutup'"
+                                class="bg-purple-600 hover:bg-purple-700 text-white p-1 rounded-full" title="Edit Ruang Tertutup">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                @endif
+                {{-- Permit Perancah --}}
+@if ($permitPerancah)
+    <div class="flex flex-col items-center">
+        <span class="text-[10px] text-gray-600 mb-1">Permit Perancah</span>
+        <div class="flex gap-1">
+            <a href="{{ route('working-permit.perancah.preview', ['id' => $permitPerancah->notification_id]) }}"
+                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Perancah">
+                <i class="fa-solid fa-building"></i>
+            </a>
+            <button @click="activeModal = 'modal-{{ $index }}-perancah'"
+                class="bg-orange-600 hover:bg-orange-700 text-white p-1 rounded-full" title="Edit Perancah">
+                <i class="fas fa-edit text-xs"></i>
+            </button>
+        </div>
+    </div>
+@endif
+{{-- Permit Risiko Panas --}}
+@if ($permitRisikoPanas)
+    <div class="flex flex-col items-center">
+        <span class="text-[10px] text-gray-600 mb-1">Permit Risiko Panas</span>
+        <div class="flex gap-1">
+            <a href="{{ route('working-permit.risiko-panas.preview', ['id' => $permitRisikoPanas->notification_id]) }}"
+                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Risiko Panas">
+                <i class="fas fa-temperature-high text-xs"></i>
+            </a>
+            <button @click="activeModal = 'modal-{{ $index }}-risiko-panas'"
+                class="bg-red-600 hover:bg-red-700 text-white p-1 rounded-full" title="Edit Risiko Panas">
+                <i class="fas fa-edit text-xs"></i>
+            </button>
+        </div>
+    </div>
+@endif
 
                 {{-- Tambah Permit Lain (Selalu Muncul di Bawah) --}}
                 <div class="flex flex-col items-center mt-2">
@@ -818,20 +880,6 @@
                                         ])
                                     @endif
     @elseif ($index === 4)
-        @php
-            $permitUmum = optional($notification)->id 
-                ? \App\Models\UmumWorkPermit::where('notification_id', $notification->id)->first()
-                : null;
-
-            $permitGas = optional($notification)->id 
-                ? \App\Models\WorkPermitGasPanas::where('notification_id', $notification->id)->first()
-                : null;
-
-            $permit = optional($notification)->id 
-                ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
-                : null;
-        @endphp
-
         {{-- Modal Permit Umum --}}
         @include('components.steps.modal-working-permit', [
             'id' => 'modal-' . $index,
@@ -865,6 +913,37 @@
             'stepName' => $step['code'],
             'permitKetinggian' => $permitKetinggian ?? null
         ])
+        {{-- Modal Permit Ruang Tertutup --}}
+        @include('components.steps.modal-working-permit-ruang-tertutup', [
+            'label' => 'Edit Ruang Tertutup',
+            'id' => 'modal-' . $index . '-ruang-tertutup',
+            'notification' => $notification,
+            'stepName' => $step['code'],
+            'permitRuangTertutup' => $permitRuangTertutup ?? null,
+            'detail' => $detail ?? null,
+            'closure' => $closure ?? null
+        ])
+        {{-- Modal Permit Perancah --}}
+        @include('components.steps.modal-working-permit-perancah', [
+            'label' => 'Edit Perancah',
+            'id' => 'modal-' . $index . '-perancah',
+            'notification' => $notification,
+            'stepName' => $step['code'],
+            'permitPerancah' => $permitPerancah ?? null,
+            'detail' => $detail ?? null,
+            'closure' => $closure ?? null
+        ])
+        {{-- Modal Permit Risiko Panas --}}
+        @include('components.steps.modal-working-permit-risiko-panas', [
+            'label' => 'Edit Risiko Panas',
+            'id' => 'modal-' . $index . '-risiko-panas',
+            'notification' => $notification,
+            'stepName' => $step['code'],
+            'permitRisikoPanas' => $permitRisikoPanas ?? null,
+            'detail' => $detail ?? null,
+            'closure' => $closure ?? null
+        ])
+
 
         {{-- Modal Permit Lainnya --}}
         @include('components.steps.modal-tambah-lainnya', [

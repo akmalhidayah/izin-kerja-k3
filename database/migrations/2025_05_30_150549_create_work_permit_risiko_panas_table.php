@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,12 +10,6 @@ return new class extends Migration {
         Schema::create('work_permit_risiko_panas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('notification_id')->constrained()->cascadeOnDelete();
-            $table->string('lokasi_pekerjaan')->nullable();
-            $table->date('tanggal_pekerjaan')->nullable();
-            $table->text('uraian_pekerjaan')->nullable();
-            $table->text('peralatan_digunakan')->nullable();
-            $table->integer('jumlah_pekerja')->nullable();
-            $table->string('nomor_darurat')->nullable();
             $table->json('pengukuran_gas')->nullable(); // Data JSON (O2, LEL, CO, H2S, O3)
             $table->json('persyaratan_kerja_panas')->nullable(); // Array radio button
             $table->text('rekomendasi_kerja_aman_tambahan')->nullable();
@@ -56,6 +51,9 @@ return new class extends Migration {
             $table->date('receiver_date')->nullable();
             $table->time('receiver_time')->nullable();
 
+            // Bagian 10 - Penutupan
+            $table->longText('requestor_signature_close')->nullable();
+            $table->longText('issuer_signature_close')->nullable();
 
             $table->timestamps();
         });

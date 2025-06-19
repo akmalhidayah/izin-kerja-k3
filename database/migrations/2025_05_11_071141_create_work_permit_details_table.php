@@ -11,8 +11,8 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('notification_id')->constrained()->onDelete('cascade');
             $table->enum('permit_type', [
-                'umum', 'ruang_terbatas', 'penggalian', 'ketinggian', 'air',
-                'panas', 'gaspanas', 'beban', 'pengangkatan', 'perancah'
+                'umum', 'ruangtertutup', 'penggalian', 'ketinggian', 'air',
+                'risiko-panas', 'gaspanas', 'beban', 'pengangkatan', 'perancah'
             ]);
             $table->string('location')->nullable();
             $table->date('work_date')->nullable();
