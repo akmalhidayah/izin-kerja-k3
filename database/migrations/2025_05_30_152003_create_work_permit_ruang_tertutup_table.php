@@ -12,7 +12,6 @@ return new class extends Migration {
 
             // Relasi
             $table->unsignedBigInteger('notification_id')->nullable()->index();
-            $table->string('token')->nullable(); // optional, untuk akses by token
             $table->foreign('notification_id')->references('id')->on('notifications')->onDelete('cascade');
 
             // Bagian 2
@@ -72,7 +71,7 @@ return new class extends Migration {
             $table->string('live_testing_signature')->nullable();
             $table->date('live_testing_date')->nullable();
             $table->time('live_testing_time')->nullable();
-
+            $table->string('token')->unique()->nullable();
             $table->timestamps();
         });
     }

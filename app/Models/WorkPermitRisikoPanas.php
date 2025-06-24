@@ -57,6 +57,8 @@ class WorkPermitRisikoPanas extends Model
         // Bagian 10 - Penutupan
         'requestor_signature_close',
         'issuer_signature_close',
+
+                'token',
     ];
 
     protected $casts = [
@@ -71,6 +73,19 @@ class WorkPermitRisikoPanas extends Model
 
     public function detail()
     {
-        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id');
+        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id')
+                    ->where('permit_type', 'risiko-panas');
+    }
+
+    public function closure()
+    {
+        return $this->hasOneThrough(
+            WorkPermitClosure::class,
+            WorkPermitDetail::class,
+            'notification_id',
+            'work_permit_detail_id',
+            'notification_id',
+            'id'
+        )->where('permit_type', 'risiko-panas');
     }
 }

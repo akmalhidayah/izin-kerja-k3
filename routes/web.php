@@ -141,4 +141,28 @@ Route::post('/izin-kerja/jsa/form/{token}', [JsaController::class, 'storeByToken
 Route::get('/izin-kerja/working-permit/umum/{token}', [UmumPermitController::class, 'showByToken'])->name('working-permit.umum.token');
 Route::post('/izin-kerja/working-permit/umum/{token}', [UmumPermitController::class, 'storeByToken'])->name('working-permit.umum.token.store');
 
+// ✅ Route Form Token untuk Permit Gas
+Route::get('/izin-kerja/working-permit/gaspanas/{token}', [GasPanasPermitController::class, 'showByToken'])->name('working-permit.gaspanas.token');
+Route::post('/izin-kerja/working-permit/gaspanas/{token}', [GasPanasPermitController::class, 'storeByToken'])->name('working-permit.gaspanas.token.store');
+
+// ✅ Route Form Token untuk Permit Air
+Route::get('/izin-kerja/working-permit/air/{token}', [AirPermitController::class, 'showByToken'])->name('working-permit.air.token');
+Route::post('/izin-kerja/working-permit/air/{token}', [AirPermitController::class, 'storeByToken'])->name('working-permit.air.token.store');
+
+// ✅ Route Form Token untuk Permit Ketinggian
+Route::get('/izin-kerja/working-permit/ketinggian/{token}', [KetinggianPermitController::class, 'showByToken'])->name('working-permit.ketinggian.token');
+Route::post('/izin-kerja/working-permit/ketinggian/{token}', [KetinggianPermitController::class, 'storeByToken'])->name('working-permit.ketinggian.token.store');
+
+// ✅ Route Form Token untuk Permit Ruang Tertutup
+Route::get('/izin-kerja/working-permit/ruang-tertutup/{token}', [RuangTertutupPermitController::class, 'showByToken'])->name('working-permit.ruangtertutup.token');
+Route::post('/izin-kerja/working-permit/ruang-tertutup/{token}', [RuangTertutupPermitController::class, 'storeByToken'])->name('working-permit.ruangtertutup.token.store');
+
+// ✅ Route Form Token untuk Permit Perancah
+Route::get('/izin-kerja/working-permit/perancah/{token}', [PerancahPermitController::class, 'showByToken'])->name('working-permit.perancah.token');
+Route::post('/izin-kerja/working-permit/perancah/{token}', [PerancahPermitController::class, 'storeByToken'])->name('working-permit.perancah.token.store');
+
+// ✅ Route Form Token untuk Permit Risiko Panas
+Route::get('/izin-kerja/working-permit/risiko-panas/{token}', [PanasRisikoPermitController::class, 'showByToken'])->name('working-permit.risiko-panas.token');
+Route::post('/izin-kerja/working-permit/risiko-panas/{token}', [PanasRisikoPermitController::class, 'storeByToken'])->name('working-permit.risiko-panas.token.store');
+
 require __DIR__.'/auth.php';

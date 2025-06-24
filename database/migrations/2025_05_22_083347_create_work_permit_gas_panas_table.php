@@ -13,6 +13,7 @@ return new class extends Migration {
 
             // Bagian 2: Daftar Pekerja
             $table->json('daftar_pekerja')->nullable();
+            $table->string('sketsa_pekerjaan')->nullable();
 
             // Bagian 3: Checklist Persyaratan Kerja Aman
             $table->json('checklist_kerja_aman')->nullable();
@@ -56,6 +57,7 @@ return new class extends Migration {
             $table->date('permit_receiver_date')->nullable();
             $table->time('permit_receiver_time')->nullable();
 
+            $table->string('token')->unique()->nullable();     
             $table->timestamps();
         });
     }

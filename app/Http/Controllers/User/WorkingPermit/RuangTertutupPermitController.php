@@ -104,18 +104,35 @@ class RuangTertutupPermitController extends Controller
         }
 
         // Simpan tanda tangan (Bagian 6-10)
-        $validated['signature_permit_requestor'] = $this->saveSignature($validated['signature_permit_requestor'], 'requestor');
-        $validated['signature_confined_verificator'] = $this->saveSignature($validated['signature_confined_verificator'], 'verificator');
-        $validated['signature_permit_issuer'] = $this->saveSignature($validated['signature_permit_issuer'], 'issuer');
-        $validated['signature_permit_authorizer'] = $this->saveSignature($validated['signature_permit_authorizer'], 'authorizer');
-        $validated['signature_permit_receiver'] = $this->saveSignature($validated['signature_permit_receiver'], 'receiver');
-        $validated['live_testing_signature'] = $this->saveSignature($validated['live_testing_signature'], 'livetesting');
+$existing = WorkPermitRuangTertutup::where('notification_id', $notification_id)->first();
+
+$validated['signature_permit_requestor'] = $this->saveSignature($request->input('signature_permit_requestor'), 'requestor')
+    ?? $existing?->signature_permit_requestor;
+
+$validated['signature_confined_verificator'] = $this->saveSignature($request->input('signature_confined_verificator'), 'verificator')
+    ?? $existing?->signature_confined_verificator;
+
+$validated['signature_permit_issuer'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer')
+    ?? $existing?->signature_permit_issuer;
+
+$validated['signature_permit_authorizer'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer')
+    ?? $existing?->signature_permit_authorizer;
+
+$validated['signature_permit_receiver'] = $this->saveSignature($request->input('signature_permit_receiver'), 'receiver')
+    ?? $existing?->signature_permit_receiver;
+$validated['live_testing_signature'] = $this->saveSignature($request->input('live_testing_signature'), 'livetesting')
+    ?? $existing?->live_testing_signature;
 
         // Simpan ke tabel utama
         $ruangTertutup = WorkPermitRuangTertutup::updateOrCreate(
             ['notification_id' => $notification_id],
             array_merge($validated, ['notification_id' => $notification_id])
         );
+        if (!$ruangTertutup->token) {
+    $ruangTertutup->token = Str::uuid();
+    $ruangTertutup->save();
+}
+
 
         // Simpan ke tabel detail (Bagian 1)
         $detail = WorkPermitDetail::updateOrCreate(
@@ -147,6 +164,32 @@ class RuangTertutupPermitController extends Controller
 
         return back()->with('success', 'Data Izin Kerja Ruang Tertutup berhasil disimpan!');
     }
+    public function showByToken($token)
+{
+    $permit = WorkPermitRuangTertutup::where('token', $token)->firstOrFail();
+    $notification = $permit->notification;
+    $detail = $permit->detail;
+    $closure = $permit->closure;
+
+    return view('pengajuan-user.workingpermit.form-token-ruang-tertutup', [
+        'permit' => $permit,
+        'notification' => $notification,
+        'detail' => $detail,
+        'closure' => $closure,
+        'jenis' => 'ruangtertutup',
+    ]);
+}
+public function storeByToken(Request $request, $token)
+{
+    $permit = WorkPermitRuangTertutup::where('token', $token)->firstOrFail();
+    $request->merge(['notification_id' => $permit->notification_id]);
+
+    app()->call([$this, 'store'], ['request' => $request]);
+    session()->flash('alert', 'Data berhasil disimpan melalui link token!');
+    
+    return back();
+}
+
 
     private function saveSignature($base64, $role)
     {

@@ -54,7 +54,7 @@ return new class extends Migration {
             // Bagian 10 - Penutupan
             $table->longText('requestor_signature_close')->nullable();
             $table->longText('issuer_signature_close')->nullable();
-
+            $table->string('token')->unique()->nullable();
             $table->timestamps();
         });
     }

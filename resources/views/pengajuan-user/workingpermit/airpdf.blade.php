@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Izin Kerja Umum</title>
+    <title>Izin Bekerja Di Air</title>
      <style>
         @page { size: A4; margin: 10mm; }
         body {
@@ -41,27 +41,31 @@
 </head>
 <body>
  {{-- HEADER IZIN KERJA PERAIRAN --}}
-<table class="header-table">
+ <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
     <tr>
-        <td style="width: 20%;">
-            <img src="{{ public_path('images/logo-st.png') }}" alt="Logo" height="50">
+        <td style="border: 1px solid black; width: 20%; text-align: center;">
+            <img src="file://{{ public_path('images/logo-st.png') }}" alt="Logo Perusahaan" style="width: 40%; height: auto;">
         </td>
-        <td style="width: 60%; text-align: center;">
-            <h2 style="margin: 0;">IZIN KERJA BEKERJA DI PERAIRAN</h2>
+        <td style="border: 1px solid black; text-align: center;" colspan="2">
+            <h2 style="margin: 0;">IZIN BEKERJA DI PERAIRAN</h2>
         </td>
-        <td style="width: 20%; text-align: right;">
-            <span style="font-weight: bold;">Nomor:</span> <span style="color: gray;">Jika ada</span>
+        <td style="border: 1px solid black; width: 25%;">
+            <strong>Nomor:</strong> <span style="color: gray;">Jika ada</span>
         </td>
     </tr>
-</table>
-
-<p style="text-align: justify; font-size: 11px; margin-top: 5px;">
+    <tr>
+        <td colspan="4" style="border: 1px solid black; font-size: 12px; padding: 5px; text-align: justify;">
+           <p style="text-align: justify; font-size: 11px; margin-top: 5px;">
     Izin kerja bekerja di air harus diterbitkan untuk semua pekerjaan pada/dekat/di air yang berpotensi menyebabkan tenggelam.
     Izin ini tidak berlaku pada pekerjaan yang sudah menjadi rutinitas misalnya menggunakan perahu/boat.
     Pekerjaan tidak bisa dimulai hingga izin kerja di verifikasi oleh <i>Permit Verificator</i>,
     diterbitkan oleh <i>Permit Issuer</i>, disahkan oleh <i>Permit Authorizer</i> dan <i>major hazards & control</i>
     disosialisasikan oleh <i>Permit Receiver</i>.
 </p>
+        </td>
+    </tr>
+</table>
+<br>
 <!-- Bagian 1: Detail Pekerjaan -->
 <table style="width: 100%; border-collapse: collapse;">
     <thead>
@@ -107,7 +111,14 @@
         @forelse ($pekerja as $item)
         <tr>
             <td style="border: 1px solid #000; padding: 5px;">{{ $item['nama'] ?? '-' }}</td>
-            <td style="border: 1px solid #000; padding: 5px;">{{ $item['paraf'] ?? '-' }}</td>
+<td style="border: 1px solid #000; padding: 5px; text-align: center;">
+    @if (!empty($item['paraf']) && str_starts_with($item['paraf'], 'data:image'))
+        <img src="{{ $item['paraf'] }}" style="height: 40px;">
+    @else
+        -
+    @endif
+</td>
+
         </tr>
         @empty
         <tr>
@@ -122,7 +133,7 @@
 <div style="margin-top: 10px; border: 1px solid #000; padding: 5px;">
     <strong>Upload Sketsa Pekerjaan (jika diperlukan):</strong><br>
     @if($permit->sketsa_pekerjaan)
-        <p style="margin-top: 5px;">Lampiran: {{ basename($permit->sketsa_pekerjaan) }}</p>
+        <p style="margin-top: 10px;">Lampiran: {{ basename($permit->sketsa_pekerjaan) }}</p>
         <img src="{{ public_path($permit->sketsa_pekerjaan) }}" alt="Sketsa Pekerjaan" style="max-width: 100%; max-height: 300px; margin-top: 5px;">
     @else
         <p style="margin-top: 5px;">Belum ada sketsa pekerjaan yang dilampirkan.</p>
@@ -161,7 +172,12 @@
                 '<i>Boat/rubber boat</i> beserta seluruh kelengkapannya yang akan digunakan sudah diperiksa dan dinyatakan layak untuk digunakan.',
             ];
 
-            $persyaratan = json_decode($permit->safety_requirements ?? '[]', true);
+$raw = $permit->persyaratan_perairan ?? '[]';
+
+    $firstDecode = json_decode($raw, true);
+    $persyaratan = is_string($firstDecode)
+        ? json_decode($firstDecode, true)
+        : $firstDecode;
         @endphp
         @foreach($items as $index => $text)
         <tr>
@@ -203,8 +219,6 @@
         </tr>
     </tbody>
 </table>
-
-
 {{-- 5. Permohonan Izin Kerja --}}
 <table class="table">
     <thead>
@@ -232,16 +246,16 @@
     </thead>
     <tbody>
         <tr>
-            <td>{{ $permit->requestor_name ?? '-' }}</td>
+            <td>{{ $permit->permit_requestor_name ?? '-' }}</td>
             <td>
-                @if($permit->signature_requestor)
-                    <img src="{{ public_path('storage/' . $permit->signature_requestor) }}" height="30">
+                @if($permit->signature_permit_requestor)
+                    <img src="{{ public_path($permit->signature_permit_requestor) }}" height="30">
                 @else
                     -
                 @endif
             </td>
-            <td>{{ $permit->requestor_date ? \Carbon\Carbon::parse($permit->requestor_date)->format('d-m-Y') : '-' }}</td>
-            <td>{{ $permit->requestor_time ?? '-' }}</td>
+            <td>{{ $permit->permit_requestor_date ? \Carbon\Carbon::parse($permit->permit_requestor_date)->format('d-m-Y') : '-' }}</td>
+            <td>{{ $permit->permit_requestor_time ?? '-' }}</td>
         </tr>
     </tbody>
 </table>
@@ -279,15 +293,18 @@
         <tr>
             <td>{{ $permit->verificator_name ?? '-' }}</td>
             <td>
-                @if($permit->verificator_sign)
-                    <img src="{{ public_path($permit->verificator_sign) }}" alt="TTD" height="40">
+                @if($permit->signature_verificator)
+                    <img src="{{ public_path($permit->signature_verificator) }}" alt="TTD" height="40">
+                @else
+                    -
                 @endif
             </td>
-            <td>{{ $permit->verificator_date ? \Carbon\Carbon::parse($permit->verificator_date)->format('d-m-Y') : '' }}</td>
-            <td>{{ $permit->verificator_time ?? '' }}</td>
+            <td>{{ $permit->verificator_date ? \Carbon\Carbon::parse($permit->verificator_date)->format('d-m-Y') : '-' }}</td>
+            <td>{{ $permit->verificator_time ?? '-' }}</td>
         </tr>
     </tbody>
 </table>
+
 
 {{-- 7. Penerbitan Izin Kerja --}}
 <table class="table">

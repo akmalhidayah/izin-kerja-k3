@@ -1,5 +1,20 @@
-<!-- Form Izin Kerja Perancah -->
-<form method="POST" action="{{ route('working-permit.perancah.store') }}" enctype="multipart/form-data">
+@if (session('success'))
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-4 text-sm">
+        {{ session('success') }}
+    </div>
+@endif
+
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-sm text-gray-800 dark:text-gray-200 leading-tight">
+            WORKING PERMIT PERANCAH
+        </h2>
+    </x-slot>
+
+    <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
+        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+
+  <form method="POST" action="{{ route('working-permit.perancah.token.store', $permit->token) }}">
     @csrf
     <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 
@@ -755,3 +770,6 @@
 </div>
 </form>
 
+
+
+            </x-app-layout>

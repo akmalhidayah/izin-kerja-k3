@@ -351,7 +351,7 @@
         ? \App\Models\WorkPermitGasPanas::where('notification_id', $notification->id)->first()
         : null;
 
-    $permit = $notification
+    $permitAir = $notification
         ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
         : null;
 
@@ -417,104 +417,138 @@
     </div>
 @endif
 
-
-                {{-- Permit Gas Panas --}}
-                @if ($permitGas)
-                    <div class="flex flex-col items-center">
-                        <span class="text-[10px] text-gray-600 mb-1">Permit Gas Panas</span>
-                        <div class="flex gap-1">
-                            <a href="{{ route('working-permit.gaspanas.preview', ['id' => $permitGas->notification_id]) }}"
-                                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Gas Panas">
-                                <i class="fas fa-fire text-xs"></i>
-                            </a>
-                            <button @click="activeModal = 'modal-{{ $index }}-gaspanas'"
-                                class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit Gas Panas">
-                                <i class="fas fa-edit text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                @endif
-
-                {{-- Permit Air --}}
-                @if ($permit)
-                    <div class="flex flex-col items-center">
-                        <span class="text-[10px] text-gray-600 mb-1">Permit Air</span>
-                        <div class="flex gap-1">
-                            <a href="{{ route('working-permit.air.preview', ['id' => $permit->notification_id]) }}"
-                                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Air">
-                                <i class="fas fa-water text-xs"></i>
-                            </a>
-                            <button @click="activeModal = 'modal-{{ $index }}-air'"
-                                class="bg-teal-600 hover:bg-teal-700 text-white p-1 rounded-full" title="Edit Air">
-                                <i class="fas fa-edit text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                @endif
-                {{-- Permit Ketinggian --}}
-                @if ($permitKetinggian)
-                    <div class="flex flex-col items-center">
-                        <span class="text-[10px] text-gray-600 mb-1">Permit Ketinggian</span>
-                        <div class="flex gap-1">
-                            <a href="{{ route('working-permit.ketinggian.preview', ['id' => $permitKetinggian->notification_id]) }}"
-                                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Gas Panas">
-                                <i class="fa-solid fa-person-falling"></i>
-                            </a>
-                            <button @click="activeModal = 'modal-{{ $index }}-ketinggian'"
-                                class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit Ketinggian">
-                                <i class="fas fa-edit text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                @endif
-                {{-- Permit Ruang Tertutup --}}
-                @if ($permitRuangTertutup)
-                    <div class="flex flex-col items-center">
-                        <span class="text-[10px] text-gray-600 mb-1">Permit Ruang Tertutup</span>
-                        <div class="flex gap-1">
-                           <a href="{{ route('working-permit.ruangtertutup.preview', ['id' => $permitRuangTertutup->notification_id]) }}"
-                                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Ruang Tertutup">
-                                <i class="fas fa-door-closed text-xs"></i>
-                            </a>
-                            <button @click="activeModal = 'modal-{{ $index }}-ruang-tertutup'"
-                                class="bg-purple-600 hover:bg-purple-700 text-white p-1 rounded-full" title="Edit Ruang Tertutup">
-                                <i class="fas fa-edit text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                @endif
-                {{-- Permit Perancah --}}
-@if ($permitPerancah)
-    <div class="flex flex-col items-center">
-        <span class="text-[10px] text-gray-600 mb-1">Permit Perancah</span>
-        <div class="flex gap-1">
-            <a href="{{ route('working-permit.perancah.preview', ['id' => $permitPerancah->notification_id]) }}"
-                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Perancah">
-                <i class="fa-solid fa-building"></i>
-            </a>
-            <button @click="activeModal = 'modal-{{ $index }}-perancah'"
-                class="bg-orange-600 hover:bg-orange-700 text-white p-1 rounded-full" title="Edit Perancah">
-                <i class="fas fa-edit text-xs"></i>
+{{-- Permit Gas Panas --}}
+@if ($permitGas)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Gas Panas:</span>
+        <a href="{{ route('working-permit.gaspanas.preview', ['id' => $permitGas->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+            <i class="fas fa-fire text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-gaspanas'"
+            class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitGas->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.gaspanas.token', $permitGas->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
             </button>
-        </div>
+        @endif
     </div>
 @endif
+
+{{-- Permit Air --}}
+@if ($permitAir)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Air:</span>
+        <a href="{{ route('working-permit.air.preview', ['id' => $permitAir->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+            <i class="fas fa-water text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-air'"
+            class="bg-teal-600 hover:bg-teal-700 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitAir->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.air.token', $permitAir->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
+            </button>
+        @endif
+    </div>
+@endif
+
+{{-- Permit Ketinggian --}}
+@if ($permitKetinggian)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Ketinggian:</span>
+        <a href="{{ route('working-permit.ketinggian.preview', ['id' => $permitKetinggian->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+            <i class="fa-solid fa-person-falling text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-ketinggian'"
+            class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitKetinggian->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.ketinggian.token', $permitKetinggian->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
+            </button>
+        @endif
+    </div>
+@endif
+
+{{-- Permit Ruang Tertutup --}}
+@if ($permitRuangTertutup)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Ruang Tertutup:</span>
+        <a href="{{ route('working-permit.ruangtertutup.preview', ['id' => $permitRuangTertutup->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+            <i class="fas fa-door-closed text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-ruang-tertutup'"
+            class="bg-purple-600 hover:bg-purple-700 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitRuangTertutup->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.ruangtertutup.token', $permitRuangTertutup->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
+            </button>
+        @endif
+    </div>
+@endif
+
+{{-- Permit Perancah --}}
+@if ($permitPerancah)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Perancah:</span>
+        <a href="{{ route('working-permit.perancah.preview', ['id' => $permitPerancah->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+            <i class="fa-solid fa-building text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-perancah'"
+            class="bg-orange-600 hover:bg-orange-700 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitPerancah->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.perancah.token', $permitPerancah->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
+            </button>
+        @endif
+    </div>
+@endif
+
 {{-- Permit Risiko Panas --}}
 @if ($permitRisikoPanas)
-    <div class="flex flex-col items-center">
-        <span class="text-[10px] text-gray-600 mb-1">Permit Risiko Panas</span>
-        <div class="flex gap-1">
-            <a href="{{ route('working-permit.risiko-panas.preview', ['id' => $permitRisikoPanas->notification_id]) }}"
-                class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Risiko Panas">
-                <i class="fas fa-temperature-high text-xs"></i>
-            </a>
-            <button @click="activeModal = 'modal-{{ $index }}-risiko-panas'"
-                class="bg-red-600 hover:bg-red-700 text-white p-1 rounded-full" title="Edit Risiko Panas">
-                <i class="fas fa-edit text-xs"></i>
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Risiko Panas:</span>
+        <a href="{{ route('working-permit.risiko-panas.preview', ['id' => $permitRisikoPanas->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+            <i class="fas fa-temperature-high text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-risiko-panas'"
+            class="bg-red-600 hover:bg-red-700 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitRisikoPanas->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.risiko-panas.token', $permitRisikoPanas->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
             </button>
-        </div>
+        @endif
     </div>
 @endif
+
 
                 {{-- Tambah Permit Lain (Selalu Muncul di Bawah) --}}
                 <div class="flex flex-col items-center mt-2">
@@ -894,7 +928,9 @@
             'id' => 'modal-' . $index . '-gaspanas',
             'notification' => $notification,
             'stepName' => $step['code'],
-            'permitGas' => $permitGas ?? null
+            'permitGas' => $permitGas ?? null,
+                        'detail' => $detail ?? null,
+            'closure' => $closure ?? null
         ])
 
         {{-- Modal Permit Air --}}
@@ -903,7 +939,9 @@
             'id' => 'modal-' . $index . '-air',
             'notification' => $notification,
             'stepName' => $step['code'],
-            'permitAir' => $permit ?? null
+            'permitAir' => $permitAir ?? null,
+                        'detail' => $detail ?? null,
+            'closure' => $closure ?? null
         ])
                 {{-- Modal Permit Ketinggian --}}
         @include('components.steps.modal-working-permit-ketinggian', [
@@ -911,7 +949,9 @@
             'id' => 'modal-' . $index . '-ketinggian',
             'notification' => $notification,
             'stepName' => $step['code'],
-            'permitKetinggian' => $permitKetinggian ?? null
+            'permitKetinggian' => $permitKetinggian ?? null,
+                        'detail' => $detail ?? null,
+            'closure' => $closure ?? null
         ])
         {{-- Modal Permit Ruang Tertutup --}}
         @include('components.steps.modal-working-permit-ruang-tertutup', [

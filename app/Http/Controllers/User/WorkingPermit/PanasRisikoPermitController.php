@@ -8,6 +8,7 @@ use App\Models\WorkPermitRisikoPanas;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 
 class PanasRisikoPermitController extends Controller
@@ -62,15 +63,16 @@ class PanasRisikoPermitController extends Controller
                 'receiver_time' => 'nullable',
 
                 // Penutupan
-                'lock_tag' => 'nullable|string',
-                'sampah_peralatan' => 'nullable|string',
-                'machine_guarding' => 'nullable|string',
-                'penutupan_tanggal' => 'nullable|date',
-                'penutupan_jam' => 'nullable',
-                'requestor_name_close' => 'nullable|string',
-                'requestor_signature_close' => 'nullable|string',
-                'issuer_name_close' => 'nullable|string',
-                'issuer_signature_close' => 'nullable|string',
+'close_lock_tag' => 'nullable|string',
+'close_tools' => 'nullable|string',
+'close_guarding' => 'nullable|string',
+'close_date' => 'nullable|date',
+'close_time' => 'nullable',
+'close_requestor_name' => 'nullable|string',
+'signature_close_requestor' => 'nullable|string',
+'close_issuer_name' => 'nullable|string',
+'signature_close_issuer' => 'nullable|string',
+
 
                 // Detail
                 'lokasi_pekerjaan' => 'nullable|string',
@@ -85,26 +87,47 @@ class PanasRisikoPermitController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
-        // Simpan signature
-        $validated['signature_requestor'] = $this->saveSignature($request->input('signature_requestor'), 'requestor');
-        $validated['signature_verificator'] = $this->saveSignature($request->input('signature_verificator'), 'verificator');
-        $validated['signature_permit_issuer'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer');
-        $validated['signature_senior_manager'] = $this->saveSignature($request->input('signature_senior_manager'), 'senior');
-        $validated['signature_general_manager'] = $this->saveSignature($request->input('signature_general_manager'), 'gm');
-        $validated['authorizer_signature'] = $this->saveSignature($request->input('authorizer_signature'), 'authorizer');
-        $validated['receiver_signature'] = $this->saveSignature($request->input('receiver_signature'), 'receiver');
         $validated['requestor_signature_close'] = $this->saveSignature($request->input('requestor_signature_close'), 'close_requestor');
         $validated['issuer_signature_close'] = $this->saveSignature($request->input('issuer_signature_close'), 'close_issuer');
+$existing = WorkPermitRisikoPanas::where('notification_id', $validated['notification_id'])->first();
+
+$validated['signature_requestor'] = $this->saveSignature($request->input('signature_requestor'), 'requestor')
+    ?? $existing?->signature_requestor;
+
+$validated['signature_verificator'] = $this->saveSignature($request->input('signature_verificator'), 'verificator')
+    ?? $existing?->signature_verificator;
+
+$validated['signature_permit_issuer'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer')
+    ?? $existing?->signature_permit_issuer;
+
+$validated['signature_senior_manager'] = $this->saveSignature($request->input('signature_senior_manager'), 'senior')
+    ?? $existing?->signature_senior_manager;
+
+$validated['signature_general_manager'] = $this->saveSignature($request->input('signature_general_manager'), 'gm')
+    ?? $existing?->signature_general_manager;
+
+$validated['authorizer_signature'] = $this->saveSignature($request->input('authorizer_signature'), 'authorizer')
+    ?? $existing?->authorizer_signature;
+
+$validated['receiver_signature'] = $this->saveSignature($request->input('receiver_signature'), 'receiver')
+    ?? $existing?->receiver_signature;
+
+
 
         // Encode JSON
         $validated['pengukuran_gas'] = json_encode($request->input('pengukuran_gas', []));
         $validated['persyaratan_kerja_panas'] = json_encode($request->input('persyaratan_kerja_panas', []));
 
         // Simpan ke tabel utama
-        WorkPermitRisikoPanas::updateOrCreate(
+    $permit = WorkPermitRisikoPanas::updateOrCreate(
             ['notification_id' => $validated['notification_id']],
             $validated
         );
+
+                if (!$permit->token) {
+            $permit->token = Str::uuid();
+            $permit->save();
+        }
 
         // Simpan ke tabel detail
         $detail = WorkPermitDetail::updateOrCreate(
@@ -124,35 +147,83 @@ class PanasRisikoPermitController extends Controller
         WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
-                'lock_tag_removed' => $request->input('lock_tag') === 'ya',
-                'equipment_cleaned' => $request->input('sampah_peralatan') === 'ya',
-                'guarding_restored' => $request->input('machine_guarding') === 'ya',
-                'closed_date' => $validated['penutupan_tanggal'] ?? null,
-                'closed_time' => $validated['penutupan_jam'] ?? null,
-                'requestor_name' => $validated['requestor_name_close'] ?? null,
-                'requestor_sign' => $validated['requestor_signature_close'],
-                'issuer_name' => $validated['issuer_name_close'] ?? null,
-                'issuer_sign' => $validated['issuer_signature_close'],
+              'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
+'equipment_cleaned' => $request->input('close_tools') === 'ya',
+'guarding_restored' => $request->input('close_guarding') === 'ya',
+'closed_date' => $validated['close_date'] ?? null,
+'closed_time' => $validated['close_time'] ?? null,
+'requestor_name' => $validated['close_requestor_name'] ?? null,
+'requestor_sign' => $validated['signature_close_requestor'],
+'issuer_name' => $validated['close_issuer_name'] ?? null,
+'issuer_sign' => $validated['signature_close_issuer'],
+
             ], fn($v) => $v !== null && $v !== '')
         );
 
         return back()->with('success', 'Data Risiko Panas berhasil disimpan!');
     }
 
-    private function saveSignature($base64, $role)
+     public function showByToken($token)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+        $permit = WorkPermitRisikoPanas::where('token', $token)->firstOrFail();
+        $notification = $permit->notification;
+        $detail = $permit->detail;
+        $closure = $permit->closure;
 
-        $folder = 'signatures/working-permit/risiko-panas/';
-        $filename = $role . '_' . Str::random(10) . '.png';
-        $path = storage_path('app/public/' . $folder);
-
-        if (!file_exists($path)) mkdir($path, 0777, true);
-
-        $image = str_replace('data:image/png;base64,', '', $base64);
-        $image = str_replace(' ', '+', $image);
-        file_put_contents($path . $filename, base64_decode($image));
-
-        return 'storage/' . $folder . $filename;
+        return view('pengajuan-user.workingpermit.form-token-risiko-panas', [
+            'permit' => $permit,
+            'notification' => $notification,
+            'detail' => $detail,
+            'closure' => $closure,
+            'jenis' => 'risiko-panas',
+        ]);
     }
+
+    public function storeByToken(Request $request, $token)
+    {
+        $permit = WorkPermitRisikoPanas::where('token', $token)->firstOrFail();
+        $request->merge(['notification_id' => $permit->notification_id]);
+
+        app()->call([$this, 'store'], ['request' => $request]);
+        session()->flash('alert', 'Data berhasil disimpan melalui link token!');
+
+        return back();
+    }
+
+   private function saveSignature($base64, $role)
+{
+    \Log::info("Signature input for {$role}: " . substr($base64, 0, 50)); // log sebagian
+    
+    if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+
+    $folder = 'signatures/working-permit/risiko-panas/';
+    $filename = $role . '_' . Str::random(10) . '.png';
+    $path = storage_path('app/public/' . $folder);
+
+    if (!file_exists($path)) mkdir($path, 0777, true);
+
+    $image = str_replace('data:image/png;base64,', '', $base64);
+    $image = str_replace(' ', '+', $image);
+    file_put_contents($path . $filename, base64_decode($image));
+
+    return 'storage/' . $folder . $filename;
+}
+
+public function preview($id)
+{
+    $permit = \App\Models\WorkPermitRisikoPanas::where('notification_id', $id)->first();
+    $detail = \App\Models\WorkPermitDetail::where('notification_id', $id)->first();
+    $closure = $detail
+        ? \App\Models\WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
+        : null;
+
+    if (!$permit && !$detail) {
+        abort(404, 'Data izin kerja risiko panas tidak ditemukan.');
+    }
+
+    return \Barryvdh\DomPDF\Facade\Pdf::loadView('pengajuan-user.workingpermit.risikopanaspdf', compact('permit', 'detail', 'closure'))
+        ->setPaper('A4')
+        ->stream('izin-kerja-risiko-panas.pdf');
+}
+
 }

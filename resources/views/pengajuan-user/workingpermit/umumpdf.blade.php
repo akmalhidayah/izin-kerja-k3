@@ -40,29 +40,20 @@
     </style>
 </head>
 <body>
-
-{{-- Header --}}
-<table class="header-table">
+<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
     <tr>
-        <td style="width: 20%;">
-         <img src="file://{{ public_path('images/logo-st.png') }}" class="logo" alt="Logo">
-
+        <td style="border: 1px solid black; width: 20%; text-align: center;">
+            <img src="file://{{ public_path('images/logo-st.png') }}" alt="Logo Perusahaan" style="width: 40%; height: auto;">
         </td>
-        <td style="width: 60%; text-align: center;">
+        <td style="border: 1px solid black; text-align: center;" colspan="2">
             <h2 style="margin: 0;">IZIN KERJA UMUM</h2>
         </td>
-        <td style="width: 20%; text-align: right;">
-            <span class="label">Nomor:</span> <span style="color:gray;">-</span>
+        <td style="border: 1px solid black; width: 25%;">
+            <strong>Nomor:</strong> <span style="color: gray;">Jika ada</span>
         </td>
     </tr>
 </table>
-
-{{-- Deskripsi --}}
-<p style="text-align: justify; margin-top: 5px;">
-    Izin kerja ini diberikan untuk pekerjaan tidak rutin yang berisiko menyebabkan kecelakaan atau pekerjaan rutin
-    yang ditetapkan dengan izin kerja misalnya pekerjaan isolasi dan penguncian, pekerjaan panas di luar
-    <i>Hot Work Designated Area</i>, dan lain-lain.
-</p>
+<br>
 
 {{-- 1. Detail Pekerjaan --}}
 <div class="section-title">1. Detail Pekerjaan</div>
@@ -554,7 +545,7 @@
             <th colspan="3" style="background-color: black; color: white; font-weight: bold;">
                 10. Penutupan Izin Kerja
             </th>
-            <th style="width: 10%; background-color: black; color: white; text-align: center;">(O)</th>
+            <th style="width: 10%; background-color: black; color: white; text-align: center;">(ya/na)</th>
         </tr>
     </thead>
     <tbody>

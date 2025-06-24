@@ -42,8 +42,7 @@
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
     <tr>
         <td style="border: 1px solid black; width: 20%; text-align: center;">
-            <img src="{{ public_path('images/logo-tonasa.png') }}" alt="Logo Perusahaan" style="width: 80px; height: auto;">
-            <div style="font-size: 12px;">Logo Perusahaan</div>
+            <img src="file://{{ public_path('images/logo-st.png') }}" alt="Logo Perusahaan" style="width: 40%; height: auto;">
         </td>
         <td style="border: 1px solid black; text-align: center;" colspan="2">
             <h2 style="margin: 0;">IZIN KERJA</h2>
@@ -55,10 +54,10 @@
     </tr>
     <tr>
         <td colspan="4" style="border: 1px solid black; font-size: 12px; padding: 5px; text-align: justify;">
-            Izin kerja ini diberikan untuk pekerjaan di ketinggian yang memiliki risiko terjatuh dari ketinggian ≥ 1.8 m, penggunaan <i>man basket</i>/<i>man box</i> dengan <i>mobile crane</i>/<i>hoist winch</i> atau yang sejenis untuk mengangkat orang serta penggunaan gondola. Pekerjaan tidak bisa dimulai hingga izin kerja di verifikasi oleh <i>Permit Verificator</i>, diterbitkan oleh <i>Permit Issuer</i>, disahkan oleh <i>Permit Authorizer</i> dan <i>major hazards & control</i> disosialisasikan oleh <i>Permit Receiver</i>.
-        </td>
+          Izin kerja ini diberikan untuk pekerjaan di ketinggian yang memiliki risiko terjatuh dari ketinggian ≥ 1.8 m, penggunaan man basket/man box dengan mobile crane/hoist winch atau yang sejenis untuk mengangkat orang serta penggunaan gondola. Pekerjaan tidak bisa dimulai hingga izin kerja di verifikasi oleh Permit Verificator, diterbitkan oleh Permit Issuer, disahkan oleh Permit Authorizer dan major hazards & control disosialisasikan oleh Permit Receiver.
     </tr>
 </table>
+<br>  
 
 <!-- Bagian 1: Detail Pekerjaan -->
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
@@ -101,40 +100,62 @@
     </tbody>
 </table>
 @php
-    $pekerja = $permit->nama_pekerja ?? [];
-    $paraf = $permit->paraf_pekerja ?? [];
+    $pekerjaList = is_array($permit->nama_pekerja)
+        ? $permit->nama_pekerja
+        : json_decode($permit->nama_pekerja, true) ?? [];
 @endphp
 
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+{{-- BAGIAN 2: Daftar Pekerja dan Sketsa Pekerjaan --}}
+<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; margin-bottom: 0;">
     <thead>
         <tr>
-            <th colspan="7" style="background-color: black; color: white; font-weight: bold; text-align: left; padding: 5px;">
-                2. Daftar Pekerja dan Sketsa Pekerjaan <span style="font-weight: normal; font-size: 12px;">(bisa dalam lampiran terpisah)</span>
+            <th colspan="2" style="background-color: black; color: white; text-align: left; padding: 5px;">
+                2. Daftar Pekerja dan Sketsa Pekerjaan
+                <span style="font-weight: normal; font-size: 12px;">(bisa dalam lampiran terpisah)</span>
             </th>
         </tr>
         <tr>
             <th style="border: 1px solid black; padding: 5px;">Nama</th>
             <th style="border: 1px solid black; padding: 5px;">Paraf</th>
-            <th style="border: 1px solid black; padding: 5px;">Nama</th>
-            <th style="border: 1px solid black; padding: 5px;">Paraf</th>
-            <th style="border: 1px solid black; padding: 5px;">Nama</th>
-            <th style="border: 1px solid black; padding: 5px;">Paraf</th>
-            <th style="border: 1px solid black; padding: 5px; width: 25%; color: #ccc; text-align: center;">Jika Diperlukan</th>
         </tr>
     </thead>
     <tbody>
-        @for ($i = 0; $i < ceil(count($pekerja ?? []) / 3); $i++)
-        <tr>
-            @for ($j = 0; $j < 3; $j++)
-                @php $index = ($i * 3) + $j; @endphp
-                <td style="border: 1px solid black; padding: 5px;">{{ $pekerja[$index] ?? '' }}</td>
-                <td style="border: 1px solid black; padding: 5px;">{{ $paraf[$index] ?? '' }}</td>
-            @endfor
-            <td style="border: 1px solid black;"></td>
-        </tr>
-        @endfor
+        @foreach ($pekerjaList as $item)
+            <tr>
+                <td style="border: 1px solid black; padding: 5px;">
+                    {{ $item['nama'] ?? '-' }}
+                </td>
+             <td style="border: 1px solid black; padding: 5px; text-align: center;">
+    @if (!empty($item['signature']) && str_starts_with($item['signature'], 'data:image'))
+        <img src="{{ $item['signature'] }}" style="height: 40px;">
+    @else
+        -
+    @endif
+</td>
+
+            </tr>
+        @endforeach
     </tbody>
 </table>
+
+{{-- SKETSA PEKERJAAN --}}
+@if (!empty($permit->sketsa_pekerjaan))
+  <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+    <tr>
+        <td colspan="2" style="font-weight: bold; padding: 5px;">Sketsa Pekerjaan:</td>
+    </tr>
+    <tr>
+        <td colspan="2" style="text-align: center; padding: 10px; border: 1px solid black;">
+            <img src="{{ public_path($permit->sketsa_pekerjaan) }}"
+                 alt="Sketsa Pekerjaan"
+                 style="max-width: 400px; height: auto;">
+        </td>
+    </tr>
+</table>
+
+@endif
+
+
 @php
     $items = [
         'Area kerja sudah diperiksa, semua bahaya dan risiko yang bisa diketahui sudah diidentifikasi.',

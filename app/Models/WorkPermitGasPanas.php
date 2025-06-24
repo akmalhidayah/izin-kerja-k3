@@ -16,6 +16,7 @@ class WorkPermitGasPanas extends Model
 
         // Bagian 2
         'daftar_pekerja',
+        'sketsa_pekerjaan',
 
         // Bagian 3
         'checklist_kerja_aman',
@@ -58,6 +59,8 @@ class WorkPermitGasPanas extends Model
         'permit_receiver_sign',
         'permit_receiver_date',
         'permit_receiver_time',
+
+                'token',
     ];
 
     protected $casts = [
@@ -78,9 +81,22 @@ class WorkPermitGasPanas extends Model
     {
         return $this->belongsTo(Notification::class);
     }
+public function detail()
+{
+    return $this->hasOne(\App\Models\WorkPermitDetail::class, 'notification_id', 'notification_id')
+                ->where('permit_type', 'gaspanas');
+}
 
-    public function detail()
-    {
-        return $this->belongsTo(WorkPermitDetail::class, 'work_permit_detail_id');
-    }
+public function closure()
+{
+    return $this->hasOneThrough(
+        \App\Models\WorkPermitClosure::class,
+        \App\Models\WorkPermitDetail::class,
+        'notification_id',      // foreign key on WorkPermitDetail
+        'work_permit_detail_id', // foreign key on WorkPermitClosure
+        'notification_id',       // local key on WorkPermitGasPanas
+        'id'                     // local key on WorkPermitDetail
+    )->where('permit_type', 'gaspanas');
+}
+
 }

@@ -60,9 +60,16 @@ return new class extends Migration {
 
             // Bagian 10: Persetujuan
             $table->string('scaffolding_verificator_approval')->nullable();
+            $table->string('signature_verificator_approval')->nullable();
             $table->string('permit_issuer_approval')->nullable();
+            $table->string('signature_issuer_approval')->nullable();
             $table->string('permit_authorizer_approval')->nullable();
-
+            $table->string('signature_authorizer_approval')->nullable();
+             $table->date('perancah_start_date')->nullable();
+            $table->time('perancah_start_time')->nullable();
+            $table->date('perancah_end_date')->nullable();
+            $table->time('perancah_end_time')->nullable();
+            $table->string('token')->unique()->nullable();
             $table->timestamps();
         });
     }

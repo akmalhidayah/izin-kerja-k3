@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Izin Kerja Umum</title>
+    <title>Izin Kerja Khusus</title>
     <style>
         @page { size: A4; margin: 10mm; }
         body {
@@ -39,46 +39,91 @@
     </style>
 </head>
 <body>
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
-    <thead>
-        <tr>
-            <th colspan="4" style="background-color: black; color: white; font-weight: bold; text-align: left; padding: 5px;">
-                1. Detail Pekerjaan Pemasangan/Pendirian Perancah
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="border: 1px solid black; font-weight: bold; padding: 5px; width: 25%;">Lokasi pekerjaan:</td>
-            <td style="border: 1px solid black; padding: 5px; width: 40%;"></td>
-            <td style="border: 1px solid black; font-weight: bold; padding: 5px; width: 15%;">Tanggal:</td>
-            <td style="border: 1px solid black; padding: 5px;"></td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; font-weight: bold; padding: 5px;">Uraian pekerjaan:</td>
-            <td style="border: 1px solid black;" colspan="3" rowspan="2"></td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; font-weight: bold; padding: 5px;">&nbsp;</td>
-        </tr>
-        <tr>
-            <td colspan="4" style="border: 1px solid black; font-weight: bold; padding: 5px;">
-                Peralatan/perlengkapan yang akan digunakan pada pekerjaan:
-            </td>
-        </tr>
-        <tr>
-            <td colspan="4" style="border: 1px solid black; height: 50px;"></td>
-        </tr>
-        <tr>
-            <td colspan="2" style="border: 1px solid black; font-weight: bold; padding: 5px;">
-                Perkiraan jumlah pekerja yang akan terlibat dalam pekerjaan ini:
-            </td>
-            <td colspan="2" style="border: 1px solid black; font-weight: bold; padding: 5px;">
-                Nomor gawat darurat yang harus dihubungi saat darurat:
-            </td>
-        </tr>
-    </tbody>
+
+<!-- Header dan Deskripsi Form -->
+<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 13px;">
+    <tr>
+        <td style="border: 1px solid black; width: 20%; text-align: center;">
+           <img src="file://{{ public_path('images/logo-st.png') }}" alt="Logo Perusahaan" style="width: 40%; height: auto;">
+        </td>
+        <td colspan="2" style="border: 1px solid black; text-align: center;">
+            <h2 style="margin: 0;">IZIN KERJA</h2>
+            <h3 style="margin: 0;">PEKERJAAN PERANCAH</h3>
+        </td>
+        <td style="border: 1px solid black; width: 25%;">
+            <strong>Nomor:</strong> <span style="color: gray;">Jika ada</span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4" style="border: 1px solid black; font-size: 12px; padding: 5px; text-align: justify;">
+           Izin kerja ini diberikan untuk semua pekerjaan pemasangan dan pembongkaran perancah. Pekerjaan tidak bisa dimulai hingga izin kerja di verifikasi oleh 
+            Permit Verificator, diterbitkan oleh Permit Issuer, disahkan oleh Permit Authorizer dan major hazards & control disosialisasikan oleh Permit Receiver. 
+        </td>
+    </tr>
 </table>
+{{-- 1. Detail Pekerjaan --}}
+<div class="section-title" style="background-color: black; color: white; padding: 5px; font-weight: bold;">
+    1. Detail Pekerjaan
+</div>
+
+<table class="table" style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 13px;">
+    <tr>
+        <th style="width: 50%; text-align: left;">Lokasi pekerjaan:</th>
+        <th style="width: 50%; text-align: left;">Tanggal:</th>
+    </tr>
+    <tr>
+        <td>{{ $detail->location ?? '-' }}</td>
+        <td>{{ $detail->work_date ?? '-' }}</td>
+    </tr>
+
+    <tr>
+        <th colspan="2" style="text-align: left;">Uraian pekerjaan:</th>
+    </tr>
+    <tr>
+        <td colspan="2">{{ $detail->job_description ?? '-' }}</td>
+    </tr>
+
+    @if (!empty($permit->sketsa_perancah) && file_exists(public_path($permit->sketsa_perancah)))
+    <tr>
+        <th colspan="2" style="text-align: left;">Sketsa Perancah:</th>
+    </tr>
+    <tr>
+        <td colspan="2" style="text-align: center; padding-top: 10px;">
+            <img src="{{ public_path($permit->sketsa_perancah) }}" style="max-width: 100%; max-height: 400px;" alt="Sketsa Perancah">
+        </td>
+    </tr>
+    @endif
+
+    <tr>
+        <th colspan="2" style="text-align: left;">Peralatan/perlengkapan yang akan digunakan pada pekerjaan:</th>
+    </tr>
+    <tr>
+        <td colspan="2">{{ $detail->equipment ?? '-' }}</td>
+    </tr>
+
+    <tr>
+        <th style="width: 50%; text-align: left;">Perkiraan jumlah pekerja yang akan terlibat dalam pekerjaan ini:</th>
+        <th style="width: 50%; text-align: left;">Nomor gawat darurat yang harus dihubungi saat darurat:</th>
+    </tr>
+    <tr>
+        <td>{{ $detail->worker_count ?? '-' }} Orang</td>
+        <td>{{ $detail->emergency_contact ?? '-' }}</td>
+    </tr>
+</table>
+
+
+@php
+    $checklist = json_decode($permit?->persyaratan_perancah ?? '[]', true);
+    $items = [
+        'Area kerja sudah diperiksa, semua bahaya dan risiko yang bisa diketahui sudah diidentifikasi, area dipasang safety line/barikade.',
+        '<i>Job Safety Analysis/Safe Working Procedure</i> sudah tersedia untuk jenis perancah yang akan dipasang/didirikan.',
+        'Scaffolder memiliki sertifikasi sebagai Teknisi Perancah, memakai FBH double hook sesuai dan paham penggunaannya.',
+        'Scaffolder yang memasang perancah gantung dinyatakan fit untuk bekerja di ketinggian, perancah gantung memerlukan Izin Kerja Bekerja di Ketinggian.',
+        'Material perancah dan semua aksesorisnya dalam kondisi layak pakai.',
+        'Perancah kompleks (misalnya perancah di permukaan yang tingginya sampai puluhan <i>lift</i>) telah di review dan disetujui oleh <i>Civil Engineer</i> untuk dipasang/didirikan.',
+    ];
+@endphp
+
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
     <thead>
         <tr>
@@ -89,26 +134,19 @@
         </tr>
     </thead>
     <tbody>
-        @php
-            $items = [
-                'Area kerja sudah diperiksa, semua bahaya dan risiko yang bisa diketahui sudah diidentifikasi, area dipasang safety line/barikade.' => 'Ya',
-                '<i>Job Safety Analysis/Safe Working Procedure</i> sudah tersedia untuk jenis perancah yang akan dipasang/didirikan.' => 'Ya',
-                'Scaffolder memiliki sertifikasi sebagai Teknisi Perancah, memakai FBH double hook sesuai dan paham penggunaannya.' => 'Ya',
-                'Scaffolder yang memasang perancah gantung dinyatakan fit untuk bekerja di ketinggian, perancah gantung memerlukan Izin Kerja Bekerja di Ketinggian.' => 'Ya / N/A',
-                'Material perancah dan semua aksesorisnya dalam kondisi layak pakai.' => 'Ya',
-                'Perancah kompleks (misalnya perancah di permukaan yang tingginya sampai puluhan <i>lift</i>) telah di review dan disetujui oleh <i>Civil Engineer</i> untuk dipasang/didirikan.' => 'Ya / N/A',
-            ];
-        @endphp
-
-        @foreach ($items as $text => $check)
+        @foreach ($items as $i => $text)
         <tr>
             <td style="width: 5%; border: 1px solid black; text-align: center;">•</td>
             <td style="border: 1px solid black; padding: 5px;">{!! $text !!}</td>
-            <td style="border: 1px solid black; text-align: center;">{!! $check !!}</td>
+            <td style="border: 1px solid black; text-align: center;">
+                {{ isset($checklist[$i]) ? ($checklist[$i] === 'ya' ? 'Ya' : ($checklist[$i] === 'na' ? 'N/A' : 'Tidak')) : 'Tidak' }}
+            </td>
         </tr>
         @endforeach
     </tbody>
 </table>
+
+
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
     <thead>
         <tr>
@@ -119,27 +157,28 @@
     </thead>
     <tbody>
         <tr>
-            <td colspan="4" style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 5px;">
-                Permit Requestor:
-            </td>
+            <td colspan="4" style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 5px;">Permit Requestor:</td>
         </tr>
         <tr>
             <td colspan="4" style="border: 1px solid black; padding: 5px; text-align: justify;">
-                Saya menyatakan bahwa semua persyaratan kerja aman untuk pemasangan/pendirian perancah yang telah ditentukan telah dipenuhi
-                untuk dapat memulai memasang/mendirikan perancah ini.
+                Saya menyatakan bahwa semua persyaratan kerja aman untuk pemasangan/pendirian perancah yang telah ditentukan telah dipenuhi untuk dapat memulai memasang/mendirikan perancah ini.
             </td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Nama:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Tanda tangan:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Tanggal:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Jam:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Nama:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Tanda tangan:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Tanggal:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Jam:</td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; height: 40px;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_requestor_name ?? '' }}</td>
+            <td style="border: 1px solid black; text-align: center;">
+                @if ($permit?->signature_permit_requestor_perancah)
+                    <img src="{{ public_path($permit->signature_permit_requestor_perancah) }}" height="50">
+                @endif
+            </td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_requestor_date ?? '' }}</td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_requestor_time ?? '' }}</td>
         </tr>
     </tbody>
 </table>
@@ -163,19 +202,24 @@
             </td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Nama:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Tanda tangan:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Tanggal:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Jam:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Nama:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Tanda tangan:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Tanggal:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Jam:</td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; height: 40px;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
+            <td style="border: 1px solid black;">{{ $permit?->scaffolding_verificator_name ?? '' }}</td>
+            <td style="border: 1px solid black; text-align: center;">
+                @if ($permit?->signature_scaffolding_verificator)
+                    <img src="{{ public_path($permit->signature_scaffolding_verificator) }}" height="50" alt="TTD">
+                @endif
+            </td>
+            <td style="border: 1px solid black;">{{ $permit?->scaffolding_verificator_date ?? '' }}</td>
+            <td style="border: 1px solid black;">{{ $permit?->scaffolding_verificator_time ?? '' }}</td>
         </tr>
     </tbody>
 </table>
+{{-- Bagian 5 --}}
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
     <thead>
         <tr>
@@ -186,9 +230,7 @@
     </thead>
     <tbody>
         <tr>
-            <td colspan="4" style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 5px;">
-                Permit Issuer:
-            </td>
+            <td colspan="4" style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 5px;">Permit Issuer:</td>
         </tr>
         <tr>
             <td colspan="4" style="border: 1px solid black; padding: 5px; text-align: justify;">
@@ -202,20 +244,26 @@
             <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Jam:</td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; height: 40px;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_issuer_name }}</td>
+            <td style="border: 1px solid black; text-align: center;">
+                @if ($permit?->signature_permit_issuer)
+                    <img src="{{ public_path($permit->signature_permit_issuer) }}" height="40">
+                @endif
+            </td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_issuer_date }}</td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_issuer_time }}</td>
         </tr>
         <tr>
             <td colspan="4" style="border: 1px solid black; padding: 5px;">
-                Izin kerja ini berlaku dari tanggal: &nbsp; / &nbsp;/ &nbsp; jam: &nbsp; _______ &nbsp;
-                sampai tanggal &nbsp; / &nbsp;/ &nbsp; jam: &nbsp; _______
+                Izin kerja ini berlaku dari tanggal: {{ $permit?->izin_berlaku_dari }} jam: {{ $permit?->izin_berlaku_jam_dari }} &nbsp;
+                sampai tanggal {{ $permit?->izin_berlaku_sampai }} jam: {{ $permit?->izin_berlaku_jam_sampai }}
             </td>
         </tr>
     </tbody>
 </table>
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
+
+{{-- Bagian 6 --}}
+<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-top: 10px;">
     <thead>
         <tr>
             <th colspan="4" style="background-color: black; color: white; font-weight: bold; text-align: left; padding: 5px;">
@@ -225,9 +273,7 @@
     </thead>
     <tbody>
         <tr>
-            <td colspan="4" style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 5px;">
-                Permit Authorizer:
-            </td>
+            <td colspan="4" style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 5px;">Permit Authorizer:</td>
         </tr>
         <tr>
             <td colspan="4" style="border: 1px solid black; padding: 5px; text-align: justify;">
@@ -235,20 +281,26 @@
             </td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Nama:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Tanda tangan:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Tanggal:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Jam:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Nama:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Tanda tangan:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Tanggal:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Jam:</td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; height: 40px;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_authorizer_name }}</td>
+            <td style="border: 1px solid black; text-align: center;">
+                @if ($permit?->signature_permit_authorizer)
+                    <img src="{{ public_path($permit->signature_permit_authorizer) }}" height="40">
+                @endif
+            </td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_authorizer_date }}</td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_authorizer_time }}</td>
         </tr>
     </tbody>
 </table>
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
+
+{{-- Bagian 7 --}}
+<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-top: 10px;">
     <thead>
         <tr>
             <th colspan="4" style="background-color: black; color: white; font-weight: bold; text-align: left; padding: 5px;">
@@ -258,9 +310,7 @@
     </thead>
     <tbody>
         <tr>
-            <td colspan="4" style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 5px;">
-                Permit Receiver:
-            </td>
+            <td colspan="4" style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 5px;">Permit Receiver:</td>
         </tr>
         <tr>
             <td colspan="4" style="border: 1px solid black; padding: 5px; text-align: justify;">
@@ -268,20 +318,26 @@
             </td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Nama:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Tanda tangan:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Tanggal:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; width: 25%;">Jam:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Nama:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Tanda tangan:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Tanggal:</td>
+            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Jam:</td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; height: 40px;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td style="border: 1px solid black;"></td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_receiver_name }}</td>
+            <td style="border: 1px solid black; text-align: center;">
+                @if ($permit?->signature_permit_receiver)
+                    <img src="{{ public_path($permit->signature_permit_receiver) }}" height="40">
+                @endif
+            </td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_receiver_date }}</td>
+            <td style="border: 1px solid black;">{{ $permit?->permit_receiver_time }}</td>
         </tr>
     </tbody>
 </table>
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
+
+{{-- Bagian 8 --}}
+<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-top: 15px;">
     <thead>
         <tr>
             <th colspan="2" style="background-color: black; color: white; font-weight: bold; text-align: left; padding: 5px;">
@@ -293,31 +349,36 @@
     <tbody>
         @php
             $items = [
-                'Semua kaki-kaki perancah (<i>vertical standard</i>) dipasang tegak lurus, terpasang <i>base plate</i> di dasarnya dan menyentuh permukaan.',
-                'Semua ujung kaki-kaki perancah selain dipasang <i>base plate</i> juga dipasang <i>base pad</i> untuk meredam getaran/mencegah amblas.',
-                'Pemasangan <i>transom</i> dan <i>ledger</i> berada di dalam <i>vertical standard</i>, pemasangan <i>transom/putlog</i> di atas <i>ledger</i>.',
-                'Posisi baut <i>clamp</i> pengikat menghadap ke atas pada <i>ledger</i> yang diikatkan pada <i>vertical standard</i>.',
-                'Jarak antara <i>vertical standard</i> secara menyamping/memanjang (<i>bay</i>) dan jarak antar <i>ledger</i> (<i>lift</i>) sesuai dengan kelasnya <i>light duty</i>/ <i>medium duty</i>/<i>heavy duty</i>.',
-                'Semua <i>bracing</i> yang diperlukan sudah terpasang.',
-                'Dipasang <i>outrigger</i> untuk menstabilkan perancah atau mengikatkan/menghubungkannya dengan aman pada struktur yang kuat.',
-                '<i>Metal/wooden platform</i> yang dipasang kondisinya baik dan kuat menahan beban pekerja/material/peralatan, terikat kuat oleh kawat pengikat, dipasang sesuai tidak menimbulkan risiko tersandung, tidak ada celah terbuka yang bisa menimbulkan risiko terjatuh.',
-                'Pagar pengaman dan toe <i>board</i> terpasang pada setiap lantai perancah.',
-                'Tersedia tangga naik/turun dengan penempatan dan kemiringan yang aman, tangga melebihi 6 meter dipasang secara <i>zig-zag</i>, terikat kuat pada perancah.',
-                'Batas demarkasi/<i>safety line</i> telah dipasang di sekeliling bawah struktur perancah.',
-                'Kabel listrik dekat struktur perancah telah diamankan untuk mencegah risiko perancah terkena aliran listrik.',
-                'Dipasang katrol yang aman untuk menaikkan/menurunkan barang.'
+                0 => 'Semua kaki-kaki perancah (<i>vertical standard</i>) dipasang tegak lurus...',
+                1 => 'Semua ujung kaki-kaki perancah selain dipasang <i>base plate</i> juga dipasang <i>base pad</i>...',
+                2 => 'Pemasangan <i>transom</i> dan <i>ledger</i> berada di dalam <i>vertical standard</i>...',
+                3 => 'Posisi baut <i>clamp</i> pengikat menghadap ke atas...',
+                4 => 'Jarak antara <i>vertical standard</i> secara menyamping...',
+                5 => 'Semua <i>bracing</i> yang diperlukan sudah terpasang.',
+                6 => 'Dipasang <i>outrigger</i> untuk menstabilkan perancah...',
+                7 => '<i>Metal/wooden platform</i> yang dipasang kondisinya baik...',
+                8 => 'Pagar pengaman dan toe <i>board</i> terpasang...',
+                9 => 'Tersedia tangga naik/turun dengan penempatan dan kemiringan yang aman...',
+                10 => 'Batas demarkasi/<i>safety line</i> telah dipasang...',
+                11 => 'Kabel listrik dekat struktur perancah telah diamankan...',
+                12 => 'Dipasang katrol yang aman untuk menaikkan/menurunkan barang.'
             ];
+            $safety = json_decode($permit->persyaratan_keselamatan_perancah ?? '{}', true);
         @endphp
 
-        @foreach ($items as $text)
+        @foreach ($items as $key => $text)
         <tr>
             <td style="width: 5%; border: 1px solid black; text-align: center;">•</td>
             <td style="border: 1px solid black; padding: 5px;">{!! $text !!}</td>
-            <td style="border: 1px solid black; text-align: center;">Ya / N/A</td>
+            <td style="border: 1px solid black; text-align: center;">
+                {{ strtoupper($safety[$key] ?? '-') }}
+            </td>
         </tr>
         @endforeach
     </tbody>
 </table>
+
+{{-- Bagian 9 --}}
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
     <thead>
         <tr>
@@ -329,11 +390,12 @@
     </thead>
     <tbody>
         <tr>
-            <td colspan="2" style="border: 1px solid black; height: 60px;"></td>
-            <td style="border: 1px solid black; text-align: center;">Ya</td>
+            <td colspan="2" style="border: 1px solid black; height: 60px;">{{ $permit->rekomendasi_keselamatan_perancah ?? '' }}</td>
+            <td style="border: 1px solid black; text-align: center;">{{ strtoupper($permit->rekomendasi_status ?? '-') }}</td>
         </tr>
     </tbody>
 </table>
+{{-- Bagian 10 --}}
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
     <thead>
         <tr>
@@ -346,7 +408,7 @@
         <tr>
             <td colspan="4" style="border: 1px solid black; padding: 5px; text-align: justify;">
                 <i>Scaffolding Permit Verificator, Permit Issuer & Permit Authorizer</i><br>
-                Saya menyatakan bahwa saya telah memeriksa perancah dan semua persyaratan keselamatan perancah yang telah ditentukan dan atau rekomendasi persyaratan keselamatan perancah tambahan dari <i>Permit Verificator/Permit Issuer</i> telah dipenuhi untuk perancah ini dapat digunakan.
+                Saya menyatakan bahwa saya telah memeriksa perancah dan semua persyaratan keselamatan perancah serta rekomendasi tambahan telah dipenuhi untuk perancah ini dapat digunakan.
             </td>
         </tr>
         <tr style="text-align: center; font-style: italic; font-weight: bold;">
@@ -355,60 +417,98 @@
             <td colspan="2" style="border: 1px solid black;">Permit Authorizer</td>
         </tr>
         <tr>
-            <td style="border: 1px solid black; height: 40px;"></td>
-            <td style="border: 1px solid black;"></td>
-            <td colspan="2" style="border: 1px solid black;"></td>
+            <td style="border: 1px solid black; text-align: center;">
+                {{ $permit?->scaffolding_verificator_name }}<br>
+                @if ($permit?->signature_scaffolding_verificator)
+                    <img src="{{ public_path($permit->signature_scaffolding_verificator) }}" height="40">
+                @endif
+            </td>
+            <td style="border: 1px solid black; text-align: center;">
+                {{ $permit?->permit_issuer_name }}<br>
+                @if ($permit?->signature_permit_issuer)
+                    <img src="{{ public_path($permit->signature_permit_issuer) }}" height="40">
+                @endif
+            </td>
+            <td colspan="2" style="border: 1px solid black; text-align: center;">
+                {{ $permit?->permit_authorizer_name }}<br>
+                @if ($permit?->signature_permit_authorizer)
+                    <img src="{{ public_path($permit->signature_permit_authorizer) }}" height="40">
+                @endif
+            </td>
         </tr>
         <tr>
-            <td colspan="2" style="border: 1px solid black; font-weight: bold;">Perancah ini berlaku dari tanggal: &nbsp;&nbsp;&nbsp;/ &nbsp;&nbsp;&nbsp;/ &nbsp;&nbsp;&nbsp; jam:</td>
-            <td colspan="2" style="border: 1px solid black; font-weight: bold;">sampai tanggal &nbsp;&nbsp;&nbsp;/ &nbsp;&nbsp;&nbsp;/ &nbsp;&nbsp;&nbsp; jam:</td>
-        </tr>
-    </tbody>
-</table>
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
-    <thead>
-        <tr>
-            <th colspan="2" style="background-color: black; color: white; text-align: left; padding: 5px;">
-                11. Penutupan Izin Kerja
-            </th>
-            <th style="background-color: black; color: white; text-align: center; width: 8%;">(lingkari)</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 4px;">Lock & Tag</td>
-            <td style="border: 1px solid black; padding: 4px;">Semua <i>lock & tag</i> sudah dilepas</td>
-            <td style="border: 1px solid black; text-align: center;">Ya N/A</td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 4px;">Sampah & Peralatan Kerja</td>
-            <td style="border: 1px solid black; padding: 4px;">Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan</td>
-            <td style="border: 1px solid black; text-align: center;">Ya</td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; font-style: italic; font-weight: bold; padding: 4px;">Machine Guarding</td>
-            <td style="border: 1px solid black; padding: 4px;">Semua <i>machine guarding</i> sudah dipasang kembali</td>
-            <td style="border: 1px solid black; text-align: center;">Ya N/A</td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center; padding: 6px;">Tanggal:</td>
-            <td style="border: 1px solid black; font-weight: bold; text-align: center;">Jam:</td>
-            <td style="border: 1px solid black;" colspan="2">
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                    <tr>
-                        <td style="text-align: center; font-weight: bold;">Tanda Tangan</td>
-                    </tr>
-                    <tr>
-                        <td style="display: flex; justify-content: space-between; padding: 0 20px;">
-                            <span style="font-style: italic;">Permit Requestor</span>
-                            <span style="font-style: italic;">Permit Issuer</span>
-                        </td>
-                    </tr>
-                </table>
+            <td colspan="2" style="border: 1px solid black; font-weight: bold;">
+                Perancah ini berlaku dari tanggal:
+                {{ $permit?->scaffolding_verificator_date ? \Carbon\Carbon::parse($permit->scaffolding_verificator_date)->format('d/m/Y') : '___/___/____' }}
+                jam: {{ $permit?->scaffolding_verificator_time ?? '__:__' }}
+            </td>
+            <td colspan="2" style="border: 1px solid black; font-weight: bold;">
+                sampai tanggal
+                {{ $permit?->permit_authorizer_date ? \Carbon\Carbon::parse($permit->permit_authorizer_date)->format('d/m/Y') : '___/___/____' }}
+                jam: {{ $permit?->permit_authorizer_time ?? '__:__' }}
             </td>
         </tr>
     </tbody>
 </table>
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th colspan="3" style="background-color: black; color: white; text-align: left; padding: 5px; font-weight: bold;">
+                11. Penutupan Izin Kerja
+            </th>
+            <th style="width: 10%; background-color: black; color: white; text-align: center;">(ya/na)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="width: 20%; font-style: italic;"><b>Lock & Tag</b></td>
+            <td colspan="2">Semua <i>lock & tag</i> sudah dilepas</td>
+            <td style="text-align: center;">{{ $closure?->lock_tag_removed ? 'ya' : 'tidak' }}</td>
+        </tr>
+        <tr>
+            <td style="font-style: italic;"><b>Sampah & Peralatan Kerja</b></td>
+            <td colspan="2">Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan</td>
+            <td style="text-align: center;">{{ $closure?->equipment_cleaned ? 'ya' : 'tidak' }}</td>
+        </tr>
+        <tr>
+            <td style="font-style: italic;"><b>Machine Guarding</b></td>
+            <td colspan="2">Semua <i>machine guarding</i> sudah dipasang kembali</td>
+            <td style="text-align: center;">{{ $closure?->guarding_restored ? 'ya' : 'tidak' }}</td>
+        </tr>
+
+        {{-- Tanda Tangan --}}
+        <tr>
+            <th style="width: 25%;">Tanggal:</th>
+            <th style="width: 25%;">Jam:</th>
+            <th colspan="2" style="text-align: center;">Tanda Tangan</th>
+        </tr>
+        <tr>
+            <td>{{ $closure?->closed_date ?? '-' }}</td>
+            <td>{{ $closure?->closed_time ?? '-' }}</td>
+            <td style="text-align: center;">
+                {{ $closure?->requestor_name ?? '-' }}<br>
+                @if($closure?->requestor_sign)
+                    <img src="{{ public_path($closure->requestor_sign) }}" style="height: 50px;" alt="TTD">
+                @endif
+                <div><i>Permit Requestor</i></div>
+            </td>
+            <td style="text-align: center;">
+                {{ $closure?->issuer_name ?? '-' }}<br>
+                @if($closure?->issuer_sign)
+                    <img src="{{ public_path($closure->issuer_sign) }}" style="height: 50px;" alt="TTD">
+                @endif
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="font-weight: bold;">Jumlah RFID yang digunakan</td>
+            <td colspan="2" style="text-align: center;">{{ $closure?->jumlah_rfid ?? '-' }}</td>
+        </tr>
+    </tbody>
+</table>
+
 
 </body>
 </html>

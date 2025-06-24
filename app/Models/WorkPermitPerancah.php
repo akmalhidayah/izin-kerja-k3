@@ -59,10 +59,20 @@ class WorkPermitPerancah extends Model
         'rekomendasi_keselamatan_perancah',
         'rekomendasi_status',
 
-        // Bagian 10
-        'scaffolding_verificator_approval',
-        'permit_issuer_approval',
-        'permit_authorizer_approval',
+// Bagian 10
+'scaffolding_verificator_approval',
+'permit_issuer_approval',
+'permit_authorizer_approval',
+'signature_verificator_approval',
+'signature_issuer_approval',
+'signature_authorizer_approval',
+ 'perancah_start_date',
+    'perancah_start_time',
+    'perancah_end_date',
+    'perancah_end_time',
+
+
+                'token',
     ];
 
     protected $casts = [
@@ -70,14 +80,28 @@ class WorkPermitPerancah extends Model
         'persyaratan_keselamatan_perancah' => 'array',
     ];
 
-    // Relasi jika dibutuhkan
-    public function detail()
+  // Relasi ke notification
+    public function notification()
     {
-        return $this->belongsTo(WorkPermitDetail::class, 'notification_id', 'notification_id');
+        return $this->belongsTo(Notification::class);
     }
 
+    // Relasi ke detail melalui notification_id
+    public function detail()
+    {
+        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id');
+    }
+
+    // Relasi ke closure melalui work_permit_detail_id
     public function closure()
     {
-        return $this->belongsTo(WorkPermitClosure::class, 'notification_id', 'notification_id');
+        return $this->hasOneThrough(
+            WorkPermitClosure::class,
+            WorkPermitDetail::class,
+            'notification_id',          // Foreign key on detail
+            'work_permit_detail_id',    // Foreign key on closure
+            'notification_id',          // Local key on this model
+            'id'                        // Local key on detail
+        );
     }
 }

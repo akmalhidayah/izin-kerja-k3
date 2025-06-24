@@ -14,6 +14,7 @@ return new class extends Migration {
             // Bagian 2
             $table->json('nama_pekerja')->nullable();
             $table->string('paraf_pekerja')->nullable();
+            $table->string('sketsa_pekerjaan')->nullable();
 
             // Bagian 3
             $table->json('kerja_aman_ketinggian')->nullable();
@@ -56,6 +57,8 @@ return new class extends Migration {
             $table->string('signature_permit_receiver')->nullable();
             $table->date('permit_receiver_date')->nullable();
             $table->time('permit_receiver_time')->nullable();
+
+            $table->string('token')->unique()->nullable();
 
             $table->timestamps();
         });

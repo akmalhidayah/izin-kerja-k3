@@ -13,7 +13,6 @@ class WorkPermitRuangTertutup extends Model
 
     protected $fillable = [
         'notification_id',
-        'token',
 
         // Bagian 2
         'isolasi_listrik',
@@ -72,6 +71,8 @@ class WorkPermitRuangTertutup extends Model
         'live_testing_signature',
         'live_testing_date',
         'live_testing_time',
+
+                'token',
     ];
 
     protected $casts = [
@@ -83,13 +84,25 @@ class WorkPermitRuangTertutup extends Model
         'live_testing_checklist' => 'array',
     ];
 
-    // Relasi ke notification jika diperlukan
-    public function notification()
+ public function notification()
     {
         return $this->belongsTo(Notification::class);
     }
-        public function detail()
+
+    public function detail()
     {
-        return $this->belongsTo(WorkPermitDetail::class, 'work_permit_detail_id');
+        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id');
+    }
+
+    public function closure()
+    {
+        return $this->hasOneThrough(
+            WorkPermitClosure::class,
+            WorkPermitDetail::class,
+            'notification_id',        // Foreign key on WorkPermitDetail
+            'work_permit_detail_id',  // Foreign key on WorkPermitClosure
+            'notification_id',        // Local key on current model
+            'id'                      // Local key on WorkPermitDetail
+        );
     }
 }

@@ -59,6 +59,15 @@ class PerancahPermitController extends Controller
                 'scaffolding_verificator_approval' => 'nullable|string',
                 'permit_issuer_approval' => 'nullable|string',
                 'permit_authorizer_approval' => 'nullable|string',
+                'signature_verificator_approval' => 'nullable|string',
+'signature_issuer_approval' => 'nullable|string',
+'signature_authorizer_approval' => 'nullable|string',
+'perancah_start_date' => 'nullable|date',
+'perancah_start_time' => 'nullable',
+'perancah_end_date' => 'nullable|date',
+'perancah_end_time' => 'nullable',
+
+
 
                 // Detail pekerjaan
                 'lokasi_pekerjaan' => 'nullable|string',
@@ -67,7 +76,8 @@ class PerancahPermitController extends Controller
                 'peralatan_digunakan' => 'nullable|string',
                 'jumlah_pekerja' => 'nullable|integer',
                 'nomor_darurat' => 'nullable|string',
-                'sketsa_perancah' => 'nullable|string',
+'sketsa_perancah_file' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+
 
                 // Penutupan
                 'close_lock_tag' => 'nullable|string',
@@ -91,16 +101,37 @@ class PerancahPermitController extends Controller
         $validated['signature_permit_issuer'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer');
         $validated['signature_permit_authorizer'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer');
         $validated['signature_permit_receiver'] = $this->saveSignature($request->input('signature_permit_receiver'), 'receiver');
+        $validated['signature_verificator_approval'] = $this->saveSignature($request->input('signature_scaffolding_verificator_approval'), 'verificator_approval');
+$validated['signature_issuer_approval'] = $this->saveSignature($request->input('signature_permit_issuer_approval'), 'issuer_approval');
+$validated['signature_authorizer_approval'] = $this->saveSignature($request->input('signature_permit_authorizer_approval'), 'authorizer_approval');
+
 
         // Simpan JSON
         $validated['persyaratan_perancah'] = json_encode($request->input('persyaratan_perancah', []));
         $validated['persyaratan_keselamatan_perancah'] = json_encode($request->input('persyaratan_keselamatan_perancah', []));
+if ($request->hasFile('sketsa_perancah_file')) {
+    // Hapus file lama jika ada
+    $old = WorkPermitPerancah::where('notification_id', $request->notification_id)->value('sketsa_perancah');
+    if ($old && file_exists(public_path($old))) {
+        unlink(public_path($old));
+    }
+
+    $file = $request->file('sketsa_perancah_file');
+    $filename = 'sketsa_' . uniqid() . '.' . $file->getClientOriginalExtension();
+    $path = $file->storeAs('public/sketsa-perancah', $filename);
+    $validated['sketsa_perancah'] = 'storage/sketsa-perancah/' . $filename;
+}
+
 
         // Simpan ke tabel work_permit_perancah
-        WorkPermitPerancah::updateOrCreate(
+        $permit = WorkPermitPerancah::updateOrCreate(
             ['notification_id' => $request->notification_id],
             array_filter($validated, fn($v) => $v !== null && $v !== '')
         );
+        if ($permit && !$permit->token) {
+    $permit->token = Str::uuid();
+    $permit->save();
+}
 
         // Simpan ke tabel work_permit_details
         $detail = WorkPermitDetail::updateOrCreate(
@@ -134,6 +165,29 @@ class PerancahPermitController extends Controller
         );
 
         return back()->with('success', 'Data Working Permit Perancah berhasil disimpan!');
+    }
+    public function showByToken($token)
+    {
+        $permit = WorkPermitPerancah::with(['detail', 'closure', 'notification'])->where('token', $token)->firstOrFail();
+
+        return view('pengajuan-user.workingpermit.form-token-perancah', [
+            'permit' => $permit,
+            'notification' => $permit->notification,
+            'detail' => $permit->detail,
+            'closure' => $permit->closure,
+            'jenis' => 'perancah',
+        ]);
+    }
+
+    public function storeByToken(Request $request, $token)
+    {
+        $permit = WorkPermitPerancah::where('token', $token)->firstOrFail();
+        $request->merge(['notification_id' => $permit->notification_id]);
+
+        app()->call([$this, 'store'], ['request' => $request]);
+
+        session()->flash('alert', 'Data berhasil disimpan melalui link token!');
+        return back();
     }
 
     private function saveSignature($base64, $role)

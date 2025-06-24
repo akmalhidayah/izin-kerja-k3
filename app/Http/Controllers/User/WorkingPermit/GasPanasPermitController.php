@@ -21,6 +21,7 @@ class GasPanasPermitController extends Controller
                 'notification_id' => 'required|integer|exists:notifications,id',
 
                 'daftar_pekerja' => 'nullable|array',
+                'sketsa_pekerjaan' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'syarat' => 'nullable|array',
                 'verified_workers' => 'nullable|array',
 
@@ -82,22 +83,32 @@ class GasPanasPermitController extends Controller
         $validated['notification_id'] = (int) $validated['notification_id'];
 
         // Simpan tanda tangan
-        $validated['permit_requestor_sign'] = $this->saveSignature($request->input('permit_requestor_sign'), 'requestor');
-        $validated['verificator_sign'] = $this->saveSignature($request->input('verificator_sign'), 'verificator');
-        $validated['permit_issuer_sign'] = $this->saveSignature($request->input('permit_issuer_sign'), 'issuer');
-        $validated['permit_authorizer_sign'] = $this->saveSignature($request->input('permit_authorizer_sign'), 'authorizer');
-        $validated['permit_receiver_sign'] = $this->saveSignature($request->input('permit_receiver_sign'), 'receiver');
+       $validated['permit_requestor_sign'] = $this->saveSignature($request->input('signature_permit_requestor'), 'requestor');
+$validated['verificator_sign'] = $this->saveSignature($request->input('signature_verificator'), 'verificator');
+$validated['permit_issuer_sign'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer');
+$validated['permit_authorizer_sign'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer');
+$validated['permit_receiver_sign'] = $this->saveSignature($request->input('signature_permit_receiver'), 'receiver');
 
         // Encode array ke JSON
         $validated['daftar_pekerja'] = json_encode($request->input('daftar_pekerja', []));
         $validated['checklist_kerja_aman'] = json_encode($request->input('syarat', []));
 $validated['verified_workers'] = json_encode($request->input('verified_workers', []));
 
+
+// Upload Sketsa
+if ($request->hasFile('sketsa_pekerjaan')) {
+    $path = $request->file('sketsa_pekerjaan')->store('uploads/sketsa', 'public');
+    $validated['sketsa_pekerjaan'] = 'storage/' . $path;
+} else {
+    $existing = WorkPermitGasPanas::where('notification_id', $validated['notification_id'])->first();
+    $validated['sketsa_pekerjaan'] = $existing?->sketsa_pekerjaan;
+}
         // Data untuk tabel gas panas SAJA
         $gaspanasData = array_filter([
             'notification_id' => $validated['notification_id'],
             'daftar_pekerja' => $validated['daftar_pekerja'],
             'checklist_kerja_aman' => $validated['checklist_kerja_aman'],
+              'sketsa_pekerjaan' => $validated['sketsa_pekerjaan'],
             'rekomendasi_tambahan' => $validated['rekomendasi_tambahan'] ?? null,
             'rekomendasi_status' => $validated['rekomendasi_status'] ?? null,
             'permit_requestor_name' => $validated['permit_requestor_name'] ?? null,
@@ -127,10 +138,17 @@ $validated['verified_workers'] = json_encode($request->input('verified_workers',
             'permit_receiver_time' => $validated['permit_receiver_time'] ?? null,
         ], fn($v) => $v !== null && $v !== '');
 
-        WorkPermitGasPanas::updateOrCreate(
-            ['notification_id' => $validated['notification_id']],
-            $gaspanasData
-        );
+
+        $permit = WorkPermitGasPanas::updateOrCreate(
+    ['notification_id' => $validated['notification_id']],
+    $gaspanasData
+);
+
+if (!$permit->token) {
+    $permit->token = Str::uuid();
+    $permit->save();
+}
+
 
         // Simpan ke tabel detail
         $detail = WorkPermitDetail::updateOrCreate(
@@ -164,6 +182,36 @@ $validated['verified_workers'] = json_encode($request->input('verified_workers',
 
         return back()->with('success', 'Data Working Permit Gas Panas berhasil disimpan!');
     }
+  public function showByToken($token)
+{
+$permit = WorkPermitGasPanas::with(['detail', 'closure', 'notification'])->where('token', $token)->firstOrFail();
+
+    $notification = $permit->notification;
+    $detail = $permit->detail;
+    $closure = $permit->closure;
+
+    return view('pengajuan-user.workingpermit.form-token-gaspanas', [ // ganti ke 1 blade umum
+        'permit' => $permit,
+        'notification' => $notification,
+        'detail' => $detail,
+        'closure' => $closure,
+        'jenis' => 'gaspanas', // agar bisa dipakai conditional include
+    ]);
+}
+
+public function storeByToken(Request $request, $token)
+{
+    $permit = WorkPermitGasPanas::where('token', $token)->firstOrFail();
+    $request->merge(['notification_id' => $permit->notification_id]);
+
+    // Simpan data
+    app()->call([$this, 'store'], ['request' => $request]);
+
+    // Flash alert JS
+    session()->flash('alert', 'Data berhasil disimpan melalui link token!');
+
+    return back();
+}
 
     private function saveSignature($base64, $role)
     {

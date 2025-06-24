@@ -60,6 +60,7 @@ return new class extends Migration {
             $table->date('permit_receiver_date')->nullable();
             $table->time('permit_receiver_time')->nullable();
 
+            $table->string('token')->unique()->nullable();            
             $table->timestamps();
         });
     }

@@ -62,8 +62,22 @@ class WorkPermitAir extends Model
         'persyaratan_perairan' => 'array',
         'verified_workers' => 'array',
     ];
-        public function detail()
-    {
-        return $this->belongsTo(WorkPermitDetail::class, 'work_permit_detail_id');
-    }
+public function detail()
+{
+    return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id');
 }
+
+    public function closure()
+{
+    return $this->hasOneThrough(
+        WorkPermitClosure::class,
+        WorkPermitDetail::class,
+        'notification_id', // Foreign key di WorkPermitDetail
+        'work_permit_detail_id', // Foreign key di WorkPermitClosure
+        'notification_id', // Local key di WorkPermitAir
+        'id' // Local key di WorkPermitDetail
+    );
+}
+
+}
+

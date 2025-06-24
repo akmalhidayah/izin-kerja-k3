@@ -1,7 +1,8 @@
+@php use Illuminate\Support\Carbon; @endphp
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-sm text-gray-800 dark:text-gray-200 leading-tight">
-            wORKING PERMIT UMUM
+            WORKING PERMIT UMUM
         </h2>
     </x-slot>
 
@@ -27,7 +28,7 @@
         <input type="text" name="lokasi_pekerjaan" placeholder="Lokasi Pekerjaan" class="input w-full"
                value="{{ old('lokasi_pekerjaan', $detail?->location) }}">
         <input type="date" name="tanggal_pekerjaan" placeholder="Tanggal" class="input w-full"
-             value="{{ old('tanggal_pekerjaan', \Carbon\Carbon::parse($detail?->work_date)->format('Y-m-d')) }}">
+             value="{{ old('tanggal_pekerjaan', \Illuminate\Support\Carbon::parse($detail?->work_date)->format('Y-m-d')) }}">
     </div>
 
     <textarea name="uraian_pekerjaan" placeholder="Uraian pekerjaan" class="textarea w-full mt-2">{{ old('uraian_pekerjaan', $detail?->job_description) }}</textarea>
@@ -333,29 +334,21 @@
 <!-- Bagian 6: Penerbitan Izin Kerja -->
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
     <h3 class="font-bold bg-black text-white px-2 py-1">6. Penerbitan Izin Kerja</h3>
-    @php
+@php
+    $issuerName = old('permit_issuer_name', $permit?->permit_issuer_name ?? '');
+    $issuerSign = old('signature_permit_issuer', $permit?->permit_issuer_sign ?? '');
 
-        $issuerName = old('permit_issuer_name', $permit?->permit_issuer_name ?? '');
-        $issuerSign = old('signature_permit_issuer', $permit?->permit_issuer_sign ?? '');
+    $issuerDateRaw = old('permit_issuer_date', $permit?->permit_issuer_date ?? '');
+    $issuerTimeRaw = old('permit_issuer_time', $permit?->permit_issuer_time ?? '');
 
-        $issuerDateRaw = old('permit_issuer_date', $permit?->permit_issuer_date);
-        $issuerDate = $issuerDateRaw && strtotime($issuerDateRaw) ? \Carbon\Carbon::parse($issuerDateRaw)->format('Y-m-d') : '';
+    $izinDariDate = old('izin_berlaku_dari', $permit?->izin_berlaku_dari ?? '');
+    $izinDariTime = old('izin_berlaku_jam_dari', $permit?->izin_berlaku_jam_dari ?? '');
+    $izinSampaiDate = old('izin_berlaku_sampai', $permit?->izin_berlaku_sampai ?? '');
+    $izinSampaiTime = old('izin_berlaku_jam_sampai', $permit?->izin_berlaku_jam_sampai ?? '');
 
-        $issuerTimeRaw = old('permit_issuer_time', $permit?->permit_issuer_time);
-        $issuerTime = $issuerTimeRaw && strtotime($issuerTimeRaw) ? \Carbon\Carbon::parse($issuerTimeRaw)->format('H:i') : '';
-
-        $izinDariRaw = old('izin_berlaku_dari', $permit?->izin_berlaku_dari);
-        $izinDariDate = $izinDariRaw && strtotime($izinDariRaw) ? \Carbon\Carbon::parse($izinDariRaw)->format('Y-m-d') : '';
-
-        $izinDariTimeRaw = old('izin_berlaku_jam_dari', $permit?->izin_berlaku_jam_dari);
-        $izinDariTime = $izinDariTimeRaw && strtotime($izinDariTimeRaw) ? \Carbon\Carbon::parse($izinDariTimeRaw)->format('H:i') : '';
-
-        $izinSampaiRaw = old('izin_berlaku_sampai', $permit?->izin_berlaku_sampai);
-        $izinSampaiDate = $izinSampaiRaw && strtotime($izinSampaiRaw) ? \Carbon\Carbon::parse($izinSampaiRaw)->format('Y-m-d') : '';
-
-        $izinSampaiTimeRaw = old('izin_berlaku_jam_sampai', $permit?->izin_berlaku_jam_sampai);
-        $izinSampaiTime = $izinSampaiTimeRaw && strtotime($izinSampaiTimeRaw) ? \Carbon\Carbon::parse($izinSampaiTimeRaw)->format('H:i') : '';
-    @endphp
+    $issuerDate = $issuerDateRaw ? Carbon::parse($issuerDateRaw)->format('Y-m-d') : '';
+    $issuerTime = $issuerTimeRaw ? Carbon::parse($issuerTimeRaw)->format('H:i') : '';
+@endphp
 
     <!-- Pernyataan -->
     <div class="border border-t-0 border-gray-300 p-3">
@@ -381,16 +374,20 @@
                     <td class="border px-2 py-2 text-center">
                         <input type="text" name="permit_issuer_name" class="input w-full text-center" value="{{ $issuerName }}">
                     </td>
-                    <td class="border px-2 py-2 text-center">
-                        @if ($issuerSign)
-                            <img src="{{ asset($issuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                        @else
-                            <button type="button" onclick="openSignPad('signature_permit_issuer')" class="text-blue-600 underline text-xs">
-                                Tanda Tangan
-                            </button>
-                        @endif
-                        <input type="hidden" name="signature_permit_issuer" id="signature_permit_issuer" value="{{ $issuerSign }}">
-                    </td>
+                  <td class="border px-2 py-2 text-center">
+    @if ($issuerSign)
+        <img src="{{ asset($issuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
+    @else
+        <button 
+            type="button"
+            onclick="openSignPad('signature_permit_issuer')"
+            class="text-blue-600 underline text-xs">
+            Tanda Tangan
+        </button>
+    @endif
+    <input type="hidden" name="signature_permit_issuer" id="signature_permit_issuer" value="{{ $issuerSign }}">
+</td>
+
                     <td class="border px-2 py-2 text-center">
                         <input type="date" name="permit_issuer_date" class="input w-full text-center" value="{{ $issuerDate }}">
                     </td>
@@ -420,16 +417,15 @@
         </div>
     </div>
 </div>
-
 @php
     $authorizerName = old('permit_authorizer_name', $permit?->permit_authorizer_name ?? '');
     $authorizerSign = old('signature_permit_authorizer', $permit?->permit_authorizer_sign ?? '');
 
     $authorizerDateRaw = old('permit_authorizer_date', $permit?->permit_authorizer_date ?? '');
-    $authorizerDate = $authorizerDateRaw ? Carbon\Carbon::parse($authorizerDateRaw)->format('Y-m-d') : '';
+    $authorizerDate = $authorizerDateRaw ? Carbon::parse($authorizerDateRaw)->format('Y-m-d') : '';
 
     $authorizerTimeRaw = old('permit_authorizer_time', $permit?->permit_authorizer_time ?? '');
-    $authorizerTime = $authorizerTimeRaw ? Carbon\Carbon::parse($authorizerTimeRaw)->format('H:i') : '';
+    $authorizerTime = $authorizerTimeRaw ? Carbon::parse($authorizerTimeRaw)->format('H:i') : '';
 @endphp
 
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
@@ -679,7 +675,6 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
             </tr>
         </tbody>
     </table>
-
     <!-- Tanda tangan -->
     <table class="table-auto w-full text-sm border mt-4">
         <thead class="bg-gray-100">
@@ -724,7 +719,7 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
             </tr>
         </tbody>
     </table>
-     <table class="table-auto w-full text-sm border mt-4">
+    <table class="table-auto w-full text-sm border mt-4">
     <tr>
         <td class="border px-2 py-1 font-semibold w-64">Jumlah RFID yang diberikan ke kontraktor</td>
         <td class="border px-2 py-1 text-left" colspan="3">
@@ -736,6 +731,7 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
         </td>
     </tr>
 </table>
+
 </div>
 
 <!-- Tombol Simpan -->
@@ -760,5 +756,5 @@ function isolasiData(existingListrik = [], existingNonListrik = []) {
     };
 }
 </script>
-        @include('components.sign-pad')
+
 </x-app-layout>

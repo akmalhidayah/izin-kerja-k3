@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Izin Kerja Umum</title>
+    <title>Izin Kerja Gas Panas</title>
     <style>
         @page { size: A4; margin: 10mm; }
         body {
@@ -207,7 +207,7 @@
                     <img src="{{ public_path($permit->permit_requestor_sign) }}" alt="ttd" height="40">
                 @endif
             </td>
-            <td style="text-align: center;">{{ $permit->permit_requestor_date }}</td>
+            <td style="text-align: center;">  {{ $permit->permit_requestor_date?->format('d-m-Y') ?? '-' }}</td>
             <td style="text-align: center;">{{ $permit->permit_requestor_time }}</td>
         </tr>
     </tbody>
@@ -236,7 +236,7 @@
                     <img src="{{ public_path($permit->verificator_sign) }}" alt="ttd" height="40">
                 @endif
             </td>
-            <td style="text-align: center;">{{ $permit->verificator_date }}</td>
+            <td style="text-align: center;">   {{ $permit->verificator_date?->format('d-m-Y') ?? '-' }}</td>
             <td style="text-align: center;">{{ $permit->verificator_time }}</td>
         </tr>
     </tbody>
@@ -265,7 +265,7 @@
                     <img src="{{ public_path($permit->permit_issuer_sign) }}" alt="ttd" height="40">
                 @endif
             </td>
-            <td style="text-align: center;">{{ $permit->permit_issuer_date }}</td>
+            <td style="text-align: center;">{{ $permit->permit_issuer_date?->format('d-m-Y') ?? '-' }}</td>
             <td style="text-align: center;">{{ $permit->permit_issuer_time }}</td>
         </tr>
         <tr>
@@ -292,7 +292,7 @@
         <tr><td colspan="4" style="font-style: italic; font-weight: bold; padding: 4px;">Permit Authorizer:</td></tr>
         <tr>
             <td colspan="4" style="padding: 4px;">
-                Saya menyatakan bahwa saya telah memeriksa area kerja... disosialisasikan oleh <i>Permit Receiver</i> kepada seluruh pekerja terkait.
+                Saya menyatakan bahwa saya telah memeriksa area kerja aman disosialisasikan oleh <i>Permit Receiver</i> kepada seluruh pekerja terkait.
             </td>
         </tr>
         <tr>
@@ -308,7 +308,7 @@
                     <img src="{{ public_path($permit->permit_authorizer_sign) }}" height="40" alt="TTD">
                 @endif
             </td>
-            <td style="text-align: center;">{{ $permit->permit_authorizer_date }}</td>
+            <td style="text-align: center;">{{ $permit->permit_authorizer_date?->format('d-m-Y') ?? '-' }}</td>
             <td style="text-align: center;">{{ $permit->permit_authorizer_time }}</td>
         </tr>
     </tbody>
@@ -343,7 +343,7 @@
                     <img src="{{ public_path($permit->permit_receiver_sign) }}" height="40" alt="TTD">
                 @endif
             </td>
-            <td style="text-align: center;">{{ $permit->permit_receiver_date }}</td>
+            <td style="text-align: center;">{{ $permit->permit_receiver_date?->format('d-m-Y') ?? '-' }}</td>
             <td style="text-align: center;">{{ $permit->permit_receiver_time }}</td>
         </tr>
     </tbody>

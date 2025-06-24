@@ -17,6 +17,7 @@ class WorkPermitKetinggian extends Model
         // Bagian 2
         'nama_pekerja',
         'paraf_pekerja',
+        'sketsa_pekerjaan',
 
         // Bagian 3
         'kerja_aman_ketinggian',
@@ -59,6 +60,8 @@ class WorkPermitKetinggian extends Model
         'signature_permit_receiver',
         'permit_receiver_date',
         'permit_receiver_time',
+
+                'token',
     ];
 
     protected $casts = [
@@ -66,8 +69,30 @@ class WorkPermitKetinggian extends Model
         'kerja_aman_ketinggian' => 'array',
         'authorized_workers' => 'array',
     ];
-        public function detail()
+
+        // Relasi ke notification
+    public function notification()
     {
-        return $this->belongsTo(WorkPermitDetail::class, 'work_permit_detail_id');
+        return $this->belongsTo(Notification::class);
+    }
+
+    // Relasi ke detail berdasarkan notification_id (bukan work_permit_detail_id)
+    public function detail()
+    {
+        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id')
+                    ->where('permit_type', 'ketinggian');
+    }
+
+    // Relasi closure via detail
+    public function closure()
+    {
+        return $this->hasOneThrough(
+            WorkPermitClosure::class,
+            WorkPermitDetail::class,
+            'notification_id', // FK on detail
+            'work_permit_detail_id', // FK on closure
+            'notification_id', // Local key on this
+            'id' // Local key on detail
+        )->where('permit_type', 'ketinggian');
     }
 }
