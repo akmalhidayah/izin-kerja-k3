@@ -7,6 +7,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Upload;
 use App\Models\Notification;
+use App\Models\UmumWorkPermit;
+use App\Models\WorkPermitGasPanas;
+use App\Models\WorkPermitAir;
+use App\Models\WorkPermitKetinggian;
+// use App\Models\WorkPermitPengangkatan;
+// use App\Models\WorkPermitPenggalian;
+use App\Models\WorkPermitRisikoPanas;
+use App\Models\WorkPermitRuangTertutup;
+// use App\Models\WorkPermitLifesaving;
+use App\Models\WorkPermitPerancah;
+// use App\Models\WorkPermitProsedurKhusus;
+use App\Models\WorkPermitDetail;
+use App\Models\WorkPermitClosure;
 use App\Models\StepApproval;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -47,11 +60,22 @@ if ($assignedAdmin && $assignedAdmin !== $loggedInAdmin) {
 }
 $dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $id)->first();
         $jsa = \App\Models\Jsa::where('notification_id', $id)->first();
-$permits = [
-    'umum' => \App\Models\UmumWorkPermit::where('notification_id', $id)->first(),
-    'gaspanas' => \App\Models\WorkPermitGasPanas::where('notification_id', $id)->first(), 
-    'air' => \App\Models\WorkPermitAir::where('notification_id', $id)->first(),
+$permitTypes = [
+    'umum' => \App\Models\UmumWorkPermit::class,
+    'gaspanas' => \App\Models\WorkPermitGasPanas::class,
+    'air' => \App\Models\WorkPermitAir::class,
+    'ketinggian' => \App\Models\WorkPermitKetinggian::class,
+    'risiko-panas' => \App\Models\WorkPermitRisikoPanas::class,
+    'ruangtertutup' => \App\Models\WorkPermitRuangTertutup::class,
+    'perancah' => \App\Models\WorkPermitPerancah::class,
+    // tambahkan yang lain kalau ada model-nya
 ];
+
+$permits = [];
+foreach ($permitTypes as $key => $model) {
+    $permits[$key] = $model::where('notification_id', $id)->first();
+}
+
 
 
         $uploads = \App\Models\Upload::where('notification_id', $id)->get()->keyBy('step');
