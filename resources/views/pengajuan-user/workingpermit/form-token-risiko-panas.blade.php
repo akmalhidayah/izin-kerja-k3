@@ -17,7 +17,6 @@
     @csrf
 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 
-
     <!-- Bagian 1: Detail Pekerjaan -->
     <div class="text-center mb-4">
         <h2 class="text-2xl font-bold uppercase">IZIN KERJA</h2>
@@ -120,7 +119,7 @@
         },
         addRow(gas) {
             this.dataGas[gas].push({ tgl: '', hasil: '', jam: '', sign: '' });
-        }
+        } 
     }"
     x-init="init()"
     class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto text-sm"
@@ -777,4 +776,4 @@
 </div>
 </form>
 @include('components.sign-pad')
-            </x-app-layout>
+</x-app-layout>

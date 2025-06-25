@@ -28,6 +28,8 @@ function openSignPad(targetId) {
     ctx.scale(ratio, ratio);
 
     signaturePadInstance = new SignaturePad(canvas);
+console.log('targetId:', targetId);
+console.log('element:', document.getElementById(targetId));
 
     const existingSignature = document.getElementById(targetId).value;
     if (existingSignature) {
@@ -39,6 +41,11 @@ function openSignPad(targetId) {
     }
 }
 
+// FIX: Jadikan fungsi ini global agar bisa dipanggil dari luar
+window.openSignPad = openSignPad;
+window.closeSignPad = closeSignPad;
+window.clearSignature = clearSignature;
+window.saveSignature = saveSignature;
 function closeSignPad() {
     document.getElementById('signPadModal').classList.add('hidden');
     signaturePadInstance.clear();

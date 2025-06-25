@@ -12,10 +12,12 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <!-- Scripts -->
+
+    <!-- Tailwind & Alpine -->
         <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/assets/app-Cs8kzoEt.css') }}">
     <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
+
 
     </head>
     <body class="font-sans text-gray-900 antialiased bg-cover bg-center" style="background-image: url('{{ asset('images/bg-login.jpg') }}')">

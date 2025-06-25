@@ -12,9 +12,8 @@
     
     
     <!-- Tailwind & Alpine -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
         <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-DpDGX-8e.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/assets/app-Cs8kzoEt.css') }}">
     <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
 
     <!-- SweetAlert2 -->

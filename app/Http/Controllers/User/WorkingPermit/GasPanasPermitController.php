@@ -83,7 +83,7 @@ class GasPanasPermitController extends Controller
         $validated['notification_id'] = (int) $validated['notification_id'];
 
         // Simpan tanda tangan
-       $validated['permit_requestor_sign'] = $this->saveSignature($request->input('signature_permit_requestor'), 'requestor');
+$validated['permit_requestor_sign'] = $this->saveSignature($request->input('permit_requestor_sign'), 'requestor');
 $validated['verificator_sign'] = $this->saveSignature($request->input('signature_verificator'), 'verificator');
 $validated['permit_issuer_sign'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer');
 $validated['permit_authorizer_sign'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer');
