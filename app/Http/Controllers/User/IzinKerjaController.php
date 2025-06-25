@@ -128,6 +128,16 @@ class IzinKerjaController extends Controller
             default => 'pending',
         };
 
+         // 👇 Tambahkan logika override status untuk step ke-13
+    if ($code === 'surat_izin_kerja') {
+        $sikApproval = StepApproval::where('notification_id', $selectedId)
+            ->where('step', 'sik')
+            ->first();
+
+        if ($sikApproval && $sikApproval->signature_senior_manager) {
+            $status = 'done';
+        }
+    }
         $enabled = $previousApproved;
         $steps[] = [
             'title' => $title,

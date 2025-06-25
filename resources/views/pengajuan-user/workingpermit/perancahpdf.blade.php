@@ -398,56 +398,39 @@
 {{-- Bagian 10 --}}
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
     <thead>
-        <tr>
-            <th colspan="4" style="background-color: black; color: white; font-weight: bold; text-align: left; padding: 5px;">
-                10. Persetujuan Perancah Layak Digunakan
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td colspan="4" style="border: 1px solid black; padding: 5px; text-align: justify;">
-                <i>Scaffolding Permit Verificator, Permit Issuer & Permit Authorizer</i><br>
-                Saya menyatakan bahwa saya telah memeriksa perancah dan semua persyaratan keselamatan perancah serta rekomendasi tambahan telah dipenuhi untuk perancah ini dapat digunakan.
-            </td>
-        </tr>
-        <tr style="text-align: center; font-style: italic; font-weight: bold;">
-            <td style="border: 1px solid black;">Scaffolding Permit Verificator</td>
-            <td style="border: 1px solid black;">Permit Issuer</td>
-            <td colspan="2" style="border: 1px solid black;">Permit Authorizer</td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; text-align: center;">
-                {{ $permit?->scaffolding_verificator_name }}<br>
-                @if ($permit?->signature_scaffolding_verificator)
-                    <img src="{{ public_path($permit->signature_scaffolding_verificator) }}" height="40">
-                @endif
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                {{ $permit?->permit_issuer_name }}<br>
-                @if ($permit?->signature_permit_issuer)
-                    <img src="{{ public_path($permit->signature_permit_issuer) }}" height="40">
-                @endif
-            </td>
-            <td colspan="2" style="border: 1px solid black; text-align: center;">
-                {{ $permit?->permit_authorizer_name }}<br>
-                @if ($permit?->signature_permit_authorizer)
-                    <img src="{{ public_path($permit->signature_permit_authorizer) }}" height="40">
-                @endif
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="border: 1px solid black; font-weight: bold;">
-                Perancah ini berlaku dari tanggal:
-                {{ $permit?->scaffolding_verificator_date ? \Carbon\Carbon::parse($permit->scaffolding_verificator_date)->format('d/m/Y') : '___/___/____' }}
-                jam: {{ $permit?->scaffolding_verificator_time ?? '__:__' }}
-            </td>
-            <td colspan="2" style="border: 1px solid black; font-weight: bold;">
-                sampai tanggal
-                {{ $permit?->permit_authorizer_date ? \Carbon\Carbon::parse($permit->permit_authorizer_date)->format('d/m/Y') : '___/___/____' }}
-                jam: {{ $permit?->permit_authorizer_time ?? '__:__' }}
-            </td>
-        </tr>
+      <tr>
+    <td style="border: 1px solid black; text-align: center;">
+        {{ $permit?->scaffolding_verificator_approval }}<br>
+        @if ($permit?->signature_verificator_approval)
+            <img src="{{ public_path($permit->signature_verificator_approval) }}" height="40">
+        @endif
+    </td>
+    <td style="border: 1px solid black; text-align: center;">
+        {{ $permit?->permit_issuer_approval }}<br>
+        @if ($permit?->signature_issuer_approval)
+            <img src="{{ public_path($permit->signature_issuer_approval) }}" height="40">
+        @endif
+    </td>
+    <td colspan="2" style="border: 1px solid black; text-align: center;">
+        {{ $permit?->permit_authorizer_approval }}<br>
+        @if ($permit?->signature_authorizer_approval)
+            <img src="{{ public_path($permit->signature_authorizer_approval) }}" height="40">
+        @endif
+    </td>
+</tr>
+<tr>
+    <td colspan="2" style="border: 1px solid black; font-weight: bold;">
+        Perancah ini berlaku dari tanggal:
+        {{ $permit?->perancah_start_date ? \Carbon\Carbon::parse($permit->perancah_start_date)->format('d/m/Y') : '___/___/____' }}
+        jam: {{ $permit?->perancah_start_time ?? '__:__' }}
+    </td>
+    <td colspan="2" style="border: 1px solid black; font-weight: bold;">
+        sampai tanggal
+        {{ $permit?->perancah_end_date ? \Carbon\Carbon::parse($permit->perancah_end_date)->format('d/m/Y') : '___/___/____' }}
+        jam: {{ $permit?->perancah_end_time ?? '__:__' }}
+    </td>
+</tr>
+
     </tbody>
 </table>
 

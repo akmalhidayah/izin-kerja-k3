@@ -776,4 +776,5 @@
     </button>
 </div>
 </form>
+@include('components.sign-pad')
             </x-app-layout>

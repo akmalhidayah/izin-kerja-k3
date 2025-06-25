@@ -568,18 +568,18 @@
         </thead>
         <tbody>
             <tr>
-                <!-- Scaffolding Verificator -->
+                  <!-- Scaffolding Verificator -->
                 <td class="border px-2 py-2 text-center">
                     <input type="text" name="scaffolding_verificator_approval" class="input w-full text-xs text-center"
                         placeholder="Nama"
                         value="{{ old('scaffolding_verificator_approval', $permit->scaffolding_verificator_approval ?? '') }}">
 
                     <button type="button"
-                        onclick="openSignPad('signature_verificator_approval')"
+                        onclick="openSignPad('perancah_signature_verificator_approval')"
                         class="text-blue-600 underline text-xs mt-1">Tanda Tangan</button>
 
                     <input type="hidden" name="signature_verificator_approval"
-                        id="signature_verificator_approval"
+                        id="perancah_signature_verificator_approval"
                         value="{{ old('signature_verificator_approval', $permit->signature_verificator_approval ?? '') }}">
 
                     @if(old('signature_verificator_approval', $permit->signature_verificator_approval ?? null))
@@ -594,11 +594,11 @@
                         value="{{ old('permit_issuer_approval', $permit->permit_issuer_approval ?? '') }}">
 
                     <button type="button"
-                        onclick="openSignPad('signature_issuer_approval')"
+                        onclick="openSignPad('perancah_signature_issuer_approval')"
                         class="text-blue-600 underline text-xs mt-1">Tanda Tangan</button>
 
                     <input type="hidden" name="signature_issuer_approval"
-                        id="signature_issuer_approval"
+                        id="perancah_signature_issuer_approval"
                         value="{{ old('signature_issuer_approval', $permit->signature_issuer_approval ?? '') }}">
 
                     @if(old('signature_issuer_approval', $permit->signature_issuer_approval ?? null))
@@ -613,11 +613,11 @@
                         value="{{ old('permit_authorizer_approval', $permit->permit_authorizer_approval ?? '') }}">
 
                     <button type="button"
-                        onclick="openSignPad('signature_authorizer_approval')"
+                        onclick="openSignPad('perancah_signature_authorizer_approval')"
                         class="text-blue-600 underline text-xs mt-1">Tanda Tangan</button>
 
                     <input type="hidden" name="signature_authorizer_approval"
-                        id="signature_authorizer_approval"
+                        id="perancah_signature_authorizer_approval"
                         value="{{ old('signature_authorizer_approval', $permit->signature_authorizer_approval ?? '') }}">
 
                     @if(old('signature_authorizer_approval', $permit->signature_authorizer_approval ?? null))
@@ -769,7 +769,5 @@
     </button>
 </div>
 </form>
-
-
-
-            </x-app-layout>
+@include('components.sign-pad')
+</x-app-layout>

@@ -101,9 +101,10 @@ class PerancahPermitController extends Controller
         $validated['signature_permit_issuer'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer');
         $validated['signature_permit_authorizer'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer');
         $validated['signature_permit_receiver'] = $this->saveSignature($request->input('signature_permit_receiver'), 'receiver');
-        $validated['signature_verificator_approval'] = $this->saveSignature($request->input('signature_scaffolding_verificator_approval'), 'verificator_approval');
-$validated['signature_issuer_approval'] = $this->saveSignature($request->input('signature_permit_issuer_approval'), 'issuer_approval');
-$validated['signature_authorizer_approval'] = $this->saveSignature($request->input('signature_permit_authorizer_approval'), 'authorizer_approval');
+     $validated['signature_verificator_approval'] = $this->saveSignature($request->input('signature_verificator_approval'), 'verificator_approval');
+$validated['signature_issuer_approval'] = $this->saveSignature($request->input('signature_issuer_approval'), 'issuer_approval');
+$validated['signature_authorizer_approval'] = $this->saveSignature($request->input('signature_authorizer_approval'), 'authorizer_approval');
+
 
 
         // Simpan JSON

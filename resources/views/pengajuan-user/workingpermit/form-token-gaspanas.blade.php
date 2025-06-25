@@ -674,4 +674,5 @@ $receiverTime = $receiverTimeRaw ? \Carbon\Carbon::parse($receiverTimeRaw)->form
     </button>
 </div>
 </form>
+@include('components.sign-pad')
 </x-app-layout>

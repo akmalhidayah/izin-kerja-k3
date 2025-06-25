@@ -668,5 +668,5 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
         </tr>
     </table>
 </div>
-
+@include('components.sign-pad')
             </x-app-layout>

@@ -756,5 +756,5 @@ function isolasiData(existingListrik = [], existingNonListrik = []) {
     };
 }
 </script>
-
+@include('components.sign-pad')
 </x-app-layout>

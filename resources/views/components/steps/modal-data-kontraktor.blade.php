@@ -99,7 +99,7 @@
                 <table class="w-full text-xs border border-collapse mb-2">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="border p-1">Nama Pekerja</th>
+                            <th class="border p-1">Pekerja (seperti Personil K3, Skill, Non Skill dll)</th>
                             <th class="border p-1">Jumlah</th>
                             <th class="border p-1">Satuan</th>
                             <th class="border p-1 w-16">Aksi</th>
