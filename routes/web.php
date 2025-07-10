@@ -20,6 +20,10 @@ use App\Http\Controllers\User\WorkingPermit\KetinggianPermitController;
 use App\Http\Controllers\User\WorkingPermit\RuangTertutupPermitController;
 use App\Http\Controllers\User\WorkingPermit\PerancahPermitController;
 use App\Http\Controllers\User\WorkingPermit\PanasRisikoPermitController;
+use App\Http\Controllers\User\WorkingPermit\BebanPermitController;
+use App\Http\Controllers\User\WorkingPermit\PenggalianPermitController;
+use App\Http\Controllers\User\WorkingPermit\PengangkatanPermitController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -73,6 +77,15 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function (
 
     Route::post('/user/working-permit/risiko-panas/store', [PanasRisikoPermitController::class, 'store'])->name('working-permit.risiko-panas.store');
     Route::get('/user/permit/risiko-panas/preview/{id}', [PanasRisikoPermitController::class, 'preview'])->name('working-permit.risiko-panas.preview');
+
+    Route::post('/user/working-permit/beban/store', [BebanPermitController::class, 'store'])->name('working-permit.beban.store');
+    Route::get('/user/permit/beban/preview/{id}', [BebanPermitController::class, 'preview'])->name('working-permit.beban.preview');
+
+    Route::post('/user/working-permit/penggalian/store', [PenggalianPermitController::class, 'store'])->name('working-permit.penggalian.store');
+    Route::get('/user/permit/penggalian/preview/{id}', [PenggalianPermitController::class, 'preview'])->name('working-permit.penggalian.preview');
+        
+    Route::post('/user/working-permit/pengangkatan/store', [PengangkatanPermitController::class, 'store'])->name('working-permit.pengangkatan.store');
+    Route::get('/user/permit/pengangkatan/preview/{id}', [PengangkatanPermitController::class, 'preview'])->name('working-permit.pengangkatan.preview');
 
      Route::get('/izin-kerja/sik/pdf/{id}', [\App\Http\Controllers\Admin\AdminPermintaanController::class, 'viewSik'])
     ->name('izin-kerja.sik.pdf');
@@ -165,4 +178,13 @@ Route::post('/izin-kerja/working-permit/perancah/{token}', [PerancahPermitContro
 Route::get('/izin-kerja/working-permit/risiko-panas/{token}', [PanasRisikoPermitController::class, 'showByToken'])->name('working-permit.risiko-panas.token');
 Route::post('/izin-kerja/working-permit/risiko-panas/{token}', [PanasRisikoPermitController::class, 'storeByToken'])->name('working-permit.risiko-panas.token.store');
 
+// ✅ Route Form Token untuk Permit Beban
+Route::get('/izin-kerja/working-permit/beban/{token}', [BebanPermitController::class, 'showByToken'])->name('working-permit.beban.token');
+Route::post('/izin-kerja/working-permit/beban/{token}', [BebanPermitController::class, 'storeByToken'])->name('working-permit.beban.token.store');
+
+Route::get('/izin-kerja/working-permit/penggalian/{token}', [PenggalianPermitController::class, 'showByToken'])->name('working-permit.penggalian.token');
+Route::post('/izin-kerja/working-permit/penggalian/{token}', [PenggalianPermitController::class, 'storeByToken'])->name('working-permit.penggalian.token.store');
+
+Route::get('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'showByToken'])->name('working-permit.pengangkatan.token');
+Route::post('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'storeByToken'])->name('working-permit.pengangkatan.token.store');
 require __DIR__.'/auth.php';

@@ -12,12 +12,13 @@ use App\Models\UmumWorkPermit;
 use App\Models\WorkPermitGasPanas;
 use App\Models\WorkPermitAir;
 use App\Models\WorkPermitKetinggian;
-// use App\Models\WorkPermitPengangkatan;
-// use App\Models\WorkPermitPenggalian;
+use App\Models\WorkPermitPengangkatan;
+use App\Models\WorkPermitPenggalian;
 use App\Models\WorkPermitRisikoPanas;
 use App\Models\WorkPermitRuangTertutup;
 // use App\Models\WorkPermitLifesaving;
 use App\Models\WorkPermitPerancah;
+use App\Models\WorkPermitBeban;
 // use App\Models\WorkPermitProsedurKhusus;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
@@ -103,10 +104,11 @@ class IzinKerjaController extends Controller
     'gaspanas' => WorkPermitGasPanas::where('notification_id', $selectedId)->first(),
     'air' => WorkPermitAir::where('notification_id', $selectedId)->first(),
     'ketinggian' => WorkPermitKetinggian::where('notification_id', $selectedId)->first(),
-    // 'pengangkatan' => WorkPermitPengangkatan::where('notification_id', $selectedId)->first(),
-    // 'penggalian' => WorkPermitPenggalian::where('notification_id', $selectedId)->first(),
+    'pengangkatan' => WorkPermitPengangkatan::where('notification_id', $selectedId)->first(),
+    'penggalian' => WorkPermitPenggalian::where('notification_id', $selectedId)->first(),
     'risiko-panas' => WorkPermitRisikoPanas::where('notification_id', $selectedId)->first(),
     'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first(),
+     'beban' => WorkPermitBeban::where('notification_id', $selectedId)->first(),
     // 'lifesaving' => WorkPermitLifesaving::where('notification_id', $selectedId)->first(),
     'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first(),
     // 'procedures' => WorkPermitProsedures::where('notification_id', $selectedId)->first(),

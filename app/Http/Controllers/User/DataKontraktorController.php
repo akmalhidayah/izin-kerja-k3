@@ -73,22 +73,27 @@ if (!$dataKontraktor->token) {
     }
 
     // Signature Helper
-    private function saveSignature($base64, $role)
-    {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+   private function saveSignature($input, $role)
+{
+    if (!$input) return null;
 
-        $folder = 'signatures/data-kontraktor/';
-        $filename = $role . '_' . \Illuminate\Support\Str::random(10) . '.png';
-        $path = storage_path('app/public/' . $folder);
+    // Sudah path lama (bukan base64)
+    if (!str_starts_with($input, 'data:image')) return $input;
 
-        if (!file_exists($path)) mkdir($path, 0777, true);
+    // Base64 baru
+    $folder = 'signatures/data-kontraktor/';
+    $filename = $role . '_' . \Illuminate\Support\Str::random(10) . '.png';
+    $path = storage_path('app/public/' . $folder);
 
-        $image = str_replace('data:image/png;base64,', '', $base64);
-        $image = str_replace(' ', '+', $image);
-        file_put_contents($path . $filename, base64_decode($image));
+    if (!file_exists($path)) mkdir($path, 0777, true);
 
-        return 'storage/' . $folder . $filename;
-    }
+    $image = str_replace('data:image/png;base64,', '', $input);
+    $image = str_replace(' ', '+', $image);
+    file_put_contents($path . $filename, base64_decode($image));
+
+    return 'storage/' . $folder . $filename;
+}
+
 
     public function showByToken($token)
 {
@@ -121,6 +126,10 @@ public function storeByToken(Request $request, $token)
     } catch (\Illuminate\Validation\ValidationException $e) {
         return back()->withErrors($e->errors())->withInput();
     }
+ // Simpan tanda tangan base64 ke file
+  $validated['ttd_manager'] = $this->saveSignature($request->input('ttd_manager'), 'manager') ?? $dataKontraktor->ttd_manager;
+$validated['ttd_perusahaan'] = $this->saveSignature($request->input('ttd_perusahaan'), 'perusahaan') ?? $dataKontraktor->ttd_perusahaan;
+$validated['diverifikasi_signature'] = $this->saveSignature($request->input('diverifikasi_signature'), 'verifikator') ?? $dataKontraktor->diverifikasi_signature;
 
     // Update Data
     $dataKontraktor->update($validated);

@@ -48,6 +48,7 @@ return new class extends Migration {
             $table->string('signature_operator')->nullable();
             $table->string('verificator_name')->nullable();
             $table->string('signature_verificator')->nullable();
+            $table->string('token')->unique()->nullable();
 
             $table->timestamps();
         });

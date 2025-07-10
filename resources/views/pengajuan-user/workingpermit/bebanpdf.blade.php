@@ -2,11 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Izin Kerja Umum</title>
+    <title>Izin Kerja Mengangkat Beban</title>
     <style>
         @page { size: A4; margin: 10mm; }
         body {
-            font-family: Arial, sans-serif;
+        font-family: "DejaVu Sans", sans-serif;
             font-size: 11px;
             line-height: 1.5;
         }
@@ -19,6 +19,7 @@
             border: 1px solid #000;
             padding: 5px;
             vertical-align: top;
+            text-align: left;
         }
         .header-table td {
             vertical-align: top;
@@ -61,152 +62,141 @@
     di verifikasi oleh <i>Permit Verificator</i>, diterbitkan oleh <i>Permit Issuer</i>, disahkan oleh <i>Permit Authorizer</i> dan
     <i>major hazards & control</i> disosialisasikan oleh <i>Permit Receiver</i>.
 </p>
-
-{{-- BAGIAN 1 --}}
-<div class="section-title">1. Detail Pekerjaan</div>
-<table class="table">
-    <tr>
-        <th style="width: 50%;">Lokasi pekerjaan:</th>
-        <th style="width: 50%;">Tanggal:</th>
-    </tr>
-    <tr>
-        <td style="height: 25px;"></td>
-        <td></td>
-    </tr>
-    <tr>
-        <th colspan="2">Uraian pekerjaan:</th>
-    </tr>
-    <tr>
-        <td colspan="2" style="height: 50px;"></td>
-    </tr>
-    <tr>
-        <th colspan="2">Peralatan/perlengkapan yang akan digunakan pada pekerjaan:</th>
-    </tr>
-    <tr>
-        <td colspan="2" style="height: 50px;"></td>
-    </tr>
-    <tr>
-        <th style="width: 50%;">Perkiraan jumlah pekerja yang akan terlibat dalam pekerjaan ini:</th>
-        <th style="width: 50%;">Nomor gawat darurat yang harus dihubungi saat darurat:</th>
-    </tr>
-    <tr>
-        <td style="height: 25px;"></td>
-        <td></td>
-    </tr>
-</table>
-{{-- 2. Dokumentasi Persyaratan Pengangkatan Beban --}}
-<table class="table">
+<!-- Bagian 1: Detail Pekerjaan -->
+<table style="width: 100%; border-collapse: collapse;">
     <thead>
         <tr>
-            <th colspan="2" style="background-color: black; color: white; font-weight: bold;">
-                2. Dokumentasi Persyaratan Pengangkatan Beban
-            </th>
-            <th style="background-color: black; color: white; text-align: center;">(lingkari)</th>
+            <th colspan="2" style="background-color: black; color: white; text-align: left; padding: 5px;">1. Detail Pekerjaan</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="width: 5%;">•</td>
-            <td><i>Operator</i> pesawat angkat memiliki lisensi K3 yang masih berlaku dan sesuai (lampirkan).</td>
-            <td style="text-align: center;">Ya / N/A</td>
+            <td style="border: 1px solid #000; width: 50%; padding: 5px;"><b>Lokasi pekerjaan:</b><br>{{ $detail->location ?? '-' }}</td>
+            <td style="border: 1px solid #000; padding: 5px;"><b>Tanggal:</b><br>{{ \Carbon\Carbon::parse($detail->work_date ?? '')->format('d-m-Y') ?? '-' }}</td>
         </tr>
         <tr>
-            <td>•</td>
-            <td>Juru ikat (<i>Rigger</i>) memiliki lisensi K3 yang masih berlaku (lampirkan).</td>
-            <td style="text-align: center;">Ya / N/A</td>
+            <td colspan="2" style="border: 1px solid #000; padding: 5px;"><b>Uraian pekerjaan:</b><br>{{ $detail->job_description ?? '-' }}</td>
         </tr>
         <tr>
-            <td>•</td>
-            <td>Pesawat angkat memiliki sertifikat uji kelayakan yang masih berlaku (lampirkan).</td>
-            <td style="text-align: center;">Ya / N/A</td>
+            <td colspan="2" style="border: 1px solid #000; padding: 5px;"><b>Peralatan/perlengkapan:</b><br>{{ $detail->equipment ?? '-' }}</td>
         </tr>
         <tr>
-            <td>•</td>
-            <td><i>Load chart</i> pengangkatan tersedia, di unit <i>control display/hardcopy</i>.</td>
-            <td style="text-align: center;">Ya / N/A</td>
-        </tr>
-        <tr>
-            <td>•</td>
-            <td>Rencana pengangkatan telah dibuat oleh <i>Rigger</i> dan <i>Operator</i> dan disetujui oleh <i>Lifting Permit Verificator</i> (bisa lampiran terpisah).</td>
-            <td style="text-align: center;">Ya / N/A</td>
-        </tr>
-        <tr>
-            <td>•</td>
-            <td><i>Job Safety Analysis/Safe Working Procedure</i> sudah tersedia dan semua pengendalian bahayanya sudah dilakukan (lampirkan).</td>
-            <td style="text-align: center;">Ya / N/A</td>
+            <td style="border: 1px solid #000; padding: 5px;"><b>Jumlah pekerja:</b><br>{{ $detail->worker_count ?? '-' }}</td>
+            <td style="border: 1px solid #000; padding: 5px;"><b>Nomor darurat:</b><br>{{ $detail->emergency_contact ?? '-' }}</td>
         </tr>
     </tbody>
 </table>
-{{-- 3. Persyaratan Kerja Aman --}}
+
 <table class="table">
     <thead>
         <tr>
-            <th colspan="2" style="background-color: black; color: white; font-weight: bold;">
-                3. Persyaratan Kerja Aman
+            <th style="background-color: black; color: white; font-weight: bold;">
+                2. Dokumentasi Persyaratan Pengangkatan Beban
             </th>
-            <th style="background-color: black; color: white; text-align: center;">(lingkari)</th>
+            <th style="background-color: black; color: white; text-align: center;">Status</th>
         </tr>
     </thead>
     <tbody>
-        @php
-            $items = [
-                'Area pengangkatan sudah diperiksa, semua bahaya dan risiko yang bisa diketahui sudah diidentifikasi.',
-                'Area pengangkatan sudah dibatasi dengan memasang barikade atau safety line dan rambu peringatan.',
-                'Area pengangkatan sudah diamankan dari potensi jatuhan benda/material.',
-                'Area pengangkatan sudah diamankan dari potensi pekerja terpeleset/tersandung.',
-                'Area pengangkatan bebas/dalam jarak aman dari kabel listrik bertegangan tinggi',
-                'Radius kerja pesawat angkat sudah diamankan.',
-                'Sudah tersedia standby person untuk mengamankan area pengangkatan dan memahami tanggung jawabnya.',
-                'Komunikasi antara Rigger dan Operator menggunakan radio komunikasi/handphone/sinyal tangan.',
-                'Operator dan Rigger sudah menentukan kode sinyal tangan sebelum pengangkatan',
-                'Aba-aba pengangkatan dilakukan oleh Rigger yang memiliki lisensi K3 yang masih berlaku.',
-                'Helper pekerjaan pengangkatan kompeten terhadap pekerjaan yang dilakukan.',
-                'Alat pelindung diri yang akan dipakai sudah diperiksa dan dinyatakan layak untuk dipakai.',
-                'Semua pekerja pengangkatan sudah menggunakan alat pelindung diri yang sesuai.',
-                'Semua pekerja terkait memahami bahwa dilarang berada di bawah beban yang sedang diangkat',
-                'Semua pekerja terkait memahami dilarang naik pada beban yang sedang diangkat.',
-                'Pekerja yang bekerja di dalam man basket, sudah dinyatakan fit untuk bekerja di ketinggian.',
-                'Pesawat angkat ditempatkan pada permukaan yang datar, keras dan rata.',
-                'Pesawat angkat yang akan digunakan sudah diperiksa ulang dan dipastikan layak pakai.',
-                'Semua outrigger telah dikeluarkan maksimal diatas bantalan kayu/besi',
-                'Counterweight pesawat angkat dipasang sebelum pengangkatan dilakukan.',
-                'Pesawat angkat dilengkapi dengan limit switch dan berfungsi baik.',
-                'Block hook pesawat angkat memiliki safety latch dan berfungsi baik.',
-                'Sudah dilakukan load test yang sesuai pada pesawat angkat hoist winch.',
-                'Alat bantu angkat yang akan digunakan sudah diperiksa dan dinyatakan layak untuk digunakan, tertera SWL.',
-                'Pasang tali pandu pengaruh (tag line) pada beban yang akan diangkat.',
-                'Man basket sudah diperiksa, dipastikan layak dan aman untuk digunakan, pintu mengarah kedalam, ada pengunci pintu, ada anchor point untuk hook FBH, ada tag line.',
-                'Tertata informasi SWL dan jumlah maksimum orang yang bisa diangkat pada man basket, dan berwarna kontras.',
-                'Maksimum hanya 2 pekerja yang boleh diangkat dalam man basket, kecuali ditentukan lain oleh orang yang kompeten.',
-                'Remote control hoist/overhead crane dan area pengangkatan mempunyai wind direction yang jelas.',
-            ];
-        @endphp
-
-        @foreach ($items as $text)
         <tr>
-            <td style="width: 5%;">•</td>
-            <td>{!! preg_replace('/(Rigger|Operator|man basket|load test|outrigger|wind direction|limit switch|counterweight|tag line|SWL|safety line|safety latch|anchor point|control display|hardcopy|handphone)/i', '<i>$1</i>', $text) !!}</td>
-            <td style="text-align: center;">Ya / N/A</td>
+            <td><i>Operator</i> pesawat angkat memiliki lisensi K3 yang masih berlaku dan sesuai (lampirkan).</td>
+            <td style="text-align: center;">{{ $permit?->dok_operator ? '✓ Ya' : 'N/A' }}</td>
         </tr>
+        <tr>
+            <td>Juru ikat (<i>Rigger</i>) memiliki lisensi K3 yang masih berlaku (lampirkan).</td>
+            <td style="text-align: center;">{{ $permit?->dok_rigger ? '✓ Ya' : 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td>Pesawat angkat memiliki sertifikat uji kelayakan yang masih berlaku (lampirkan).</td>
+            <td style="text-align: center;">{{ $permit?->dok_sertifikat ? '✓ Ya' : 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td><i>Load chart</i> pengangkatan tersedia, di unit <i>control display/hardcopy</i>.</td>
+            <td style="text-align: center;">{{ $permit?->dok_loadchart ? '✓ Ya' : 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td>Rencana pengangkatan telah dibuat dan disetujui oleh <i>Lifting Permit Verificator</i>.</td>
+            <td style="text-align: center;">{{ $permit?->dok_rencana_pengangkatan ? '✓ Ya' : 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td><i>Job Safety Analysis/Safe Working Procedure</i> sudah tersedia dan pengendalian bahaya dilakukan.</td>
+            <td style="text-align: center;">{{ $permit?->dok_jsa ? '✓ Ya' : 'N/A' }}</td>
+        </tr>
+    </tbody>
+</table>
+@php
+    $statusList = $permit?->persyaratan_kerja_aman ?? [];
+    $textList = [
+        'Area pengangkatan sudah diperiksa, semua bahaya dan risiko yang bisa diketahui sudah diidentifikasi.',
+        'Area pengangkatan sudah dibatasi dengan memasang barricade atau safety line dan rambu peringatan.',
+        'Area pengangkatan sudah diamankan dari potensi jatuhan benda/material.',
+        'Area pengangkatan sudah diamankan dari potensi pekerja terpleset/tersandung.',
+        'Area pengangkatan bebas/dalam jarak aman dari kabel listrik bertegangan tinggi.',
+        'Radius kerja pesawat angkat sudah diamankan.',
+        'Sudah tersedia standby person untuk mengamankan area pengangkatan dan memahami tanggung jawabnya.',
+        'Komunikasi antara Rigger dan Operator menggunakan radio komunikasi/handphone/sinyal tangan.',
+        'Operator dan Rigger sudah menentukan kode sinyal tangan sebelum pengangkatan.',
+        'Aba-aba pengangkatan dilakukan oleh Rigger yang memiliki lisensi K3 yang masih berlaku.',
+        'Helper pekerjaan pengangkatan kompeten terhadap pekerjaan yang dilakukan.',
+        'Alat pelindung diri yang akan dipakai sudah diperiksa dan dinyatakan layak untuk dipakai.',
+        'Semua pekerja pengangkatan sudah menggunakan alat pelindung diri yang sesuai.',
+        'Semua pekerja terkait memahami bahwa dilarang berada dibawah beban yang sedang diangkat.',
+        'Semua pekerja terkait memahami dilarang naik pada beban yang sedang diangkat.',
+        'Pekerja yang bekerja di dalam man basket, sudah dinyatakan fit untuk bekerja di ketinggian.',
+        'Pesawat angkat ditempatkan pada permukaan yang datar, keras dan rata.',
+        'Pesawat angkat yang akan digunakan sudah diperiksa ulang dan dipastikan layak pakai.',
+        'Semua outrigger telah dikeluarkan maksimal diatas bantalan kayu/besi.',
+        'Counterweight pesawat angkat dipasang sebelum pengangkatan dilakukan.',
+        'Pesawat angkat dilengkapi dengan limit switch dan berfungsi baik.',
+        'Block hook pesawat angkat memiliki safety latch dan berfungsi baik.',
+        'Sudah dilakukan load test yang sesuai dengan kapasitas angkat hoist winch.',
+        'Alat bantu angkat yang akan digunakan sudah diperiksa dan dipastikan layak untuk digunakan, tertera SWL.',
+        'Pasang tali pandu pengarah (tag line) pada beban yang akan diangkat.',
+        'Man basket sudah diperiksa, dipastikan layak dan aman untuk digunakan, pintu mengarah kedalam, ada pengunci pintu, ada anchor point untuk hook FBH, ada tag line.',
+        'Tertera informasi SWL dan jumlah maksimum orang yang bisa diangkat pada man basket, dan berwarna kontras.',
+        'Maksimum hanya 2 pekerja yang boleh diangkat dalam man basket, kecuali ditentukan lain oleh orang yang kompeten.',
+        'Remote control hoist/overhead crane area pengangkatan mempunyai wind direction yang jelas.'
+    ];
+@endphp
+
+<table class="table">
+    <thead>
+        <tr>
+            <th colspan="1" style="background-color: black; color: white; font-weight: bold;">
+                3. Persyaratan Kerja Aman
+            </th>
+            <th style="background-color: black; color: white; text-align: center;">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($textList as $index => $text)
+            <tr>
+                <td>{{ $text }}</td>
+                <td style="text-align: center;">
+                    {{ ($statusList[$index] ?? '') === 'ya' ? '✓ Ya' : 'N/A' }}
+                </td>
+            </tr>
         @endforeach
     </tbody>
 </table>
+
+
 <table class="table">
     <thead>
         <tr>
             <th colspan="2" style="background-color: black; color: white; font-weight: bold;">
                 4. Rekomendasi Persyaratan Kerja Aman Tambahan dari <i>Permit Verificator/Permit Issuer</i> (Jika ada)
             </th>
-            <th style="background-color: black; color: white; text-align: center;">(lingkari)</th>
+            <th style="background-color: black; color: white; text-align: center;">Status</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td colspan="2" style="height: 100px;"></td>
-            <td style="text-align: center;">Ya / N/A</td>
+            <td colspan="2" style="height: 100px;">{{ $permit?->rekomendasi_kerja_aman ?? '-' }}</td>
+            <td style="text-align: center;">{{ $permit?->rekomendasi_status === 'ya' ? '✓ Ya' : 'N/A' }}</td>
         </tr>
     </tbody>
 </table>
+
 <table class="table">
     <thead>
         <tr>
@@ -232,13 +222,23 @@
             <td>Jam:</td>
         </tr>
         <tr>
-            <td style="height: 40px;"></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td style="text-align: center;">{{ $permit?->permit_requestor_name ?? '-' }}</td>
+            <td style="text-align: center;">
+                @if ($permit?->signature_permit_requestor)
+                    <img src="{{ public_path($permit->signature_permit_requestor) }}" height="40" alt="TTD">
+                @endif
+            </td>
+            <td style="text-align: center;">
+                {{ $permit?->permit_requestor_date?->format('d-m-Y') ?? '-' }}
+            </td>
+            <td style="text-align: center;">
+                {{ $permit?->permit_requestor_time ?? '-' }}
+            </td>
         </tr>
     </tbody>
 </table>
+
+{{-- Bagian 6: Verifikasi Izin Kerja --}}
 <table class="table">
     <thead>
         <tr>
@@ -258,20 +258,26 @@
                 <i>Permit Verificator/Permit Issuer</i> telah dipenuhi serta saya telah menyetujui rencana pengangkatan untuk pekerjaan ini dapat dilakukan.
             </td>
         </tr>
-        <tr>
-            <td style="text-align: center;"><strong>Nama:</strong></td>
-            <td style="text-align: center;"><strong>Tanda tangan:</strong></td>
-            <td style="text-align: center;"><strong>Tanggal:</strong></td>
-            <td style="text-align: center;"><strong>Jam:</strong></td>
+        <tr style="text-align: center; font-weight: bold;">
+            <td>Nama:</td>
+            <td>Tanda tangan:</td>
+            <td>Tanggal:</td>
+            <td>Jam:</td>
         </tr>
         <tr>
-            <td style="height: 50px;"></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td style="text-align: center;">{{ $permit?->verificator_name ?? '' }}</td>
+            <td style="text-align: center;">
+                @if (!empty($permit?->signature_verificator))
+                    <img src="{{ public_path($permit->signature_verificator) }}" alt="TTD" style="height: 40px;">
+                @endif
+            </td>
+            <td style="text-align: center;">{{ $permit?->verificator_date?->format('Y-m-d') ?? '' }}</td>
+            <td style="text-align: center;">{{ $permit?->verificator_time ?? '' }}</td>
         </tr>
     </tbody>
 </table>
+
+{{-- Bagian 7: Penerbitan Izin Kerja --}}
 <table class="table">
     <thead>
         <tr>
@@ -290,25 +296,34 @@
                 <i>Permit Verificator/Permit Issuer</i> telah dipenuhi untuk pekerjaan ini dapat dilakukan.
             </td>
         </tr>
-        <tr>
-            <td style="text-align: center;"><strong>Nama:</strong></td>
-            <td style="text-align: center;"><strong>Tanda tangan:</strong></td>
-            <td style="text-align: center;"><strong>Tanggal:</strong></td>
-            <td style="text-align: center;"><strong>Jam:</strong></td>
+        <tr style="text-align: center; font-weight: bold;">
+            <td>Nama:</td>
+            <td>Tanda tangan:</td>
+            <td>Tanggal:</td>
+            <td>Jam:</td>
         </tr>
         <tr>
-            <td style="height: 50px;"></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td style="text-align: center;">{{ $permit?->permit_issuer_name ?? '' }}</td>
+            <td style="text-align: center;">
+                @if (!empty($permit?->signature_permit_issuer))
+                    <img src="{{ public_path($permit->signature_permit_issuer) }}" alt="TTD" style="height: 40px;">
+                @endif
+            </td>
+            <td style="text-align: center;">{{ $permit?->permit_issuer_date?->format('Y-m-d') ?? '' }}</td>
+            <td style="text-align: center;">{{ $permit?->permit_issuer_time ?? '' }}</td>
         </tr>
         <tr>
             <td colspan="4">
-                Izin kerja ini berlaku dari tanggal: &nbsp; <u> / </u> &nbsp; <u> / </u> &nbsp; jam: <u>______</u> &nbsp; sampai tanggal: &nbsp; <u> / </u> &nbsp; <u> / </u> &nbsp; jam: <u>______</u>
+                Izin kerja ini berlaku dari tanggal: <u>{{ $permit?->izin_berlaku_dari?->format('Y-m-d') ?? '/' }}</u>
+                jam: <u>{{ $permit?->izin_berlaku_jam_dari ?? '_____' }}</u>
+                sampai tanggal: <u>{{ $permit?->izin_berlaku_sampai?->format('Y-m-d') ?? '/' }}</u>
+                jam: <u>{{ $permit?->izin_berlaku_jam_sampai ?? '_____' }}</u>
             </td>
         </tr>
     </tbody>
 </table>
+
+{{-- Bagian 8: Pengesahan Izin Kerja --}}
 <table class="table">
     <thead>
         <tr>
@@ -323,25 +338,32 @@
         </tr>
         <tr>
             <td colspan="4">
-                Saya menyatakan bahwa saya telah memeriksa area kerja, semua dokumentasi persyaratan pengangkatan beban telah dilengkapi, semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
+                Saya menyatakan bahwa saya telah memeriksa area kerja, semua dokumentasi persyaratan pengangkatan beban telah dilengkapi,
+                semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
                 <i>Permit Verificator/Permit Issuer</i> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah menekankan apa saja 
                 <i>major hazards</i> dan pengendaliannya yang harus disosialisasikan oleh <i>Permit Receiver</i> kepada seluruh pekerja terkait.
             </td>
         </tr>
-        <tr>
-            <td style="text-align: center;"><strong>Nama:</strong></td>
-            <td style="text-align: center;"><strong>Tanda tangan:</strong></td>
-            <td style="text-align: center;"><strong>Tanggal:</strong></td>
-            <td style="text-align: center;"><strong>Jam:</strong></td>
+        <tr style="text-align: center; font-weight: bold;">
+            <td>Nama:</td>
+            <td>Tanda tangan:</td>
+            <td>Tanggal:</td>
+            <td>Jam:</td>
         </tr>
         <tr>
-            <td style="height: 50px;"></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td style="text-align: center;">{{ $permit?->permit_authorizer_name ?? '' }}</td>
+            <td style="text-align: center;">
+                @if (!empty($permit?->signature_permit_authorizer))
+                    <img src="{{ public_path($permit->signature_permit_authorizer) }}" alt="TTD" style="height: 40px;">
+                @endif
+            </td>
+            <td style="text-align: center;">{{ $permit?->permit_authorizer_date?->format('Y-m-d') ?? '' }}</td>
+            <td style="text-align: center;">{{ $permit?->permit_authorizer_time ?? '' }}</td>
         </tr>
     </tbody>
 </table>
+
+{{-- Bagian 9: Pelaksanaan Pekerjaan --}}
 <table class="table">
     <thead>
         <tr>
@@ -356,63 +378,80 @@
         </tr>
         <tr>
             <td colspan="4">
-                Saya menyatakan bahwa semua dokumentasi persyaratan pengangkatan beban telah dilengkapi, semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
+                Saya menyatakan bahwa semua dokumentasi persyaratan pengangkatan beban telah dilengkapi,
+                semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
                 <i>Permit Verificator/Permit Issuer</i> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah mensosialisasikan apa saja 
                 <i>major hazards</i> dan pengendaliannya dari pekerjaan ini kepada seluruh pekerja terkait.
             </td>
         </tr>
-        <tr>
-            <td style="text-align: center;"><strong>Nama:</strong></td>
-            <td style="text-align: center;"><strong>Tanda tangan:</strong></td>
-            <td style="text-align: center;"><strong>Tanggal:</strong></td>
-            <td style="text-align: center;"><strong>Jam:</strong></td>
+        <tr style="text-align: center; font-weight: bold;">
+            <td>Nama:</td>
+            <td>Tanda tangan:</td>
+            <td>Tanggal:</td>
+            <td>Jam:</td>
         </tr>
         <tr>
-            <td style="height: 50px;"></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td style="text-align: center;">{{ $permit?->permit_receiver_name ?? '' }}</td>
+            <td style="text-align: center;">
+                @if (!empty($permit?->signature_permit_receiver))
+                    <img src="{{ public_path($permit->signature_permit_receiver) }}" alt="TTD" style="height: 40px;">
+                @endif
+            </td>
+            <td style="text-align: center;">{{ $permit?->permit_receiver_date?->format('Y-m-d') ?? '' }}</td>
+            <td style="text-align: center;">{{ $permit?->permit_receiver_time ?? '' }}</td>
         </tr>
     </tbody>
 </table>
+
+
+<!-- Bagian 10: Penutupan Izin Kerja -->
 <table class="table" style="width: 100%; border-collapse: collapse;">
     <thead>
         <tr>
             <th colspan="3" style="background-color: black; color: white; font-weight: bold; padding: 4px;">
                 10. Penutupan Izin Kerja
             </th>
-            <th style="background-color: black; color: white; text-align: center; width: 10%;">(lingkari)</th>
+            <th style="width: 10%; background-color: black; color: white; text-align: center;">(Beri Centang)</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="width: 25%; font-style: italic; padding: 4px;"><strong>Lock & Tag</strong></td>
-            <td colspan="2" style="padding: 4px;">Semua <i>lock & tag</i> sudah dilepas</td>
-            <td style="text-align: center;">☐ Ya &nbsp;&nbsp; ☐ N/A</td>
+            <td style="width: 25%; font-style: italic;"><b>Lock & Tag</b></td>
+            <td colspan="2">Semua <i>lock & tag</i> sudah dilepas</td>
+            <td style="text-align: center;">{{ $closure?->lock_tag_removed ? '✓ Ya' : 'N/A' }}</td>
         </tr>
         <tr>
-            <td style="font-style: italic; padding: 4px;"><strong>Sampah & Peralatan Kerja</strong></td>
-            <td colspan="2" style="padding: 4px;">Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan</td>
-            <td style="text-align: center;">☐ Ya &nbsp;&nbsp; ☐ N/A</td>
+            <td style="font-style: italic;"><b>Sampah & Peralatan Kerja</b></td>
+            <td colspan="2">Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan</td>
+            <td style="text-align: center;">{{ $closure?->equipment_cleaned ? '✓ Ya' : 'N/A' }}</td>
         </tr>
         <tr>
-            <td style="font-style: italic; padding: 4px;"><strong>Machine Guarding</strong></td>
-            <td colspan="2" style="padding: 4px;">Semua <i>machine guarding</i> sudah dipasang kembali</td>
-            <td style="text-align: center;">☐ Ya &nbsp;&nbsp; ☐ N/A</td>
+            <td style="font-style: italic;"><b>Machine Guarding</b></td>
+            <td colspan="2">Semua <i>machine guarding</i> sudah dipasang kembali</td>
+            <td style="text-align: center;">{{ $closure?->guarding_restored ? '✓ Ya' : 'N/A' }}</td>
         </tr>
         <tr>
-            <th style="padding: 4px;">Tanggal:</th>
-            <th style="padding: 4px;">Jam:</th>
-            <th colspan="2" style="text-align: center; padding: 4px;">Tanda Tangan</th>
+            <th style="width: 20%;">Tanggal:</th>
+            <th style="width: 20%;">Jam:</th>
+            <th colspan="2" style="text-align: center;">Tanda Tangan</th>
         </tr>
-        <tr>
-            <td style="height: 35px;"></td>
-            <td></td>
-            <td style="text-align: center;"><i>Permit Requestor</i></td>
-            <td style="text-align: center;"><i>Permit Issuer</i></td>
+        <tr style="height: 40px;">
+            <td style="text-align: center;">{{ $closure?->closed_date }}</td>
+            <td style="text-align: center;">{{ $closure?->closed_time }}</td>
+            <td style="text-align: center;">
+                @if ($closure?->requestor_sign)
+                    <img src="{{ public_path($closure->requestor_sign) }}" height="40" alt="TTD">
+                @endif
+                <div><i>Permit Requestor</i></div>
+            </td>
+            <td style="text-align: center;">
+                @if ($closure?->issuer_sign)
+                    <img src="{{ public_path($closure->issuer_sign) }}" height="40" alt="TTD">
+                @endif
+                <div><i>Permit Issuer</i></div>
+            </td>
         </tr>
     </tbody>
 </table>
-
 </body>
 </html>

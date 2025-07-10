@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('lifting_permits', function (Blueprint $table) {
+        Schema::create('work_permit_beban', function (Blueprint $table) {
             $table->id();
             $table->foreignId('notification_id')->constrained('notifications')->onDelete('cascade');
 
@@ -61,12 +61,14 @@ return new class extends Migration
             $table->date('permit_receiver_date')->nullable();
             $table->time('permit_receiver_time')->nullable();
 
+            $table->string('token')->unique()->nullable();
+
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('lifting_permits');
+        Schema::dropIfExists('work_permit_beban');
     }
 };

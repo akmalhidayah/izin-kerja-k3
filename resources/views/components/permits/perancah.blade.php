@@ -292,9 +292,10 @@
     <input type="hidden" name="signature_permit_issuer"
         id="perancah_signature_permit_issuer"
         value="{{ old('signature_permit_issuer', $permit->signature_permit_issuer ?? '') }}">
-@if(old('signature_permit_issuer', $permit->signature_permit_issuer ?? null))
-    <img src="{{ asset(old('signature_permit_issuer', $permit->signature_permit_issuer)) }}" alt="TTD" class="h-12 mx-auto mt-1">
+@if(old('signature_permit_issuer') || isset($permit) && $permit->signature_permit_issuer)
+    <img src="{{ asset(old('signature_permit_issuer', $permit->signature_permit_issuer ?? '')) }}" alt="TTD" class="h-12 mx-auto mt-1">
 @endif
+
 </td>
 
                 <td class="border px-2 py-2 text-center">

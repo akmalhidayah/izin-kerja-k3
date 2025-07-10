@@ -358,15 +358,14 @@
         </tr>
         {{-- Data --}}
         <tr>
-            <td style="border: 1px solid black; text-align: center;">{{ $permit->verificator_name ?? '' }}</td>
+            <td style="border: 1px solid black; text-align: center;">{{ $permit->confined_verificator_name ?? '' }}</td>
             <td style="border: 1px solid black; text-align: center;">
-                @if (!empty($permit->signature_verificator))
-                 <img src="{{ public_path($permit->signature_verificator) }}" height="40">
-
+                @if (!empty($permit->signature_confined_verificator))
+                    <img src="{{ public_path($permit->signature_confined_verificator) }}" height="40">
                 @endif
             </td>
-            <td style="border: 1px solid black; text-align: center;">{{ $permit->verificator_date ?? '' }}</td>
-            <td style="border: 1px solid black; text-align: center;">{{ $permit->verificator_time ?? '' }}</td>
+            <td style="border: 1px solid black; text-align: center;">{{ $permit->confined_verificator_date ?? '' }}</td>
+            <td style="border: 1px solid black; text-align: center;">{{ $permit->confined_verificator_time ?? '' }}</td>
         </tr>
     </tbody>
 </table>
@@ -415,7 +414,8 @@
             </td>
         </tr>
     </tbody>
-</table>{{-- BAGIAN 9 --}}
+</table>
+{{-- BAGIAN 9 --}}
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
     <thead>
         <tr>

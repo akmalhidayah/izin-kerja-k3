@@ -229,17 +229,17 @@
 
                     <tr>
                         <td class="border px-2 py-1 text-center font-semibold">
-                            <input type="text" name="manager_nama" class="w-full text-xs border-gray-300 rounded p-1 mt-2" placeholder="Sjarifuddin Said" value="{{ old('manager_nama', $dataKontraktor->manager_nama ?? '') }}">
+                            <input type="text" name="manager_nama" class="w-full text-xs border-gray-300 rounded p-1 mt-2" placeholder="Masukkan Nama Manager K3" value="{{ old('manager_nama', $dataKontraktor->manager_nama ?? '') }}">
                         </td>
                         <td class="border px-2 py-1 text-center font-semibold">
-                            <input type="text" name="perusahaan_nama" class="w-full text-xs border-gray-300 rounded p-1 mt-2" placeholder="Nama Perusahaan/Kontraktor" value="{{ old('perusahaan_nama', $dataKontraktor->perusahaan_nama ?? '') }}">
+                            <input type="text" name="perusahaan_nama" class="w-full text-xs border-gray-300 rounded p-1 mt-2" placeholder="Masukkan Nama Perusahaan/Kontraktor" value="{{ old('perusahaan_nama', $dataKontraktor->perusahaan_nama ?? '') }}">
                         </td>
                     </tr>
                     <tr>
                         <td class="border px-2 py-1 text-center" colspan="2">
                             <div class="flex justify-between items-center">
                                 <span class="font-semibold text-xs">Paraf Diverifikasi oleh</span>
-                                <input type="text" name="diverifikasi_nama" class="text-xs border-gray-300 rounded p-1 w-1/3 ml-2" placeholder="Nama" value="{{ old('diverifikasi_nama', $dataKontraktor->diverifikasi_nama ?? '') }}">
+                                <input type="text" name="diverifikasi_nama" class="text-xs border-gray-300 rounded p-1 w-1/3 ml-2" placeholder="Nama Verifikator/Uji Reksa" value="{{ old('diverifikasi_nama', $dataKontraktor->diverifikasi_nama ?? '') }}">
                                 <button type="button" onclick="openSignPad('diverifikasi_signature')" class="text-blue-600 underline text-xs ml-2">Tanda Tangan</button>
                                 @if(!empty($dataKontraktor->diverifikasi_signature))
                                     <img src="{{ asset($dataKontraktor->diverifikasi_signature) }}" class="h-10 ml-3 inline-block" alt="Paraf Verifikasi">

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\WorkPermitDetail;
+use App\Models\WorkPermitClosure;
 
 class WorkPermitPenggalian extends Model
 {
@@ -50,6 +52,7 @@ class WorkPermitPenggalian extends Model
         'signature_permit_receiver',
         'permit_receiver_date',
         'permit_receiver_time',
+        'token',
     ];
 
     protected $casts = [
@@ -61,4 +64,22 @@ class WorkPermitPenggalian extends Model
     {
         return $this->belongsTo(Notification::class);
     }
+
+    public function detail()
+{
+    return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id')
+                ->where('permit_type', 'penggalian');
+}
+
+public function closure()
+{
+    return $this->hasOneThrough(
+        WorkPermitClosure::class,
+        WorkPermitDetail::class,
+        'notification_id',        // foreign key di WorkPermitDetail
+        'work_permit_detail_id',  // foreign key di WorkPermitClosure
+        'notification_id',        // local key di WorkPermitPenggalian
+        'id'                      // local key di WorkPermitDetail
+    )->where('permit_type', 'penggalian');
+}
 }

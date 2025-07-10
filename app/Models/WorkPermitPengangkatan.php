@@ -51,10 +51,20 @@ class WorkPermitPengangkatan extends Model
         'signature_operator',
         'verificator_name',
         'signature_verificator',
+
+        'token',
     ];
 
     protected $casts = [
         'teknik_pengikatan' => 'array',
         'wire_rope_sling' => 'array',
     ];
+
+    // 
+
+public function notification()
+{
+    return $this->belongsTo(\App\Models\Notification::class, 'notification_id');
+}
+
 }

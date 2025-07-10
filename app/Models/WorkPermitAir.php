@@ -54,7 +54,7 @@ class WorkPermitAir extends Model
         'permit_receiver_date',
         'permit_receiver_time',
 
-
+ 'token',
     ];
 
     protected $casts = [

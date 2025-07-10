@@ -22,9 +22,9 @@
                 { value: 'beban', label: 'Izin Beban Berat' },
                 { value: 'panas-risiko', label: 'Izin Risiko Panas' },
                 { value: 'ruang-tertutup', label: 'Izin Ruang Tertutup' },
-                { value: 'lifesaving', label: 'Izin Life Saving Appliance' },
+                <!-- { value: 'lifesaving', label: 'Izin Life Saving Appliance' }, -->
                 { value: 'perancah', label: 'Izin Perancah' },
-                { value: 'procedures', label: 'Izin Prosedur Khusus' }
+                <!-- { value: 'procedures', label: 'Izin Prosedur Khusus' } -->
             ]
         }">
             <!-- Dropdown -->

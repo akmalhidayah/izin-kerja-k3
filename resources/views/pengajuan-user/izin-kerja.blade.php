@@ -370,6 +370,20 @@
     $permitRisikoPanas = $notification
         ? \App\Models\WorkPermitRisikoPanas::where('notification_id', $notification->id)->first()
         : null;
+    $permitBeban = $notification
+    ? \App\Models\WorkPermitBeban::where('notification_id', $notification->id)->first()
+    : null;
+
+    $permitPenggalian = $notification
+    ? \App\Models\WorkPermitPenggalian::where('notification_id', $notification->id)->first()
+    : null;
+
+    $permitPengangkatan = $notification
+    ? \App\Models\WorkPermitPengangkatan::where('notification_id', $notification->id)->first()
+    : null;
+
+
+
 @endphp
 
         @if (!$prevStepApproved)
@@ -548,8 +562,70 @@
         @endif
     </div>
 @endif
+{{-- Permit Beban --}}
+@if ($permitBeban)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Beban:</span>
+        <a href="{{ route('working-permit.beban.preview', ['id' => $permitBeban->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+            <i class="fas fa-dumbbell text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-beban'"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitBeban->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.beban.token', $permitBeban->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
+            </button>
+        @endif
+    </div>
+@endif
+{{-- Permit Penggalian --}}
+@if ($permitPenggalian)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Penggalian:</span>
+        <a href="{{ route('working-permit.penggalian.preview', ['id' => $permitPenggalian->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+           <i class="fas fa-digging text-xs"></i>
 
-
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-penggalian'"
+            class="bg-yellow-700 hover:bg-yellow-800 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitPenggalian->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.penggalian.token', $permitPenggalian->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
+            </button>
+        @endif
+    </div>
+@endif
+{{-- Permit Pengangkatan --}}
+@if ($permitPengangkatan)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Pengangkatan:</span>
+        <a href="{{ route('working-permit.pengangkatan.preview', ['id' => $permitPengangkatan->notification_id]) }}"
+            class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
+<i class="fas fa-anchor text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $index }}-pengangkatan'"
+            class="bg-pink-600 hover:bg-pink-700 text-white p-1 rounded-full" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @if ($permitPengangkatan->token)
+            <button type="button"
+                onclick="navigator.clipboard.writeText('{{ route('working-permit.pengangkatan.token', $permitPengangkatan->token) }}'); alert('Link berhasil disalin!')"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
+                <i class="fas fa-link text-xs"></i>
+            </button>
+        @endif
+    </div>
+@endif
                 {{-- Tambah Permit Lain (Selalu Muncul di Bawah) --}}
                 <div class="flex flex-col items-center mt-2">
                     <span class="text-[10px] text-gray-600 mb-1">Tambah Permit Lain</span>
@@ -983,8 +1059,36 @@
             'detail' => $detail ?? null,
             'closure' => $closure ?? null
         ])
-
-
+{{-- Modal Permit Beban --}}
+@include('components.steps.modal-working-permit-beban', [
+    'label' => 'Edit Beban',
+    'id' => 'modal-' . $index . '-beban',
+    'notification' => $notification,
+    'stepName' => $step['code'],
+    'permitBeban' => $permitBeban ?? null,
+    'detail' => $detail ?? null,
+    'closure' => $closure ?? null
+])
+{{-- Modal Permit Penggalian --}}
+@include('components.steps.modal-working-permit-penggalian', [
+    'label' => 'Edit Penggalian',
+    'id' => 'modal-' . $index . '-penggalian',
+    'notification' => $notification,
+    'stepName' => $step['code'],
+    'permitPenggalian' => $permitPenggalian ?? null,
+    'detail' => $detail ?? null,
+    'closure' => $closure ?? null
+])
+{{-- Modal Permit Pengangkatan --}}
+@include('components.steps.modal-working-permit-pengangkatan', [
+    'label' => 'Edit Pengangkatan',
+    'id' => 'modal-' . $index . '-pengangkatan',
+    'notification' => $notification,
+    'stepName' => $step['code'],
+    'permitPengangkatan' => $permitPengangkatan ?? null,
+    'detail' => $detail ?? null,
+    'closure' => $closure ?? null
+])
         {{-- Modal Permit Lainnya --}}
         @include('components.steps.modal-tambah-lainnya', [
             'label' => 'Tambah Permit Lain',

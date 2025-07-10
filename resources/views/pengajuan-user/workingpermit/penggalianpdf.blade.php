@@ -1,518 +1,515 @@
-<!-- Izin Kerja Penggalian - Bagian 1: Detail Pekerjaan -->
-<div class="text-center mb-4">
-    <h2 class="text-2xl font-bold uppercase">IZIN KERJA PENGGALIAN</h2>
-    <p class="text-sm mt-2 text-gray-600 leading-snug">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Izin Kerja Penggalian</title>
+    <style>
+        @page { size: A4; margin: 10mm; }
+        body {
+        font-family: "DejaVu Sans", sans-serif;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+        .header-table, .table, .checkbox-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td,
+        .checkbox-table th, .checkbox-table td {
+            border: 1px solid #000;
+            padding: 5px;
+            vertical-align: top;
+            text-align: left;
+        }
+        .header-table td {
+            vertical-align: top;
+        }
+        .section-title {
+            background-color: #000;
+            color: #fff;
+            font-weight: bold;
+            padding: 6px;
+            font-size: 12px;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .logo {
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+    <tr>
+        <td style="border: 1px solid black; width: 20%; text-align: center;">
+            <img src="file://{{ public_path('images/logo-st.png') }}" alt="Logo Perusahaan" style="width: 40%; height: auto;">
+        </td>
+        <td style="border: 1px solid black; text-align: center;" colspan="2">
+            <h2 style="margin: 0;">IZIN KERJA PENGGALIAN</h2>
+        </td>
+        <td style="border: 1px solid black; width: 25%;">
+            <strong>Nomor:</strong> <span style="color: gray;">Jika ada</span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4" style="border: 1px solid black; font-size: 12px; padding: 5px; text-align: justify;">
+            <p class="text-sm mt-2 text-gray-600 leading-snug">
         Izin kerja ini diberikan untuk semua pekerjaan penggalian dengan kedalaman ≥ 300 mm, izin ini tidak berlaku untuk penggalian di area tambang aktif.
         Pekerjaan tidak bisa dimulai hingga izin kerja diverifikasi oleh <em>Permit Verificator</em>, diterbitkan oleh <em>Permit Issuer</em>, disahkan oleh 
         <em>Permit Authorizer</em>, dan <em>major hazards & control</em> disosialisasikan oleh <em>Permit Receiver</em>.
     </p>
-</div>
-
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow space-y-4">
-    <h3 class="bg-black text-white px-2 py-1 font-bold">1. Detail Pekerjaan</h3>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-            <label class="font-semibold">Lokasi pekerjaan:</label>
-            <input type="text" name="lokasi_pekerjaan" class="input w-full text-sm">
-        </div>
-        <div>
-            <label class="font-semibold">Tanggal:</label>
-            <input type="date" name="tanggal_pekerjaan" class="input w-full text-sm">
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-            <label class="font-semibold">Uraian pekerjaan:</label>
-            <textarea name="uraian_pekerjaan" rows="5" class="textarea w-full text-sm"></textarea>
-        </div>
-        <div>
-    <label class="font-semibold">Sketsa penggalian: 
-        <span class="text-gray-400 text-xs">(upload gambar jpg/png/pdf)</span>
-    </label>
-    <input type="file" 
-           name="sketsa_penggalian" 
-           accept=".jpg,.jpeg,.png,.pdf" 
-           class="block w-full mt-1 text-sm text-gray-700 file:mr-4 file:py-1 file:px-3
-                  file:rounded-md file:border-0 file:text-sm file:font-semibold
-                  file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-</div>
-    </div>
-
-    <div>
-        <label class="font-semibold">Peralatan/perlengkapan yang akan digunakan pada pekerjaan:</label>
-        <textarea name="alat_penggalian" class="textarea w-full text-sm"></textarea>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-            <label class="font-semibold">Perkiraan jumlah pekerja:</label>
-            <input type="number" name="jumlah_pekerja" class="input w-full text-sm">
-        </div>
-        <div>
-            <label class="font-semibold">Nomor darurat yang dapat dihubungi:</label>
-            <input type="text" name="nomor_darurat" class="input w-full text-sm">
-        </div>
-    </div>
-</div>
-
-<!--  Bagian 2: Gambar Denaah -->
-<div x-data="{ showUpload: false }" class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6">
-    <h3 class="font-bold bg-black text-white px-2 py-1">
-        2. Gambar/Denah Fasilitas Bawah Tanah yang Diperlukan 
-        <span class="text-xs font-normal">(beri tanda centang)</span>
-    </h3>
-
-    <!-- Daftar checkbox -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-sm">
-        <div class="space-y-1">
-            <label><input type="checkbox" name="denah[]" value="kabel_listrik" class="mr-1"> Jalur kabel listrik</label><br>
-            <label><input type="checkbox" name="denah[]" value="kabel_optik" class="mr-1"> Jalur kabel optik/telpon</label><br>
-            <label><input type="checkbox" name="denah[]" value="pipa_gas" class="mr-1"> Jalur pipa gas</label><br>
-            <label><input type="checkbox" name="denah[]" value="pipa_proses" class="mr-1"> Jalur pipa proses</label><br>
-            <label><input type="checkbox" name="denah[]" value="cable_tunnel" class="mr-1"> Jalur <em>cable tunnel</em></label>
-        </div>
-        <div class="space-y-1">
-            <label><input type="checkbox" name="denah[]" value="pipa_air_hydrant" class="mr-1"> Jalur pipa air <em>hydrant</em></label><br>
-            <label><input type="checkbox" name="denah[]" value="pipa_air_utilitas" class="mr-1"> Jalur pipa air utilitas</label><br>
-            <label><input type="checkbox" name="denah[]" value="kabel_instrumen" class="mr-1"> Jalur kabel instrumentasi</label><br>
-            <label><input type="checkbox" name="denah[]" value="selokan_septic" class="mr-1"> Jalur selokan dan <em>septic tank</em></label><br>
-            <label><input type="checkbox" name="denah[]" value="lainnya" class="mr-1"> Jalur lainnya ……………………</label>
-        </div>
-    </div>
-
-    <!-- Radio dan upload -->
-    <p class="mt-3 text-sm">Jika ya, lampirkan untuk melengkapi izin penggalian ini</p>
-
-    <div class="flex items-center gap-4 mt-2">
-        <label class="inline-flex items-center gap-1">
-            <input type="radio" name="denah_status" value="ya" x-model="showUpload" :checked="true" @change="showUpload = true"> Ya
-        </label>
-        <label class="inline-flex items-center gap-1">
-            <input type="radio" name="denah_status" value="na" x-model="showUpload" @change="showUpload = false"> N/A
-        </label>
-    </div>
-
-    <!-- Upload section -->
-    <div x-show="showUpload" x-transition class="mt-4">
-        <label class="block text-sm font-semibold mb-1">Upload Denah (PDF atau Gambar)</label>
-        <input type="file" name="file_denah" accept=".pdf, .jpg, .jpeg, .png" class="block w-full text-sm text-gray-700 border border-gray-300 rounded p-2">
-        <p class="text-xs text-gray-500 mt-1">Format diperbolehkan: PDF, JPG, PNG</p>
-    </div>
-</div>
-
-<!-- Bagian 3: Persyaratan Kerja Aman -->
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6 overflow-x-auto">
-    <h3 class="font-bold bg-black text-white px-2 py-1">3. Persyaratan Kerja Aman</h3>
-
-    <table class="table-auto w-full text-sm border mt-3">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-2 py-1 text-left">Persyaratan</th>
-                <th class="border px-2 py-1 text-center w-12">Ya</th>
-                <th class="border px-2 py-1 text-center w-12">N/A</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php
-                $items = [
-                    'Area penggalian sudah diperiksa, semua bahaya dan risiko yang bisa diketahui sudah diidentifikasi.',
-                    'Area penggalian sudah dibatasi dengan memasang barikade atau <em>safety line</em>.',
-                    'Area kerja sudah diamankan dari potensi jatuhan benda/material.',
-                    'Area kerja sudah diamankan dari potensi pekerja terpeleset/tersandung.',
-                    'Pekerja yang melakukan pekerjaan penggalian kompeten terhadap pekerjaan yang dilakukan.',
-                    '<em>Job Safety Analysis/Safe Working Procedure</em> sudah tersedia dan semua pengendalian bahayanya sudah dilakukan.',
-                    'Peralatan kerja yang akan digunakan sudah diperiksa dan dipastikan layak untuk digunakan.',
-                    'Alat pelindung diri yang akan dipakai sudah diperiksa dan dinyatakan layak untuk dipakai.',
-                    'Semua pekerja penggalian sudah menggunakan alat pelindung diri yang sesuai.',
-                    'Tersedia jalur masuk/keluar galian yang aman, tersedia jembatan yang aman jika diperlukan.',
-                    'Tersedia tangga naik/turun dengan penempatan dan kemiringan yang aman (75°) dan terikat dengan kuat pada bibir galian.',
-                    'Semua pekerja penggalian memahami teknik <em>three point contact</em> saat naik/turun tangga.',
-                    'Area yang akan digali aman/sudah diamankan dari fasilitas bawah tanah seperti jalur kabel listrik, kabel optik, kabel instrumentasi, kabel telepon, pipa gas, pipa air <em>utility</em>, pipa proses, pipa air <em>hydrant</em>, selokan, <em>septic tank</em>, <em>cable tunnel</em>.',
-                    'Melakukan metoda <em>cutback</em> 30° untuk tanah keras dan 46° untuk tanah lunak/dipadatan.',
-                    'Metoda penyanggaan (<em>shoring</em>) lebih dari 3 meter disetujui oleh professional engineer.',
-                    'Penumpukan tanah galian minimum 2 meter dari bibir galian dan kemiringan kurang dari 45°.',
-                    'Garis barikade dengan jarak 2 meter dari bibir galian dan lengkap dengan rambu peringatan?',
-                    'Genangan air pada lubang galian dibuang/dipompa keluar dari lubang galian.',
-                    'Dipasang exhaust fan pada lubang galian untuk sirkulasi udara yang baik.',
-                    'Diterapkan <em>Protective support system</em> untuk penggalian yang akan dilakukan seperti <em>shoring/shielding/benching</em>.',
-                    'Dilakukan pengukuran kadar gas pada lubang galian (hasil pengukuran bisa dicatatkan pada lembar terpisah).',
-                    'Diperlukan isolasi dan penguncian sebelum penggalian dilakukan (ajukan Izin Kerja Umum).',
-                ];
-            @endphp
-
-            @foreach ($items as $i => $item)
-                <tr>
-                    <td class="border px-2 py-1">{!! $item !!}</td>
-                    <td class="border px-2 py-1 text-center">
-                        <input type="radio" name="syarat_penggalian[{{ $i }}]" value="ya">
-                    </td>
-                    <td class="border px-2 py-1 text-center">
-                        <input type="radio" name="syarat_penggalian[{{ $i }}]" value="na">
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
-
-<!-- Bagian 4: Rekomendasi Persyaratan Kerja Aman Tambahan -->
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
-    <h3 class="font-bold bg-black text-white px-2 py-1">
-        4. Rekomendasi Persyaratan Kerja Aman Tambahan dari 
-        <em>Permit Verificator/Permit Issuer</em> 
-        <span class="text-gray-300 text-xs">(jika ada)</span>
-    </h3>
-
-    <table class="table-auto w-full text-sm border mt-2">
+        </td>
+    </tr>
+</table>
+<br>
+<!-- Bagian 1: Detail Pekerjaan -->
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
         <tr>
-            <td class="border px-2 py-2 align-top">
-                <textarea name="rekomendasi_tambahan" class="w-full h-32 border rounded p-2 resize-none" placeholder="Tulis rekomendasi jika ada..."></textarea>
-            </td>
-            <td class="border text-center align-top px-4 py-2 w-24">
-                <label class="block mb-1 font-medium">Ya</label>
-                <input type="radio" name="rekomendasi_status" value="ya">
+            <th colspan="2" style="background-color: black; color: white; text-align: left; padding: 5px;">1. Detail Pekerjaan</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="border: 1px solid #000; width: 50%; padding: 5px;"><b>Lokasi pekerjaan:</b><br>{{ $detail->location ?? '-' }}</td>
+            <td style="border: 1px solid #000; padding: 5px;"><b>Tanggal:</b><br>{{ \Carbon\Carbon::parse($detail->work_date ?? '')->format('d-m-Y') ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="border: 1px solid #000; padding: 5px;"><b>Uraian pekerjaan:</b><br>{{ $detail->job_description ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="border: 1px solid #000; padding: 5px;"><b>Peralatan/perlengkapan:</b><br>{{ $detail->equipment ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #000; padding: 5px;"><b>Jumlah pekerja:</b><br>{{ $detail->worker_count ?? '-' }}</td>
+            <td style="border: 1px solid #000; padding: 5px;"><b>Nomor darurat:</b><br>{{ $detail->emergency_contact ?? '-' }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Bagian 2: Gambar/Denah Fasilitas Bawah Tanah -->
+<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+    <thead>
+        <tr>
+            <th colspan="2" style="background-color: black; color: white; text-align: left; padding: 5px;">
+                2. Gambar/Denah Fasilitas Bawah Tanah yang Diperlukan
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @php
+            $denah = is_array($permit->denah) ? $permit->denah : json_decode($permit->denah, true) ?? [];
+
+            $denahItems = [
+                'kabel_listrik'     => 'Jalur kabel listrik',
+                'optik_telpon'      => 'Jalur kabel optik/telpon',
+                'pipa_gas'          => 'Jalur pipa gas',
+                'pipa_proses'       => 'Jalur pipa proses',
+                'cable_tunnel'      => 'Jalur cable tunnel',
+                'pipa_hydrant'      => 'Jalur pipa air hydrant',
+                'pipa_utilitas'     => 'Jalur pipa air utilitas',
+                'kabel_instrumen'   => 'Jalur kabel instrumentasi',
+                'selokan_septic'    => 'Jalur selokan dan septic tank',
+                'lainnya'           => 'Jalur lainnya ……………………',
+            ];
+
+            $chunks = array_chunk($denahItems, ceil(count($denahItems) / 2), true);
+        @endphp
+
+        @for ($i = 0; $i < count($chunks[0]); $i++)
+            <tr>
+                @foreach ([0, 1] as $col)
+                    @php
+                        $key = array_keys($chunks[$col])[$i] ?? null;
+                        $label = $key ? $chunks[$col][$key] : '';
+                    @endphp
+                    @if ($key)
+                        <td style="border: 1px solid #000; padding: 5px;">
+                            {!! $label !!}: {{ in_array($key, $denah) ? '✓' : '' }}
+                        </td>
+                    @else
+                        <td style="border: 1px solid #000; padding: 5px;"></td>
+                    @endif
+                @endforeach
+            </tr>
+        @endfor
+
+        <tr>
+            <td colspan="2" style="border: 1px solid #000; padding: 5px;">
+                <b>Status denah:</b> {{ $permit->denah_status === 'ya' ? '✓ Ya' : 'N/A' }}<br>
+
+                @if($permit->denah_status === 'ya' && $permit->file_denah)
+                    <b>Lampiran:</b> Gambar/denah terlampir
+                @endif
             </td>
         </tr>
-    </table>
-</div>
 
+        @php
+            $denahPath = storage_path('app/public/' . str_replace('storage/', '', $permit->file_denah));
+        @endphp
+
+        @if($permit->denah_status === 'ya' && $permit->file_denah && file_exists($denahPath))
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; padding: 5px; text-align: center;">
+                    <img src="{{ $denahPath }}" style="max-width: 100%; max-height: 400px;" alt="Gambar Denah">
+                </td>
+            </tr>
+        @endif
+    </tbody>
+</table>
+
+<!-- Bagian 3: Persyaratan Kerja Aman -->
+<h3 style="background-color: black; color: white; padding: 5px;">3. Persyaratan Kerja Aman</h3>
+<table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid #000; padding: 5px;">Persyaratan</th>
+            <th style="border: 1px solid #000; padding: 5px; width: 30px;">Ya</th>
+            <th style="border: 1px solid #000; padding: 5px; width: 30px;">N/A</th>
+        </tr>
+    </thead>
+    <tbody>
+        @php
+            $items = [
+                'Area penggalian sudah diperiksa, semua bahaya dan risiko yang bisa diketahui sudah diidentifikasi.',
+                'Area penggalian sudah dibatasi dengan memasang barikade atau <em>safety line</em>.',
+                'Area kerja sudah diamankan dari potensi jatuhan benda/material.',
+                'Area kerja sudah diamankan dari potensi pekerja terpeleset/tersandung.',
+                'Pekerja yang melakukan pekerjaan penggalian kompeten terhadap pekerjaan yang dilakukan.',
+                '<em>Job Safety Analysis/Safe Working Procedure</em> sudah tersedia dan semua pengendalian bahayanya sudah dilakukan.',
+                'Peralatan kerja yang akan digunakan sudah diperiksa dan dipastikan layak untuk digunakan.',
+                'Alat pelindung diri yang akan dipakai sudah diperiksa dan dinyatakan layak untuk dipakai.',
+                'Semua pekerja penggalian sudah menggunakan alat pelindung diri yang sesuai.',
+                'Tersedia jalur masuk/keluar galian yang aman, tersedia jembatan yang aman jika diperlukan.',
+                'Tersedia tangga naik/turun dengan penempatan dan kemiringan yang aman (75°) dan terikat dengan kuat pada bibir galian.',
+                'Semua pekerja penggalian memahami teknik <em>three point contact</em> saat naik/turun tangga.',
+                'Area yang akan digali aman/sudah diamankan dari fasilitas bawah tanah seperti jalur kabel listrik, kabel optik, kabel instrumentasi, kabel telepon, pipa gas, pipa air <em>utility</em>, pipa proses, pipa air <em>hydrant</em>, selokan, <em>septic tank</em>, <em>cable tunnel</em>.',
+                'Melakukan metoda <em>cutback</em> 30° untuk tanah keras dan 46° untuk tanah lunak/dipadatan.',
+                'Metoda penyanggaan (<em>shoring</em>) lebih dari 3 meter disetujui oleh professional engineer.',
+                'Penumpukan tanah galian minimum 2 meter dari bibir galian dan kemiringan kurang dari 45°.',
+                'Garis barikade dengan jarak 2 meter dari bibir galian dan lengkap dengan rambu peringatan?',
+                'Genangan air pada lubang galian dibuang/dipompa keluar dari lubang galian.',
+                'Dipasang exhaust fan pada lubang galian untuk sirkulasi udara yang baik.',
+                'Diterapkan <em>Protective support system</em> untuk penggalian yang akan dilakukan seperti <em>shoring/shielding/benching</em>.',
+                'Dilakukan pengukuran kadar gas pada lubang galian (hasil pengukuran bisa dicatatkan pada lembar terpisah).',
+                'Diperlukan isolasi dan penguncian sebelum penggalian dilakukan (ajukan Izin Kerja Umum).',
+            ];
+            $syarat = json_decode($permit->syarat_penggalian ?? '[]', true);
+        @endphp
+
+      @foreach ($items as $i => $item)
+<tr>
+    <td style="border: 1px solid #000; padding: 5px;">{!! $item !!}</td>
+    <td style="border: 1px solid #000; text-align: center;">
+        {{ ($syarat[$i] ?? '') === 'ya' ? '✓' : '' }}
+    </td>
+    <td style="border: 1px solid #000; text-align: center;">
+        {{ ($syarat[$i] ?? '') === 'na' ? '✓' : '' }}
+    </td>
+</tr>
+@endforeach
+
+    </tbody>
+</table>
+
+<!-- Bagian 4: Rekomendasi Persyaratan Kerja Aman Tambahan -->
+<table class="table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th colspan="2" style="background-color: black; color: white; font-weight: bold; padding: 5px;">
+                4. Rekomendasi Persyaratan Kerja Aman Tambahan dari <em>Permit Verificator/Permit Issuer</em>
+            </th>
+            <th style="background-color: black; color: white; text-align: center; width: 80px;">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr style="height: 80px;">
+            <td colspan="2" style="border: 1px solid #000; padding: 5px;">
+                {!! nl2br(e($permit->rekomendasi_tambahan ?? '-')) !!}
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ $permit->rekomendasi_status === 'ya' ? '✓ Ya' : 'N/A' }}
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 <!-- Bagian 5: Permohonan Izin Kerja -->
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
-    <h3 class="font-bold bg-black text-white px-2 py-1">5. Permohonan Izin Kerja</h3>
-
-    <div class="p-2 border-t-0 border border-gray-300">
-        <p class="text-sm italic font-semibold mb-2">Permit Requestor:</p>
-        <p class="text-sm">
+<table class="table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th colspan="4" style="background-color: black; color: white; font-weight: bold; padding: 5px;">
+                5. Permohonan Izin Kerja
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="4" style="font-style: italic; font-weight: bold; padding: 5px;">Permit Requestor:</td></tr>
+        <tr><td colspan="4" style="padding: 5px;">
             Saya menyatakan bahwa semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
             <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini.
-        </p>
-    </div>
+        </td></tr>
+        <tr>
+            <th style="border: 1px solid #000; padding: 5px;">Nama</th>
+            <th style="border: 1px solid #000; padding: 5px;">Tanda Tangan</th>
+            <th style="border: 1px solid #000; padding: 5px;">Tanggal</th>
+            <th style="border: 1px solid #000; padding: 5px;">Jam</th>
+        </tr>
+        <tr style="height: 60px;">
+            <td style="border: 1px solid #000; padding: 5px; text-align: center;">
+                {{ $permit->permit_requestor_name ?? '-' }}
+            </td>
+            <td style="border: 1px solid #000; padding: 5px; text-align: center;">
+                @if ($permit->signature_permit_requestor && file_exists(public_path($permit->signature_permit_requestor)))
+                    <img src="{{ public_path($permit->signature_permit_requestor) }}" height="40" alt="TTD">
+                @else
+                    -
+                @endif
+            </td>
+            <td style="border: 1px solid #000; padding: 5px; text-align: center;">
+                {{ \Carbon\Carbon::parse($permit->permit_requestor_date)->format('d-m-Y') ?? '-' }}
+            </td>
+            <td style="border: 1px solid #000; padding: 5px; text-align: center;">
+                {{ $permit->permit_requestor_time ?? '-' }}
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-    <table class="table-auto w-full text-sm border mt-3">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-2 py-1 text-center w-1/4">Nama:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanda tangan:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanggal:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Jam:</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="border px-2 py-2 text-center">
-                    <input type="text" name="permit_requestor_name" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <button 
-                        type="button"
-                        @click="Alpine.store('signatureModal').openModal('Permit Requestor')"
-                        class="text-blue-600 underline text-xs">
-                        Tanda Tangan
-                    </button>
-                    <input type="hidden" name="signature_permit_requestor">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="date" name="permit_requestor_date" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="time" name="permit_requestor_time" class="input w-full text-center">
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
 <!-- Bagian 6: Verifikasi Izin Kerja -->
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6">
-    <h3 class="font-bold bg-black text-white px-2 py-1">6. Verifikasi Izin Kerja</h3>
-
-    <div class="p-2 border-t-0 border border-gray-300">
-        <p class="text-sm italic font-semibold mb-2">Digging Permit Verificator:</p>
-        <p class="text-sm">
-            Saya menyatakan bahwa saya telah memeriksa area kerja dan memverifikasi semua persyaratan kerja aman yang telah
-            ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
-            <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk pekerjaan ini dapat dilakukan.
-        </p>
-    </div>
-
-    <table class="table-auto w-full text-sm border mt-3">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-2 py-1 text-center w-1/4">Nama:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanda Tangan:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanggal:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Jam:</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="border px-2 py-2 text-center">
-                    <input type="text" name="verificator_name" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <button 
-                        type="button"
-                        @click="Alpine.store('signatureModal').openModal('Digging Verificator')"
-                        class="text-blue-600 underline text-xs">
-                        Tanda Tangan
-                    </button>
-                    <input type="hidden" name="signature_verificator">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="date" name="verificator_date" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="time" name="verificator_time" class="input w-full text-center">
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
+<table class="table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th colspan="4" style="background-color: black; color: white; font-weight: bold; padding: 5px;">
+                6. Verifikasi Izin Kerja
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="4" style="font-style: italic; font-weight: bold; padding: 5px;">
+                Digging Permit Verificator:
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="padding: 5px;">
+                Saya menyatakan bahwa saya telah memeriksa area kerja dan memverifikasi semua persyaratan kerja aman yang telah
+                ditentukan dan/atau rekomendasi persyaratan kerja aman tambahan dari
+                <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk pekerjaan ini dapat dilakukan.
+            </td>
+        </tr>
+        <tr>
+            <th style="border: 1px solid #000; text-align: center;">Nama</th>
+            <th style="border: 1px solid #000; text-align: center;">Tanda Tangan</th>
+            <th style="border: 1px solid #000; text-align: center;">Tanggal</th>
+            <th style="border: 1px solid #000; text-align: center;">Jam</th>
+        </tr>
+        <tr style="height: 60px;">
+            <td style="border: 1px solid #000; text-align: center;">{{ $permit->verificator_name ?? '-' }}</td>
+            <td style="border: 1px solid #000; text-align: center;">
+                @if ($permit->signature_verificator && file_exists(public_path($permit->signature_verificator)))
+                    <img src="{{ public_path($permit->signature_verificator) }}" height="40" alt="TTD">
+                @else
+                    -
+                @endif
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ \Carbon\Carbon::parse($permit->verificator_date)->format('d-m-Y') ?? '-' }}
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ $permit->verificator_time ?? '-' }}
+            </td>
+        </tr>
+    </tbody>
+</table>
 <!-- Bagian 7: Penerbitan Izin Kerja -->
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
-    <h3 class="font-bold bg-black text-white px-2 py-1">7. Penerbitan Izin Kerja</h3>
-
-    <!-- Pernyataan -->
-    <div class="border border-t-0 border-gray-300 p-3">
-        <p class="text-sm">
-            <strong><em>Permit Issuer:</em></strong><br>
-            Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan/atau rekomendasi persyaratan kerja aman tambahan dari <em>Permit Issuer</em> telah dipenuhi untuk pekerjaan ini dapat dilakukan.
-        </p>
-    </div>
-
-    <!-- Tabel tanda tangan -->
-    <div class="overflow-x-auto mt-3">
-        <table class="table-auto min-w-full text-sm border">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="border px-2 py-1 text-center">Nama:</th>
-                    <th class="border px-2 py-1 text-center">Tanda Tangan:</th>
-                    <th class="border px-2 py-1 text-center">Tanggal:</th>
-                    <th class="border px-2 py-1 text-center">Jam:</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="border px-2 py-2 text-center">
-                        <input type="text" name="permit_issuer_name" class="input w-full text-center">
-                    </td>
-                    <td class="border px-2 py-2 text-center">
-                        <button 
-                            type="button"
-                            @click="Alpine.store('signatureModal').openModal('Permit Issuer')"
-                            class="text-blue-600 underline text-xs">
-                            Tanda Tangan
-                        </button>
-                        <input type="hidden" name="signature_permit issuer">
-                    </td>
-                    <td class="border px-2 py-2 text-center">
-                        <input type="date" name="permit_issuer_date" class="input w-full text-center">
-                    </td>
-                    <td class="border px-2 py-2 text-center">
-                        <input type="time" name="permit_issuer_time" class="input w-full text-center">
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-<!-- Baris waktu izin berlaku (versi kompak) -->
-<div class="mt-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-        <div class="flex items-center gap-2">
-            <label class="whitespace-nowrap font-medium">Dari Tanggal:</label>
-            <input type="date" name="izin_berlaku_dari" class="input text-xs w-full">
-            <label class="whitespace-nowrap font-medium">Jam:</label>
-            <input type="time" name="izin_berlaku_jam_dari" class="input text-xs w-28">
-        </div>
-        <div class="flex items-center gap-2">
-            <label class="whitespace-nowrap font-medium">Sampai Tanggal:</label>
-            <input type="date" name="izin_berlaku_sampai" class="input text-xs w-full">
-            <label class="whitespace-nowrap font-medium">Jam:</label>
-            <input type="time" name="izin_berlaku_jam_sampai" class="input text-xs w-28">
-        </div>
-    </div>
-</div>
-</div>
+<table class="table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th colspan="4" style="background-color: black; color: white; font-weight: bold; padding: 5px;">
+                7. Penerbitan Izin Kerja
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="4" style="font-style: italic; font-weight: bold; padding: 5px;">Permit Issuer:</td>
+        </tr>
+        <tr>
+            <td colspan="4" style="padding: 5px;">
+                Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan/atau
+                rekomendasi persyaratan kerja aman tambahan telah dipenuhi untuk pekerjaan ini dapat dilakukan.
+            </td>
+        </tr>
+        <tr>
+            <th style="border: 1px solid #000; text-align: center;">Nama</th>
+            <th style="border: 1px solid #000; text-align: center;">Tanda Tangan</th>
+            <th style="border: 1px solid #000; text-align: center;">Tanggal</th>
+            <th style="border: 1px solid #000; text-align: center;">Jam</th>
+        </tr>
+        <tr style="height: 60px;">
+            <td style="border: 1px solid #000; text-align: center;">{{ $permit->permit_issuer_name ?? '-' }}</td>
+            <td style="border: 1px solid #000; text-align: center;">
+                @if ($permit->signature_permit_issuer && file_exists(public_path($permit->signature_permit_issuer)))
+                    <img src="{{ public_path($permit->signature_permit_issuer) }}" height="40" alt="TTD">
+                @else
+                    -
+                @endif
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ \Carbon\Carbon::parse($permit->permit_issuer_date)->format('d-m-Y') ?? '-' }}
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ $permit->permit_issuer_time ?? '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="padding: 5px;">
+                <b>Izin kerja ini berlaku dari tanggal:</b>
+                {{ $permit->izin_berlaku_dari ?? '-' }}
+                <b>jam:</b> {{ $permit->izin_berlaku_jam_dari ?? '-' }} &nbsp;
+                <b>sampai tanggal</b> {{ $permit->izin_berlaku_sampai ?? '-' }}
+                <b>jam:</b> {{ $permit->izin_berlaku_jam_sampai ?? '-' }}
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 <!-- Bagian 8: Pengesahan Izin Kerja -->
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
-    <h3 class="font-bold bg-black text-white px-2 py-1">8. Pengesahan Izin Kerja</h3>
-
-    <div class="border border-t-0 border-gray-300 p-3">
-        <p class="text-sm">
-            <strong><em>Permit Authorizer:</em></strong><br>
-            Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
-            <em>Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah menekankan apa saja <em>major hazards</em> dan pengendaliannya yang harus disosialisasikan oleh 
-            <em>Permit Receiver</em> kepada seluruh pekerja terkait.
-        </p>
-    </div>
-
-    <table class="table-auto w-full text-sm border mt-3">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-2 py-1 text-center w-1/4">Nama:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanda Tangan:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanggal:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Jam:</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="border px-2 py-2 text-center">
-                    <input type="text" name="permit_authorizer_name" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <button 
-                        type="button"
-                        @click="Alpine.store('signatureModal').openModal('Permit Authorizer')"
-                        class="text-blue-600 underline text-xs">
-                        Tanda Tangan
-                    </button>
-                    <input type="hidden" name="signature_Permit Authorizer">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="date" name="permit_authorizer_date" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="time" name="permit_authorizer_time" class="input w-full text-center">
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-
-<!-- Bagian 9 : Pelaksanaan Pekerjaan -->
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
-    <h3 class="font-bold bg-black text-white px-2 py-1">9. Pelaksanaan Pekerjaan</h3>
-
-    <div class="border border-t-0 border-gray-300 p-3">
-        <p class="text-sm">
-            <strong><em>Permit Receiver:</em></strong><br>
-            Saya menyatakan bahwa semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari Permit Issuer telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah mensosialisasikan apa saja major hazards dan pengendaliannya dari pekerjaan ini kepada seluruh pekerja terkait.
-        </p>
-    </div>
-
-    <table class="table-auto w-full text-sm border mt-3">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-2 py-1 text-center w-1/4">Nama:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanda Tangan:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Tanggal:</th>
-                <th class="border px-2 py-1 text-center w-1/4">Jam:</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="border px-2 py-2 text-center">
-                    <input type="text" name="permit_authorizer_name" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <button 
-                        type="button"
-                        @click="Alpine.store('signatureModal').openModal('Permit Authorizer')"
-                        class="text-blue-600 underline text-xs">
-                        Tanda Tangan
-                    </button>
-                    <input type="hidden" name="signature_Permit Authorizer">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="date" name="permit_authorizer_date" class="input w-full text-center">
-                </td>
-                <td class="border px-2 py-2 text-center">
-                    <input type="time" name="permit_authorizer_time" class="input w-full text-center">
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<table class="table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th colspan="4" style="background-color: black; color: white; font-weight: bold; padding: 5px;">
+                8. Pengesahan Izin Kerja
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="4" style="font-style: italic; font-weight: bold; padding: 5px;">Permit Authorizer:</td>
+        </tr>
+        <tr>
+            <td colspan="4" style="padding: 5px;">
+                Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan/atau
+                rekomendasi tambahan dari <em>Permit Issuer</em> telah dipenuhi, serta saya sudah menekankan apa saja <em>major hazards</em> dan pengendaliannya yang harus disosialisasikan oleh <em>Permit Receiver</em> kepada seluruh pekerja terkait.
+            </td>
+        </tr>
+        <tr>
+            <th style="border: 1px solid #000; text-align: center;">Nama</th>
+            <th style="border: 1px solid #000; text-align: center;">Tanda Tangan</th>
+            <th style="border: 1px solid #000; text-align: center;">Tanggal</th>
+            <th style="border: 1px solid #000; text-align: center;">Jam</th>
+        </tr>
+        <tr style="height: 60px;">
+            <td style="border: 1px solid #000; text-align: center;">{{ $permit->permit_authorizer_name ?? '-' }}</td>
+            <td style="border: 1px solid #000; text-align: center;">
+                @if ($permit->signature_permit_authorizer && file_exists(public_path($permit->signature_permit_authorizer)))
+                    <img src="{{ public_path($permit->signature_permit_authorizer) }}" height="40" alt="TTD">
+                @else
+                    -
+                @endif
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ \Carbon\Carbon::parse($permit->permit_authorizer_date)->format('d-m-Y') ?? '-' }}
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ $permit->permit_authorizer_time ?? '-' }}
+            </td>
+        </tr>
+    </tbody>
+</table>
+<!-- Bagian 9: Pelaksanaan Pekerjaan -->
+<table class="table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th colspan="4" style="background-color: black; color: white; font-weight: bold; padding: 5px;">
+                9. Pelaksanaan Pekerjaan
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="4" style="font-style: italic; font-weight: bold; padding: 5px;">Permit Receiver:</td>
+        </tr>
+        <tr>
+            <td colspan="4" style="padding: 5px;">
+                Saya menyatakan bahwa semua persyaratan kerja aman yang telah ditentukan dan/atau rekomendasi tambahan dari Permit Issuer telah dipenuhi untuk pekerjaan ini, serta saya telah mensosialisasikan <em>major hazards</em> dan pengendaliannya kepada seluruh pekerja terkait.
+            </td>
+        </tr>
+        <tr>
+            <th style="border: 1px solid #000; text-align: center;">Nama</th>
+            <th style="border: 1px solid #000; text-align: center;">Tanda Tangan</th>
+            <th style="border: 1px solid #000; text-align: center;">Tanggal</th>
+            <th style="border: 1px solid #000; text-align: center;">Jam</th>
+        </tr>
+        <tr style="height: 60px;">
+            <td style="border: 1px solid #000; text-align: center;">{{ $permit->permit_receiver_name ?? '-' }}</td>
+            <td style="border: 1px solid #000; text-align: center;">
+                @if ($permit->signature_permit_receiver && file_exists(public_path($permit->signature_permit_receiver)))
+                    <img src="{{ public_path($permit->signature_permit_receiver) }}" height="40" alt="TTD">
+                @else
+                    -
+                @endif
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ \Carbon\Carbon::parse($permit->permit_receiver_date)->format('d-m-Y') ?? '-' }}
+            </td>
+            <td style="border: 1px solid #000; text-align: center;">
+                {{ $permit->permit_receiver_time ?? '-' }}
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 <!-- Bagian 10: Penutupan Izin Kerja -->
-<div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
-    <h3 class="font-bold bg-black text-white px-2 py-1">10. Penutupan Izin Kerja</h3>
-
-    <table class="table-auto w-full text-sm border mt-3">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-2 py-1 text-left">Item</th>
-                <th class="border px-2 py-1 text-left">Keterangan</th>
-                <th class="border px-2 py-1 text-center w-20">(O)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="border px-2 py-1 font-semibold">Lock & Tag</td>
-                <td class="border px-2 py-1">Semua <em>lock & tag</em> sudah dilepas</td>
-                <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_lock_tag" value="ya"> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_lock_tag" value="na"> N/A</label>
-                </td>
-            </tr>
-            <tr>
-                <td class="border px-2 py-1 font-semibold">Sampah & Peralatan Kerja</td>
-                <td class="border px-2 py-1">Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan</td>
-                <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_tools" value="ya"> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_tools" value="na"> N/A</label>
-                </td>
-            </tr>
-            <tr>
-                <td class="border px-2 py-1 font-semibold">Machine Guarding</td>
-                <td class="border px-2 py-1">Semua <em>machine guarding</em> sudah dipasang kembali</td>
-                <td class="border px-2 py-1 text-center">
-                    <label><input type="radio" name="close_guarding" value="ya"> Ya</label>
-                    <label class="ml-2"><input type="radio" name="close_guarding" value="na"> N/A</label>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- Tanda tangan -->
-    <table class="table-auto w-full text-sm border mt-4">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-2 py-1 text-center w-32">Tanggal:</th>
-                <th class="border px-2 py-1 text-center w-32">Jam:</th>
-                <th class="border px-2 py-1 text-center">Permit Requestor</th>
-                <th class="border px-2 py-1 text-center">Permit Issuer</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="border text-center px-2 py-2"><input type="date" name="close_date" class="input w-full text-center"></td>
-                <td class="border text-center px-2 py-2"><input type="time" name="close_time" class="input w-full text-center"></td>
-                <td class="border text-center px-2 py-2">
-                    <button 
-                        type="button"
-                        @click="Alpine.store('signatureModal').openModal('Penutup - Requestor')"
-                        class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_close_requestor">
-                </td>
-                <td class="border text-center px-2 py-2">
-                    <button 
-                        type="button"
-                        @click="Alpine.store('signatureModal').openModal('Penutup - Issuer')"
-                        class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_close_issuer">
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<!-- Tombol Simpan dan Submit -->
-<div class="flex justify-center gap-4 mt-8">
-    <!-- Tombol Simpan Draft -->
-    <button type="submit" name="action" value="save"
-        class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
-        💾 Simpan Draft
-    </button>
-
-    <!-- Tombol Submit Final -->
-    <button type="submit" name="action" value="submit"
-        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
-        🚀 Submit Final
-    </button>
-</div>
+<table class="table" style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th colspan="3" style="background-color: black; color: white; font-weight: bold; padding: 4px;">
+                10. Penutupan Izin Kerja
+            </th>
+            <th style="width: 10%; background-color: black; color: white; text-align: center;">(lingkari)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="width: 25%; font-style: italic;"><b>Lock & Tag</b></td>
+            <td colspan="2">Semua <i>lock & tag</i> sudah dilepas</td>
+            <td style="text-align: center;">{{ $closure?->lock_tag_removed ? '✓ Ya' : 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td style="font-style: italic;"><b>Sampah & Peralatan Kerja</b></td>
+            <td colspan="2">Semua sampah sudah dibersihkan dan peralatan kerja sudah diamankan</td>
+            <td style="text-align: center;">{{ $closure?->equipment_cleaned ? '✓ Ya' : 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td style="font-style: italic;"><b>Machine Guarding</b></td>
+            <td colspan="2">Semua <i>machine guarding</i> sudah dipasang kembali</td>
+            <td style="text-align: center;">{{ $closure?->guarding_restored ? '✓ Ya' : 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th style="width: 20%;">Tanggal:</th>
+            <th style="width: 20%;">Jam:</th>
+            <th colspan="2" style="text-align: center;">Tanda Tangan</th>
+        </tr>
+        <tr style="height: 40px;">
+            <td style="text-align: center;">{{ $closure?->closed_date }}</td>
+            <td style="text-align: center;">{{ $closure?->closed_time }}</td>
+            <td style="text-align: center;">
+                @if ($closure?->requestor_sign)
+                    <img src="{{ public_path($closure->requestor_sign) }}" height="40" alt="TTD">
+                @endif
+                <div><i>Permit Requestor</i></div>
+            </td>
+            <td style="text-align: center;">
+                @if ($closure?->issuer_sign)
+                    <img src="{{ public_path($closure->issuer_sign) }}" height="40" alt="TTD">
+                @endif
+                <div><i>Permit Issuer</i></div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>
