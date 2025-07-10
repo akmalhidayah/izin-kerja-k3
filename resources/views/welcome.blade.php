@@ -7,7 +7,7 @@
     <title>Unit K3 - PT. Semen Tonasa</title>
     <!-- Tailwind & Alpine -->
         <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-Cs8kzoEt.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DIftN9q9.css') }}">
     <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>

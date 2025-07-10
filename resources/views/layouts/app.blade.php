@@ -14,9 +14,9 @@
         <!-- PANGGIL SEKALI DI APP BLADE -->
 
         <!-- Styles & Vite -->
-             @vite(['resources/css/app.css', 'resources/js/app.js']) 
-    <!-- <link rel="stylesheet" href="{{ asset('build/assets/app-Cs8kzoEt.css') }}">
-    <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script>  -->
+             <!-- @vite(['resources/css/app.css', 'resources/js/app.js'])  -->
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DIftN9q9.css') }}">
+    <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
 
     </head>
     <body class="font-sans antialiased">

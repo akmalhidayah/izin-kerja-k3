@@ -36,6 +36,7 @@
                         <th class="px-4 py-3 text-left">Nama Vendor/User</th>
                         <th class="px-4 py-3 text-left">No. PO / Notif / SPK</th>
                         <th class="px-4 py-3 text-left">Ditangani Oleh</th>
+                        <th class="px-4 py-3 text-left">Lihat Dokumen Vendor</th>
                         <th class="px-4 py-3 text-left">Status SIK</th>
                         <th class="px-4 py-3 text-left">Lihat SIK</th>
                         <th class="px-4 py-3 text-left">Tanda Tangan</th>
@@ -53,6 +54,11 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-gray-800">{{ $row->assignedAdmin->name ?? 'Belum Ditugaskan' }}</td>
+                            <td class="px-4 py-3">
+    <a href="{{ route('admin.permintaansik.show', $row->id) }}"
+       class="text-blue-600 hover:underline font-medium text-sm">Lihat Detail</a>
+</td>
+
                             <td class="px-4 py-3">
                                 <span class="{{ $row->sikStep ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">
                                     {{ $row->sikStep ? 'Sudah Terbit' : 'Belum' }}
