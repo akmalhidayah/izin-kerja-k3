@@ -1,16 +1,16 @@
 <x-admin-layout>
-    <div class="rounded-2xl border border-gray-200 bg-gradient-to-r from-red-50 via-white to-amber-50 p-6 shadow-sm mb-6">
+    <div class="rounded-2xl border border-gray-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 p-6 shadow-sm mb-6">
         <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-red-600 text-white shadow">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-600 text-white shadow">
                         <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path d="M4 5h16v5H4zM4 13h9v6H4zM15 13h5v6h-5z" />
                         </svg>
                     </span>
-                    <h1 class="text-3xl font-extrabold text-red-700 tracking-wide">Permintaan Izin Kerja Vendordi</h1>
+                    <h1 class="text-3xl font-extrabold text-amber-700 tracking-wide">Permintaan Izin Kerja Karyawan</h1>
                 </div>
-                <p class="text-xs text-gray-600 mt-1">Pantau progres pengajuan, status dokumen, dan penanggung jawab.</p>
+                <p class="text-xs text-gray-600 mt-1">Pantau progres pengajuan User, status dokumen, dan penanggung jawab.</p>
             </div>
             <div class="text-[11px] text-gray-500">
                 {{ now()->format('d M Y, H:i') }}
@@ -18,10 +18,9 @@
         </div>
     </div>
 
-    <form method="GET" action="{{ route('admin.permintaansik') }}"
+    <form method="GET" action="{{ route('admin.permintaansikpgo') }}"
         class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 bg-white/90 backdrop-blur p-4 border border-gray-200 rounded-xl mb-6 shadow-sm">
 
-        {{-- Pencarian --}}
         <div class="relative">
             <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
                 <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
@@ -31,10 +30,9 @@
             </span>
             <input type="text" name="search" placeholder="Cari vendor / nomor / deskripsi..."
             value="{{ request('search') }}"
-            class="w-full pl-9 pr-3 py-2 border rounded-lg text-xs focus:ring focus:ring-red-300" />
+            class="w-full pl-9 pr-3 py-2 border rounded-lg text-xs focus:ring focus:ring-amber-300" />
         </div>
 
-        {{-- Admin Penanggung Jawab --}}
         <div class="relative">
             <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
                 <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -52,7 +50,6 @@
             </select>
         </div>
 
-        {{-- Status Dokumen --}}
         <div class="relative">
             <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
                 <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -68,7 +65,6 @@
             </select>
         </div>
 
-        {{-- Dari Bulan dan Tahun --}}
         <div class="flex gap-2 w-full">
             <div class="relative w-1/2">
                 <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
@@ -98,7 +94,6 @@
             </div>
         </div>
 
-        {{-- Sampai Bulan dan Tahun --}}
         <div class="flex gap-2 w-full">
             <div class="relative w-1/2">
                 <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
@@ -128,15 +123,14 @@
             </div>
         </div>
 
-        {{-- Tombol Filter & Reset --}}
         <div class="flex gap-2 w-full">
-            <button type="submit" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-xs rounded-lg">
+            <button type="submit" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-xs rounded-lg">
                 <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M4 6h16M7 12h10M10 18h4" />
                 </svg>
                 Filter
             </button>
-            <a href="{{ route('admin.permintaansik') }}"
+            <a href="{{ route('admin.permintaansikpgo') }}"
                class="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-blue-600 underline self-center">
                 <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M4 12a8 8 0 1 0 8-8" />
@@ -209,6 +203,7 @@
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <div class="text-sm font-semibold text-gray-900">{{ $request->user_name }}</div>
+                                <div class="text-[11px] text-gray-500">Jabatan: {{ $request->user_jabatan ?? '-' }}</div>
                                 <div class="text-[11px] text-gray-500">{{ $request->tanggal }}</div>
                             </div>
                             <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $statusClass }}">
@@ -263,7 +258,7 @@
                 <table class="min-w-full text-xs table-auto">
                     <thead class="bg-gray-50/90 text-gray-700 text-[11px] uppercase tracking-wider sticky top-0 backdrop-blur">
                         <tr>
-                            <th class="px-4 py-3 text-left">Vendor</th>
+                            <th class="px-4 py-3 text-left">User</th>
                             <th class="px-4 py-3 text-left">No. PO/NOTIF/SPK</th>
                             <th class="px-4 py-3 text-left">Tanggal Pengajuan</th>
                             <th class="px-4 py-3 text-left">Ditangani Oleh</th>
@@ -318,6 +313,7 @@
                             <tr class="hover:bg-amber-50/40 transition border-l-4 {{ $borderClass }}">
                                 <td class="px-4 py-3">
                                     <div class="font-semibold text-gray-900">{{ $request->user_name }}</div>
+                                    <div class="text-[11px] text-gray-500">Jabatan: {{ $request->user_jabatan ?? '-' }}</div>
                                 </td>
                                 <td class="px-4 py-3 text-gray-700 text-xs align-middle max-w-[220px] break-all">
                                     <div class="font-medium text-gray-900 leading-tight text-xs">
@@ -355,7 +351,6 @@
                                 </td>
                                 <td class="px-4 py-3 text-gray-800 text-sm font-medium">
                                     Step {{ $isCompleted ? $totalSteps . ' - Selesai' : $request->current_step . ' - ' . ($request->current_step_title ?? 'Belum Diketahui') }}
-                                    <div class="text-[11px] text-gray-500">Total: {{ $totalSteps }} step</div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="w-full bg-gray-200 rounded-full h-2">

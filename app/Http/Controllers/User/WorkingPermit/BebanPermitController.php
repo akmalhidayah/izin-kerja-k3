@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkPermitBeban;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -90,6 +91,16 @@ class BebanPermitController extends Controller
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }
+        if (!$request->boolean('_token_access')) {
+            $notification = Notification::where('id', $validated['notification_id'])
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid.');
+            }
+        }
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
 foreach (['dok_operator', 'dok_rigger', 'dok_sertifikat', 'dok_loadchart', 'dok_rencana_pengangkatan', 'dok_jsa'] as $item) {
     $validated[$item] = (bool) $request->input($item); // ✔ konversi ke true/false
 }
@@ -151,7 +162,7 @@ $validated['signature_permit_receiver'] = $this->saveSignature(
         );
 
         // Simpan closure
-        WorkPermitClosure::updateOrCreate(
+        $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
                 'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
@@ -165,6 +176,23 @@ $validated['signature_permit_receiver'] = $this->saveSignature(
                 'issuer_sign' => $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer'),
             ], fn($v) => $v !== null && $v !== '')
         );
+
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'signature_permit_requestor' => null,
+                'signature_verificator' => null,
+                'signature_permit_issuer' => null,
+                'signature_permit_authorizer' => null,
+                'signature_permit_receiver' => null,
+            ])->save();
+
+            if ($closure) {
+                $closure->forceFill([
+                    'requestor_sign' => null,
+                    'issuer_sign' => null,
+                ])->save();
+            }
+        }
 
         return back()->with('success', 'Data izin kerja pengangkatan beban berhasil disimpan!');
     }
@@ -193,6 +221,7 @@ public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitBeban::where('token', $token)->firstOrFail();
     $request->merge(['notification_id' => $permit->notification_id]);
+    $request->merge(['_token_access' => true]);
 
     // Reuse logic penyimpanan utama
     app()->call([$this, 'store'], ['request' => $request]);

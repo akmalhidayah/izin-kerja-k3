@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkPermitKetinggian;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -81,7 +82,18 @@ class KetinggianPermitController extends Controller
             'signature_close_issuer' => 'nullable|string',
         ])->validate();
 
+        if (!$request->boolean('_token_access')) {
+            $notification = Notification::where('id', $validated['notification_id'])
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid.');
+            }
+        }
+
         $validated['notification_id'] = (int) $validated['notification_id'];
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
 
         // ✅ Simpan signature
 $existing = WorkPermitKetinggian::where('notification_id', $validated['notification_id'])->first();
@@ -182,7 +194,7 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
         );
 
         // ✅ Simpan ke WorkPermitClosure
-        WorkPermitClosure::updateOrCreate(
+        $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             [
                 'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
@@ -194,6 +206,23 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
         'issuer_sign' => $issuer_sign,
             ]
         );
+
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'signature_permit_requestor' => null,
+                'signature_verifikator' => null,
+                'signature_permit_issuer' => null,
+                'signature_permit_authorizer' => null,
+                'signature_permit_receiver' => null,
+            ])->save();
+
+            if ($closure) {
+                $closure->forceFill([
+                    'requestor_sign' => null,
+                    'issuer_sign' => null,
+                ])->save();
+            }
+        }
 
         return back()->with('success', 'Data Izin Kerja Ketinggian berhasil disimpan!');
     }
@@ -217,6 +246,7 @@ public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitKetinggian::where('token', $token)->firstOrFail();
     $request->merge(['notification_id' => $permit->notification_id]);
+    $request->merge(['_token_access' => true]);
 
     app()->call([$this, 'store'], ['request' => $request]);
     session()->flash('alert', 'Data berhasil disimpan melalui link token!');

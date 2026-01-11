@@ -23,11 +23,16 @@ use App\Models\WorkPermitBeban;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
 use App\Models\StepApproval;
+use App\Http\Controllers\User\IzinKerjaPgoController;
 
 class IzinKerjaController extends Controller
 {
-   public function index(Request $request)
+public function index(Request $request)
 {
+    if (auth()->user()?->isPgo()) {
+        return app(IzinKerjaPgoController::class)->index($request);
+    }
+
     $userId = auth()->id();
 
     // Ambil semua pengajuan notifikasi milik user (buat dropdown)
@@ -54,16 +59,6 @@ class IzinKerjaController extends Controller
             'surat_izin_kerja' => 'Surat Izin Kerja',
         ];
 
-        // Cek usertype saat belum ada pengajuan juga
-        if (auth()->user()->usertype === 'pgo') {
-            // Filter step untuk PGO
-            $stepTitles = [
-                'op_spk' => 'Buat Notifikasi/OP/SPK',
-                'jsa' => 'Input JSA',
-                'working_permit' => 'Input Working Permit',
-            ];
-        }
-
         $steps = [];
         foreach ($stepTitles as $code => $title) {
             $steps[] = [
@@ -88,7 +83,9 @@ class IzinKerjaController extends Controller
         ]);
     }
 
-    $notification = Notification::findOrFail($selectedId);
+    $notification = Notification::where('id', $selectedId)
+        ->where('user_id', $userId)
+        ->firstOrFail();
     $generatedNoJsa = (new JsaController)->getGeneratedNoJsa();
 
     // Default stepTitles semua step
@@ -107,16 +104,6 @@ class IzinKerjaController extends Controller
         'bukti_serah_terima' => 'Upload BAST',
         'surat_izin_kerja' => 'Surat Izin Kerja',
     ];
-
-    // **Cek usertype setelah ambil $notification**
-    if (auth()->user()->usertype === 'pgo') {
-        // Step khusus usertype PGO
-        $stepTitles = [
-            'op_spk' => 'Buat Notifikasi/OP/SPK',
-            'jsa' => 'Input JSA',
-            'working_permit' => 'Input Working Permit',
-        ];
-    }
 
     $dataKontraktor = DataKontraktor::where('notification_id', $selectedId)->first();
     $jsa = Jsa::where('notification_id', $selectedId)->first();

@@ -12,6 +12,10 @@ class UploadController extends Controller
 
     public function store(Request $request)
     {
+        if (auth()->user()?->isPgo()) {
+            return back()->with('error', 'Akses ditolak untuk akun PGO.');
+        }
+
         try {
             $request->validate([
                 'notification_id' => 'required|exists:notifications,id',
@@ -36,6 +40,10 @@ class UploadController extends Controller
     }
     public function destroy($id)
 {
+    if (auth()->user()?->isPgo()) {
+        return back()->with('error', 'Akses ditolak untuk akun PGO.');
+    }
+
     $upload = \App\Models\Upload::findOrFail($id);
     if ($upload->file_path && \Storage::disk('public')->exists($upload->file_path)) {
         \Storage::disk('public')->delete($upload->file_path);
@@ -48,6 +56,10 @@ class UploadController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        if (auth()->user()?->isPgo()) {
+            return back()->with('error', 'Akses ditolak untuk akun PGO.');
+        }
+
         $request->validate([
             'status' => 'required|in:pending,done,revisi',
         ]);

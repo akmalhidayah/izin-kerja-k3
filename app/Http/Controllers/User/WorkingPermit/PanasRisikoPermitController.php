@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkPermitRisikoPanas;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
@@ -87,6 +88,17 @@ class PanasRisikoPermitController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
+        if (!$request->boolean('_token_access')) {
+            $notification = Notification::where('id', $validated['notification_id'])
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid.');
+            }
+        }
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
+
         $validated['requestor_signature_close'] = $this->saveSignature($request->input('requestor_signature_close'), 'close_requestor');
         $validated['issuer_signature_close'] = $this->saveSignature($request->input('issuer_signature_close'), 'close_issuer');
 $existing = WorkPermitRisikoPanas::where('notification_id', $validated['notification_id'])->first();
@@ -144,7 +156,7 @@ $validated['receiver_signature'] = $this->saveSignature($request->input('receive
         );
 
         // Simpan ke tabel closure
-        WorkPermitClosure::updateOrCreate(
+        $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
               'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
@@ -159,6 +171,25 @@ $validated['receiver_signature'] = $this->saveSignature($request->input('receive
 
             ], fn($v) => $v !== null && $v !== '')
         );
+
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'signature_requestor' => null,
+                'signature_verificator' => null,
+                'signature_permit_issuer' => null,
+                'signature_senior_manager' => null,
+                'signature_general_manager' => null,
+                'authorizer_signature' => null,
+                'receiver_signature' => null,
+            ])->save();
+
+            if ($closure) {
+                $closure->forceFill([
+                    'requestor_sign' => null,
+                    'issuer_sign' => null,
+                ])->save();
+            }
+        }
 
         return back()->with('success', 'Data Risiko Panas berhasil disimpan!');
     }
@@ -183,6 +214,7 @@ $validated['receiver_signature'] = $this->saveSignature($request->input('receive
     {
         $permit = WorkPermitRisikoPanas::where('token', $token)->firstOrFail();
         $request->merge(['notification_id' => $permit->notification_id]);
+        $request->merge(['_token_access' => true]);
 
         app()->call([$this, 'store'], ['request' => $request]);
         session()->flash('alert', 'Data berhasil disimpan melalui link token!');

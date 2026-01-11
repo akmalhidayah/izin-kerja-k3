@@ -49,6 +49,19 @@ class AdminPermintaanController extends Controller
         ];
     }
 
+    private function stepTitlesForUser(?string $usertype): array
+    {
+        if ($usertype === 'pgo') {
+            return [
+                'op_spk' => 'Buat Notifikasi/OP/SPK',
+                'jsa' => 'Input JSA',
+                'working_permit' => 'Input Working Permit',
+            ];
+        }
+
+        return $this->stepTitles();
+    }
+
     private function assertValidStep(string $step): void
     {
         if (!array_key_exists($step, $this->stepTitles())) {
@@ -246,10 +259,34 @@ class AdminPermintaanController extends Controller
             }
         }
 
+        $stepTitles = $this->stepTitlesForUser($notification->user?->usertype);
+
+        $isPgo = ($notification->user?->usertype ?? null) === 'pgo';
+        $hasOpSpk = (bool)($notification->number || $notification->file);
+        $hasJsa = (bool)$jsa;
+        $hasPermit = collect($permits)->filter()->isNotEmpty();
+
         // Bangun step data
         $stepData = [];
-        foreach ($this->stepTitles() as $step => $title) {
+        foreach ($stepTitles as $step => $title) {
             $status = strtolower($approvals[$step]->status ?? 'menunggu');
+            if ($isPgo) {
+                $approvalStatus = strtolower($approvals[$step]->status ?? '');
+                $hasData = match ($step) {
+                    'op_spk' => $hasOpSpk,
+                    'jsa' => $hasJsa,
+                    'working_permit' => $hasPermit,
+                    default => false,
+                };
+
+                if ($approvalStatus === 'revisi') {
+                    $status = 'revisi';
+                } elseif ($approvalStatus === 'disetujui' || $hasData) {
+                    $status = 'disetujui';
+                } else {
+                    $status = 'menunggu';
+                }
+            }
             $upload = $uploadsSingle[$step] ?? null;
 
             // OP/SPK spesial: bawa info number/type/date + fallback file
@@ -285,17 +322,19 @@ class AdminPermintaanController extends Controller
 
         // Ringkasan step (lebih akurat: hitung berapa yang disetujui)
         $approvedCount = collect($stepData)->where('status', 'disetujui')->count();
-        $totalSteps = count($this->stepTitles());
+        $totalSteps = count($stepTitles);
         $stepSummary = $approvedCount >= $totalSteps
             ? 'Selesai'
-            : 'Step ' . ($approvedCount + 1) . ' - ' . array_values($this->stepTitles())[$approvedCount];
+            : 'Step ' . ($approvedCount + 1) . ' - ' . array_values($stepTitles)[$approvedCount];
 
         $data = (object)[
             'id' => $notification->id,
             'user_name' => $notification->user->name ?? '-',
+            'user_jabatan' => $notification->user->jabatan ?? '-',
             'tanggal' => $notification->created_at?->format('d-m-Y H:i') ?? '-',
             'handled_by' => $notification->assignedAdmin?->name ?? '-',
             'status' => $notification->status ?? 'menunggu',
+            'usertype' => $notification->user?->usertype ?? null,
             'notification_file' => $notification->file ?? null,
             'notification_id' => $notification->id,
             'description' => $notification->description ?? '-',
@@ -312,8 +351,12 @@ class AdminPermintaanController extends Controller
         // admin list (tetap seperti sebelumnya)
         $admins = User::where('usertype', 'admin')->pluck('name');
 
+        $detailView = ($notification->user?->usertype ?? null) === 'pgo'
+            ? 'admin.detailpermintaanpgo'
+            : 'admin.detailpermintaan';
+
         return response()
-            ->view('admin.detailpermintaan', compact('data', 'admins', 'showAlert', 'assignedAdmin'))
+            ->view($detailView, compact('data', 'admins', 'showAlert', 'assignedAdmin'))
             ->setStatusCode(200);
     }
 

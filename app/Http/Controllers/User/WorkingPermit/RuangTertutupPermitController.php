@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkPermitRuangTertutup;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -92,6 +93,17 @@ class RuangTertutupPermitController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
+        if (!$request->boolean('_token_access')) {
+            $notification = Notification::where('id', $validated['notification_id'])
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid.');
+            }
+        }
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
+
         $notification_id = (int) $validated['notification_id'];
 
         // Encode array fields
@@ -149,7 +161,7 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
         );
 
         // Simpan ke tabel closure (Bagian 13)
-        WorkPermitClosure::updateOrCreate(
+        $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
                 'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
@@ -161,6 +173,23 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
                 'issuer_sign' => $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer'),
             ], fn($v) => $v !== null && $v !== '')
         );
+
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'signature_permit_requestor' => null,
+                'signature_confined_verificator' => null,
+                'signature_permit_issuer' => null,
+                'signature_permit_authorizer' => null,
+                'signature_permit_receiver' => null,
+            ])->save();
+
+            if ($closure) {
+                $closure->forceFill([
+                    'requestor_sign' => null,
+                    'issuer_sign' => null,
+                ])->save();
+            }
+        }
 
         return back()->with('success', 'Data Izin Kerja Ruang Tertutup berhasil disimpan!');
     }
@@ -183,6 +212,7 @@ public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitRuangTertutup::where('token', $token)->firstOrFail();
     $request->merge(['notification_id' => $permit->notification_id]);
+    $request->merge(['_token_access' => true]);
 
     app()->call([$this, 'store'], ['request' => $request]);
     session()->flash('alert', 'Data berhasil disimpan melalui link token!');

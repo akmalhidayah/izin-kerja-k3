@@ -20,8 +20,11 @@
         <a href="{{ route('admin.userpanel.index', ['usertype' => 'user']) }}" class="px-3 py-1 rounded-full text-sm {{ request('usertype') == 'user' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
             Vendor
         </a>
+        <a href="{{ route('admin.userpanel.index', ['usertype' => 'pgo']) }}" class="px-3 py-1 rounded-full text-sm {{ request('usertype') == 'pgo' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+            Karyawan
+        </a>
         <a href="{{ route('admin.userpanel.index', ['usertype' => 'admin']) }}" class="px-3 py-1 rounded-full text-sm {{ request('usertype') == 'admin' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
-            Admin
+            K3
         </a>
     </div>
 
@@ -44,8 +47,27 @@
                         <td class="px-4 py-2">{{ $user->name }}</td>
                         <td class="px-4 py-2">{{ $user->email }}</td>
                         <td class="px-4 py-2">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $user->usertype == 'admin' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }}">
-                                {{ ucfirst($user->usertype) }}
+                            @php
+                                $usertypeClass = match ($user->usertype) {
+                                    'admin' => 'bg-red-100 text-red-600',
+                                    'pgo' => 'bg-amber-100 text-amber-700',
+                                    default => 'bg-green-100 text-green-600',
+                                };
+                            @endphp
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $usertypeClass }}">
+                                @switch($user->usertype)
+                                    @case('admin')
+                                        K3
+                                        @break
+                                    @case('pgo')
+                                        Karyawan
+                                        @break
+                                    @case('user')
+                                        Vendor
+                                        @break
+                                    @default
+                                        {{ ucfirst($user->usertype) }}
+                                @endswitch
                             </span>
                         </td>
                         <td class="px-4 py-2">{{ $user->role->name ?? '-' }}</td>

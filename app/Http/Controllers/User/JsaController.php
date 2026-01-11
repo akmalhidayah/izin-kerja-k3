@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\Jsa;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -32,6 +33,14 @@ class JsaController extends Controller
             ])->validate();
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
+        }
+
+        $notification = Notification::where('id', $validated['notification_id'])
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$notification) {
+            return back()->with('error', 'Notifikasi tidak valid.');
         }
 
         // Signature Handling
@@ -91,6 +100,13 @@ class JsaController extends Controller
         ])->validate();
 
         $jsa = Jsa::findOrFail($id);
+        $notification = Notification::where('id', $jsa->notification_id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$notification) {
+            return back()->with('error', 'Notifikasi tidak valid.');
+        }
 
         // Signature Handling
         $validated['dibuat_signature'] = $this->saveSignature($request->input('dibuat_signature'), 'dibuat') ?: $jsa->dibuat_signature;

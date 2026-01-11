@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             // ✅ Tambahkan 'pgo' ke dalam enum
             $table->enum('usertype', ['admin', 'user', 'pgo'])->default('user');
+            $table->string('jabatan')->nullable();
             $table->foreignId('role_id')->nullable()->constrained('roles')->onDelete('set null');
             $table->rememberToken();
             $table->timestamps();

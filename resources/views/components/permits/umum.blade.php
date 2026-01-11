@@ -12,6 +12,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
         @if(isset($notification))
             <input type="hidden" name="notification_id" value="{{ $notification->id }}">
+            <input type="hidden" name="clear_all_signatures" id="clear_all_signatures" value="0">
         @else
             <div class="text-red-600 text-sm font-semibold">❗ Notifikasi belum dibuat. Silakan isi notifikasi terlebih dahulu.</div>
         @endif
@@ -726,10 +727,15 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
 </div>
 
 <!-- Tombol Simpan -->
-<div class="flex justify-center mt-8">
+<div class="flex justify-center gap-3 mt-8">
+    <button type="button"
+        onclick="if (confirm('Hapus semua tanda tangan?')) { document.getElementById('clear_all_signatures').value = '1'; this.closest('form').submit(); }"
+        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
+        Hapus Semua TTD
+    </button>
     <button type="submit" name="action" value="save"
         class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
-        💾 Simpan
+        ?? Simpan
     </button>
 </div>
 </form>

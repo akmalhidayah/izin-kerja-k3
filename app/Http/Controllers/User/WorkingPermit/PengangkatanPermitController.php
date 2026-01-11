@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\WorkPermitPengangkatan;
+use App\Models\Notification;
 
 class PengangkatanPermitController extends Controller
 {
@@ -57,6 +58,17 @@ public function store(Request $request)
         return back()->withErrors($e->errors())->withInput();
     }
 
+    if (!$request->boolean('_token_access')) {
+        $notification = Notification::where('id', $validated['notification_id'])
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$notification) {
+            return back()->with('error', 'Notifikasi tidak valid.');
+        }
+    }
+    $clearAllSignatures = $request->boolean('clear_all_signatures');
+
     $validated['teknik_pengikatan'] = json_encode($request->input('teknik_pengikatan', []));
     $validated['wire_rope_sling'] = json_encode($request->input('wire_rope_sling', []));
 
@@ -89,6 +101,14 @@ public function store(Request $request)
         array_merge($validated, ['token' => $existing->token ?? Str::uuid()])
     );
 
+    if ($clearAllSignatures) {
+        $permit->forceFill([
+            'signature_rigger' => null,
+            'signature_operator' => null,
+            'signature_verificator' => null,
+        ])->save();
+    }
+
     return back()->with('success', 'Data Working Permit Pengangkatan berhasil disimpan!');
 }
 
@@ -108,6 +128,7 @@ public function store(Request $request)
     {
         $permit = WorkPermitPengangkatan::where('token', $token)->firstOrFail();
         $request->merge(['notification_id' => $permit->notification_id]);
+        $request->merge(['_token_access' => true]);
 
         app()->call([$this, 'store'], ['request' => $request]);
 

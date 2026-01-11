@@ -2,6 +2,7 @@
 <form method="POST" action="{{ route('working-permit.perancah.store') }}" enctype="multipart/form-data">
     @csrf
     <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
+    <input type="hidden" name="clear_all_signatures" id="clear_all_signatures" value="0">
 
 <!-- bagian 1 izin kerja perancah -->
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6 text-sm">
@@ -748,10 +749,15 @@
 </div>
 
 <!-- Tombol Simpan -->
-<div class="flex justify-center mt-8">
+<div class="flex justify-center gap-3 mt-8">
+    <button type="button"
+        onclick="if (confirm('Hapus semua tanda tangan?')) { document.getElementById('clear_all_signatures').value = '1'; this.closest('form').submit(); }"
+        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
+        Hapus Semua TTD
+    </button>
     <button type="submit" name="action" value="save"
         class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
-        💾 Simpan
+        ?? Simpan
     </button>
 </div>
 </form>

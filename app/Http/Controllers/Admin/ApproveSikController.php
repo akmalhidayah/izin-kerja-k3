@@ -6,6 +6,17 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\Models\StepApproval;
+use App\Models\Jsa;
+use App\Models\UmumWorkPermit;
+use App\Models\WorkPermitAir;
+use App\Models\WorkPermitGasPanas;
+use App\Models\WorkPermitBeban;
+use App\Models\WorkPermitKetinggian;
+use App\Models\WorkPermitPengangkatan;
+use App\Models\WorkPermitPenggalian;
+use App\Models\WorkPermitPerancah;
+use App\Models\WorkPermitRisikoPanas;
+use App\Models\WorkPermitRuangTertutup;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -56,7 +67,7 @@ class ApproveSikController extends Controller
 
     public function index(Request $request)
     {
-        $query = Notification::with(['user', 'assignedAdmin', 'sikStep']);
+        $query = Notification::with(['user', 'assignedAdmin', 'sikStep', 'stepApprovals']);
 
         if ($request->filled('bulan')) {
             $query->whereMonth('created_at', $request->bulan);
@@ -70,9 +81,64 @@ class ApproveSikController extends Controller
             $query->whereYear('created_at', now()->year);
         }
 
-        $permintaansik = $query->latest()->get();
+        $vendorQuery = (clone $query)->whereHas('user', fn($q) => $q->where('usertype', 'user'));
+        $pgoQuery = (clone $query)->whereHas('user', fn($q) => $q->where('usertype', 'pgo'));
 
-        return view('admin.approvesik', compact('permintaansik'));
+        $filter = $request->get('usertype');
+        if ($filter === 'pgo') {
+            $vendorRows = collect();
+            $pgoRows = $pgoQuery->latest()->get();
+        } elseif ($filter === 'user') {
+            $vendorRows = $vendorQuery->latest()->get();
+            $pgoRows = collect();
+        } else {
+            $vendorRows = $vendorQuery->latest()->get();
+            $pgoRows = $pgoQuery->latest()->get();
+        }
+
+        if ($pgoRows->isNotEmpty()) {
+            $pgoIds = $pgoRows->pluck('id')->all();
+            $jsaIds = Jsa::whereIn('notification_id', $pgoIds)
+                ->pluck('notification_id')
+                ->flip();
+
+            $permitModels = [
+                UmumWorkPermit::class,
+                WorkPermitAir::class,
+                WorkPermitGasPanas::class,
+                WorkPermitBeban::class,
+                WorkPermitKetinggian::class,
+                WorkPermitPengangkatan::class,
+                WorkPermitPenggalian::class,
+                WorkPermitPerancah::class,
+                WorkPermitRisikoPanas::class,
+                WorkPermitRuangTertutup::class,
+            ];
+
+            $permitIds = collect();
+            foreach ($permitModels as $model) {
+                if (class_exists($model)) {
+                    $permitIds = $permitIds->merge(
+                        $model::whereIn('notification_id', $pgoIds)->pluck('notification_id')
+                    );
+                }
+            }
+            $permitIds = $permitIds->flip();
+
+            $pgoRows->each(function ($row) use ($jsaIds, $permitIds) {
+                $revisi = $row->stepApprovals
+                    ->whereIn('step', ['op_spk', 'jsa', 'working_permit'])
+                    ->contains('status', 'revisi');
+
+                $hasJsa = $jsaIds->has($row->id);
+                $hasPermit = $permitIds->has($row->id);
+
+                $row->pgo_has_revisi = $revisi;
+                $row->pgo_is_allowed = $hasJsa && $hasPermit;
+            });
+        }
+
+        return view('admin.approvesik', compact('vendorRows', 'pgoRows', 'filter'));
     }
 
     public function storeSignature(Request $request, $id)

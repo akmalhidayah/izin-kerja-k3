@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkPermitPenggalian;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -69,6 +70,17 @@ class PenggalianPermitController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
+        if (!$request->boolean('_token_access')) {
+            $notification = Notification::where('id', $validated['notification_id'])
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid.');
+            }
+        }
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
+
         $notification_id = (int) $validated['notification_id'];
         $validated['denah'] = json_encode($request->input('denah', []));
         $validated['syarat_penggalian'] = json_encode($request->input('syarat_penggalian', []));
@@ -123,6 +135,16 @@ $validated['file_denah'] = $path;
             'notification_id' => $notification_id
         ], $penggalianData);
 
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'signature_permit_requestor' => null,
+                'signature_verificator' => null,
+                'signature_permit_issuer' => null,
+                'signature_permit_authorizer' => null,
+                'signature_permit_receiver' => null,
+            ])->save();
+        }
+
         if (!$permit->token) {
             $permit->token = Str::uuid();
             $permit->save();
@@ -161,6 +183,7 @@ $validated['file_denah'] = $path;
     {
         $permit = WorkPermitPenggalian::where('token', $token)->firstOrFail();
         $request->merge(['notification_id' => $permit->notification_id]);
+        $request->merge(['_token_access' => true]);
         app()->call([$this, 'store'], ['request' => $request]);
         session()->flash('alert', 'Data berhasil disimpan melalui link token!');
         return back();

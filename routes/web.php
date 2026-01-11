@@ -96,9 +96,10 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function (
 
 
 // ✅ ADMIN SIDE (usertype = 'admin' + role = 'Admin' atau 'Super Admin')
-Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Admin,Super Admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'usertype:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/permintaansik', [AdminDashboardController::class, 'permintaanSIK'])->name('permintaansik');
+    Route::get('/permintaansikpgo', [AdminDashboardController::class, 'permintaanSIKPgo'])->name('permintaansikpgo');
 
     Route::post('/permintaansik/{id}/step/{step}/status', [AdminPermintaanController::class, 'updateStatus'])->name('permintaansik.updateStatus');
     Route::get('/permintaansik/{id}', [AdminPermintaanController::class, 'show'])->name('permintaansik.show');

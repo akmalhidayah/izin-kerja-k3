@@ -11,6 +11,10 @@ class DataKontraktorController extends Controller
 {
     public function store(Request $request)
     {
+        if (auth()->user()?->isPgo()) {
+            return back()->with('error', 'Akses ditolak untuk akun PGO.');
+        }
+
         try {
             $validated = Validator::make($request->all(), [
                 'notification_id' => 'required|exists:notifications,id',
@@ -139,6 +143,10 @@ $validated['diverifikasi_signature'] = $this->saveSignature($request->input('div
 
     public function previewPdf($id)
     {
+        if (auth()->user()?->isPgo()) {
+            abort(403, 'Akses ditolak.');
+        }
+
         $data = DataKontraktor::where('notification_id', $id)->firstOrFail();
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengajuan-user.kontraktor.pdfdatakontraktor', compact('data'));
         return $pdf->stream('Form-Data-Kontraktor.pdf');

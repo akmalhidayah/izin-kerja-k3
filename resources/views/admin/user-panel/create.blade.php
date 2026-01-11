@@ -15,6 +15,7 @@
             <label class="block">Usertype</label>
             <select name="usertype" class="w-full border p-2 rounded" required>
                 <option value="user" {{ old('usertype') == 'user' ? 'selected' : '' }}>User</option>
+                <option value="pgo" {{ old('usertype') == 'pgo' ? 'selected' : '' }}>PGO</option>
                 <option value="admin" {{ old('usertype') == 'admin' ? 'selected' : '' }}>Admin</option>
             </select>
         </div>

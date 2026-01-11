@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\UmumWorkPermit;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -73,7 +74,18 @@ public function store(Request $request)
         return back()->withErrors($e->errors())->withInput();
     }
 
+    if (!$request->boolean('_token_access')) {
+        $notification = Notification::where('id', $validated['notification_id'])
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$notification) {
+            return back()->with('error', 'Notifikasi tidak valid.');
+        }
+    }
+
     $isDraft = $request->input('action') === 'save';
+    $clearAllSignatures = $request->boolean('clear_all_signatures');
 
     $validated['permit_requestor_sign'] = $this->saveSignature($request->input('signature_permit_requestor'), 'requestor');
     $validated['permit_issuer_sign'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer');
@@ -137,7 +149,20 @@ public function store(Request $request)
         ], fn ($v) => $v !== null && $v !== '')
     );
 
-    WorkPermitClosure::updateOrCreate(
+    $closeRequestorSign = $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor');
+    $closeIssuerSign = $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer');
+
+    if ($request->boolean('clear_all_signatures')) {
+        $validated['permit_requestor_sign'] = null;
+        $validated['permit_issuer_sign'] = null;
+        $validated['permit_authorizer_sign'] = null;
+        $validated['permit_receiver_sign'] = null;
+        $validated['live_testing_sign'] = null;
+        $closeRequestorSign = null;
+        $closeIssuerSign = null;
+    }
+
+    $closure = WorkPermitClosure::updateOrCreate(
         ['work_permit_detail_id' => $detail->id],
         array_filter([
             'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
@@ -146,12 +171,29 @@ public function store(Request $request)
             'closed_date' => $request->input('close_date'),
             'closed_time' => $request->input('close_time'),
             'requestor_name' => $request->input('close_requestor_name'),
-            'requestor_sign' => $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor'),
+            'requestor_sign' => $closeRequestorSign,
             'issuer_name' => $request->input('close_issuer_name'),
-            'issuer_sign' => $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer'),
-                    'jumlah_rfid' => $request->input('jumlah_rfid'),
+            'issuer_sign' => $closeIssuerSign,
+            'jumlah_rfid' => $request->input('jumlah_rfid'),
         ], fn ($v) => $v !== null && $v !== '')
     );
+
+    if ($clearAllSignatures) {
+        $permit->forceFill([
+            'permit_requestor_sign' => null,
+            'permit_issuer_sign' => null,
+            'permit_authorizer_sign' => null,
+            'permit_receiver_sign' => null,
+            'live_testing_sign' => null,
+        ])->save();
+
+        if ($closure) {
+            $closure->forceFill([
+                'requestor_sign' => null,
+                'issuer_sign' => null,
+            ])->save();
+        }
+    }
 if (!$permit->token) {
     $permit->token = Str::uuid();
     $permit->save();
@@ -185,7 +227,9 @@ if (!$permit->token) {
     $detail = $permit->detail;
     $closure = $permit->closure;
 
-    return view('pengajuan-user.workingpermit.formpermitumum', compact('permit', 'notification', 'detail', 'closure'));
+    $isTokenForm = true;
+
+    return view('pengajuan-user.workingpermit.formpermitumum', compact('permit', 'notification', 'detail', 'closure', 'isTokenForm'));
 }
 
 
@@ -239,6 +283,7 @@ if (!$permit->token) {
         }
 
         // Handle signature uploads
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
 $validated['permit_requestor_sign'] = $this->saveSignature($request->input('signature_permit_requestor'), 'requestor');
 $validated['permit_issuer_sign'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer');
 $validated['permit_authorizer_sign'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer');
@@ -269,7 +314,7 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
         ], fn ($v) => $v !== null && $v !== '')
     );
 
-    WorkPermitClosure::updateOrCreate(
+    $closure = WorkPermitClosure::updateOrCreate(
         ['work_permit_detail_id' => $detail->id],
         array_filter([
             'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
@@ -285,6 +330,23 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
  
         ], fn ($v) => $v !== null && $v !== '')
     );
+
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'permit_requestor_sign' => null,
+                'permit_issuer_sign' => null,
+                'permit_authorizer_sign' => null,
+                'permit_receiver_sign' => null,
+                'live_testing_sign' => null,
+            ])->save();
+
+            if ($closure) {
+                $closure->forceFill([
+                    'requestor_sign' => null,
+                    'issuer_sign' => null,
+                ])->save();
+            }
+        }
         return back()->with('success', 'Form Working Permit Umum berhasil diperbarui.');
     }
 

@@ -17,7 +17,8 @@
         <div>
             <label class="block">Usertype</label>
             <select name="usertype" class="w-full border p-2 rounded" required>
-                <option value="user" {{ old('usertype', $user->usertype) == 'user' ? 'selected' : '' }}>User</option>
+                <option value="user" {{ old('usertype', $user->usertype) == 'user' ? 'selected' : '' }}>Vendor</option>
+                <option value="pgo" {{ old('usertype', $user->usertype) == 'pgo' ? 'selected' : '' }}>User Karyawan</option>
                 <option value="admin" {{ old('usertype', $user->usertype) == 'admin' ? 'selected' : '' }}>Admin</option>
             </select>
         </div>

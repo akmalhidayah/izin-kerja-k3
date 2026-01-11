@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkPermitAir;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -83,35 +84,52 @@ class AirPermitController extends Controller
             'issuer_signature' => 'nullable|string',
         ])->validate();
 
+        if (!$request->boolean('_token_access')) {
+            $notification = Notification::where('id', $validated['notification_id'])
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid.');
+            }
+        }
+
         $validated['notification_id'] = (int) $validated['notification_id'];
 
-$existing = WorkPermitAir::where('notification_id', $validated['notification_id'])->first();
-$validated['signature_permit_requestor'] = $this->saveSignature($request->input('signature_permit_requestor'), 'requestor')
-    ?? $existing?->signature_permit_requestor;
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
 
-$validated['signature_verificator'] = $this->saveSignature($request->input('signature_verificator'), 'verificator')
-    ?? $existing?->signature_verificator;
+        $existing = WorkPermitAir::where('notification_id', $validated['notification_id'])->first();
+        $existingDetail = WorkPermitDetail::where('notification_id', $validated['notification_id'])->first();
+        $existingClosure = $existingDetail
+            ? WorkPermitClosure::where('work_permit_detail_id', $existingDetail->id)->first()
+            : null;
 
-$validated['signature_permit_issuer'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer')
-    ?? $existing?->signature_permit_issuer;
+        $validated['signature_permit_requestor'] = $this->saveSignature($request->input('signature_permit_requestor'), 'requestor')
+            ?? $existing?->signature_permit_requestor;
 
-$validated['senior_manager_signature'] = $this->saveSignature($request->input('senior_manager_signature'), 'senior_manager')
-    ?? $existing?->senior_manager_signature;
+        $validated['signature_verificator'] = $this->saveSignature($request->input('signature_verificator'), 'verificator')
+            ?? $existing?->signature_verificator;
 
-$validated['general_manager_signature'] = $this->saveSignature($request->input('general_manager_signature'), 'general_manager')
-    ?? $existing?->general_manager_signature;
+        $validated['signature_permit_issuer'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer')
+            ?? $existing?->signature_permit_issuer;
 
-$validated['signature_permit_authorizer'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer')
-    ?? $existing?->signature_permit_authorizer;
+        $validated['senior_manager_signature'] = $this->saveSignature($request->input('senior_manager_signature'), 'senior_manager')
+            ?? $existing?->senior_manager_signature;
 
-$validated['signature_permit_receiver'] = $this->saveSignature($request->input('signature_permit_receiver'), 'receiver')
-    ?? $existing?->signature_permit_receiver;
+        $validated['general_manager_signature'] = $this->saveSignature($request->input('general_manager_signature'), 'general_manager')
+            ?? $existing?->general_manager_signature;
 
-$validated['requestor_signature'] = $this->saveSignature($request->input('requestor_signature'), 'close_requestor')
-    ?? ($closure->requestor_sign ?? null);
+        $validated['signature_permit_authorizer'] = $this->saveSignature($request->input('signature_permit_authorizer'), 'authorizer')
+            ?? $existing?->signature_permit_authorizer;
 
-$validated['issuer_signature'] = $this->saveSignature($request->input('issuer_signature'), 'close_issuer')
-    ?? ($closure->issuer_sign ?? null);
+        $validated['signature_permit_receiver'] = $this->saveSignature($request->input('signature_permit_receiver'), 'receiver')
+            ?? $existing?->signature_permit_receiver;
+
+        $validated['requestor_signature'] = $this->saveSignature($request->input('requestor_signature'), 'close_requestor')
+            ?? ($existingClosure?->requestor_sign ?? null);
+
+        $validated['issuer_signature'] = $this->saveSignature($request->input('issuer_signature'), 'close_issuer')
+            ?? ($existingClosure?->issuer_sign ?? null);
 
 
         // Sketsa
@@ -202,12 +220,30 @@ if (!$permit->token) {
         $closure->issuer_sign = $validated['issuer_signature'] ?? $closure->issuer_sign;
         $closure->save();
 
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'signature_permit_requestor' => null,
+                'signature_verificator' => null,
+                'signature_permit_issuer' => null,
+                'senior_manager_signature' => null,
+                'general_manager_signature' => null,
+                'signature_permit_authorizer' => null,
+                'signature_permit_receiver' => null,
+            ])->save();
+
+            $closure->forceFill([
+                'requestor_sign' => null,
+                'issuer_sign' => null,
+            ])->save();
+        }
+
         return back()->with('success', 'Data Work Permit Air berhasil disimpan!');
     }
 public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitAir::where('token', $token)->firstOrFail();
     $request->merge(['notification_id' => $permit->notification_id]);
+    $request->merge(['_token_access' => true]);
 
     app()->call([$this, 'store'], ['request' => $request]);
 

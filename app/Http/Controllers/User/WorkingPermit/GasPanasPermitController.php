@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkPermitGasPanas;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -80,7 +81,18 @@ class GasPanasPermitController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
+        if (!$request->boolean('_token_access')) {
+            $notification = Notification::where('id', $validated['notification_id'])
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid.');
+            }
+        }
+
         $validated['notification_id'] = (int) $validated['notification_id'];
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
 
         // Simpan tanda tangan
 $validated['permit_requestor_sign'] = $this->saveSignature($request->input('permit_requestor_sign'), 'requestor');
@@ -150,6 +162,9 @@ if (!$permit->token) {
 }
 
 
+        $closeRequestorSign = $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor');
+        $closeIssuerSign = $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer');
+
         // Simpan ke tabel detail
         $detail = WorkPermitDetail::updateOrCreate(
             ['notification_id' => $validated['notification_id']],
@@ -165,7 +180,7 @@ if (!$permit->token) {
         );
 
         // Simpan ke tabel closure
-        WorkPermitClosure::updateOrCreate(
+        $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
                 'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
@@ -174,11 +189,28 @@ if (!$permit->token) {
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
                 'requestor_name' => $validated['close_requestor_name'] ?? null,
-                'requestor_sign' => $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor'),
+                'requestor_sign' => $closeRequestorSign,
                 'issuer_name' => $validated['close_issuer_name'] ?? null,
-                'issuer_sign' => $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer'),
+                'issuer_sign' => $closeIssuerSign,
             ], fn($v) => $v !== null && $v !== '')
         );
+
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'permit_requestor_sign' => null,
+                'verificator_sign' => null,
+                'permit_issuer_sign' => null,
+                'permit_authorizer_sign' => null,
+                'permit_receiver_sign' => null,
+            ])->save();
+
+            if ($closure) {
+                $closure->forceFill([
+                    'requestor_sign' => null,
+                    'issuer_sign' => null,
+                ])->save();
+            }
+        }
 
         return back()->with('success', 'Data Working Permit Gas Panas berhasil disimpan!');
     }
@@ -203,6 +235,7 @@ public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitGasPanas::where('token', $token)->firstOrFail();
     $request->merge(['notification_id' => $permit->notification_id]);
+    $request->merge(['_token_access' => true]);
 
     // Simpan data
     app()->call([$this, 'store'], ['request' => $request]);

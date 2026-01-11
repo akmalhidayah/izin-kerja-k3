@@ -10,6 +10,10 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public const USERTYPE_ADMIN = 'admin';
+    public const USERTYPE_USER = 'user';
+    public const USERTYPE_PGO = 'pgo';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'usertype',
+        'jabatan',
         'role_id', // ini penting ditambahkan biar bisa mass assign
     ];
 
@@ -41,6 +46,21 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->usertype === self::USERTYPE_ADMIN;
+    }
+
+    public function isUser(): bool
+    {
+        return $this->usertype === self::USERTYPE_USER;
+    }
+
+    public function isPgo(): bool
+    {
+        return $this->usertype === self::USERTYPE_PGO;
+    }
 
     /**
      * Relasi ke Role (many-to-one)

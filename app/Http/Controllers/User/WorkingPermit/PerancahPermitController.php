@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkPermitPerancah;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
+use App\Models\Notification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -95,6 +96,17 @@ class PerancahPermitController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
+        if (!$request->boolean('_token_access')) {
+            $notification = Notification::where('id', $validated['notification_id'])
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid.');
+            }
+        }
+        $clearAllSignatures = $request->boolean('clear_all_signatures');
+
         // Simpan signature base64
         $validated['signature_permit_requestor_perancah'] = $this->saveSignature($request->input('signature_permit_requestor_perancah'), 'requestor');
         $validated['signature_scaffolding_verificator'] = $this->saveSignature($request->input('signature_scaffolding_verificator'), 'verificator');
@@ -149,7 +161,7 @@ if ($request->hasFile('sketsa_perancah_file')) {
         );
 
         // Simpan ke tabel closure
-        WorkPermitClosure::updateOrCreate(
+        $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
                 'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
@@ -164,6 +176,26 @@ if ($request->hasFile('sketsa_perancah_file')) {
                 'jumlah_rfid' => $request->jumlah_rfid,
             ], fn($v) => $v !== null && $v !== '')
         );
+
+        if ($clearAllSignatures) {
+            $permit->forceFill([
+                'signature_permit_requestor_perancah' => null,
+                'signature_scaffolding_verificator' => null,
+                'signature_permit_issuer' => null,
+                'signature_permit_authorizer' => null,
+                'signature_permit_receiver' => null,
+                'signature_verificator_approval' => null,
+                'signature_issuer_approval' => null,
+                'signature_authorizer_approval' => null,
+            ])->save();
+
+            if ($closure) {
+                $closure->forceFill([
+                    'requestor_sign' => null,
+                    'issuer_sign' => null,
+                ])->save();
+            }
+        }
 
         return back()->with('success', 'Data Working Permit Perancah berhasil disimpan!');
     }
@@ -184,6 +216,7 @@ if ($request->hasFile('sketsa_perancah_file')) {
     {
         $permit = WorkPermitPerancah::where('token', $token)->firstOrFail();
         $request->merge(['notification_id' => $permit->notification_id]);
+        $request->merge(['_token_access' => true]);
 
         app()->call([$this, 'store'], ['request' => $request]);
 

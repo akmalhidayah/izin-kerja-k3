@@ -33,7 +33,7 @@ class UserPanelController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'usertype' => 'required|in:admin,user',
+            'usertype' => 'required|in:admin,user,pgo',
             'role_id' => 'nullable|exists:roles,id',
         ]);
 
@@ -59,7 +59,7 @@ class UserPanelController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'usertype' => 'required|in:admin,user',
+            'usertype' => 'required|in:admin,user,pgo',
             'role_id' => 'nullable|exists:roles,id',
         ]);
 

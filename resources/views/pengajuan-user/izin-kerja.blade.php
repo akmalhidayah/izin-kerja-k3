@@ -26,7 +26,7 @@
 
 
     <!-- Tombol Buat Notifikasi Baru -->
-<button @click="activeModal = 'modal-0'"
+<button @click="activeModal = 'modal-op_spk'"
     class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded shadow w-full md:w-auto">
     + Buat Pengajuan Baru
 </button>
@@ -89,7 +89,7 @@
                                             ($step['status'] === 'revisi' ? 'Revisi' : 'Pending') 
                                         }}
                                     </p>
-                              @if ($index === 0)
+                              @if ($step['code'] === 'op_spk')
     @php
         $label = $step['label'] ?? 'Input Notification/PO/SPK'; // Default label aman
         $catatanRevisi = $notification
@@ -122,7 +122,7 @@
         <div class="text-center text-[11px] text-gray-500 italic mt-1">
             Belum ada notifikasi/PO/SPK
         </div>
-        <button @click="activeModal = 'modal-{{ $index }}'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}'"
             class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -132,7 +132,7 @@
     @endif
 @endif
 
-@if ($index === 1)
+@if ($step['code'] === 'data_kontraktor')
     @php
         $prevStepCode = $steps[$index - 1]['code'] ?? null;
         $prevStepApproved = $prevStepCode 
@@ -206,7 +206,7 @@
             </div>
         @endif
     @endif
-@if ($index === 2)
+@if ($step['code'] === 'bpjs')
    @php
     $prevStepCode = $steps[$index - 1]['code'] ?? null;
 
@@ -246,7 +246,7 @@
             @endif
 
             {{-- Tombol Upload Baru --}}
-            <button @click="activeModal = 'modal-{{ $index }}'"
+            <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                 class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
                 +
             </button>
@@ -267,7 +267,7 @@
 @endif
 
 
-    @if ($index === 3)
+    @if ($step['code'] === 'jsa')
     @php
         $prevStepCode = $steps[$index - 1]['code'] ?? null;
         $prevStepApproved = $prevStepCode 
@@ -333,7 +333,7 @@
         </div>
     @endif
 @endif
-    @if ($index === 4)
+    @if ($step['code'] === 'working_permit')
        @php
     $prevStepCode = $steps[$index - 1]['code'] ?? null;
 
@@ -401,7 +401,7 @@
                                 class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF Umum">
                                 <i class="fas fa-file-pdf text-xs"></i>
                             </a>
-                            <button @click="activeModal = 'modal-{{ $index }}'"
+                            <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                                 class="bg-yellow-500 hover:bg-yellow-600 text-white p-1 rounded-full" title="Edit Umum">
                                 <i class="fas fa-edit text-xs"></i>
                             </button>
@@ -410,7 +410,7 @@
                 @else
                     <div class="flex flex-col items-center">
                         <span class="text-[10px] text-gray-600 mb-1">Permit Umum</span>
-                        <button @click="activeModal = 'modal-{{ $index }}'"
+                        <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                             class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Buat Permit Umum">
                             <i class="fas fa-plus text-xs"></i>
                         </button>
@@ -439,7 +439,7 @@
             class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
             <i class="fas fa-fire text-xs"></i>
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-gaspanas'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-gaspanas'"
             class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -461,7 +461,7 @@
             class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
             <i class="fas fa-water text-xs"></i>
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-air'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-air'"
             class="bg-teal-600 hover:bg-teal-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -483,7 +483,7 @@
             class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
             <i class="fa-solid fa-person-falling text-xs"></i>
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-ketinggian'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-ketinggian'"
             class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -505,7 +505,7 @@
             class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
             <i class="fas fa-door-closed text-xs"></i>
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-ruang-tertutup'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-ruang-tertutup'"
             class="bg-purple-600 hover:bg-purple-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -527,7 +527,7 @@
             class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
             <i class="fa-solid fa-building text-xs"></i>
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-perancah'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-perancah'"
             class="bg-orange-600 hover:bg-orange-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -549,7 +549,7 @@
             class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
             <i class="fas fa-temperature-high text-xs"></i>
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-risiko-panas'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-risiko-panas'"
             class="bg-red-600 hover:bg-red-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -570,7 +570,7 @@
             class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
             <i class="fas fa-dumbbell text-xs"></i>
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-beban'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-beban'"
             class="bg-indigo-600 hover:bg-indigo-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -592,7 +592,7 @@
            <i class="fas fa-digging text-xs"></i>
 
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-penggalian'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-penggalian'"
             class="bg-yellow-700 hover:bg-yellow-800 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -613,7 +613,7 @@
             class="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full" title="Lihat PDF">
 <i class="fas fa-anchor text-xs"></i>
         </a>
-        <button @click="activeModal = 'modal-{{ $index }}-pengangkatan'"
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-pengangkatan'"
             class="bg-pink-600 hover:bg-pink-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
@@ -638,7 +638,7 @@
         @endif
     @endif
 
-    @if ($index === 5)
+    @if ($step['code'] === 'fakta_integritas')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
             $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -650,12 +650,22 @@
         @else
             @if ($notification)
                 @if ($faktaFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'fakta_integritas')->first())
-                    <a href="{{ asset('storage/' . $faktaFile->file_path) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                        Lihat Fakta Integritas
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ asset('storage/' . $faktaFile->file_path) }}" target="_blank"
+                            class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+                            Lihat Fakta Integritas
+                        </a>
+                        <form action="{{ route('upload.delete', $faktaFile->id) }}" method="POST"
+                            onsubmit="return confirm('Hapus file ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 text-[9px] px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
                 @else
-                    <button @click="activeModal = 'modal-{{ $index }}'"
+                    <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                         class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
                         Upload Fakta Integritas
                     </button>
@@ -676,7 +686,7 @@
             @endif
         @endif
     @endif
-    @if ($index === 6)
+    @if ($step['code'] === 'sertifikasi_ak3')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
             $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -688,12 +698,22 @@
         @else
             @if ($notification)
                 @if ($ak3File = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'sertifikasi_ak3')->first())
-                    <a href="{{ asset('storage/' . $ak3File->file_path) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                        Lihat Sertifikasi AK3
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ asset('storage/' . $ak3File->file_path) }}" target="_blank"
+                            class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+                            Lihat Sertifikasi AK3
+                        </a>
+                        <form action="{{ route('upload.delete', $ak3File->id) }}" method="POST"
+                            onsubmit="return confirm('Hapus file ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 text-[9px] px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
                 @else
-                    <button @click="activeModal = 'modal-{{ $index }}'"
+                    <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                         class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
                         Upload Sertifikasi AK3
                     </button>
@@ -714,7 +734,7 @@
             @endif
         @endif
     @endif
-@if ($index === 7)
+@if ($step['code'] === 'ktp')
   @php
     $notifId = $notification?->id;
     $prevStepCode = $steps[$index - 1]['code'] ?? null;
@@ -756,7 +776,7 @@
             @endforeach
 
             {{-- Tombol Upload Baru --}}
-            <button @click="activeModal = 'modal-{{ $index }}'"
+            <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                 class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
                 +
             </button>
@@ -778,7 +798,7 @@
 
 
 
-    @if ($index === 8)
+    @if ($step['code'] === 'surat_kesehatan')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
             $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -790,12 +810,22 @@
         @else
             @if ($notification)
                 @if ($suratKesehatanFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'surat_kesehatan')->first())
-                    <a href="{{ asset('storage/' . $suratKesehatanFile->file_path) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                        Lihat Surat Kesehatan
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ asset('storage/' . $suratKesehatanFile->file_path) }}" target="_blank"
+                            class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+                            Lihat Surat Kesehatan
+                        </a>
+                        <form action="{{ route('upload.delete', $suratKesehatanFile->id) }}" method="POST"
+                            onsubmit="return confirm('Hapus file ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 text-[9px] px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
                 @else
-                    <button @click="activeModal = 'modal-{{ $index }}'"
+                    <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                         class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
                         Upload Surat Kesehatan
                     </button>
@@ -816,7 +846,7 @@
             @endif
         @endif
     @endif
-    @if ($index === 9)
+    @if ($step['code'] === 'struktur_organisasi')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
             $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -828,12 +858,22 @@
         @else
             @if ($notification)
                 @if ($strukturFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'struktur_organisasi')->first())
-                    <a href="{{ asset('storage/' . $strukturFile->file_path) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                        Lihat Struktur Organisasi
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ asset('storage/' . $strukturFile->file_path) }}" target="_blank"
+                            class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+                            Lihat Struktur Organisasi
+                        </a>
+                        <form action="{{ route('upload.delete', $strukturFile->id) }}" method="POST"
+                            onsubmit="return confirm('Hapus file ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 text-[9px] px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
                 @else
-                    <button @click="activeModal = 'modal-{{ $index }}'"
+                    <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                         class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
                         Upload Struktur Organisasi
                     </button>
@@ -854,7 +894,7 @@
             @endif
         @endif
     @endif
-    @if ($index === 10)
+    @if ($step['code'] === 'post_test')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
             $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -866,12 +906,22 @@
         @else
             @if ($notification)
                 @if ($postTestFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'post_test')->first())
-                    <a href="{{ asset('storage/' . $postTestFile->file_path) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                        Lihat Dokumen
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ asset('storage/' . $postTestFile->file_path) }}" target="_blank"
+                            class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+                            Lihat Dokumen
+                        </a>
+                        <form action="{{ route('upload.delete', $postTestFile->id) }}" method="POST"
+                            onsubmit="return confirm('Hapus file ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 text-[9px] px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
                 @else
-                    <button @click="activeModal = 'modal-{{ $index }}'"
+                    <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                         class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
                         Upload Dokumen
                     </button>
@@ -893,7 +943,7 @@
             @endif
         @endif
     @endif
-  @if ($index === 12) {{-- atau 13 jika urutan 1-based --}}
+  @if ($step['code'] === 'surat_izin_kerja') {{-- atau 13 jika urutan 1-based --}}
     @php
         $prevStepCode = $steps[$index - 1]['code'] ?? null;
         $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -919,7 +969,7 @@
 @endif
 
 
-    @if ($index === 11)
+    @if ($step['code'] === 'bukti_serah_terima')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
             $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
@@ -931,12 +981,22 @@
         @else
             @if ($notification)
                 @if ($buktiSerahFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'bukti_serah_terima')->first())
-                    <a href="{{ asset('storage/' . $buktiSerahFile->file_path) }}" target="_blank"
-                        class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                        Lihat Bukti Serah Terima
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ asset('storage/' . $buktiSerahFile->file_path) }}" target="_blank"
+                            class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
+                            Lihat Bukti Serah Terima
+                        </a>
+                        <form action="{{ route('upload.delete', $buktiSerahFile->id) }}" method="POST"
+                            onsubmit="return confirm('Hapus file ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 text-[9px] px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
                 @else
-                    <button @click="activeModal = 'modal-{{ $index }}'"
+                    <button @click="activeModal = 'modal-{{ $step['code'] }}'"
                         class="flex items-center gap-1 mt-1 bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-3 py-[3px] rounded-full transition">
                         Upload Bukti Serah Terima
                     </button>
@@ -957,13 +1017,13 @@
         @endif
     @endif
 
-                                @if ($index === 0)
+                                @if ($step['code'] === 'op_spk')
                                     @include('components.steps.modal-op', [
-                                        'id' => 'modal-' . $index,
+                                        'id' => 'modal-' . $step['code'],
                                         'notification' => $notification,
                                         'stepName' => $step['code']
                                     ])
-                                    @elseif ($index === 1)
+                                    @elseif ($step['code'] === 'data_kontraktor')
                                     {{-- Modal Data Kontraktor --}}
                                     @include('components.steps.modal-data-kontraktor', [
                                         'label' => 'Input Data Kontraktor',
@@ -972,7 +1032,7 @@
                                         'stepName' => 'data_kontraktor'
                                     ])
                                 
-                                @elseif ($index === 3)
+                                @elseif ($step['code'] === 'jsa')
                                     @if (!$jsa)
                                         {{-- Jika BELUM ADA JSA, tampilkan modal CREATE --}}
                                         @include('components.steps.modal-jsa', [
@@ -989,10 +1049,10 @@
                                             'jsa' => $jsa
                                         ])
                                     @endif
-    @elseif ($index === 4)
+    @elseif ($step['code'] === 'working_permit')
         {{-- Modal Permit Umum --}}
         @include('components.steps.modal-working-permit', [
-            'id' => 'modal-' . $index,
+            'id' => 'modal-' . $step['code'],
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitUmum' => $permitUmum ?? null
@@ -1001,7 +1061,7 @@
         {{-- Modal Permit Gas Panas --}}
         @include('components.steps.modal-working-permit-gaspanas', [
             'label' => 'Edit Gas Panas',
-            'id' => 'modal-' . $index . '-gaspanas',
+            'id' => 'modal-' . $step['code'] . '-gaspanas',
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitGas' => $permitGas ?? null,
@@ -1012,7 +1072,7 @@
         {{-- Modal Permit Air --}}
         @include('components.steps.modal-working-permit-air', [
             'label' => 'Edit Air',
-            'id' => 'modal-' . $index . '-air',
+            'id' => 'modal-' . $step['code'] . '-air',
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitAir' => $permitAir ?? null,
@@ -1022,7 +1082,7 @@
                 {{-- Modal Permit Ketinggian --}}
         @include('components.steps.modal-working-permit-ketinggian', [
             'label' => 'Edit Ketinggian',
-            'id' => 'modal-' . $index . '-ketinggian',
+            'id' => 'modal-' . $step['code'] . '-ketinggian',
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitKetinggian' => $permitKetinggian ?? null,
@@ -1032,7 +1092,7 @@
         {{-- Modal Permit Ruang Tertutup --}}
         @include('components.steps.modal-working-permit-ruang-tertutup', [
             'label' => 'Edit Ruang Tertutup',
-            'id' => 'modal-' . $index . '-ruang-tertutup',
+            'id' => 'modal-' . $step['code'] . '-ruang-tertutup',
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitRuangTertutup' => $permitRuangTertutup ?? null,
@@ -1042,7 +1102,7 @@
         {{-- Modal Permit Perancah --}}
         @include('components.steps.modal-working-permit-perancah', [
             'label' => 'Edit Perancah',
-            'id' => 'modal-' . $index . '-perancah',
+            'id' => 'modal-' . $step['code'] . '-perancah',
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitPerancah' => $permitPerancah ?? null,
@@ -1052,7 +1112,7 @@
         {{-- Modal Permit Risiko Panas --}}
         @include('components.steps.modal-working-permit-risiko-panas', [
             'label' => 'Edit Risiko Panas',
-            'id' => 'modal-' . $index . '-risiko-panas',
+            'id' => 'modal-' . $step['code'] . '-risiko-panas',
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitRisikoPanas' => $permitRisikoPanas ?? null,
@@ -1062,7 +1122,7 @@
 {{-- Modal Permit Beban --}}
 @include('components.steps.modal-working-permit-beban', [
     'label' => 'Edit Beban',
-    'id' => 'modal-' . $index . '-beban',
+    'id' => 'modal-' . $step['code'] . '-beban',
     'notification' => $notification,
     'stepName' => $step['code'],
     'permitBeban' => $permitBeban ?? null,
@@ -1072,7 +1132,7 @@
 {{-- Modal Permit Penggalian --}}
 @include('components.steps.modal-working-permit-penggalian', [
     'label' => 'Edit Penggalian',
-    'id' => 'modal-' . $index . '-penggalian',
+    'id' => 'modal-' . $step['code'] . '-penggalian',
     'notification' => $notification,
     'stepName' => $step['code'],
     'permitPenggalian' => $permitPenggalian ?? null,
@@ -1082,7 +1142,7 @@
 {{-- Modal Permit Pengangkatan --}}
 @include('components.steps.modal-working-permit-pengangkatan', [
     'label' => 'Edit Pengangkatan',
-    'id' => 'modal-' . $index . '-pengangkatan',
+    'id' => 'modal-' . $step['code'] . '-pengangkatan',
     'notification' => $notification,
     'stepName' => $step['code'],
     'permitPengangkatan' => $permitPengangkatan ?? null,
@@ -1099,7 +1159,7 @@
         ])
                                 @else
                                    @include('components.steps.modal-upload', [
-                                        'id' => 'modal-' . $index,
+                                        'id' => 'modal-' . $step['code'],
                                         'notification' => $notification,
                                         'stepName' => $step['code'],
                                         'label' => $step['title'] // ⬅️ Tambahkan ini

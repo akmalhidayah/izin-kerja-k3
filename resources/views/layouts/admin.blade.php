@@ -104,7 +104,7 @@
 
                 @php
                     $isSuperAdmin = Auth::user()
-                        && Auth::user()->usertype === 'admin'
+                        && Auth::user()?->isAdmin()
                         && in_array(Auth::user()->role->name ?? '', ['Super Admin']);
 
                     $isChecklist = request()->routeIs('admin.checklist.*');
@@ -131,7 +131,17 @@
                                  {{ request()->routeIs('admin.permintaansik') ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
                         <i data-lucide="clipboard-list" class="w-5 h-5"></i>
                     </span>
-                    <span x-show="sidebarOpen" x-transition class="font-medium">Permintaan Izin Kerja</span>
+                    <span x-show="sidebarOpen" x-transition class="font-medium">Permintaan SIK Vendor</span>
+                </a>
+
+                <a href="{{ url('admin/permintaansikpgo') }}"
+                   class="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition
+                          {{ request()->is('admin/permintaansikpgo*') ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-100' : 'text-slate-700 hover:bg-slate-100' }}">
+                    <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
+                                 {{ request()->is('admin/permintaansikpgo*') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                        <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                    </span>
+                    <span x-show="sidebarOpen" x-transition class="font-medium">Permintaan SIK Karyawan</span>
                 </a>
 
                 @if($isSuperAdmin)
