@@ -21,163 +21,362 @@
         </script>
     @endif
 
-    <div class="mb-6">
+    <div class="mb-6 flex items-center justify-between">
         <a href="{{ route('admin.permintaansik') }}"
-           class="inline-flex items-center px-4 py-2 rounded bg-white border shadow-sm hover:bg-gray-50 transition text-sm font-medium text-gray-700">
-            <i class="fas fa-arrow-left mr-2 text-blue-500"></i> Kembali ke Daftar Permintaan
+           class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition">
+            <svg viewBox="0 0 24 24" class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Kembali
         </a>
+        <div class="text-[11px] text-gray-500">
+            ID: #{{ $data->id }}
+        </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow p-6 mb-6">
-        <h2 class="text-xl font-bold text-red-600 mb-4">Detail Permintaan Izin Kerja</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-            <p><strong>Vendor/User:</strong> <span class="text-blue-700">{{ $data->user_name }}</span></p>
-            <div><strong>Tanggal Pengajuan:</strong> {{ $data->tanggal }}</div>
-            <div><strong>Ditangani Oleh:</strong> <span class="bg-gray-200 px-2 py-1 rounded text-xs">{{ $data->handled_by }}</span></div>
-            <div>
-                <strong>Status Umum:</strong>
-                <span class="font-semibold {{ $data->status === 'revisi' ? 'text-yellow-600' : ($data->status === 'disetujui' ? 'text-green-600' : 'text-gray-600') }}">
-                    {{ $data->status === 'revisi' ? 'Perlu Revisi' : ucfirst($data->status) }}
+    <div class="rounded-2xl border border-gray-200 bg-gradient-to-r from-red-50 via-white to-amber-50 p-6 shadow-sm mb-6">
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center gap-3">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-red-600 text-white shadow">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 5h16v5H4zM4 13h9v6H4zM15 13h5v6h-5z" />
+                    </svg>
                 </span>
+                <div>
+                    <h2 class="text-2xl font-extrabold text-red-700 tracking-wide">Detail Permintaan Izin Kerja</h2>
+                    <p class="text-xs text-gray-600 mt-1">Ringkasan pengajuan dan status setiap step.</p>
+                </div>
+            </div>
+            <div class="text-[11px] text-gray-500">
+                {{ $data->tanggal }}
             </div>
         </div>
     </div>
 
-    <div class="bg-white p-6 rounded-xl shadow">
-        <h3 class="text-lg font-semibold text-gray-800 mb-6">Progress Pengajuan Izin Kerja</h3>
+    @php
+        $overallStatusLabel = match($data->status) {
+            'revisi' => 'Perlu Revisi',
+            'disetujui' => 'Disetujui',
+            default => ucfirst($data->status ?? 'menunggu'),
+        };
+        $overallStatusClass = match($data->status) {
+            'revisi' => 'bg-yellow-100 text-yellow-700',
+            'disetujui' => 'bg-green-100 text-green-700',
+            default => 'bg-gray-100 text-gray-700',
+        };
+        $totalSteps = count($data->step_data ?? []);
+    @endphp
+
+    <div class="bg-white rounded-2xl shadow p-6 mb-6 border border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-700">
+            <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/60 px-3 py-2">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" />
+                        <path d="M4 20a8 8 0 0 1 16 0" />
+                    </svg>
+                </span>
+                <div>
+                    <div class="text-[11px] text-gray-500">Vendor/User</div>
+                    <div class="text-sm font-semibold text-gray-900">{{ $data->user_name }}</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/60 px-3 py-2">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 7h16M7 3v3M17 3v3M5 11h14v8H5z" />
+                    </svg>
+                </span>
+                <div>
+                    <div class="text-[11px] text-gray-500">Tanggal Pengajuan</div>
+                    <div class="text-sm font-semibold text-gray-900">{{ $data->tanggal }}</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/60 px-3 py-2">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-600 text-white">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+                        <path d="M12 12l8-4.5" />
+                        <path d="M12 12v9" />
+                        <path d="M12 12L4 7.5" />
+                    </svg>
+                </span>
+                <div>
+                    <div class="text-[11px] text-gray-500">Ditangani Oleh</div>
+                    <div class="text-sm font-semibold text-gray-900">{{ $data->handled_by }}</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/60 px-3 py-2">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M9 12l2 2 4-4" />
+                        <path d="M12 3a9 9 0 1 0 9 9" />
+                    </svg>
+                </span>
+                <div>
+                    <div class="text-[11px] text-gray-500">Status Umum</div>
+                    <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $overallStatusClass }}">
+                        <span class="h-1.5 w-1.5 rounded-full {{ $data->status === 'disetujui' ? 'bg-green-500' : ($data->status === 'revisi' ? 'bg-yellow-500' : 'bg-gray-400') }}"></span>
+                        {{ $overallStatusLabel }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-gray-600">
+            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5">
+                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M4 6h16M7 12h10M10 18h4" />
+                </svg>
+                {{ $data->step_summary }}
+            </span>
+            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5">
+                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M12 6v6l4 2" />
+                    <path d="M12 3a9 9 0 1 0 9 9" />
+                </svg>
+                Total Step: {{ $totalSteps }}
+            </span>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow border border-gray-200">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-base font-semibold text-gray-800">Progress Pengajuan Izin Kerja</h3>
+            <div class="text-[11px] text-gray-500">Update status tiap step di bawah.</div>
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach ($data->step_data as $step)
                 @php
                     $status = strtolower($step['status']);
                     $stepKey = $step['step'];
+                    $statusLabel = $status === 'revisi' ? 'Perlu Revisi' : ucfirst($status);
                     $badgeColor = match($status) {
-                        'disetujui' => 'bg-green-500 text-white',
-                        'revisi' => 'bg-yellow-500 text-white',
-                        default => 'bg-gray-400 text-white',
+                        'disetujui' => 'bg-green-100 text-green-700',
+                        'revisi' => 'bg-yellow-100 text-yellow-700',
+                        default => 'bg-gray-100 text-gray-700',
                     };
-                    $textColor = match($status) {
-                        'disetujui' => 'text-green-600',
-                        'revisi' => 'text-yellow-600',
-                        default => 'text-gray-500',
+                    $cardStyle = match($status) {
+                        'disetujui' => 'border-green-200 bg-green-50/30',
+                        'revisi' => 'border-yellow-200 bg-yellow-50/30',
+                        default => 'border-gray-200 bg-white',
                     };
                     $upload = $step['upload'] ?? null;
                 @endphp
 
-                <div class="border rounded-lg p-4 shadow-sm hover:shadow-md transition bg-gray-50 @if($stepKey === 'sik') min-h-[300px] @endif">
-                    <div class="flex items-center justify-between mb-3">
+                <div class="rounded-xl border {{ $cardStyle }} p-4 shadow-sm hover:shadow-md transition @if($stepKey === 'sik') min-h-[320px] @endif">
+                    <div class="flex items-start justify-between">
                         <div class="flex items-center gap-3">
-                            <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold {{ $badgeColor }}">{{ $loop->iteration }}</span>
-                            <h4 class="text-sm font-semibold text-gray-700">{{ $step['title'] }}</h4>
+                        <span class="h-8 w-8 rounded-lg bg-red-50 text-red-700 text-[11px] font-bold flex items-center justify-center border border-red-200">
+                                {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                            </span>
+                        <div>
+                            <div class="text-sm font-semibold text-gray-800">{{ $step['title'] }}</div>
+                            <div class="text-[11px] text-gray-500">Step {{ $loop->iteration }}</div>
                         </div>
-                        <span class="text-xs font-medium {{ $textColor }}">{{ $status === 'revisi' ? 'Perlu Revisi' : ucfirst($status) }}</span>
+                    </div>
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $badgeColor }}">
+                            <span class="h-1.5 w-1.5 rounded-full {{ $status === 'disetujui' ? 'bg-green-500' : ($status === 'revisi' ? 'bg-yellow-500' : 'bg-gray-400') }}"></span>
+                            {{ $statusLabel }}
+                        </span>
                     </div>
 
-                    <div class="flex flex-col gap-3 text-xs">
+                    <div class="mt-3 flex flex-col gap-3 text-[11px] text-gray-700">
                         @if ($stepKey === 'op_spk' && $upload && $upload->number)
-                            <div>
-                                <strong>{{ strtoupper($upload->type ?? '-') }}:</strong> {{ $upload->number }}<br>
-                                <span class="text-gray-500">Tanggal: {{ \Carbon\Carbon::parse($upload->created_at)->format('d-m-Y H:i') }}</span>
+                            <div class="rounded-lg border border-gray-200 bg-white px-3 py-2">
+                                <div class="text-[11px] text-gray-500">Dokumen</div>
+                                <div class="text-sm font-semibold text-gray-900 mt-0.5">
+                                    {{ strtoupper($upload->type ?? '-') }}: {{ $upload->number }}
+                                </div>
+                                <div class="text-[11px] text-gray-500 mt-1">
+                                    Tanggal: {{ \Carbon\Carbon::parse($upload->created_at)->format('d-m-Y H:i') }}
+                                </div>
+                                <div class="text-[11px] text-gray-500 mt-1">
+                                    Deskripsi: {{ $data->description ?? '-' }}
+                                </div>
                             </div>
                             @if ($upload->file_path)
                                 <a href="{{ asset('storage/' . $upload->file_path) }}" target="_blank"
-                                   class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                                    <i class="fas fa-file-alt"></i> Lihat File SPK/PO
+                                   class="inline-flex items-center gap-2 rounded-full bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-[11px]">
+                                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+                                        <path d="M14 3v5h5" />
+                                    </svg>
+                                    Lihat File SPK/PO
                                 </a>
                             @endif
                         @endif
 
-                        {{-- SIK --}}
-@if ($stepKey === 'sik')
-    @if ($status == 'disetujui')
-        <a href="{{ route('admin.permintaansik.viewSik', $data->id) }}" target="_blank"
-           class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
-            <i class="fas fa-file-pdf"></i> Lihat Surat Izin Kerja (PDF)
-        </a>
+                        @if ($stepKey === 'sik')
+                            @if ($status == 'disetujui')
+                                <a href="{{ route('admin.permintaansik.viewSik', $data->id) }}" target="_blank"
+                                   class="inline-flex items-center gap-2 rounded-full bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-[11px]">
+                                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+                                        <path d="M14 3v5h5" />
+                                        <path d="M8.5 13.5h7M8.5 17h5" />
+                                    </svg>
+                                    Lihat Surat Izin Kerja (PDF)
+                                </a>
+                            @else
+                                <div class="text-[11px] text-gray-500">SIK akan tersedia setelah disetujui.</div>
                             @endif
                             <form method="POST" action="{{ route('admin.permintaansik.updateStatus', [$data->id, $stepKey]) }}" class="mt-3">
                                 @csrf
-                                <select name="status" onchange="toggleCatatan(this)" class="text-xs px-2 py-1 border rounded w-full mt-1 focus:outline-none @if($status == 'disetujui') bg-green-500 text-white @elseif($status == 'revisi') bg-yellow-500 text-white @else bg-gray-100 text-black @endif">
+                                <select name="status" onchange="toggleCatatan(this)" class="text-[11px] px-2 py-1 border rounded-lg w-full mt-1 focus:outline-none @if($status == 'disetujui') bg-green-500 text-white @elseif($status == 'revisi') bg-yellow-500 text-white @else bg-gray-100 text-black @endif">
                                     <option value="menunggu" {{ $status == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                                     <option value="disetujui" {{ $status == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
                                     <option value="revisi" {{ $status == 'revisi' ? 'selected' : '' }}>Perlu Revisi</option>
                                 </select>
-                                <textarea name="catatan" class="catatan-field mt-2 text-xs w-full border rounded px-2 py-1 text-gray-700" placeholder="Tulis alasan revisi..." style="display: {{ $status === 'revisi' ? 'block' : 'none' }};">{{ $step['catatan'] ?? '' }}</textarea>
-                                <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow">Simpan</button>
+                                <textarea name="catatan" class="catatan-field mt-2 text-[11px] w-full border rounded-lg px-2 py-1 text-gray-700" placeholder="Tulis alasan revisi..." style="display: {{ $status === 'revisi' ? 'block' : 'none' }};">{{ $step['catatan'] ?? '' }}</textarea>
+                                <button type="submit" class="mt-2 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-3 py-1 rounded-lg shadow">
+                                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M5 12l4 4L19 6" />
+                                    </svg>
+                                    Simpan
+                                </button>
                             </form>
                         @else
-                         @if (in_array($stepKey, ['bpjs', 'ktp']))
-    @php
-        $uploadFiles = \App\Models\Upload::where('notification_id', $data->notification_id)
-            ->where('step', $stepKey)
-            ->get();
-    @endphp
+                            @if (in_array($stepKey, ['bpjs', 'ktp']))
+                                @php
+                                    $uploadFiles = \App\Models\Upload::where('notification_id', $data->notification_id)
+                                        ->where('step', $stepKey)
+                                        ->get();
+                                @endphp
 
-    @foreach ($uploadFiles as $file)
-        <div class="flex items-center gap-2">
-            <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
-               class="bg-green-500 hover:bg-green-600 text-white px-3 py-[3px] rounded-full text-xs flex items-center gap-1">
-                <i class="fas fa-file-alt"></i> Lihat Dokumen
-            </a>
-            <form action="{{ route('admin.permintaansik.deleteFile', [$data->id, $stepKey]) }}" method="POST"
-                  onsubmit="return confirm('Yakin ingin menghapus file ini?')">
-                @csrf
-                @method('DELETE')
-                <input type="hidden" name="file_id" value="{{ $file->id }}">
-                <button type="submit" class="text-red-500 text-xs px-2 py-[1px] border border-red-300 hover:bg-red-100 rounded-full">
-                    Hapus
-                </button>
-            </form>
-        </div>
-    @endforeach
-@elseif (!in_array($stepKey, ['op_spk', 'sik']) && $upload && $upload->file_path)
-    <div class="flex items-center gap-2">
-        <a href="{{ asset('storage/' . $upload->file_path) }}" target="_blank"
-           class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-xs flex items-center gap-1">
-            <i class="fas fa-file-alt"></i> Lihat Dokumen
-        </a>
-        <form action="{{ route('admin.permintaansik.deleteFile', [$data->id, $stepKey]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus file ini?')">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="text-red-500 text-xs underline">Hapus</button>
-        </form>
-    </div>
-@endif
-
+                                @foreach ($uploadFiles as $file)
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                                           class="inline-flex items-center gap-2 rounded-full bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-[11px]">
+                                            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                <path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+                                                <path d="M14 3v5h5" />
+                                            </svg>
+                                            Lihat Dokumen
+                                        </a>
+                                        <form action="{{ route('admin.permintaansik.deleteFile', [$data->id, $stepKey]) }}" method="POST"
+                                              onsubmit="return confirm('Yakin ingin menghapus file ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="file_id" value="{{ $file->id }}">
+                                            <button type="submit" class="inline-flex items-center gap-1 text-red-600 text-[11px] px-2 py-1 border border-red-200 hover:bg-red-50 rounded-lg">
+                                                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                    <path d="M6 7h12" />
+                                                    <path d="M9 7V5h6v2" />
+                                                    <path d="M8 7l1 12h6l1-12" />
+                                                </svg>
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endforeach
+                            @elseif (!in_array($stepKey, ['op_spk', 'sik']) && $upload && $upload->file_path)
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ asset('storage/' . $upload->file_path) }}" target="_blank"
+                                       class="inline-flex items-center gap-2 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 text-[11px]">
+                                        <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+                                            <path d="M14 3v5h5" />
+                                        </svg>
+                                        Lihat Dokumen
+                                    </a>
+                                    <form action="{{ route('admin.permintaansik.deleteFile', [$data->id, $stepKey]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus file ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 text-[11px] underline">Hapus</button>
+                                    </form>
+                                </div>
+                            @endif
 
                             @if ($stepKey === 'data_kontraktor' && $data->data_kontraktor)
                                 <a href="{{ route('izin-kerja.data-kontraktor.pdf', ['notification_id' => $data->data_kontraktor->notification_id]) }}" target="_blank"
-                                   class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                                    <i class="fas fa-file-pdf"></i> Lihat PDF Data Kontraktor
+                                   class="inline-flex items-center gap-2 rounded-full bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-[11px]">
+                                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+                                        <path d="M14 3v5h5" />
+                                    </svg>
+                                    Lihat PDF Data Kontraktor
                                 </a>
+                                <form action="{{ route('admin.permintaansik.deleteDataKontraktor', $data->id) }}" method="POST"
+                                      onsubmit="return confirm('Yakin ingin menghapus data kontraktor ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 text-[11px]">
+                                        <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M6 7h12" />
+                                            <path d="M9 7V5h6v2" />
+                                            <path d="M8 7l1 12h6l1-12" />
+                                        </svg>
+                                        Hapus Data
+                                    </button>
+                                </form>
                             @endif
 
                             @if ($stepKey === 'jsa' && $data->jsa)
                                 <a href="{{ route('jsa.pdf.view', ['notification_id' => $data->notification_id]) }}" target="_blank"
-                                   class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                                    <i class="fas fa-file-pdf"></i> Lihat PDF JSA
+                                   class="inline-flex items-center gap-2 rounded-full bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-[11px]">
+                                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+                                        <path d="M14 3v5h5" />
+                                    </svg>
+                                    Lihat PDF JSA
                                 </a>
+                                <form action="{{ route('admin.permintaansik.deleteJsa', $data->id) }}" method="POST"
+                                      onsubmit="return confirm('Yakin ingin menghapus data JSA ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 text-[11px]">
+                                        <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M6 7h12" />
+                                            <path d="M9 7V5h6v2" />
+                                            <path d="M8 7l1 12h6l1-12" />
+                                        </svg>
+                                        Hapus Data
+                                    </button>
+                                </form>
                             @endif
 
                             @if ($stepKey === 'working_permit' && $data->permits)
                                 @foreach ($data->permits as $type => $permit)
                                     @if ($permit)
                                         <a href="{{ route('working-permit.' . $type . '.preview', ['id' => $permit->notification_id]) }}" target="_blank"
-                                           class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                                            <i class="fas fa-file-pdf"></i> Lihat PDF {{ ucfirst(str_replace('_', ' ', $type)) }}
+                                           class="inline-flex items-center gap-2 rounded-full bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-[11px]">
+                                            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                <path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+                                                <path d="M14 3v5h5" />
+                                            </svg>
+                                            Lihat PDF {{ ucfirst(str_replace('_', ' ', $type)) }}
                                         </a>
+                                        <form action="{{ route('admin.permintaansik.deleteWorkingPermit', ['id' => $data->id, 'type' => $type]) }}" method="POST"
+                                              onsubmit="return confirm('Yakin ingin menghapus data permit {{ ucfirst(str_replace('_', ' ', $type)) }}?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 text-[11px]">
+                                                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                    <path d="M6 7h12" />
+                                                    <path d="M9 7V5h6v2" />
+                                                    <path d="M8 7l1 12h6l1-12" />
+                                                </svg>
+                                                Hapus Data
+                                            </button>
+                                        </form>
                                     @endif
                                 @endforeach
                             @endif
 
                             <form method="POST" action="{{ route('admin.permintaansik.updateStatus', [$data->id, $stepKey]) }}" class="mt-3">
                                 @csrf
-                                <select name="status" onchange="toggleCatatan(this)" class="text-xs px-2 py-1 border rounded w-full mt-1 focus:outline-none @if($status == 'disetujui') bg-green-500 text-white @elseif($status == 'revisi') bg-yellow-500 text-white @else bg-gray-100 text-black @endif">
+                                <select name="status" onchange="toggleCatatan(this)" class="text-[11px] px-2 py-1 border rounded-lg w-full mt-1 focus:outline-none @if($status == 'disetujui') bg-green-500 text-white @elseif($status == 'revisi') bg-yellow-500 text-white @else bg-gray-100 text-black @endif">
                                     <option value="menunggu" {{ $status == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                                     <option value="disetujui" {{ $status == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
                                     <option value="revisi" {{ $status == 'revisi' ? 'selected' : '' }}>Perlu Revisi</option>
                                 </select>
-                                <textarea name="catatan" class="catatan-field mt-2 text-xs w-full border rounded px-2 py-1 text-gray-700" placeholder="Tulis alasan revisi..." style="display: {{ $status === 'revisi' ? 'block' : 'none' }};">{{ $step['catatan'] ?? '' }}</textarea>
-                                <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow">Simpan</button>
+                                <textarea name="catatan" class="catatan-field mt-2 text-[11px] w-full border rounded-lg px-2 py-1 text-gray-700" placeholder="Tulis alasan revisi..." style="display: {{ $status === 'revisi' ? 'block' : 'none' }};">{{ $step['catatan'] ?? '' }}</textarea>
+                                <button type="submit" class="mt-2 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-3 py-1 rounded-lg shadow">
+                                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M5 12l4 4L19 6" />
+                                    </svg>
+                                    Simpan
+                                </button>
                             </form>
                         @endif
                     </div>

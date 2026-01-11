@@ -5,134 +5,272 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+
 use App\Models\Upload;
 use App\Models\Notification;
 use App\Models\UmumWorkPermit;
 use App\Models\WorkPermitGasPanas;
 use App\Models\WorkPermitAir;
 use App\Models\WorkPermitKetinggian;
-// use App\Models\WorkPermitPengangkatan;
-// use App\Models\WorkPermitPenggalian;
 use App\Models\WorkPermitRisikoPanas;
 use App\Models\WorkPermitRuangTertutup;
-// use App\Models\WorkPermitLifesaving;
 use App\Models\WorkPermitPerancah;
-// use App\Models\WorkPermitProsedurKhusus;
-use App\Models\WorkPermitDetail;
-use App\Models\WorkPermitClosure;
+use App\Models\WorkPermitBeban;
+use App\Models\WorkPermitPenggalian;
+use App\Models\WorkPermitPengangkatan;
+
 use App\Models\StepApproval;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminPermintaanController extends Controller
 {
-    public function show($id)
+    /**
+     * Judul step (13 step, SIK final).
+     * NOTE: status di StepApproval kamu simpan lowercase: disetujui|revisi|menunggu
+     */
+    private function stepTitles(): array
     {
-$notification = Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
-// ✅ Fallback: jika kolom `file` kosong, ambil dari uploads step 'op_spk'
-if (!$notification->file) {
-    $fallbackUpload = Upload::where('notification_id', $id)
-        ->where('step', 'op_spk')
-        ->latest()
-        ->first();
-
-    if ($fallbackUpload && $fallbackUpload->file_path) {
-        $notification->file = $fallbackUpload->file_path;
+        return [
+            'op_spk'               => 'Buat Notifikasi/OP/SPK',
+            'data_kontraktor'     => 'Input Data Kontraktor',
+            'bpjs'                => 'Upload BPJS',
+            'jsa'                 => 'Input JSA',
+            'working_permit'      => 'Input Working Permit',
+            'fakta_integritas'    => 'Upload Fakta Integritas',
+            'sertifikasi_ak3'     => 'Upload Sertifikasi AK3',
+            'ktp'                 => 'Upload KTP Pekerja',
+            'surat_kesehatan'     => 'Upload Surat Kesehatan',
+            'struktur_organisasi' => 'Upload Struktur Organisasi',
+            'post_test'           => 'Upload Post Test',
+            'bukti_serah_terima'  => 'Upload Bukti Serah Terima',
+            'sik'                 => 'Surat Izin Kerja',
+        ];
     }
-}
 
-// Cek admin yang login vs yang assigned
-$loggedInAdmin = auth()->user()->name;
-$assignedAdmin = $notification->assignedAdmin?->name;
+    private function assertValidStep(string $step): void
+    {
+        if (!array_key_exists($step, $this->stepTitles())) {
+            Log::warning('[ADMIN][STEP INVALID]', [
+                'step' => $step,
+                'admin_id' => auth()->id(),
+            ]);
+            abort(404);
+        }
+    }
 
-$showAlert = false;
-if ($assignedAdmin && $assignedAdmin !== $loggedInAdmin) {
-    $showAlert = true;
-}
+    private function ensureAssignedAdmin(Notification $notification)
+    {
+        $adminId = auth()->id();
 
-        
-    // Auto-assign admin jika belum ada
-    if (!$notification->assigned_admin_id) {
-        $notification->assigned_admin_id = auth()->id();
-        $notification->save();
-    // Tambahkan ini supaya handledBy ke-load
-    $notification->refresh();
-}
-$dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $id)->first();
-        $jsa = \App\Models\Jsa::where('notification_id', $id)->first();
-$permitTypes = [
-    'umum' => \App\Models\UmumWorkPermit::class,
-    'gaspanas' => \App\Models\WorkPermitGasPanas::class,
-    'air' => \App\Models\WorkPermitAir::class,
-    'ketinggian' => \App\Models\WorkPermitKetinggian::class,
-    'risiko-panas' => \App\Models\WorkPermitRisikoPanas::class,
-    'ruangtertutup' => \App\Models\WorkPermitRuangTertutup::class,
-    'perancah' => \App\Models\WorkPermitPerancah::class,
-    // tambahkan yang lain kalau ada model-nya
-];
+        if (!$notification->assigned_admin_id) {
+            $notification->update(['assigned_admin_id' => $adminId]);
+            $notification->refresh();
 
-$permits = [];
-foreach ($permitTypes as $key => $model) {
-    $permits[$key] = $model::where('notification_id', $id)->first();
-}
+            Log::info('[ADMIN][ASSIGN] auto assign admin', [
+                'notification_id' => $notification->id,
+                'assigned_admin_id' => $notification->assigned_admin_id,
+            ]);
 
+            return null;
+        }
 
+        if ((int)$notification->assigned_admin_id !== (int)$adminId) {
+            Log::warning('[ADMIN][DELETE] forbidden action by non-assigned admin', [
+                'notification_id' => $notification->id,
+                'assigned_admin_id' => $notification->assigned_admin_id,
+                'admin_id' => $adminId,
+            ]);
 
-        $uploads = \App\Models\Upload::where('notification_id', $id)->get()->keyBy('step');
-        $approvals = StepApproval::where('notification_id', $id)->get()->keyBy('step');
+            return redirect()->back()->with('error', 'Hanya admin yang pertama kali menangani yang dapat mengubah data!');
+        }
 
-        // Inject file_path dari step_approvals kalau upload tidak ada
-        foreach ($approvals as $key => $approval) {
-            if (!isset($uploads[$key]) && $approval->file_path) {
-                $uploads[$key] = (object) [
-                    'file_path' => $approval->file_path
-                ];
+        return null;
+    }
+
+    private function deleteStoredPath(?string $path): void
+    {
+        if (!$path || !is_string($path)) {
+            return;
+        }
+
+        $relativePath = str_starts_with($path, 'storage/')
+            ? substr($path, strlen('storage/'))
+            : $path;
+
+        Storage::disk('public')->delete($relativePath);
+    }
+
+    private function deleteModelFiles(object $model): void
+    {
+        foreach ($model->getAttributes() as $value) {
+            if (is_string($value) && str_starts_with($value, 'storage/')) {
+                $this->deleteStoredPath($value);
+            }
+        }
+    }
+
+    private function permitModels(): array
+    {
+        $models = [
+            'umum' => UmumWorkPermit::class,
+            'gaspanas' => WorkPermitGasPanas::class,
+            'air' => WorkPermitAir::class,
+            'ketinggian' => WorkPermitKetinggian::class,
+            'risiko-panas' => WorkPermitRisikoPanas::class,
+            'ruangtertutup' => WorkPermitRuangTertutup::class,
+            'perancah' => WorkPermitPerancah::class,
+        ];
+
+        if (class_exists(WorkPermitBeban::class)) {
+            $models['beban'] = WorkPermitBeban::class;
+        }
+        if (class_exists(WorkPermitPenggalian::class)) {
+            $models['penggalian'] = WorkPermitPenggalian::class;
+        }
+        if (class_exists(WorkPermitPengangkatan::class)) {
+            $models['pengangkatan'] = WorkPermitPengangkatan::class;
+        }
+
+        return $models;
+    }
+
+    private function hasAnyPermit(int $notificationId, array $models = null): bool
+    {
+        $models = $models ?? $this->permitModels();
+
+        foreach ($models as $model) {
+            if ($model::where('notification_id', $notificationId)->exists()) {
+                return true;
             }
         }
 
-        $stepTitles = [
-            'op_spk' => 'Buat Notifikasi/OP/SPK',
-            'data_kontraktor' => 'Input Data Kontraktor',
-            'bpjs' => 'Upload BPJS',
-            'jsa' => 'Input JSA',
-            'working_permit' => 'Input Working Permit',
-            'fakta_integritas' => 'Upload Fakta Integritas',
-            'sertifikasi_ak3' => 'Upload Sertifikasi AK3',
-            'ktp' => 'Upload KTP Pekerja',
-            'surat_kesehatan' => 'Upload Surat Kesehatan',
-            'struktur_organisasi' => 'Upload Struktur Organisasi',
-            'post_test' => 'Upload Post Test',
-            'bukti_serah_terima' => 'Upload Bukti Serah Terima',
-            'sik' => 'Surat Izin Kerja',
+        return false;
+    }
 
+    public function show($id)
+    {
+        Log::info('[ADMIN][SHOW] open detail permintaan', [
+            'notification_id' => $id,
+            'admin_id' => auth()->id(),
+        ]);
+
+        $notification = Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
+
+        // ✅ Fallback file OP/SPK jika Notification.file kosong
+        if (!$notification->file) {
+            $fallbackUpload = Upload::where('notification_id', $id)
+                ->where('step', 'op_spk')
+                ->latest()
+                ->first();
+
+            if ($fallbackUpload?->file_path) {
+                $notification->file = $fallbackUpload->file_path;
+            }
+        }
+
+        /**
+         * ✅ Auto-assign admin (atomik, hindari race)
+         * logic tetap sama: kalau belum assigned, assign ke admin pertama yang membuka detail.
+         */
+        if (!$notification->assigned_admin_id) {
+            Notification::where('id', $id)
+                ->whereNull('assigned_admin_id')
+                ->update(['assigned_admin_id' => auth()->id()]);
+
+            $notification->refresh();
+
+            Log::info('[ADMIN][ASSIGN] auto assign admin', [
+                'notification_id' => $id,
+                'assigned_admin_id' => $notification->assigned_admin_id,
+            ]);
+        }
+
+        // ✅ Alert pakai ID (bukan nama)
+        $showAlert = $notification->assigned_admin_id
+            && $notification->assigned_admin_id !== auth()->id();
+
+        $assignedAdmin = $notification->assignedAdmin?->name;
+
+        // Data tambahan
+        $dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $id)->first();
+        $jsa = \App\Models\Jsa::where('notification_id', $id)->first();
+
+        // Permit types (samakan dengan user, kalau model tersedia)
+        $permitTypes = [
+            'umum' => UmumWorkPermit::class,
+            'gaspanas' => WorkPermitGasPanas::class,
+            'air' => WorkPermitAir::class,
+            'ketinggian' => WorkPermitKetinggian::class,
+            'risiko-panas' => WorkPermitRisikoPanas::class,
+            'ruangtertutup' => WorkPermitRuangTertutup::class,
+            'perancah' => WorkPermitPerancah::class,
         ];
 
+        // Tambahan (kalau modelnya beneran ada di project kamu)
+        if (class_exists(WorkPermitBeban::class)) {
+            $permitTypes['beban'] = WorkPermitBeban::class;
+        }
+        if (class_exists(WorkPermitPenggalian::class)) {
+            $permitTypes['penggalian'] = WorkPermitPenggalian::class;
+        }
+        if (class_exists(WorkPermitPengangkatan::class)) {
+            $permitTypes['pengangkatan'] = WorkPermitPengangkatan::class;
+        }
+
+        $permits = [];
+        foreach ($permitTypes as $key => $model) {
+            $permits[$key] = $model::where('notification_id', $id)->first();
+        }
+
+        /**
+         * ✅ Uploads: groupBy step untuk multi-file (bpjs/ktp)
+         * Tapi tetap sediakan "single" upload (last) agar blade lama tidak pecah.
+         */
+        $uploadsByStep = Upload::where('notification_id', $id)
+            ->orderBy('created_at')
+            ->get()
+            ->groupBy('step');
+
+        $uploadsSingle = $uploadsByStep->map(fn($c) => $c->last());
+
+        $approvals = StepApproval::where('notification_id', $id)
+            ->get()
+            ->keyBy('step');
+
+        // Inject file dari approvals kalau upload kosong (kompatibilitas legacy)
+        foreach ($approvals as $key => $approval) {
+            if (!isset($uploadsSingle[$key]) && $approval->file_path) {
+                $uploadsSingle[$key] = (object)['file_path' => $approval->file_path];
+            }
+        }
+
+        // Bangun step data
         $stepData = [];
-        foreach ($stepTitles as $step => $title) {
-            $status = $approvals[$step]->status ?? 'Menunggu';
-            $upload = $uploads[$step] ?? null;
+        foreach ($this->stepTitles() as $step => $title) {
+            $status = strtolower($approvals[$step]->status ?? 'menunggu');
+            $upload = $uploadsSingle[$step] ?? null;
 
+            // OP/SPK spesial: bawa info number/type/date + fallback file
             if ($step === 'op_spk') {
-    // Ambil dari upload op_spk, fallback ke notification->file
-    $fileUpload = Upload::where('notification_id', $id)
-        ->where('step', 'op_spk')
-        ->latest()
-        ->first();
+                $fileUpload = Upload::where('notification_id', $id)
+                    ->where('step', 'op_spk')
+                    ->latest()
+                    ->first();
 
-    $upload = (object)[
-        'file_path' => $fileUpload?->file_path ?? $notification->file ?? null,
-        'number' => $notification->number ?? null,
-        'type' => $notification->type ?? null,
-        'created_at' => $notification->created_at ?? null,
-    ];
-}
-
+                $upload = (object)[
+                    'file_path' => $fileUpload?->file_path ?? $notification->file ?? null,
+                    'number' => $notification->number ?? null,
+                    'type' => $notification->type ?? null,
+                    'created_at' => $notification->created_at ?? null,
+                ];
+            }
 
             $statusClass = match ($status) {
-                'Disetujui' => 'bg-green-500 text-white',
-                'Perlu Revisi' => 'bg-yellow-500 text-white',
-                'Menunggu' => 'bg-gray-300 text-black',
-                default => 'bg-white text-black',
+                'disetujui' => 'bg-green-500 text-white',
+                'revisi'    => 'bg-yellow-500 text-white',
+                default     => 'bg-gray-300 text-black',
             };
 
             $stepData[] = [
@@ -145,101 +283,293 @@ foreach ($permitTypes as $key => $model) {
             ];
         }
 
-        // Tambahan: step aktif terakhir
-        $lastApprovedIndex = collect($stepData)->where('status', 'Disetujui')->keys()->last();
-        $stepSummary = $lastApprovedIndex !== null
-            ? 'Step ' . ($lastApprovedIndex + 1) . ' - ' . $stepData[$lastApprovedIndex]['title']
-            : 'Belum Diketahui';
+        // Ringkasan step (lebih akurat: hitung berapa yang disetujui)
+        $approvedCount = collect($stepData)->where('status', 'disetujui')->count();
+        $totalSteps = count($this->stepTitles());
+        $stepSummary = $approvedCount >= $totalSteps
+            ? 'Selesai'
+            : 'Step ' . ($approvedCount + 1) . ' - ' . array_values($this->stepTitles())[$approvedCount];
 
         $data = (object)[
             'id' => $notification->id,
             'user_name' => $notification->user->name ?? '-',
-            'tanggal' => $notification->created_at->format('d-m-Y H:i'),
-'handled_by' => $notification->assignedAdmin?->name ?? '-',
-            'status' => $notification->status ?? 'Menunggu',
+            'tanggal' => $notification->created_at?->format('d-m-Y H:i') ?? '-',
+            'handled_by' => $notification->assignedAdmin?->name ?? '-',
+            'status' => $notification->status ?? 'menunggu',
             'notification_file' => $notification->file ?? null,
             'notification_id' => $notification->id,
+            'description' => $notification->description ?? '-',
             'step_data' => $stepData,
-            'step_summary' => $stepSummary, // ✅ properti tambahan
+            'step_summary' => $stepSummary,
             'data_kontraktor' => $dataKontraktor,
             'jsa' => $jsa,
-    'permits' => $permits, // ← tambahkan permits di sini
+            'permits' => $permits,
+
+            // optional: kirim uploadsByStep untuk dipakai blade jika mau rapihin query di view
+            'uploads_by_step' => $uploadsByStep,
         ];
 
+        // admin list (tetap seperti sebelumnya)
         $admins = User::where('usertype', 'admin')->pluck('name');
 
-return view('admin.detailpermintaan', compact('data', 'admins', 'showAlert', 'assignedAdmin'));
-
-    }
-public function updateStatus(Request $request, $id, $step)
-{
-    $request->validate([
-        'status' => 'required|in:disetujui,revisi,menunggu',
-        'catatan' => 'nullable|string|max:500'
-    ]);
-
-    $adminId = auth()->id();
-    $notification = \App\Models\Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
-
-    if (!$notification->assigned_admin_id) {
-        $notification->update(['assigned_admin_id' => $adminId]);
-    } elseif ($notification->assigned_admin_id != $adminId) {
-        return back()->with('error', 'Hanya admin yang pertama kali menangani yang dapat mengubah status!');
+        return response()
+            ->view('admin.detailpermintaan', compact('data', 'admins', 'showAlert', 'assignedAdmin'))
+            ->setStatusCode(200);
     }
 
-    $dataUpdate = [
-        'status' => strtolower($request->status),
-        'catatan' => $request->catatan,
-        'approved_by' => $adminId,
-    ];
+    public function updateStatus(Request $request, $id, $step)
+    {
+        $this->assertValidStep($step);
 
-    // 🚀 Tanpa simpan file, generate PDF hanya saat diminta download
-    if ($step === 'sik' && strtolower($request->status) === 'disetujui') {
-        // Tidak perlu Storage::put(), biarkan PDF hanya di-stream lewat route
-    }
-
-    StepApproval::updateOrCreate(
-        ['notification_id' => $id, 'step' => $step],
-        $dataUpdate
-    );
-
-    return redirect()->back()->with('success', 'Status langkah ke-' . $step . ' berhasil diperbarui ke "' . $request->status . '"');
-}
-
-
-
-    public function deleteFile($id, $step)
-{
-    // Hapus file dari table uploads
-    $upload = Upload::where('notification_id', $id)->where('step', $step)->first();
-    if ($upload) {
-        Storage::disk('public')->delete($upload->file_path);
-        $upload->delete();
-    }
-
-    // Hapus path dan status di StepApproval jika ada
-    StepApproval::where('notification_id', $id)
-        ->where('step', $step)
-        ->update([
-            'file_path' => null,
-            'status' => 'menunggu',
+        $request->validate([
+            'status' => 'required|in:disetujui,revisi,menunggu',
+            'catatan' => 'nullable|string|max:500',
         ]);
 
-    return back()->with('success', 'File berhasil dihapus dan status direset.');
+        $adminId = auth()->id();
+        $notification = Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
+
+        // logic sama: admin pertama yang menangani = yang boleh update
+        if (!$notification->assigned_admin_id) {
+            $notification->update(['assigned_admin_id' => $adminId]);
+            $notification->refresh();
+
+            Log::info('[ADMIN][ASSIGN][UPDATE] assign on updateStatus', [
+                'notification_id' => $id,
+                'admin_id' => $adminId,
+            ]);
+        } elseif ((int)$notification->assigned_admin_id !== (int)$adminId) {
+            Log::warning('[ADMIN][UPDATE] forbidden update by non-assigned admin', [
+                'notification_id' => $id,
+                'step' => $step,
+                'assigned_admin_id' => $notification->assigned_admin_id,
+                'admin_id' => $adminId,
+            ]);
+
+            return redirect()->back()->with('error', 'Hanya admin yang pertama kali menangani yang dapat mengubah status!');
+        }
+
+        StepApproval::updateOrCreate(
+            ['notification_id' => $id, 'step' => $step],
+            [
+                'status' => strtolower($request->status),
+                'catatan' => $request->catatan,
+                'approved_by' => $adminId,
+            ]
+        );
+
+        Log::info('[ADMIN][UPDATE] step status updated', [
+            'notification_id' => $id,
+            'step' => $step,
+            'status' => $request->status,
+            'admin_id' => $adminId,
+        ]);
+
+        return redirect()->back()->with('success', 'Status langkah berhasil diperbarui');
+    }
+
+    /**
+     * Hapus file upload.
+     * ✅ Support multi-file via file_id (opsional), fallback step-first biar blade lama tetap jalan.
+     * ✅ Reset approval hanya jika file step sudah habis.
+     */
+    public function deleteFile(Request $request, $id, $step)
+    {
+        $this->assertValidStep($step);
+
+        Log::warning('[ADMIN][DELETE FILE] request', [
+            'notification_id' => $id,
+            'step' => $step,
+            'file_id' => $request->file_id ?? null,
+            'admin_id' => auth()->id(),
+        ]);
+
+        // Prioritas file_id
+        if ($request->filled('file_id')) {
+            $upload = Upload::where('id', $request->file_id)
+                ->where('notification_id', $id)
+                ->where('step', $step)
+                ->first();
+        } else {
+            // fallback legacy
+            $upload = Upload::where('notification_id', $id)
+                ->where('step', $step)
+                ->first();
+        }
+
+        if ($upload) {
+            try {
+                Storage::disk('public')->delete($upload->file_path);
+            } catch (\Throwable $e) {
+                Log::error('[ADMIN][DELETE FILE] storage delete error', [
+                    'upload_id' => $upload->id,
+                    'file_path' => $upload->file_path,
+                    'err' => $e->getMessage(),
+                ]);
+            }
+
+            $upload->delete();
+
+            Log::info('[ADMIN][DELETE FILE] deleted', [
+                'upload_id' => $upload->id,
+                'notification_id' => $id,
+                'step' => $step,
+            ]);
+        } else {
+            Log::warning('[ADMIN][DELETE FILE] upload not found', [
+                'notification_id' => $id,
+                'step' => $step,
+                'file_id' => $request->file_id ?? null,
+            ]);
+        }
+
+        // Reset approval hanya jika sudah tidak ada file tersisa pada step tsb
+        $hasRemaining = Upload::where('notification_id', $id)
+            ->where('step', $step)
+            ->exists();
+
+        if (!$hasRemaining) {
+            StepApproval::where('notification_id', $id)
+                ->where('step', $step)
+                ->update([
+                    'file_path' => null,
+                    'status' => 'menunggu',
+                ]);
+
+            Log::info('[ADMIN][DELETE FILE] approval reset (no remaining files)', [
+                'notification_id' => $id,
+                'step' => $step,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'File berhasil dihapus.');
+    }
+
+    /**
+     * Stream PDF SIK
+     * (Tidak mengubah logic utama: tetap stream PDF dari view)
+     */
+    public function viewSik($id)
+    {
+        Log::info('[ADMIN][VIEW SIK] request', [
+            'notification_id' => $id,
+            'user_id' => auth()->id(),
+            'usertype' => auth()->user()->usertype ?? null,
+        ]);
+
+        $notification = Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
+        $dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $notification->id)->first();
+
+        $sikStep = StepApproval::where('notification_id', $notification->id)
+            ->where('step', 'sik')
+            ->first();
+
+        // ✅ Optional safety (tanpa ubah alur admin):
+        // Kalau route ini juga dipakai user, sebaiknya cek ownership & status.
+        // Kalau kamu ingin STRICT sesuai saran sebelumnya, aktifkan blok ini.
+        /*
+        if ((auth()->user()->usertype ?? null) !== 'admin') {
+            if ($notification->user_id !== auth()->id()) abort(403);
+            if (($sikStep?->status ?? 'menunggu') !== 'disetujui') abort(403);
+        }
+        */
+
+        $pdf = Pdf::loadView('admin.pdfsik', compact('notification', 'dataKontraktor', 'sikStep'));
+
+        return response($pdf->stream('Surat-Izin-Kerja.pdf'), 200, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    public function deleteDataKontraktor($id)
+    {
+        $notification = Notification::findOrFail($id);
+        if ($response = $this->ensureAssignedAdmin($notification)) {
+            return $response;
+        }
+
+        $dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $id)->first();
+        if (!$dataKontraktor) {
+            return redirect()->back()->with('error', 'Data kontraktor tidak ditemukan.');
+        }
+
+        $this->deleteModelFiles($dataKontraktor);
+        $dataKontraktor->delete();
+
+        StepApproval::where('notification_id', $id)
+            ->where('step', 'data_kontraktor')
+            ->update([
+                'status' => 'menunggu',
+                'catatan' => null,
+            ]);
+
+        return redirect()->back()->with('success', 'Data kontraktor berhasil dihapus.');
+    }
+
+    public function deleteJsa($id)
+    {
+        $notification = Notification::findOrFail($id);
+        if ($response = $this->ensureAssignedAdmin($notification)) {
+            return $response;
+        }
+
+        $jsa = \App\Models\Jsa::where('notification_id', $id)->first();
+        if (!$jsa) {
+            return redirect()->back()->with('error', 'Data JSA tidak ditemukan.');
+        }
+
+        $this->deleteModelFiles($jsa);
+        $jsa->delete();
+
+        StepApproval::where('notification_id', $id)
+            ->where('step', 'jsa')
+            ->update([
+                'status' => 'menunggu',
+                'catatan' => null,
+            ]);
+
+        return redirect()->back()->with('success', 'Data JSA berhasil dihapus.');
+    }
+
+    public function deleteWorkingPermit($id, $type)
+    {
+        $notification = Notification::findOrFail($id);
+        if ($response = $this->ensureAssignedAdmin($notification)) {
+            return $response;
+        }
+
+        $models = $this->permitModels();
+        if (!array_key_exists($type, $models)) {
+            abort(404);
+        }
+
+        $model = $models[$type];
+        $permit = $model::where('notification_id', $id)->first();
+
+        if (!$permit) {
+            return redirect()->back()->with('error', 'Data working permit tidak ditemukan.');
+        }
+
+        $this->deleteModelFiles($permit);
+
+        if (method_exists($permit, 'closure')) {
+            $permit->closure()->delete();
+        }
+        if (method_exists($permit, 'detail')) {
+            $permit->detail()->delete();
+        }
+
+        $permit->delete();
+
+        if (!$this->hasAnyPermit($id, $models)) {
+            StepApproval::where('notification_id', $id)
+                ->where('step', 'working_permit')
+                ->update([
+                    'status' => 'menunggu',
+                    'catatan' => null,
+                ]);
+        }
+
+        return redirect()->back()->with('success', 'Data working permit berhasil dihapus.');
+    }
 }
-public function viewSik($id)
-{
-    $notification = \App\Models\Notification::with(['user', 'assignedAdmin'])->findOrFail($id);
-    $dataKontraktor = \App\Models\DataKontraktor::where('notification_id', $notification->id)->first();
-
-    // Tambahan: ambil tanda tangan SIK
-    $sikStep = StepApproval::where('notification_id', $notification->id)
-        ->where('step', 'sik')
-        ->first();
-
-    $pdf = \PDF::loadView('admin.pdfsik', compact('notification', 'dataKontraktor', 'sikStep'));
-    return $pdf->stream('Surat-Izin-Kerja.pdf');
-}
-
-}
-

@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class StepApproval extends Model
 {
     protected $fillable = [
-        'notification_id', 'step', 'status', 'catatan', 'file_path', 'approved_by'
+        'notification_id', 'step', 'status', 'catatan', 'file_path', 'approved_by',
+        'signature_senior_manager', 'signature_manager'
     ];
 
     public function notification()

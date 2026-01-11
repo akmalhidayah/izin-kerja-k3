@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('file_path')->nullable(); // Lokasi file yang diupload (misalnya SIK)
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->longText('signature_senior_manager')->nullable();
+            $table->longText('signature_manager')->nullable();
             $table->timestamps();
         });
     }

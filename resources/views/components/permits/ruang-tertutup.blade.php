@@ -358,28 +358,39 @@
         </thead>
         <tbody>
             <tr>
+                {{-- Nama --}}
                 <td class="border px-2 py-2 text-center">
                     <input type="text" name="permit_requestor_name" class="input w-full text-center"
                         value="{{ old('permit_requestor_name', $permit->permit_requestor_name ?? '') }}">
                 </td>
+
+                {{-- Tanda Tangan --}}
                 <td class="border px-2 py-2 text-center">
-                 <button type="button"
-    @click="openSignPad('ruangtertutup_signature_permit_requestor')"
-    class="text-blue-600 underline text-xs">
-    Tanda Tangan
-</button>
-<input type="hidden" id="ruangtertutup_signature_permit_requestor" name="signature_permit_requestor"
-    value="{{ old('signature_permit_requestor', $permit->signature_permit_requestor ?? '') }}">
-    @if(old('signature_permit_requestor', $permit->signature_permit_requestor ?? null))
-    <img src="{{ asset(old('signature_permit_requestor', $permit->signature_permit_requestor)) }}" class="h-12 mx-auto mt-1">
-@endif
+                    <button type="button"
+                        @click="openSignPad('ruangtertutup_signature_permit_requestor')"
+                        class="text-blue-600 underline text-xs">
+                        Tanda Tangan
+                    </button>
 
+                    @php
+                        $signature = old('signature_permit_requestor', $permit->signature_permit_requestor ?? null);
+                    @endphp
 
+                    <input type="hidden" id="ruangtertutup_signature_permit_requestor" name="signature_permit_requestor"
+                        value="{{ $signature }}">
+
+                    @if ($signature)
+                        <img src="{{ asset($signature) }}" class="h-12 mx-auto mt-1">
+                    @endif
                 </td>
+
+                {{-- Tanggal --}}
                 <td class="border px-2 py-2 text-center">
                     <input type="date" name="permit_requestor_date" class="input w-full text-center"
                         value="{{ old('permit_requestor_date', $permit->permit_requestor_date ?? '') }}">
                 </td>
+
+                {{-- Jam --}}
                 <td class="border px-2 py-2 text-center">
                     <input type="time" name="permit_requestor_time" class="input w-full text-center"
                         value="{{ old('permit_requestor_time', $permit->permit_requestor_time ?? '') }}">
@@ -388,6 +399,7 @@
         </tbody>
     </table>
 </div>
+
 
 {{-- BAGIAN 7: Verifikasi --}}
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">

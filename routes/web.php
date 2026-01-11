@@ -29,34 +29,24 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// ✅ USER SIDE (usertype = 'user dan admin')
-Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function () {
+
+// ✅ USER & PGO SIDE (step 1, 4, 5 saja untuk PGO)
+Route::middleware(['auth', 'verified', 'usertype:user,admin,pgo'])->group(function () {
 
     // Dashboard User
     Route::get('pengajuan-user/izin-kerja', [IzinKerjaController::class, 'index'])->name('dashboard');
 
-    // Step 1: Create Notification
+    // ✅ Step 1: Create Notification
     Route::post('/pengajuan-user/izin-kerja/notification', [UserNotificationController::class, 'store'])->name('notification.store');
 
-
-    // Step 2: Data Kontraktor
-    Route::post('/pengajuan-user/izin-kerja/data-kontraktor/{notification}', [DataKontraktorController::class, 'store'])->name('izin-kerja.data-kontraktor');
-    Route::get('/pengajuan-user/izin-kerja/data-kontraktor/pdf/{notification_id}', [DataKontraktorController::class, 'previewPdf'])->name('izin-kerja.data-kontraktor.pdf');
-
-    // Step 3,6,7,8,9,10, 13 Upload
-    Route::post('/user/upload', [UploadController::class, 'store'])->name('upload.store');
-    Route::patch('/user/upload/{id}/status', [UploadController::class, 'updateStatus'])->name('upload.updateStatus');
-    Route::delete('/user/upload/{id}', [UploadController::class, 'destroy'])->name('upload.delete');
-
-
-    // Step 4: JSA
+    // ✅ Step 4: JSA
     Route::post('/user/jsa/store', [JsaController::class, 'store'])->name('jsa.store');
     Route::get('/user/jsa/{id}/edit', [JsaController::class, 'edit'])->name('jsa.edit');
     Route::patch('/user/jsa/{id}', [JsaController::class, 'update'])->name('jsa.update');
     Route::get('/user/jsa/pdf/{notification_id}', [JsaController::class, 'downloadPdf'])->name('jsa.pdf');
     Route::get('/user/jsa/pdf/view/{notification_id}', [JsaController::class, 'showPdf'])->name('jsa.pdf.view');
 
-    // Step 5: Working Permit
+    // ✅ Step 5: Working Permit (semua jenis)
     Route::post('/user/working-permit/umum/store', [UmumPermitController::class, 'store'])->name('working-permit.umum.store');
     Route::get('/user/permit/umum/preview/{id}', [UmumPermitController::class, 'preview'])->name('working-permit.umum.preview');
 
@@ -83,14 +73,27 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function (
 
     Route::post('/user/working-permit/penggalian/store', [PenggalianPermitController::class, 'store'])->name('working-permit.penggalian.store');
     Route::get('/user/permit/penggalian/preview/{id}', [PenggalianPermitController::class, 'preview'])->name('working-permit.penggalian.preview');
-        
+
     Route::post('/user/working-permit/pengangkatan/store', [PengangkatanPermitController::class, 'store'])->name('working-permit.pengangkatan.store');
     Route::get('/user/permit/pengangkatan/preview/{id}', [PengangkatanPermitController::class, 'preview'])->name('working-permit.pengangkatan.preview');
 
-     Route::get('/izin-kerja/sik/pdf/{id}', [\App\Http\Controllers\Admin\AdminPermintaanController::class, 'viewSik'])
-    ->name('izin-kerja.sik.pdf');
-
+    // ✅ View PDF SIK
+    Route::get('/izin-kerja/sik/pdf/{id}', [\App\Http\Controllers\Admin\AdminPermintaanController::class, 'viewSik'])->name('izin-kerja.sik.pdf');
 });
+
+// ✅ Tambahan: user dan admin only (tanpa PGO)
+Route::middleware(['auth', 'verified', 'usertype:user,admin'])->group(function () {
+
+    // Step 2: Data Kontraktor
+    Route::post('/pengajuan-user/izin-kerja/data-kontraktor/{notification}', [DataKontraktorController::class, 'store'])->name('izin-kerja.data-kontraktor');
+    Route::get('/pengajuan-user/izin-kerja/data-kontraktor/pdf/{notification_id}', [DataKontraktorController::class, 'previewPdf'])->name('izin-kerja.data-kontraktor.pdf');
+
+    // Step 3,6,7,8,9,10,13: Upload
+    Route::post('/user/upload', [UploadController::class, 'store'])->name('upload.store');
+    Route::patch('/user/upload/{id}/status', [UploadController::class, 'updateStatus'])->name('upload.updateStatus');
+    Route::delete('/user/upload/{id}', [UploadController::class, 'destroy'])->name('upload.delete');
+});
+
 
 // ✅ ADMIN SIDE (usertype = 'admin' + role = 'Admin' atau 'Super Admin')
 Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Admin,Super Admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -101,6 +104,9 @@ Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Admin,Super Admin
     Route::get('/permintaansik/{id}', [AdminPermintaanController::class, 'show'])->name('permintaansik.show');
 Route::get('/permintaansik/{id}/view-sik', [AdminPermintaanController::class, 'viewSik'])->name('permintaansik.viewSik');
     Route::delete('/permintaansik/{id}/delete-file/{step}', [AdminPermintaanController::class, 'deleteFile'])->name('permintaansik.deleteFile');
+    Route::delete('/permintaansik/{id}/data-kontraktor', [AdminPermintaanController::class, 'deleteDataKontraktor'])->name('permintaansik.deleteDataKontraktor');
+    Route::delete('/permintaansik/{id}/jsa', [AdminPermintaanController::class, 'deleteJsa'])->name('permintaansik.deleteJsa');
+    Route::delete('/permintaansik/{id}/working-permit/{type}', [AdminPermintaanController::class, 'deleteWorkingPermit'])->name('permintaansik.deleteWorkingPermit');
 });
 
 // ✅ SUPER ADMIN - Manajemen User Panel
@@ -130,6 +136,7 @@ Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Super Admin'])
         // ✅ Tambahan route untuk Approve SIK
         Route::get('/approvesik', [ApproveSikController::class, 'index'])->name('approvesik.index');
 Route::post('/approvesik/{id}/ttd', [ApproveSikController::class, 'storeSignature'])->name('approvesik.signature');
+Route::post('/approvesik/{id}/ttd-manager', [ApproveSikController::class, 'storeManagerSignature'])->name('approvesik.signature_manager');
 
 
     });

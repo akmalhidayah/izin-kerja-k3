@@ -49,4 +49,11 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+// di User.php
+public function handledNotifications()
+{
+    return $this->hasMany(Notification::class, 'assigned_admin_id');
+}
+
+
 }

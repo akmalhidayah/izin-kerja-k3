@@ -122,19 +122,30 @@
                             <th class="border px-2 py-1 w-16">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <template x-for="(row, index) in langkahKerja" :key="index">
-                            <tr>
-                                <td class="border px-2 py-1 text-center" x-text="index + 1"></td>
-                                <td class="border px-2 py-1"><input type="text" x-model="row.langkah" class="input w-full text-xs"></td>
-                                <td class="border px-2 py-1"><input type="text" x-model="row.bahaya" class="input w-full text-xs"></td>
-                                <td class="border px-2 py-1"><input type="text" x-model="row.pengendalian" class="input w-full text-xs"></td>
-                                <td class="border px-2 py-1 text-center">
-                                    <button type="button" @click="hapusRow(index)" class="text-red-500 text-xs">Hapus</button>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
+                   <tbody>
+    <template x-for="(row, index) in langkahKerja" :key="index">
+        <tr>
+            <td class="border px-2 py-1 text-center" x-text="index + 1"></td>
+
+            <td class="border px-2 py-1">
+                <textarea x-model="row.langkah" class="input w-full text-xs resize-y min-h-[60px]"></textarea>
+            </td>
+
+            <td class="border px-2 py-1">
+                <textarea x-model="row.bahaya" class="input w-full text-xs resize-y min-h-[60px]"></textarea>
+            </td>
+
+            <td class="border px-2 py-1">
+                <textarea x-model="row.pengendalian" class="input w-full text-xs resize-y min-h-[60px]"></textarea>
+            </td>
+
+            <td class="border px-2 py-1 text-center">
+                <button type="button" @click="hapusRow(index)" class="text-red-500 text-xs">Hapus</button>
+            </td>
+        </tr>
+    </template>
+</tbody>
+
                 </table>
 
                 <button type="button" @click="tambahRow()" class="bg-blue-500 text-white px-2 py-1 rounded text-xs mb-2">

@@ -1,192 +1,245 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unit K3 - PT. Semen Tonasa</title>
-    <!-- Tailwind & Alpine -->
-        <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-DIftN9q9.css') }}">
-    <script src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> 
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unit K3 · PT. Semen Tonasa</title>
+  <meta name="description" content="Unit K3 PT. Semen Tonasa — pengajuan izin kerja, JSA, working permit, dokumentasi K3." />
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-    <style>
-        .hero-bg {
-            background-image: url('/images/bg-login.jpg');
-            background-size: cover;
-            background-position: center;
-        }
+  {{-- Tailwind build --}}
+      @vite(['resources/css/app.css', 'resources/js/app.js'])
+<!-- 
+  <link rel="stylesheet" href="{{ asset('build/assets/app-Dtrtahse.css') }}">
+  <script defer src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script> -->
 
-        .glass {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(3px);
-        }
+  {{-- Icons --}}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
 
-        @media (max-width: 640px) {
-            header img {
-                width: 2.5rem;
-                height: 2.5rem;
-            }
+  <style>
+    /* ===== GLOBAL FIX ===== */
+    html, body {
+      overflow-x: hidden;
+    }
 
-            header h1 {
-                font-size: 1rem;
-            }
+    /* ===== HEADER FLOATING ===== */
+    .header-float {
+      position: sticky;
+      top: 12px;
+      z-index: 60;
+    }
+    .header-inner {
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.95);
+      border-radius: 18px;
+      transition: all .3s ease;
+    }
+    .header-scrolled .header-inner {
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+      transform: scale(.98);
+    }
 
-            header p {
-                font-size: 0.75rem;
-            }
-        }
-    </style>
+    /* ===== HERO ===== */
+    .hero-wrap {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 64px);
+      min-height: 520px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(0,0,0,.25),
+        rgba(0,0,0,.55)
+      );
+      z-index: 20;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 30;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    /* ===== ANIMATION ===== */
+    .fade-up {
+      animation: fadeUp .9s ease forwards;
+      opacity: 0;
+    }
+    .fade-up.delay { animation-delay: .25s; }
+
+    @keyframes fadeUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ===== BUTTON ===== */
+    .btn-main {
+      transition: all .25s ease;
+    }
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    }
+
+    /* ===== STEP CARD ===== */
+    .step-card {
+      transition: all .25s ease;
+    }
+    .step-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 30px rgba(0,0,0,.12);
+    }
+    .step-card i {
+      transition: transform .25s ease;
+    }
+    .step-card:hover i {
+      transform: scale(1.15);
+    }
+  </style>
 </head>
 
-<body class="bg-white text-gray-800 font-sans">
+<body class="bg-gray-50 text-gray-900 antialiased">
 
-    <!-- Header -->
-    <header class="bg-white border-b shadow py-4 sticky top-0 z-50">
-        <div class="container mx-auto flex flex-wrap justify-between items-center px-4">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('images/logo-k3.png') }}" alt="Logo ST" class="w-12 h-12">
-                <img src="{{ asset('images/logo-st.png') }}" alt="Logo SIG" class="w-12 h-12">
-                <div class="flex items-center gap-3">
-                    <h1 class="text-xl font-bold text-red-700">Unit K3 - PT. Semen Tonasa</h1>
-                </div>
-            </div>
-            <div class="flex gap-2 mt-4 md:mt-0">
-                <a href="{{ route('login') }}"
-                    class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-300">
-                    Login
-                </a>
-                <a href="{{ route('register') }}"
-                    class="bg-white text-red-600 border border-red-600 hover:bg-red-50 font-semibold px-4 py-2 rounded-lg transition duration-300">
-                    Register
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="hero-bg relative py-24">
-        <div class="absolute inset-0 bg-black bg-opacity-40 z-0"></div>
-        <div class="glass container mx-auto px-4 text-center py-12 rounded-lg relative z-10">
-            <h2 class="text-2xl md:text-2xl font-bold text-red-800 mb-4 animate-fade-in-up">Selamat Datang di Unit Keselamatan & Kesehatan Kerja</h2>
-            <h3 class="text-3xl md:text-3xl font-bold text-red-800 mb-4 animate-fade-in-up delay-100">PT. Semen Tonasa</h3>
-        </div>
-    </section>
-<!-- Informasi / Galeri K3 (Slider Cards) -->
-<section class="py-12 bg-white dark:bg-gray-900">
-    <div class="container mx-auto px-4">
-        <h3 class="text-2xl font-bold text-center text-red-700 dark:text-green-300 mb-8">Informasi Tentang Unit K3</h3>
-
-        <!-- Swiper -->
-        <div class="swiper mySwiper">
-            <div class="swiper-wrapper">
-                @for ($i = 1; $i <= 5; $i++)
-                    <div class="swiper-slide bg-white dark:bg-gray-800 border rounded-lg p-4 shadow-md w-72">
-                        <img src="{{ asset('images/' . $i . '.jpg') }}" alt="Galeri {{ $i }}" class="rounded mb-3 h-40 w-full object-cover">
-                        <h4 class="text-sm font-semibold text-gray-800 dark:text-white mb-1">Aktivitas K3 #{{ $i }}</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Deskripsi singkat kegiatan K3 yang dilakukan di lapangan.</p>
-                    </div>
-                @endfor
-            </div>
-        </div>
+{{-- ================= HEADER ================= --}}
+<header id="header" class="header-float">
+  <div class="header-inner max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <img src="{{ asset('images/logo-k3.png') }}" class="w-11 h-11" alt="Logo K3">
+      <img src="{{ asset('images/logo-st.png') }}" class="w-11 h-11" alt="Logo Semen Tonasa">
+      <div>
+        <h1 class="font-bold text-red-700 leading-tight">
+          Unit K3 - PT. Semen Tonasa
+        </h1>
+        <p class="text-xs text-gray-500">Keselamatan & Kesehatan Kerja</p>
+      </div>
     </div>
+
+    <a href="{{ route('login') }}"
+       class="px-4 py-2 bg-red-600 text-white rounded-xl btn-main">
+      Login
+    </a>
+  </div>
+</header>
+
+{{-- ================= HERO ================= --}}
+<section class="hero-wrap">
+
+  <video class="hero-video"
+         autoplay
+         muted
+         loop
+         playsinline
+         preload="auto">
+    <source src="{{ asset('images/videobgk3.mp4') }}" type="video/mp4">
+  </video>
+
+  <div class="hero-overlay"></div>
+
+  <div class="hero-inner max-w-6xl mx-auto px-4">
+    <div class="text-white max-w-xl">
+      <h2 class="text-4xl font-extrabold leading-tight fade-up">
+        Selamat Datang di<br>
+        Unit Keselamatan &<br>
+        Kesehatan Kerja
+      </h2>
+
+      <p class="mt-4 text-slate-200 fade-up delay">
+        PT. Semen Tonasa — pusat SOP, JSA, dan pengelolaan izin kerja.
+        Interaktif, cepat, dan aman.
+      </p>
+
+      <div class="mt-6 flex gap-3 fade-up delay">
+        <a href="#alur"
+           class="px-5 py-2 bg-white text-slate-900 rounded-xl btn-main">
+          Lihat Alur
+        </a>
+        <a href="{{ route('login') }}"
+           class="px-5 py-2 border border-white/40 rounded-xl btn-main">
+          Masuk
+        </a>
+      </div>
+    </div>
+  </div>
+
 </section>
 
-    <!-- Alur Proses -->
-    <section class="py-12 bg-gray-100">
-        <div class="container mx-auto px-4">
-            <h3 class="text-2xl font-bold text-center text-green-700 mb-10">Alur Pengajuan Izin Kerja</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
-                @php
-                    $steps = [
-                        ['Input OP/SPK/Notifikasi', 'fa-bell'],
-                        ['Upload Foto Copy BPJS Ketenagakerjaan', 'fa-id-card'],
-                        ['Create Job Safety Analysis (JSA)', 'fa-file-alt'],
-                        ['Create Working Permit', 'fa-clipboard-check'],
-                        ['Upload Fakta Integritas Kontraktor', 'fa-file-contract'],
-                        ['Upload Sertifikasi AK3 Umum', 'fa-certificate'],
-                        ['Upload KTP Personil K3', 'fa-id-badge'],
-                        ['Upload Surat Kesehatan STMC', 'fa-notes-medical'],
-                        ['Upload Struktur Organisasi Berlaku', 'fa-sitemap'],
-                        ['Upload Hasil Post Test', 'fa-upload'],
-                        ['Terbit Surat Izin Kerja & Upload BST', 'fa-file-signature'],
-                        ['Tanda Tangan Digital', 'fa-pen-nib'],
-                    ];
-                @endphp
+<main>
 
-                @foreach ($steps as $index => [$step, $icon])
-                    <div
-                        class="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition transform hover:-translate-y-1 hover:scale-105 duration-300 text-center relative animate-fade-in">
-                        <div class="absolute top-2 left-2 text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full shadow">
-                            {{ $index + 1 }}
-                        </div>
-                        <div class="text-2xl text-green-600 mb-2">
-                            <i class="fas {{ $icon }}"></i>
-                        </div>
-                        <p class="text-gray-700 font-medium leading-tight">{{ $step }}</p>
-                    </div>
-                @endforeach
-            </div>
+{{-- ================= POSTER ================= --}}
+<section class="py-10">
+  <div class="max-w-6xl mx-auto px-4">
+    <img src="{{ asset('images/posterk3.jpg') }}"
+         class="rounded-2xl shadow-lg w-full"
+         alt="Poster K3">
+  </div>
+</section>
+
+{{-- ================= ALUR ================= --}}
+<section id="alur" class="py-12 bg-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <h3 class="text-2xl font-semibold text-center text-green-700 mb-10">
+      Alur Pengajuan Izin Kerja
+    </h3>
+
+    @php
+      $steps = [
+        ['Input OP/SPK/Notifikasi','fa-bell'],
+        ['Upload BPJS','fa-id-card'],
+        ['Buat JSA','fa-file-alt'],
+        ['Working Permit','fa-clipboard-check'],
+        ['Dokumen Kontraktor','fa-file-contract'],
+        ['Sertifikat AK3','fa-certificate'],
+        ['KTP Personil','fa-id-badge'],
+        ['Surat Kesehatan','fa-notes-medical'],
+        ['Struktur Organisasi','fa-sitemap'],
+        ['Post Test','fa-upload'],
+        ['Terbit Izin Kerja','fa-file-signature'],
+        ['Tanda Tangan Digital','fa-pen-nib'],
+      ];
+    @endphp
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      @foreach($steps as [$label,$icon])
+        <div class="step-card bg-gray-50 rounded-xl p-5 text-center">
+          <div class="text-green-600 text-2xl mb-3">
+            <i class="fas {{ $icon }}"></i>
+          </div>
+          <h4 class="font-semibold text-sm">{{ $label }}</h4>
         </div>
-    </section>
+      @endforeach
+    </div>
+  </div>
+</section>
 
-    <!-- Footer -->
-    <footer class="bg-green-700 text-white py-6 text-center">
-        <p>&copy; {{ date('Y') }} PT. Semen Tonasa - Unit Keselamatan & Kesehatan Kerja</p>
-    </footer>
+</main>
 
-    <!-- Animasi CSS -->
-    <style>
-        @keyframes fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fade-in 0.6s ease-out forwards;
-        }
-
-        .animate-fade-in-up {
-            opacity: 0;
-            animation: fade-in 1s ease forwards;
-        }
-
-        .delay-100 {
-            animation-delay: 0.1s;
-        }
-
-        .delay-200 {
-            animation-delay: 0.2s;
-        }
-    </style>
-
-<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<footer class="bg-gray-900 text-gray-300 py-6 text-center text-sm">
+  &copy; {{ date('Y') }} PT. Semen Tonasa · Unit K3
+</footer>
 
 <script>
-    const swiper = new Swiper('.mySwiper', {
-        slidesPerView: 1.2,
-        spaceBetween: 15,
-        breakpoints: {
-            640: { slidesPerView: 2.5 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 4 }
-        },
-        autoplay: {
-            delay: 3000,
-            disableOnInteraction: false,
-        },
-        loop: true,
-    });
+  window.addEventListener('scroll', () => {
+    document
+      .getElementById('header')
+      .classList.toggle('header-scrolled', window.scrollY > 40);
+  });
 </script>
 
 </body>
-
 </html>

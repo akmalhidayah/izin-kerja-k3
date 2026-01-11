@@ -8,14 +8,14 @@
         <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
             <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
                 <div x-data="{ expanded: true, activeModal: null, selectedPermit: 'umum' }">
-                    <div class="flex justify-between items-center mb-4">
-<form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-3">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+<form method="GET" action="{{ route('dashboard') }}" class="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
     <label for="notification_id" class="text-sm font-semibold text-gray-800 whitespace-nowrap">
         Pilih Pengajuan
     </label>
 
     <select name="notification_id" id="notification_id" onchange="this.form.submit()"
-        class="w-[280px] border border-gray-300 text-sm rounded px-3 py-2 shadow focus:outline-none focus:ring-1 focus:ring-blue-500">
+        class="w-full sm:w-[280px] border border-gray-300 text-sm rounded px-3 py-2 shadow focus:outline-none focus:ring-1 focus:ring-blue-500">
         @foreach ($notifications as $notif)
             <option value="{{ $notif->id }}" {{ $notif->id == $selectedId ? 'selected' : '' }}>
                 {{ $notif->number }} - {{ $notif->created_at->format('d/m/Y') }}
@@ -27,7 +27,7 @@
 
     <!-- Tombol Buat Notifikasi Baru -->
 <button @click="activeModal = 'modal-0'"
-    class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded shadow">
+    class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded shadow w-full md:w-auto">
     + Buat Pengajuan Baru
 </button>
 

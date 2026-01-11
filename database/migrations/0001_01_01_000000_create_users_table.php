@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('usertype', ['admin', 'user'])->default('user');
+            // ✅ Tambahkan 'pgo' ke dalam enum
+            $table->enum('usertype', ['admin', 'user', 'pgo'])->default('user');
             $table->foreignId('role_id')->nullable()->constrained('roles')->onDelete('set null');
             $table->rememberToken();
             $table->timestamps();

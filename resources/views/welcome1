@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Unit K3 · PT. Semen Tonasa</title>
+  <meta name="description" content="Unit K3 PT. Semen Tonasa — pengajuan izin kerja, JSA, working permit, dokumentasi K3." />
+
+  {{-- Tailwind --}}
+  @if (app()->environment('local'))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+  @else
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DIftN9q9.css') }}">
+    <script defer src="{{ asset('build/assets/app-B84ErxN3.js') }}"></script>
+  @endif
+
+  {{-- CDN --}}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+
+  <style>
+    /* ===== HERO FULLSCREEN YOUTUBE ===== */
+    .hero-wrap {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 64px); /* minus header */
+      min-height: 520px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .hero-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 120%;
+      height: 120%;
+      transform: translate(-50%, -50%);
+      border: none;
+      pointer-events: none; /* HILANGKAN INTERAKSI YOUTUBE */
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(0,0,0,0.35),
+        rgba(0,0,0,0.75)
+      );
+      z-index: 20;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 30;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    /* EXISTING STYLE (TIDAK DIUBAH) */
+    .tilt-card { will-change: transform; transform-style: preserve-3d; perspective: 1000px; }
+    .tilt-card .inner { transition: box-shadow .18s ease, transform .18s ease; }
+    .reveal { opacity:0; transform: translateY(12px); }
+
+    @media (max-width: 768px) {
+      .hero-video {
+        width: 200%;
+        height: 200%;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 antialiased">
+<a class="sr-only focus:not-sr-only" href="#main">Lewati ke konten</a>
+
+{{-- HEADER (TIDAK DIUBAH) --}}
+<header class="bg-white border-b sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+    <div class="flex items-center gap-3">
+      <img src="{{ asset('images/logo-k3.png') }}" alt="Logo K3" class="w-12 h-12">
+      <img src="{{ asset('images/logo-st.png') }}" alt="Logo Semen Tonasa" class="w-12 h-12">
+      <div>
+        <h1 class="text-lg font-bold text-red-700">Unit K3 - PT. Semen Tonasa</h1>
+        <div class="text-xs text-gray-500">Keselamatan & Kesehatan Kerja</div>
+      </div>
+    </div>
+    <a href="{{ route('login') }}"
+       class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700">
+      Login
+    </a>
+  </div>
+</header>
+
+{{-- HERO FULLSCREEN --}}
+<section id="hero" class="hero-wrap">
+
+  <!-- YOUTUBE BACKGROUND (NO CONTROLS) -->
+  <iframe
+    class="hero-video"
+    src="https://www.youtube.com/embed/9UfoeB_eN6E
+      ?autoplay=1
+      &mute=1
+      &loop=1
+      &playlist=9UfoeB_eN6E
+      &controls=0
+      &showinfo=0
+      &rel=0
+      &modestbranding=1
+      &playsinline=1"
+    allow="autoplay; fullscreen"
+    referrerpolicy="strict-origin-when-cross-origin">
+  </iframe>
+
+  <div class="hero-overlay"></div>
+
+  <div class="hero-inner max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="w-full md:w-2/3 lg:w-1/2 text-white">
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight drop-shadow-md">
+        Selamat Datang di Unit Keselamatan & Kesehatan Kerja
+      </h2>
+      <p class="mt-3 text-lg text-slate-200 max-w-xl">
+        PT. Semen Tonasa — pusat SOP, JSA, dan pengelolaan izin kerja.
+        Interaktif, cepat, dan aman.
+      </p>
+
+      <div class="mt-6 flex gap-3">
+        <a href="#alur"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-900 rounded-lg shadow">
+          Lihat Alur
+        </a>
+        <a href="{{ route('login') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 border border-white/20 text-white rounded-lg hover:bg-white/10">
+          Masuk
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{-- ===== SEMUA BAGIAN BAWAH TETAP PUNYA ANDA ===== --}}
+{{-- Alur, steps, swiper, footer, dll TIDAK DIUBAH --}}
+
+<script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.2/dist/vanilla-tilt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  VanillaTilt.init(document.querySelectorAll('[data-tilt]'), {
+    max: 12,
+    speed: 400,
+    glare: true,
+    "max-glare": 0.15
+  });
+});
+</script>
+
+</body>
+</html>

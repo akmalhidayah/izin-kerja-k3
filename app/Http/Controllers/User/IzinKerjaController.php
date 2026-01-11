@@ -26,7 +26,7 @@ use App\Models\StepApproval;
 
 class IzinKerjaController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
 {
     $userId = auth()->id();
 
@@ -53,6 +53,16 @@ class IzinKerjaController extends Controller
             'bukti_serah_terima' => 'Upload BAST',
             'surat_izin_kerja' => 'Surat Izin Kerja',
         ];
+
+        // Cek usertype saat belum ada pengajuan juga
+        if (auth()->user()->usertype === 'pgo') {
+            // Filter step untuk PGO
+            $stepTitles = [
+                'op_spk' => 'Buat Notifikasi/OP/SPK',
+                'jsa' => 'Input JSA',
+                'working_permit' => 'Input Working Permit',
+            ];
+        }
 
         $steps = [];
         foreach ($stepTitles as $code => $title) {
@@ -81,6 +91,7 @@ class IzinKerjaController extends Controller
     $notification = Notification::findOrFail($selectedId);
     $generatedNoJsa = (new JsaController)->getGeneratedNoJsa();
 
+    // Default stepTitles semua step
     $stepTitles = [
         'op_spk' => 'Buat Notifikasi/OP/SPK',
         'data_kontraktor' => 'Input Data Kontraktor',
@@ -97,22 +108,30 @@ class IzinKerjaController extends Controller
         'surat_izin_kerja' => 'Surat Izin Kerja',
     ];
 
+    // **Cek usertype setelah ambil $notification**
+    if (auth()->user()->usertype === 'pgo') {
+        // Step khusus usertype PGO
+        $stepTitles = [
+            'op_spk' => 'Buat Notifikasi/OP/SPK',
+            'jsa' => 'Input JSA',
+            'working_permit' => 'Input Working Permit',
+        ];
+    }
+
     $dataKontraktor = DataKontraktor::where('notification_id', $selectedId)->first();
     $jsa = Jsa::where('notification_id', $selectedId)->first();
-   $permits = [
-    'umum' => UmumWorkPermit::where('notification_id', $selectedId)->first(),
-    'gaspanas' => WorkPermitGasPanas::where('notification_id', $selectedId)->first(),
-    'air' => WorkPermitAir::where('notification_id', $selectedId)->first(),
-    'ketinggian' => WorkPermitKetinggian::where('notification_id', $selectedId)->first(),
-    'pengangkatan' => WorkPermitPengangkatan::where('notification_id', $selectedId)->first(),
-    'penggalian' => WorkPermitPenggalian::where('notification_id', $selectedId)->first(),
-    'risiko-panas' => WorkPermitRisikoPanas::where('notification_id', $selectedId)->first(),
-    'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first(),
-     'beban' => WorkPermitBeban::where('notification_id', $selectedId)->first(),
-    // 'lifesaving' => WorkPermitLifesaving::where('notification_id', $selectedId)->first(),
-    'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first(),
-    // 'procedures' => WorkPermitProsedures::where('notification_id', $selectedId)->first(),
-];
+    $permits = [
+        'umum' => UmumWorkPermit::where('notification_id', $selectedId)->first(),
+        'gaspanas' => WorkPermitGasPanas::where('notification_id', $selectedId)->first(),
+        'air' => WorkPermitAir::where('notification_id', $selectedId)->first(),
+        'ketinggian' => WorkPermitKetinggian::where('notification_id', $selectedId)->first(),
+        'pengangkatan' => WorkPermitPengangkatan::where('notification_id', $selectedId)->first(),
+        'penggalian' => WorkPermitPenggalian::where('notification_id', $selectedId)->first(),
+        'risiko-panas' => WorkPermitRisikoPanas::where('notification_id', $selectedId)->first(),
+        'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first(),
+        'beban' => WorkPermitBeban::where('notification_id', $selectedId)->first(),
+        'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first(),
+    ];
 
     $detail = WorkPermitDetail::where('notification_id', $selectedId)->first();
     $closure = $detail ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first() : null;
@@ -130,16 +149,16 @@ class IzinKerjaController extends Controller
             default => 'pending',
         };
 
-         // 👇 Tambahkan logika override status untuk step ke-13
-    if ($code === 'surat_izin_kerja') {
-        $sikApproval = StepApproval::where('notification_id', $selectedId)
-            ->where('step', 'sik')
-            ->first();
+        // 👇 Logika override status untuk step ke-13
+        if ($code === 'surat_izin_kerja') {
+            $sikApproval = StepApproval::where('notification_id', $selectedId)
+                ->where('step', 'sik')
+                ->first();
 
-        if ($sikApproval && $sikApproval->signature_senior_manager) {
-            $status = 'done';
+            if ($sikApproval && $sikApproval->signature_senior_manager) {
+                $status = 'done';
+            }
         }
-    }
         $enabled = $previousApproved;
         $steps[] = [
             'title' => $title,
@@ -166,5 +185,4 @@ class IzinKerjaController extends Controller
         'generatedNoJsa' => $generatedNoJsa,
     ]);
 }
-
 }

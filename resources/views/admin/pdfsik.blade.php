@@ -46,7 +46,7 @@
 
     {{-- Konten Surat --}}
     <div class="content">
-        <p>Sesuai Prosedur Izin Kerja bagi kontraktor dengan mengacu pada prosedur No. Dokumen 22.4.0/P/05, setelah dilakukan pemeriksaan kelengkapan dokumen dan alat Keselamatan Kerja bagi Vendor/Kontraktor pada tanggal <strong>{{ now()->format('d F Y') }}</strong> maka dengan ini dinyatakan bahwa:</p>
+        <p>Sesuai Prosedur Izin Kerja bagi kontraktor dengan mengacu pada prosedur No. Dokumen 22.4.0/P/05, setelah dilakukan pemeriksaan kelengkapan dokumen dan alat Keselamatan Kerja bagi Vendor/Kontraktor pada tanggal <strong>{{ \Carbon\Carbon::parse($sikStep->created_at)->translatedFormat('d F Y') }}</strong> maka dengan ini dinyatakan bahwa:</p>
 
         <br>
 
@@ -62,18 +62,24 @@
         <p>Demikian Surat Izin Kerja ini diberikan untuk dipergunakan sebagaimana mestinya kepada Perusahaan di atas dan tidak diperkenankan untuk dipindahtangankan kepada pihak lain.</p>
     </div>
 
-   <div class="signature">
-    <p>Tonasa, {{ now()->translatedFormat('d F Y') }}</p>
-    
-    @if($sikStep && $sikStep->signature_senior_manager)
-        <img src="{{ public_path($sikStep->signature_senior_manager) }}" alt="TTD Senior Manager" style="height: 60px; margin-top: 20px;">
-    @else
-        <br><br><br>
-    @endif
+    <div class="signature">
+        <p>Tonasa, {{ \Carbon\Carbon::parse($sikStep->created_at)->translatedFormat('d F Y') }}</p>
 
-    <p><strong>M. ALIANTO M., ST</strong></p>
-    <p>SJP/Surat Izin Kerja</p>
-</div>
+        @if($sikStep && $sikStep->signature_senior_manager)
+            <img src="{{ public_path($sikStep->signature_senior_manager) }}" alt="TTD Senior Manager" style="height: 60px; margin-top: 20px;">
+        @else
+            <br><br><br>
+        @endif
+
+        <p><strong>M. ALIANTO M., ST</strong></p>
+        <div style="display: inline-flex; align-items: center; gap: 0;">
+            <span style="margin-right: -2px;">SJP</span>
+            @if($sikStep && $sikStep->signature_manager)
+                <img src="{{ public_path($sikStep->signature_manager) }}" alt="TTD Manager" style="height: 26px; vertical-align: middle; margin: 0 -6px;">
+            @endif
+            <span style="margin-left: -2px;">/Surat Izin Kerja</span>
+        </div>
+    </div>
 
 </body>
 </html>

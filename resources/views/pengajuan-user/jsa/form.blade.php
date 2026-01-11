@@ -1,13 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-sm text-gray-800 dark:text-gray-200 leading-tight">
-            Form Data Kontraktor
+            Form Job Safety Analysis
         </h2>
     </x-slot>
 
     <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
         <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
-            <h1 class="text-lg font-semibold mb-4">Form Data Kontraktor</h1>
+            <h1 class="text-lg font-semibold mb-4">Form Job Safety Analysis</h1>
             {{-- ALERT SUCCESS / ERROR --}}
 @if(session('success'))
     <div class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow z-50">
@@ -85,66 +85,118 @@ x-init="console.log('✅ langkahKerja loaded (edit):', langkahKerja)">
                     </tr>
                 </table>
 
-                {{-- Dibuat/Disetujui/Diverifikasi --}}
-                <table class="table-auto w-full border text-xs mb-2">
-                    <tr class="text-center font-semibold">
-                        <td class="border px-2 py-1">Dibuat oleh</td>
-                        <td class="border px-2 py-1">Disetujui oleh</td>
-                        <td class="border px-2 py-1">Diverifikasi oleh</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2 text-center">
-                            <input type="text" name="dibuat_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('dibuat_nama', $jsa->dibuat_nama ?? '') }}">
-                            @if(!empty($jsa->dibuat_signature))
-                                <span class="text-green-600 text-xs">Sudah Ditandatangani</span>
-                            @else
-                                <button type="button" onclick="openSignPad('dibuat_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                            @endif
-                        </td>
-                        <td class="border p-2 text-center">
-                            <input type="text" name="disetujui_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('disetujui_nama', $jsa->disetujui_nama ?? '') }}">
-                            @if(!empty($jsa->disetujui_signature))
-                                <span class="text-green-600 text-xs">Sudah Ditandatangani</span>
-                            @else
-                                <button type="button" onclick="openSignPad('disetujui_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                            @endif
-                        </td>
-                        <td class="border p-2 text-center">
-                            <input type="text" name="diverifikasi_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('diverifikasi_nama', $jsa->diverifikasi_nama ?? '') }}">
-                            @if(!empty($jsa->diverifikasi_signature))
-                                <span class="text-green-600 text-xs">Sudah Ditandatangani</span>
-                            @else
-                                <button type="button" onclick="openSignPad('diverifikasi_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                            @endif
-                        </td>
-                    </tr>
-                </table>
+{{-- Dibuat/Disetujui/Diverifikasi --}}
+<table class="table-auto w-full border text-xs mb-2">
+    <tr class="text-center font-semibold">
+        <td class="border px-2 py-1">Dibuat oleh</td>
+        <td class="border px-2 py-1">Disetujui oleh</td>
+        <td class="border px-2 py-1">Diverifikasi oleh</td>
+    </tr>
+    <tr>
+        {{-- Dibuat oleh --}}
+        <td class="border px-2 py-4 text-center align-top">
+            <input type="text" 
+                   name="dibuat_nama" 
+                   class="w-full text-xs border-gray-300 rounded p-1 mb-2" 
+                   placeholder="Masukkan Nama" 
+                   value="{{ old('dibuat_nama', $jsa->dibuat_nama ?? '') }}">
+            <button type="button" onclick="openSignPad('dibuat_signature')" class="text-blue-600 underline text-xs mt-1">
+                Tanda Tangan
+            </button>
+            @if(!empty($jsa->dibuat_signature))
+                <div class="flex justify-center mt-2">
+                    <img src="{{ asset($jsa->dibuat_signature) }}" class="h-12" alt="TTD Dibuat">
+                </div>
+            @endif
+        </td>
 
-                {{-- LANGKAH KERJA --}}
-                <table class="table-auto w-full border text-xs mb-2">
-                    <thead class="bg-gray-100">
-                        <tr class="text-center font-semibold">
-                            <th class="border px-2 py-1 w-12">No</th>
-                            <th class="border px-2 py-1">Urutan Langkah Kerja</th>
-                            <th class="border px-2 py-1">Bahaya/Risiko</th>
-                            <th class="border px-2 py-1">Pengendalian</th>
-                            <th class="border px-2 py-1 w-16">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="(row, index) in langkahKerja" :key="index">
-                            <tr>
-                                <td class="border px-2 py-1 text-center" x-text="index + 1"></td>
-                                <td class="border px-2 py-1"><input type="text" x-model="row.langkah" class="input w-full text-xs"></td>
-                                <td class="border px-2 py-1"><input type="text" x-model="row.bahaya" class="input w-full text-xs"></td>
-                                <td class="border px-2 py-1"><input type="text" x-model="row.pengendalian" class="input w-full text-xs"></td>
-                                <td class="border px-2 py-1 text-center">
-                                    <button type="button" @click="hapusRow(index)" class="text-red-500 text-xs">Hapus</button>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
+        {{-- Disetujui oleh --}}
+        <td class="border px-2 py-4 text-center align-top">
+            <input type="text" 
+                   name="disetujui_nama" 
+                   class="w-full text-xs border-gray-300 rounded p-1 mb-2" 
+                   placeholder="Masukkan Nama" 
+                   value="{{ old('disetujui_nama', $jsa->disetujui_nama ?? '') }}">
+            <button type="button" onclick="openSignPad('disetujui_signature')" class="text-blue-600 underline text-xs mt-1">
+                Tanda Tangan
+            </button>
+            @if(!empty($jsa->disetujui_signature))
+                <div class="flex justify-center mt-2">
+                    <img src="{{ asset($jsa->disetujui_signature) }}" class="h-12" alt="TTD Disetujui">
+                </div>
+            @endif
+        </td>
+
+        {{-- Diverifikasi oleh --}}
+        <td class="border px-2 py-4 text-center align-top">
+            <input type="text" 
+                   name="diverifikasi_nama" 
+                   class="w-full text-xs border-gray-300 rounded p-1 mb-2" 
+                   placeholder="Masukkan Nama" 
+                   value="{{ old('diverifikasi_nama', $jsa->diverifikasi_nama ?? '') }}">
+            <button type="button" onclick="openSignPad('diverifikasi_signature')" class="text-blue-600 underline text-xs mt-1">
+                Tanda Tangan
+            </button>
+            @if(!empty($jsa->diverifikasi_signature))
+                <div class="flex justify-center mt-2">
+                    <img src="{{ asset($jsa->diverifikasi_signature) }}" class="h-12" alt="TTD Diverifikasi">
+                </div>
+            @endif
+        </td>
+    </tr>
+</table>
+
+
+              {{-- LANGKAH KERJA --}}
+<table class="table-auto w-full border text-xs mb-2">
+    <thead class="bg-gray-100">
+        <tr class="text-center font-semibold">
+            <th class="border px-2 py-1 w-12">No</th>
+            <th class="border px-2 py-1">Urutan Langkah Kerja</th>
+            <th class="border px-2 py-1">Bahaya/Risiko</th>
+            <th class="border px-2 py-1">Pengendalian</th>
+            <th class="border px-2 py-1 w-16">Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        <template x-for="(row, index) in langkahKerja" :key="index">
+            <tr>
+                <td class="border px-2 py-1 text-center" x-text="index + 1"></td>
+
+                <td class="border px-2 py-1">
+                    <textarea
+                        x-model="row.langkah"
+                        class="w-full text-xs resize-y min-h-[80px] p-1 border border-gray-300 rounded"
+                        rows="3"
+                        style="white-space: pre-wrap; overflow-wrap: break-word;"
+                    ></textarea>
+                </td>
+
+                <td class="border px-2 py-1">
+                    <textarea
+                        x-model="row.bahaya"
+                        class="w-full text-xs resize-y min-h-[80px] p-1 border border-gray-300 rounded"
+                        rows="3"
+                        style="white-space: pre-wrap; overflow-wrap: break-word;"
+                    ></textarea>
+                </td>
+
+                <td class="border px-2 py-1">
+                    <textarea
+                        x-model="row.pengendalian"
+                        class="w-full text-xs resize-y min-h-[80px] p-1 border border-gray-300 rounded"
+                        rows="3"
+                        style="white-space: pre-wrap; overflow-wrap: break-word;"
+                    ></textarea>
+                </td>
+
+                <td class="border px-2 py-1 text-center">
+                    <button type="button" @click="hapusRow(index)" class="text-red-500 text-xs">Hapus</button>
+                </td>
+            </tr>
+        </template>
+    </tbody>
+</table>
 
                 <button type="button" @click="tambahRow()" class="bg-blue-500 text-white px-2 py-1 rounded text-xs mb-2">
                     + Tambah Baris
