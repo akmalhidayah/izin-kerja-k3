@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('notification_id')->constrained()->onDelete('cascade');
             $table->string('step'); // Misal: 'bpjs', 'ktp', 'jsa', 'sik', dll
-            $table->enum('status', ['menunggu', 'disetujui', 'revisi'])->default('menunggu');
+            $table->enum('status', ['menunggu', 'perlu_disetujui', 'disetujui', 'revisi'])->default('menunggu');
             $table->text('catatan')->nullable(); // Alasan revisi jika ada
             $table->string('file_path')->nullable(); // Lokasi file yang diupload (misalnya SIK)
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();

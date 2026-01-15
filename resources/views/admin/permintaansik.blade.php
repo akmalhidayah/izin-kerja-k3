@@ -8,7 +8,7 @@
                             <path d="M4 5h16v5H4zM4 13h9v6H4zM15 13h5v6h-5z" />
                         </svg>
                     </span>
-                    <h1 class="text-3xl font-extrabold text-red-700 tracking-wide">Permintaan Izin Kerja Vendordi</h1>
+                    <h1 class="text-3xl font-extrabold text-red-700 tracking-wide">Permintaan Izin Kerja Vendor</h1>
                 </div>
                 <p class="text-xs text-gray-600 mt-1">Pantau progres pengajuan, status dokumen, dan penanggung jawab.</p>
             </div>
@@ -63,6 +63,8 @@
             <select name="status" class="w-full pl-9 pr-3 py-2 border rounded-lg text-xs">
                 <option value="">Status Dokumen</option>
                 <option value="Menunggu" {{ request('status') == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
+                <option value="Perlu Disetujui" {{ request('status') == 'Perlu Disetujui' ? 'selected' : '' }}>Perlu Disetujui</option>
+                <option value="Disetujui" {{ request('status') == 'Disetujui' ? 'selected' : '' }}>Disetujui</option>
                 <option value="Perlu Revisi" {{ request('status') == 'Perlu Revisi' ? 'selected' : '' }}>Perlu Revisi</option>
                 <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
             </select>
@@ -172,27 +174,33 @@
                             ? 'selesai'
                             : (in_array($rawStatus, ['perlu revisi', 'revisi'], true)
                                 ? 'revisi'
-                                : (in_array($rawStatus, ['disetujui', 'approved'], true) ? 'disetujui' : 'menunggu'));
+                                : (in_array($rawStatus, ['perlu disetujui', 'menunggu persetujuan'], true)
+                                    ? 'perlu_disetujui'
+                                    : (in_array($rawStatus, ['disetujui', 'approved'], true) ? 'disetujui' : 'menunggu')));
                         $statusDisplay = [
-                            'menunggu' => 'Menunggu Persetujuan',
+                            'menunggu' => 'Menunggu',
+                            'perlu_disetujui' => 'Perlu Disetujui',
                             'disetujui' => 'Disetujui',
                             'revisi' => 'Perlu Revisi',
                             'selesai' => 'Selesai',
                         ][$statusKey];
                         $statusClass = [
                             'menunggu' => 'bg-gray-100 text-gray-700',
+                            'perlu_disetujui' => 'bg-amber-100 text-amber-700',
                             'disetujui' => 'bg-blue-100 text-blue-700',
                             'revisi' => 'bg-yellow-100 text-yellow-700',
                             'selesai' => 'bg-green-100 text-green-700',
                         ][$statusKey];
                         $dotClass = [
                             'menunggu' => 'bg-gray-400',
+                            'perlu_disetujui' => 'bg-amber-500',
                             'disetujui' => 'bg-blue-500',
                             'revisi' => 'bg-yellow-500',
                             'selesai' => 'bg-green-500',
                         ][$statusKey];
                         $borderClass = [
                             'menunggu' => 'border-gray-200',
+                            'perlu_disetujui' => 'border-amber-200',
                             'disetujui' => 'border-blue-200',
                             'revisi' => 'border-yellow-300',
                             'selesai' => 'border-green-300',
@@ -201,6 +209,7 @@
                         $statusIcon = match ($statusKey) {
                             'selesai' => '<path d="M9 12l2 2 4-4" /><path d="M12 3a9 9 0 1 0 9 9" />',
                             'revisi' => '<path d="M12 8v4" /><path d="M12 16h.01" /><path d="M10.29 3.86l-7.5 13A1 1 0 0 0 3.67 18h16.66a1 1 0 0 0 .88-1.5l-7.5-13a1 1 0 0 0-1.72 0z" />',
+                            'perlu_disetujui' => '<path d="M12 6v6" /><path d="M12 16h.01" /><path d="M12 3a9 9 0 1 0 9 9" />',
                             'disetujui' => '<path d="M5 13l4 4L19 7" />',
                             default => '<path d="M12 6v6l4 2" /><path d="M12 3a9 9 0 1 0 9 9" />',
                         };
@@ -282,27 +291,33 @@
                                     ? 'selesai'
                                     : (in_array($rawStatus, ['perlu revisi', 'revisi'], true)
                                         ? 'revisi'
-                                        : (in_array($rawStatus, ['disetujui', 'approved'], true) ? 'disetujui' : 'menunggu'));
+                                        : (in_array($rawStatus, ['perlu disetujui', 'menunggu persetujuan'], true)
+                                            ? 'perlu_disetujui'
+                                            : (in_array($rawStatus, ['disetujui', 'approved'], true) ? 'disetujui' : 'menunggu')));
                                 $statusDisplay = [
-                                    'menunggu' => 'Menunggu Persetujuan',
+                                    'menunggu' => 'Menunggu',
+                                    'perlu_disetujui' => 'Perlu Disetujui',
                                     'disetujui' => 'Disetujui',
                                     'revisi' => 'Perlu Revisi',
                                     'selesai' => 'Selesai',
                                 ][$statusKey];
                                 $statusClass = [
                                     'menunggu' => 'bg-gray-100 text-gray-700',
+                                    'perlu_disetujui' => 'bg-amber-100 text-amber-700',
                                     'disetujui' => 'bg-blue-100 text-blue-700',
                                     'revisi' => 'bg-yellow-100 text-yellow-700',
                                     'selesai' => 'bg-green-100 text-green-700',
                                 ][$statusKey];
                                 $dotClass = [
                                     'menunggu' => 'bg-gray-400',
+                                    'perlu_disetujui' => 'bg-amber-500',
                                     'disetujui' => 'bg-blue-500',
                                     'revisi' => 'bg-yellow-500',
                                     'selesai' => 'bg-green-500',
                                 ][$statusKey];
                                 $borderClass = [
                                     'menunggu' => 'border-gray-200',
+                                    'perlu_disetujui' => 'border-amber-200',
                                     'disetujui' => 'border-blue-200',
                                     'revisi' => 'border-yellow-300',
                                     'selesai' => 'border-green-300',
@@ -311,6 +326,7 @@
                                 $statusIcon = match ($statusKey) {
                                     'selesai' => '<path d="M9 12l2 2 4-4" /><path d="M12 3a9 9 0 1 0 9 9" />',
                                     'revisi' => '<path d="M12 8v4" /><path d="M12 16h.01" /><path d="M10.29 3.86l-7.5 13A1 1 0 0 0 3.67 18h16.66a1 1 0 0 0 .88-1.5l-7.5-13a1 1 0 0 0-1.72 0z" />',
+                                    'perlu_disetujui' => '<path d="M12 6v6" /><path d="M12 16h.01" /><path d="M12 3a9 9 0 1 0 9 9" />',
                                     'disetujui' => '<path d="M5 13l4 4L19 7" />',
                                     default => '<path d="M12 6v6l4 2" /><path d="M12 3a9 9 0 1 0 9 9" />',
                                 };

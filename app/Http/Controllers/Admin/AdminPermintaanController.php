@@ -281,8 +281,10 @@ class AdminPermintaanController extends Controller
 
                 if ($approvalStatus === 'revisi') {
                     $status = 'revisi';
-                } elseif ($approvalStatus === 'disetujui' || $hasData) {
+                } elseif ($approvalStatus === 'disetujui') {
                     $status = 'disetujui';
+                } elseif ($approvalStatus === 'perlu_disetujui' || $hasData) {
+                    $status = 'perlu_disetujui';
                 } else {
                     $status = 'menunggu';
                 }
@@ -306,6 +308,7 @@ class AdminPermintaanController extends Controller
 
             $statusClass = match ($status) {
                 'disetujui' => 'bg-green-500 text-white',
+                'perlu_disetujui' => 'bg-amber-500 text-white',
                 'revisi'    => 'bg-yellow-500 text-white',
                 default     => 'bg-gray-300 text-black',
             };

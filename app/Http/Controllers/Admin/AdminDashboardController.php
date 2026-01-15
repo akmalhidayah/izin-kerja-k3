@@ -88,22 +88,23 @@ public function permintaanSIK(Request $request)
         $query->whereHas('assignedAdmin', fn($q) => $q->where('name', 'like', '%' . $request->admin . '%'));
     }
 // 📄 Filter berdasarkan status dokumen
-if ($request->filled('status')) {
-    $status = strtolower($request->status);
+    if ($request->filled('status')) {
+        $status = strtolower($request->status);
 
-    $query->whereHas('stepApprovals', function ($q) use ($status) {
-        if ($status === 'selesai') {
-            $q->where('step', 'bukti_serah_terima')->where('status', 'disetujui');
-        } elseif ($status === 'disetujui') {
-            $q->where('status', 'disetujui');
-        } elseif ($status === 'perlu revisi') {
-            $q->where('status', 'revisi');
-        } elseif ($status === 'menunggu') {
-            $q->where('status', '!=', 'disetujui')
-              ->where('status', '!=', 'revisi');
-        }
-    });
-}
+        $query->whereHas('stepApprovals', function ($q) use ($status) {
+            if ($status === 'selesai') {
+                $q->where('step', 'bukti_serah_terima')->where('status', 'disetujui');
+            } elseif ($status === 'disetujui') {
+                $q->where('status', 'disetujui');
+            } elseif ($status === 'perlu disetujui') {
+                $q->where('status', 'perlu_disetujui');
+            } elseif ($status === 'perlu revisi') {
+                $q->where('status', 'revisi');
+            } elseif ($status === 'menunggu') {
+                $q->where('status', 'menunggu');
+            }
+        });
+    }
 
     // 📅 Filter Rentang Bulan & Tahun
     if ($request->filled('bulan_dari') && $request->filled('tahun_dari') &&
@@ -174,8 +175,10 @@ if ($request->filled('status')) {
 
             if ($approvalStatus === 'revisi') {
                 $stepStatus[$stepKey] = 'revisi';
-            } elseif ($approvalStatus === 'disetujui' || $hasData) {
+            } elseif ($approvalStatus === 'disetujui') {
                 $stepStatus[$stepKey] = 'disetujui';
+            } elseif ($approvalStatus === 'perlu_disetujui' || $hasData) {
+                $stepStatus[$stepKey] = 'perlu_disetujui';
             } else {
                 $stepStatus[$stepKey] = 'menunggu';
             }
@@ -189,9 +192,11 @@ if ($request->filled('status')) {
         $stepTitle = $stepTitles[$currentStepKey] ?? 'Belum Diketahui';
 
         $hasRevisi = in_array('revisi', $stepStatus, true);
+        $hasNeedApproval = in_array('perlu_disetujui', $stepStatus, true);
         $currentStatus = match (true) {
             $hasRevisi => 'Perlu Revisi',
             $approvedSteps >= $totalSteps => 'Selesai',
+            $hasNeedApproval => 'Perlu Disetujui',
             $approvedSteps > 0 => 'Disetujui',
             default => 'Menunggu',
         };
@@ -260,11 +265,12 @@ public function permintaanSIKPgo(Request $request)
                 $q->where('step', 'working_permit')->where('status', 'disetujui');
             } elseif ($status === 'disetujui') {
                 $q->where('status', 'disetujui');
+            } elseif ($status === 'perlu disetujui') {
+                $q->where('status', 'perlu_disetujui');
             } elseif ($status === 'perlu revisi') {
                 $q->where('status', 'revisi');
             } elseif ($status === 'menunggu') {
-                $q->where('status', '!=', 'disetujui')
-                    ->where('status', '!=', 'revisi');
+                $q->where('status', 'menunggu');
             }
         });
     }
@@ -324,8 +330,10 @@ public function permintaanSIKPgo(Request $request)
 
             if ($approvalStatus === 'revisi') {
                 $stepStatus[$stepKey] = 'revisi';
-            } elseif ($approvalStatus === 'disetujui' || $hasData) {
+            } elseif ($approvalStatus === 'disetujui') {
                 $stepStatus[$stepKey] = 'disetujui';
+            } elseif ($approvalStatus === 'perlu_disetujui' || $hasData) {
+                $stepStatus[$stepKey] = 'perlu_disetujui';
             } else {
                 $stepStatus[$stepKey] = 'menunggu';
             }
@@ -339,9 +347,11 @@ public function permintaanSIKPgo(Request $request)
         $stepTitle = $stepTitles[$currentStepKey] ?? 'Belum Diketahui';
 
         $hasRevisi = in_array('revisi', $stepStatus, true);
+        $hasNeedApproval = in_array('perlu_disetujui', $stepStatus, true);
         $currentStatus = match (true) {
             $hasRevisi => 'Perlu Revisi',
             $approvedSteps >= $totalSteps => 'Selesai',
+            $hasNeedApproval => 'Perlu Disetujui',
             $approvedSteps > 0 => 'Disetujui',
             default => 'Menunggu',
         };
