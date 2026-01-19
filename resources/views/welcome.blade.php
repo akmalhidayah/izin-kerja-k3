@@ -3,8 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Unit K3 · PT. Semen Tonasa</title>
-  <meta name="description" content="Unit K3 PT. Semen Tonasa — pengajuan izin kerja, JSA, working permit, dokumentasi K3." />
+    <title>Unit OHS - PT. Semen Tonasa</title>
+  <meta name="description" content="Sistem Unit OHS PT. Semen Tonasa untuk pengajuan izin kerja, notifikasi/OP/SPK, JSA, working permit, dan dokumentasi K3." />
+  <meta name="robots" content="index,follow" />
+  <meta name="author" content="PT. Semen Tonasa" />
+  <meta name="theme-color" content="#b91c1c" />
+  <link rel="canonical" href="{{ url('/') }}" />
+  <meta property="og:title" content="Unit OHS - PT. Semen Tonasa" />
+  <meta property="og:description" content="Sistem Unit OHS PT. Semen Tonasa untuk pengajuan izin kerja, notifikasi/OP/SPK, JSA, working permit, dan dokumentasi K3." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ url('/') }}" />
+  <meta property="og:image" content="{{ asset('images/logo-st2.png') }}" />
+  <meta property="og:site_name" content="Unit OHS - PT. Semen Tonasa" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Unit OHS - PT. Semen Tonasa" />
+  <meta name="twitter:description" content="Sistem Unit OHS PT. Semen Tonasa untuk pengajuan izin kerja, notifikasi/OP/SPK, JSA, working permit, dan dokumentasi K3." />
+  <meta name="twitter:image" content="{{ asset('images/logo-st2.png') }}" />
 
   {{-- Tailwind build --}}
       <link rel="icon" type="image/png" href="{{ asset('images/logo-st2.png') }}?v=1">
@@ -114,6 +128,43 @@
     .step-card:hover i {
       transform: scale(1.15);
     }
+
+    /* ===== NEWS CAROUSEL ===== */
+    .news-carousel {
+      position: relative;
+    }
+    .news-slide {
+      display: none;
+      transition: opacity .3s ease;
+    }
+    .news-slide.active {
+      display: block;
+    }
+    .news-card {
+      background: linear-gradient(135deg, #ffffff, #f8fafc);
+      border: 1px solid #e5e7eb;
+    }
+    .news-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin-bottom: 16px;
+    }
+    .news-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .news-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #cbd5f5;
+    }
+    .news-dot.active {
+      background: #ef4444;
+    }
   </style>
 </head>
 
@@ -184,6 +235,95 @@
 
 <main>
 
+{{-- ================= BERITA ================= --}}
+<section id="berita" class="py-12 bg-slate-50">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col gap-2 text-center mb-8">
+      <h3 class="text-2xl font-semibold text-slate-900">Berita K3 Terbaru</h3>
+      <p class="text-sm text-slate-600">Update kegiatan dan prestasi K3 dari PT. Semen Tonasa.</p>
+    </div>
+
+    <div class="news-carousel" data-carousel>
+      <div class="news-slide active" data-slide="0">
+        <div class="news-card rounded-2xl p-6 shadow-sm">
+          <img class="news-image"
+               src="https://www.sementonasa.co.id/wp-content/uploads/2025/03/WhatsApp-Image-2025-03-03-at-07.49.16_7c0b11a0.jpg"
+               alt="Upacara Bulan K3 tingkat Provinsi Sulsel di Semen Tonasa">
+          <div class="text-xs text-red-600 font-semibold mb-2">Semen Tonasa</div>
+          <h4 class="text-lg font-bold text-slate-900 mb-2">
+            Upacara Bulan K3 Tingkat Provinsi Sulsel Digelar di Semen Tonasa
+          </h4>
+          <p class="text-sm text-slate-600 mb-4">
+            Kegiatan Bulan K3 digelar untuk meningkatkan budaya keselamatan kerja di lingkungan industri.
+          </p>
+          <a href="https://www.sementonasa.co.id/upacara-bulan-k3-tingkat-provinsi-sulsel-digelar-di-semen-tonasa/"
+             target="_blank"
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-sm btn-main">
+            Baca Selengkapnya
+          </a>
+        </div>
+      </div>
+
+      <div class="news-slide" data-slide="1">
+        <div class="news-card rounded-2xl p-6 shadow-sm">
+          <img class="news-image"
+               src="https://www.sementonasa.co.id/wp-content/uploads/2025/12/WhatsApp-Image-2025-12-31-at-15.12.42.jpeg"
+               alt="PT Semen Tonasa raih tujuh penghargaan K3 di Sulawesi Selatan">
+          <div class="text-xs text-red-600 font-semibold mb-2">Simpul Rakyat</div>
+          <h4 class="text-lg font-bold text-slate-900 mb-2">
+            PT Semen Tonasa Raih Tujuh Penghargaan K3 di Sulawesi Selatan
+          </h4>
+          <p class="text-sm text-slate-600 mb-4">
+            Prestasi K3 ini mencerminkan konsistensi penerapan standar keselamatan dan kesehatan kerja.
+          </p>
+          <a href="https://www.simpulrakyat.co.id/2025/02/pt-semen-tonasa-raih-tujuh-penghargaan-k3-di-sulawesi-selatan.html"
+             target="_blank"
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-sm btn-main">
+            Baca Selengkapnya
+          </a>
+        </div>
+      </div>
+
+      <div class="news-slide" data-slide="2">
+        <div class="news-card rounded-2xl p-6 shadow-sm">
+          <img class="news-image"
+               src="https://www.sementonasa.co.id/wp-content/uploads/2022/11/WhatsApp-Image-2022-11-30-at-12.12.17.jpeg"
+               alt="Pelatihan dasar keselamatan dan kesehatan kerja PT Semen Tonasa">
+          <div class="text-xs text-red-600 font-semibold mb-2">Semen Tonasa</div>
+          <h4 class="text-lg font-bold text-slate-900 mb-2">
+            Tingkatkan Sadar Keselamatan, PT Semen Tonasa Gelar Pelatihan Dasar K3
+          </h4>
+          <p class="text-sm text-slate-600 mb-4">
+            Pelatihan ini fokus pada peningkatan pemahaman dasar keselamatan dan kesehatan kerja.
+          </p>
+          <a href="https://www.sementonasa.co.id/tingkatkan-sadar-keselamatan-pt-semen-tonasa-gelar-pelatihan-dasar-dasar-keselamatan-dan-kesehatan-kerja/"
+             target="_blank"
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-sm btn-main">
+            Baca Selengkapnya
+          </a>
+        </div>
+      </div>
+
+      <button type="button"
+              class="news-nav left-2 md:left-4 p-2 rounded-full bg-white shadow hover:bg-slate-100"
+              data-prev>
+        <i class="fas fa-chevron-left text-slate-700"></i>
+      </button>
+      <button type="button"
+              class="news-nav right-2 md:right-4 p-2 rounded-full bg-white shadow hover:bg-slate-100"
+              data-next>
+        <i class="fas fa-chevron-right text-slate-700"></i>
+      </button>
+
+      <div class="mt-4 flex justify-center gap-2">
+        <button type="button" class="news-dot active" data-dot="0" aria-label="Slide 1"></button>
+        <button type="button" class="news-dot" data-dot="1" aria-label="Slide 2"></button>
+        <button type="button" class="news-dot" data-dot="2" aria-label="Slide 3"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
 {{-- ================= POSTER ================= --}}
 <section class="py-10">
   <div class="max-w-6xl mx-auto px-4">
@@ -242,6 +382,51 @@
       .getElementById('header')
       .classList.toggle('header-scrolled', window.scrollY > 40);
   });
+
+  const carousel = document.querySelector('[data-carousel]');
+  if (carousel) {
+    const slides = Array.from(carousel.querySelectorAll('[data-slide]'));
+    const dots = Array.from(carousel.querySelectorAll('[data-dot]'));
+    let index = 0;
+    let timer = null;
+
+    const renderSlide = (nextIndex) => {
+      slides[index].classList.remove('active');
+      dots[index].classList.remove('active');
+      index = nextIndex;
+      slides[index].classList.add('active');
+      dots[index].classList.add('active');
+    };
+
+    const nextSlide = () => renderSlide((index + 1) % slides.length);
+    const prevSlide = () => renderSlide((index - 1 + slides.length) % slides.length);
+
+    const start = () => {
+      clearInterval(timer);
+      timer = setInterval(nextSlide, 7000);
+    };
+
+    carousel.querySelector('[data-next]').addEventListener('click', () => {
+      nextSlide();
+      start();
+    });
+    carousel.querySelector('[data-prev]').addEventListener('click', () => {
+      prevSlide();
+      start();
+    });
+
+    dots.forEach((dot) => {
+      dot.addEventListener('click', (event) => {
+        const targetIndex = Number(event.currentTarget.dataset.dot);
+        if (!Number.isNaN(targetIndex)) {
+          renderSlide(targetIndex);
+          start();
+        }
+      });
+    });
+
+    start();
+  }
 </script>
 
 </body>
