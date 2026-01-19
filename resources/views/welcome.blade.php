@@ -7,6 +7,9 @@
   <meta name="description" content="Unit K3 PT. Semen Tonasa — pengajuan izin kerja, JSA, working permit, dokumentasi K3." />
 
   {{-- Tailwind build --}}
+      <link rel="icon" type="image/png" href="{{ asset('images/logo-st2.png') }}?v=1">
+      <link rel="shortcut icon" href="{{ asset('images/logo-st2.png') }}?v=1">
+      <link rel="apple-touch-icon" href="{{ asset('images/logo-st2.png') }}?v=1">
       @vite(['resources/css/app.css', 'resources/js/app.js'])
 <!-- 
   <link rel="stylesheet" href="{{ asset('build/assets/app-Dtrtahse.css') }}">

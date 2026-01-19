@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Admin Panel') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-st2.png') }}?v=1">
+    <link rel="shortcut icon" href="{{ asset('images/logo-st2.png') }}?v=1">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo-st2.png') }}?v=1">
 
     <!-- Font Awesome (optional, boleh hapus kalau nggak dipakai lagi) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
