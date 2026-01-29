@@ -3,7 +3,12 @@
     <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
     <input type="hidden" name="clear_all_signatures" id="clear_all_signatures" value="0">
 
-    <!-- Bagian 1: Detail Pekerjaan -->
+   <!-- Bagian 1: Detail Pekerjaan -->
+       <div class="text-center mb-4">
+        <h2 class="text-2xl font-bold uppercase">IZIN KERJA</h2>
+        <h3 class="text-xl font-semibold text-gray-700">BEKERJA DI Air</h3>
+        </div>
+ <!-- Bagian 1: Detail Pekerjaan -->
     <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6 text-sm">
         <h3 class="font-bold bg-black text-white px-2 py-1">1. Detail Pekerjaan</h3>
         <table class="table-auto w-full border text-sm">
