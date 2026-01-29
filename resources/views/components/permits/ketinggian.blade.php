@@ -1,4 +1,4 @@
-﻿<form method="POST" action="{{ route('working-permit.ketinggian.token') }}" enctype="multipart/form-data">
+﻿<form method="POST" action="{{ route('working-permit.ketinggian.store') }}" enctype="multipart/form-data">
     @csrf
         <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 
