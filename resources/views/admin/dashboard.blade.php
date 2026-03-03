@@ -1,12 +1,14 @@
 <x-admin-layout>
     @php
+        $topVendorRequests = $topVendorRequests ?? collect();
         $totalRequests = $summaryRequests->count();
-        $inProgress = $summaryRequests->whereIn('status', ['Menunggu', 'Perlu Revisi'])->count();
+        $inProgress = $summaryRequests->whereIn('status', ['Menunggu', 'Diproses', 'Perlu Disetujui'])->count();
         $needRevision = $summaryRequests->where('status', 'Perlu Revisi')->count();
-        $completed = $summaryRequests->where('current_step', '>=', $totalSteps)->count();
+        $completed = $summaryRequests->where('is_sik_approved', true)->count();
         $avgProgress = round($summaryRequests->avg('progress') ?? 0);
         $recentRequests = $summaryRequests->sortByDesc('created_at')->take(5);
         $adminLoads = $summaryRequests->groupBy('handled_by')->map->count()->sortDesc()->take(3);
+        $maxVendorRequest = max((int) ($topVendorRequests->max('total_requests') ?? 0), 1);
     @endphp
 
     <div class="relative w-full rounded-2xl overflow-hidden shadow mb-6">
@@ -93,60 +95,48 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 lg:col-span-2">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-base font-semibold text-gray-800">Izin Kerja Yang Sudah Terbit SIK</h2>
-                <span class="text-[11px] text-gray-500">Total: {{ $requests->count() }}</span>
+                <h2 class="text-base font-semibold text-gray-800">Top 10 Vendor Pengajuan Izin Kerja</h2>
+                <span class="text-[11px] text-gray-500">Total Vendor: {{ $topVendorRequests->count() }}</span>
             </div>
-            <div class="overflow-x-auto rounded-xl border border-gray-200">
-                <table class="min-w-full table-auto text-xs">
-                    <thead class="bg-gray-50 text-gray-700 text-[11px] uppercase tracking-wider">
-                        <tr>
-                            <th class="px-4 py-3 text-left">Vendor</th>
-                            <th class="px-4 py-3 text-left">Handle On</th>
-                            <th class="px-4 py-3 text-left">Status</th>
-                            <th class="px-4 py-3 text-left">Progress</th>
-                            <th class="px-4 py-3 text-left">Surat Izin Kerja</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dashboardTableBody">
-                        @forelse ($requests as $request)
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3">{{ $request->user_name }}</td>
-                                <td class="px-4 py-3">{{ $request->handled_by }}</td>
-                                <td class="px-4 py-3">
-                                    @php
-                                        $statusClass = match($request->status) {
-                                            'Perlu Revisi' => 'bg-yellow-100 text-yellow-700',
-                                            'Selesai', 'Disetujui', 'Terbit SIK' => 'bg-green-100 text-green-700',
-                                            default => 'bg-gray-100 text-gray-700',
-                                        };
-                                    @endphp
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $statusClass }}">
-                                        {{ $request->status }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="w-full bg-gray-200 rounded-full h-2">
-                                        <div class="h-2 rounded-full {{ $request->progress == 100 ? 'bg-green-500' : 'bg-yellow-500' }}" style="width: {{ $request->progress }}%"></div>
-                                    </div>
-                                    <div class="text-[11px] text-gray-500 mt-1">{{ $request->current_step }}/{{ $totalSteps }}</div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <a href="{{ route('admin.permintaansik.viewSik', $request->id) }}" target="_blank"
-                                       class="inline-flex items-center gap-2 text-blue-600 hover:underline text-[11px]">
-                                        <i class="fas fa-eye"></i>
-                                        Lihat SIK
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-4 py-10 text-center text-xs text-gray-500">
-                                    Belum ada data untuk periode ini.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+
+            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
+                @forelse ($topVendorRequests as $vendor)
+                    @php
+                        $height = round(($vendor->total_requests / $maxVendorRequest) * 100);
+                    @endphp
+                    @if ($loop->first)
+                        <div class="flex items-end gap-3 h-64 overflow-x-auto pb-2">
+                    @endif
+                        <div class="chart-bar-item flex min-w-[84px] flex-1 flex-col justify-end" data-name="{{ strtolower($vendor->name) }}">
+                            <div class="text-center text-[11px] font-semibold text-gray-700 mb-2">
+                                {{ $vendor->total_requests }}
+                            </div>
+                            <div class="mx-auto flex h-44 w-full max-w-[56px] items-end rounded-t-lg bg-blue-50">
+                                <div
+                                    class="w-full rounded-t-lg bg-gradient-to-t from-blue-600 to-blue-400 transition-all"
+                                    style="height: {{ max($height, 12) }}%"
+                                    title="{{ $vendor->name }} - {{ $vendor->total_requests }} pengajuan"
+                                ></div>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <p class="text-[11px] font-semibold text-gray-800 leading-tight break-words">
+                                    {{ \Illuminate\Support\Str::limit($vendor->name, 18) }}
+                                </p>
+                                <p class="text-[10px] text-gray-500 mt-1">{{ $vendor->avg_progress }}%</p>
+                            </div>
+                        </div>
+                    @if ($loop->last)
+                        </div>
+                    @endif
+                @empty
+                    <div class="py-10 text-center text-sm text-gray-500">
+                        Belum ada data vendor untuk ditampilkan.
+                    </div>
+                @endforelse
+
+                <div id="chartEmptyState" class="hidden py-10 text-center text-sm text-gray-500">
+                    Vendor tidak ditemukan.
+                </div>
             </div>
         </div>
 
@@ -159,12 +149,14 @@
                             $badgeClass = match($item->status) {
                                 'Perlu Revisi' => 'bg-yellow-100 text-yellow-700',
                                 'Terbit SIK' => 'bg-green-100 text-green-700',
+                                'Perlu Disetujui' => 'bg-blue-100 text-blue-700',
+                                'Diproses' => 'bg-sky-100 text-sky-700',
                                 default => 'bg-gray-100 text-gray-700',
                             };
                         @endphp
                         <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="font-semibold text-gray-900">{{ $item->user_name }}</div>
+                            <div class="min-w-0">
+                                <div class="font-semibold text-gray-900 truncate">{{ $item->user_name }}</div>
                                 <div class="text-[11px] text-gray-500">
                                     {{ $item->current_step_title ?? 'Belum Diketahui' }}
                                 </div>
@@ -199,13 +191,27 @@
 
     <script>
         const searchInput = document.getElementById('searchInput');
-        const tableBody = document.getElementById('dashboardTableBody');
-        if (searchInput && tableBody) {
+        const chartRows = document.querySelectorAll('.chart-bar-item');
+        const chartEmptyState = document.getElementById('chartEmptyState');
+
+        if (searchInput && chartRows.length) {
             searchInput.addEventListener('input', function () {
-                const filter = this.value.toLowerCase();
-                tableBody.querySelectorAll('tr').forEach(function (row) {
-                    row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+                const filter = this.value.toLowerCase().trim();
+                let visibleCount = 0;
+
+                chartRows.forEach(function (row) {
+                    const name = row.dataset.name || '';
+                    const show = !filter || name.includes(filter);
+                    row.style.display = show ? '' : 'none';
+
+                    if (show) {
+                        visibleCount++;
+                    }
                 });
+
+                if (chartEmptyState) {
+                    chartEmptyState.style.display = visibleCount === 0 ? '' : 'none';
+                }
             });
         }
     </script>

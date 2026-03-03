@@ -9,7 +9,6 @@ class AdminDashboardController extends Controller
 {
 public function index()
 {
-    // ðŸ”¸ Untuk summary (tanpa filter bulan/tahun)
     $allNotifications = \App\Models\Notification::with(['user', 'assignedAdmin'])->latest()->get();
 
     $stepTitles = [
@@ -19,43 +18,53 @@ public function index()
     ];
     $totalSteps = count($stepTitles);
 
-$summaryRequests = $allNotifications->map(function ($notif) use ($stepTitles) {
-    $approvals = \App\Models\StepApproval::where('notification_id', $notif->id)->get();
-    $approvedSteps = $approvals->where('status', 'disetujui')->count();
-    $currentStep = min($approvedSteps + 1, count($stepTitles));
-    $stepTitle = $stepTitles[$approvedSteps] ?? 'Belum Diketahui';
+    $summaryRequests = $allNotifications->map(function ($notif) use ($stepTitles) {
+        $approvals = \App\Models\StepApproval::where('notification_id', $notif->id)->get();
+        $approvedSteps = $approvals->where('status', 'disetujui')->count();
+        $currentStep = min($approvedSteps + 1, count($stepTitles));
+        $stepTitle = $stepTitles[$approvedSteps] ?? 'Belum Diketahui';
 
-    $sikApproval = $approvals->firstWhere('step', 'sik');
-    $sikFile = $sikApproval?->file_path;
+        $sikApproval = $approvals->firstWhere('step', 'sik');
+        $sikFile = $sikApproval?->file_path;
+        $isSikApproved = ($sikApproval?->status ?? null) === 'disetujui';
 
-    // 🔧 Update di sini:
-$status = match (true) {
-    $approvals->where('status', 'revisi')->isNotEmpty() && $approvals->where('status', 'disetujui')->count() < count($stepTitles)
-        => 'Perlu Revisi',
+        $status = match (true) {
+            $approvals->where('status', 'revisi')->isNotEmpty() && $approvals->where('status', 'disetujui')->count() < count($stepTitles)
+                => 'Perlu Revisi',
+            in_array(strtolower($notif->status), ['disetujui', 'selesai'])
+                => 'Terbit SIK',
+            default => 'Menunggu',
+        };
 
-    in_array(strtolower($notif->status), ['disetujui', 'selesai'])
-        => 'Terbit SIK',
+        return (object)[
+            'id' => $notif->id,
+            'user_name' => $notif->user->vendor_name ?? $notif->user->name ?? 'User',
+            'user_jabatan' => $notif->user->jabatan ?? '-',
+            'tanggal' => $notif->created_at->format('d-m-Y H:i'),
+            'handled_by' => $notif->assignedAdmin?->name ?? '-',
+            'status' => $status,
+            'progress' => round(($approvedSteps / count($stepTitles)) * 100),
+            'current_step' => $currentStep,
+            'current_step_title' => $stepTitle,
+            'sik_file' => $sikFile,
+            'is_sik_approved' => $isSikApproved,
+            'created_at' => $notif->created_at
+        ];
+    });
 
-    default => 'Menunggu',
-};
+    $topVendorRequests = $summaryRequests
+        ->groupBy(fn ($item) => filled(trim((string) $item->user_name)) ? trim((string) $item->user_name) : 'Tanpa Nama Vendor')
+        ->map(function ($items, $vendorName) {
+            return (object)[
+                'name' => $vendorName,
+                'total_requests' => $items->count(),
+                'avg_progress' => round($items->avg('progress') ?? 0),
+            ];
+        })
+        ->sortByDesc('total_requests')
+        ->take(10)
+        ->values();
 
-
-    return (object)[
-        'id' => $notif->id,
-        'user_name' => $notif->user->vendor_name ?? $notif->user->name ?? 'User',
-        'user_jabatan' => $notif->user->jabatan ?? '-',
-        'tanggal' => $notif->created_at->format('d-m-Y H:i'),
-        'handled_by' => $notif->assignedAdmin?->name ?? '-',
-        'status' => $status,
-        'progress' => round(($approvedSteps / count($stepTitles)) * 100),
-        'current_step' => $currentStep,
-        'current_step_title' => $stepTitle,
-        'sik_file' => $sikFile,
-        'created_at' => $notif->created_at
-    ];
-});
-
-    // ðŸ”¸ Filter yang sudah ada SIK dan bulan ini untuk tabel saja
     $filteredRequests = $summaryRequests->filter(function ($req) {
         return $req->sik_file &&
                $req->created_at->format('Y-m') === now()->format('Y-m');
@@ -65,6 +74,7 @@ $status = match (true) {
         'requests' => $filteredRequests,
         'summaryRequests' => $summaryRequests,
         'totalSteps' => $totalSteps,
+        'topVendorRequests' => $topVendorRequests,
     ]);
 }
 
@@ -73,7 +83,6 @@ public function permintaanSIK(Request $request)
     $query = \App\Models\Notification::with(['user', 'assignedAdmin'])
         ->whereHas('user', fn($q) => $q->where('usertype', '!=', 'pgo'));
 
-    // 🔍 Pencarian bebas
     if ($request->filled('search')) {
         $query->where(function ($q) use ($request) {
             $q->where('number', 'like', '%' . $request->search . '%')
@@ -83,11 +92,10 @@ public function permintaanSIK(Request $request)
         });
     }
 
-    // 👤 Filter Admin Penanggung Jawab
     if ($request->filled('admin')) {
         $query->whereHas('assignedAdmin', fn($q) => $q->where('name', 'like', '%' . $request->admin . '%'));
     }
-// 📄 Filter berdasarkan status dokumen
+
     if ($request->filled('status')) {
         $status = strtolower($request->status);
 
@@ -106,7 +114,6 @@ public function permintaanSIK(Request $request)
         });
     }
 
-    // 📅 Filter Rentang Bulan & Tahun
     if ($request->filled('bulan_dari') && $request->filled('tahun_dari') &&
         $request->filled('bulan_sampai') && $request->filled('tahun_sampai')) {
         $from = \Carbon\Carbon::createFromDate($request->tahun_dari, $request->bulan_dari, 1)->startOfMonth();
@@ -114,29 +121,26 @@ public function permintaanSIK(Request $request)
         $query->whereBetween('created_at', [$from, $to]);
     }
 
-    // 📌 Ambil data utama
     $notifications = $query->latest()->paginate(10)->withQueryString();
 
-    // 🔢 Step Titles
-        $stepTitles = [
-            'op_spk' => 'Buat Notifikasi/OP/SPK',
-            'data_kontraktor' => 'Input Data Kontraktor',
-            'bpjs' => 'Upload BPJS',
-            'jsa' => 'Input JSA',
-            'working_permit' => 'Input Working Permit',
-            'fakta_integritas' => 'Upload Fakta Integritas',
-            'sertifikasi_ak3' => 'Upload Sertifikasi AK3',
-            'ktp' => 'Upload KTP Personil K3',
-            'surat_kesehatan' => 'Upload Surat Kesehatan',
-            'struktur_organisasi' => 'Upload Struktur Organisasi',
-            'post_test' => 'Upload Post Test',
-            'bukti_serah_terima' => 'Upload Bukti Serah Terima',
-            'sik' => 'Surat Izin Kerja',
-        ];
+    $stepTitles = [
+        'op_spk' => 'Buat Notifikasi/OP/SPK',
+        'data_kontraktor' => 'Input Data Kontraktor',
+        'bpjs' => 'Upload BPJS',
+        'jsa' => 'Input JSA',
+        'working_permit' => 'Input Working Permit',
+        'fakta_integritas' => 'Upload Fakta Integritas',
+        'sertifikasi_ak3' => 'Upload Sertifikasi AK3',
+        'ktp' => 'Upload KTP Personil K3',
+        'surat_kesehatan' => 'Upload Surat Kesehatan',
+        'struktur_organisasi' => 'Upload Struktur Organisasi',
+        'post_test' => 'Upload Post Test',
+        'bukti_serah_terima' => 'Upload Bukti Serah Terima',
+        'sik' => 'Surat Izin Kerja',
+    ];
     $stepKeys = array_keys($stepTitles);
     $totalSteps = count($stepTitles);
 
-    // 🧠 Proses mapping
     $requests = $notifications->getCollection()->map(function ($notif) use ($stepTitles, $stepKeys, $totalSteps) {
         $approvals = \App\Models\StepApproval::where('notification_id', $notif->id)->get();
         $approvalMap = $approvals->pluck('status', 'step');
@@ -220,7 +224,6 @@ public function permintaanSIK(Request $request)
 
     $notifications->setCollection($requests);
 
-    // 📋 Admin, Bulan, Tahun List
     $adminList = \App\Models\User::whereHas('handledNotifications')->pluck('name', 'id');
     $bulanList = [
         1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -388,8 +391,4 @@ public function permintaanSIKPgo(Request $request)
         'totalSteps' => $totalSteps,
     ]);
 }
-
-
 }
-
- 
