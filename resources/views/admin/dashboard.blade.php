@@ -100,39 +100,40 @@
             </div>
 
             <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
-                @forelse ($topVendorRequests as $vendor)
-                    @php
-                        $height = round(($vendor->total_requests / $maxVendorRequest) * 100);
-                    @endphp
-                    @if ($loop->first)
-                        <div class="flex items-end gap-3 h-64 overflow-x-auto pb-2">
-                    @endif
-                        <div class="chart-bar-item flex min-w-[84px] flex-1 flex-col justify-end" data-name="{{ strtolower($vendor->name) }}">
-                            <div class="text-center text-[11px] font-semibold text-gray-700 mb-2">
-                                {{ $vendor->total_requests }}
-                            </div>
-                            <div class="mx-auto flex h-44 w-full max-w-[56px] items-end rounded-t-lg bg-blue-50">
-                                <div
-                                    class="w-full rounded-t-lg bg-gradient-to-t from-blue-600 to-blue-400 transition-all"
-                                    style="height: {{ max($height, 12) }}%"
-                                    title="{{ $vendor->name }} - {{ $vendor->total_requests }} pengajuan"
-                                ></div>
-                            </div>
-                            <div class="mt-3 text-center">
-                                <p class="text-[11px] font-semibold text-gray-800 leading-tight break-words">
-                                    {{ \Illuminate\Support\Str::limit($vendor->name, 18) }}
-                                </p>
-                                <p class="text-[10px] text-gray-500 mt-1">{{ $vendor->avg_progress }}%</p>
-                            </div>
+                @if ($topVendorRequests->isNotEmpty())
+                    <div class="h-[250px] overflow-x-auto">
+                        <div class="flex min-w-[760px] items-end gap-3 border-b border-gray-300 pb-3" style="height: 210px;">
+                            @foreach ($topVendorRequests as $vendor)
+                                @php
+                                    $height = round(($vendor->total_requests / $maxVendorRequest) * 100);
+                                    $shortName = \Illuminate\Support\Str::limit($vendor->name, 14, '...');
+                                @endphp
+                                <div class="chart-bar-item flex-1 text-center" data-name="{{ strtolower($vendor->name) }}">
+                                    <div class="mb-2 text-[11px] font-semibold text-gray-700">
+                                        {{ $vendor->total_requests }}
+                                    </div>
+                                    <div class="mx-auto flex w-10 items-end justify-center" style="height: 140px;">
+                                        <div
+                                            class="w-full rounded-t-md"
+                                            style="height: {{ max($height, 10) }}%; background: linear-gradient(to top, #2563eb, #60a5fa);"
+                                            title="{{ $vendor->name }} - {{ $vendor->total_requests }} pengajuan"
+                                        ></div>
+                                    </div>
+                                    <div class="mt-3 text-[10px] font-semibold leading-tight text-gray-700">
+                                        {{ $shortName }}
+                                    </div>
+                                    <div class="mt-1 text-[10px] text-gray-500">
+                                        {{ $vendor->avg_progress }}%
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                    @if ($loop->last)
-                        </div>
-                    @endif
-                @empty
+                    </div>
+                @else
                     <div class="py-10 text-center text-sm text-gray-500">
                         Belum ada data vendor untuk ditampilkan.
                     </div>
-                @endforelse
+                @endif
 
                 <div id="chartEmptyState" class="hidden py-10 text-center text-sm text-gray-500">
                     Vendor tidak ditemukan.
