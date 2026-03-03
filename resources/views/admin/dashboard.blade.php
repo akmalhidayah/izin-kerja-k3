@@ -99,10 +99,10 @@
                 <span class="text-[11px] text-gray-500">Total Vendor: {{ $topVendorRequests->count() }}</span>
             </div>
 
-            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 pt-6 pb-8">
                 @if ($topVendorRequests->isNotEmpty())
-                    <div class="h-[250px] overflow-x-auto">
-                        <div class="flex min-w-[760px] items-end gap-3 border-b border-gray-300 pb-3" style="height: 210px;">
+                    <div class="h-[270px] overflow-x-auto">
+                        <div class="flex min-w-[760px] items-end gap-3 border-b border-gray-300 pt-4 pb-3" style="height: 220px;">
                             @foreach ($topVendorRequests as $vendor)
                                 @php
                                     $height = round(($vendor->total_requests / $maxVendorRequest) * 100);
