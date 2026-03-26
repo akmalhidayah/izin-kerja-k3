@@ -361,8 +361,8 @@
 @endif
 
 @if ($hasPgo)
-    <section class="space-y-4">
-        <div class="flex items-center justify-between">
+    <section class="space-y-4 mt-6">
+        <div class="flex items-center justify-between mb-3">
             <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Karyawan </h3>
             <span class="text-[11px] text-gray-500">Total: {{ $pgoRows->count() }}</span>
         </div>

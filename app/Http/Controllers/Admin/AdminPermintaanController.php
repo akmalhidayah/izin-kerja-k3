@@ -80,6 +80,7 @@ class AdminPermintaanController extends Controller
         if (!$notification->assigned_admin_id) {
             $notification->update(['assigned_admin_id' => $adminId]);
             $notification->refresh();
+             $notification->load('assignedAdmin');
 
             Log::info('[ADMIN][ASSIGN] auto assign admin', [
                 'notification_id' => $notification->id,
@@ -193,6 +194,7 @@ class AdminPermintaanController extends Controller
                 ->update(['assigned_admin_id' => auth()->id()]);
 
             $notification->refresh();
+             $notification->load('assignedAdmin');
 
             Log::info('[ADMIN][ASSIGN] auto assign admin', [
                 'notification_id' => $id,
@@ -201,8 +203,10 @@ class AdminPermintaanController extends Controller
         }
 
         // ✅ Alert pakai ID (bukan nama)
-        $showAlert = $notification->assigned_admin_id
-            && $notification->assigned_admin_id !== auth()->id();
+$assignedAdminId = (int) $notification->assigned_admin_id;
+$currentAdminId = (int) auth()->id();
+
+$showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
 
         $assignedAdmin = $notification->assignedAdmin?->name;
 
@@ -379,6 +383,7 @@ class AdminPermintaanController extends Controller
         if (!$notification->assigned_admin_id) {
             $notification->update(['assigned_admin_id' => $adminId]);
             $notification->refresh();
+            $notification->load('assignedAdmin'); 
 
             Log::info('[ADMIN][ASSIGN][UPDATE] assign on updateStatus', [
                 'notification_id' => $id,

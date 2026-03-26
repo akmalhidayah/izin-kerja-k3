@@ -61,12 +61,14 @@
                 </div>
 
                 <div x-show="expanded">
-                    <h2 class="text-xl font-bold text-center text-gray-800 mb-6">Step Pengajuan Izin Kerja (PGO)</h2>
+                    <h2 class="text-xl font-bold text-center text-gray-800 mb-6">Step Pengajuan Izin Kerja User</h2>
+                    <div class="text-center text-sm text-gray-600 mb-6">
+    ⚠️ Setiap langkah harus <span class="font-semibold text-blue-600">disetujui oleh Admin K3</span> terlebih dahulu sebelum dapat melanjutkan ke tahap berikutnya.
+</div>
                     <div class="flex flex-wrap justify-center items-start gap-y-12 gap-x-8 relative">
                         @php
                             $colors = array(
                                 'done' => 'bg-green-500 text-white',
-                                'on' => 'bg-blue-600 text-white animate-pulse',
                                 'pending' => 'bg-gray-300 text-gray-800',
                                 'revisi' => 'bg-red-500 text-white',
                             );
@@ -102,13 +104,11 @@
                                 </p>
 
                                 @if ($step['code'] === 'op_spk')
-                                    @php
-                                        $catatanRevisi = $notification
-                                            ? \App\Models\StepApproval::where('notification_id', $notification->id)
-                                                ->where('step', 'op_spk')
-                                                ->value('catatan')
-                                            : null;
-                                    @endphp
+                                    @if ($step['status'] === 'revisi' && !empty($stepNotes['op_spk']))
+    <p class="text-[10px] text-red-600 italic mt-1">
+        Catatan: {{ $stepNotes['op_spk'] }}
+    </p>
+@endif
 
                                     @if ($notification)
                                         <div class="text-center text-[11px] text-gray-700 font-medium leading-tight mt-1">
@@ -122,9 +122,6 @@
                                                 Lihat File SPK/PO
                                             </a>
                                         @endif
-                                        @if ($step['status'] === 'revisi' && $catatanRevisi)
-                                            <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
-                                        @endif
                                     @else
                                         <div class="text-center text-[11px] text-gray-500 italic mt-1">
                                             Belum ada notifikasi/PO/SPK
@@ -136,98 +133,77 @@
                                     @endif
                                 @endif
 
-                                @if ($step['code'] === 'jsa')
-                                    @php
-                                        $prevStepStatus = $steps[$index - 1]['status'] ?? 'done';
-                                        $prevStepApproved = $prevStepStatus === 'done';
-                                        $label = 'Input JSA';
-                                    @endphp
+@if ($step['code'] === 'jsa')
+    @php
+        $label = 'Input JSA';
+    @endphp
 
-                                    @if (!$prevStepApproved)
-                                        <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
-                                    @else
-                                        <div class="flex flex-col items-center space-y-2">
-                                            @if (!$jsa)
-                                                <button @click="activeModal = 'modal-jsa-create'"
-                                                    class="flex items-center gap-1 mt-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-4 py-[5px] rounded-full transition">
-                                                    {{ $label }}
-                                                </button>
-                                            @else
-                                                <a href="{{ route('jsa.pdf.view', ['notification_id' => $notification->id]) }}" target="_blank"
-                                                    class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[10px] px-4 py-[5px] rounded-full">
-                                                    Lihat PDF
-                                                </a>
-                                                <button @click="activeModal = 'modal-jsa-edit'"
-                                                    class="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-[10px] px-4 py-[5px] rounded-full transition">
-                                                    Edit JSA
-                                                </button>
-                                                @if ($jsa->token)
-                                                    <div class="mt-2 text-xs text-gray-700">
-                                                        Salin link berikut dan kirimkan ke pihak terkait untuk tanda tangan:
-                                                        <div class="flex items-center gap-2 mt-1">
-                                                            <input type="text" value="{{ route('jsa.form.token', $jsa->token) }}" readonly
-                                                                class="text-xs border-gray-300 rounded p-1 w-full bg-gray-100">
-                                                            <button type="button" onclick="navigator.clipboard.writeText('{{ route('jsa.form.token', $jsa->token) }}'); alert('Link berhasil disalin!')"
-                                                                class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                                                                Salin
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                @endif
-                                            @endif
+    @if (!$step['enabled']) 
+        <span class="text-[10px] text-gray-400 italic mt-1">
+            Langkah perizinan harus dilakukan secara bertahap.
+        </span>
+    @else
+        <div class="flex flex-col items-center space-y-2">
 
-                                            @if ($step['status'] === 'revisi')
-                                                @php
-                                                    $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                                                        ->where('step', 'jsa')
-                                                        ->value('catatan');
-                                                @endphp
-                                                @if ($catatanRevisi)
-                                                    <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
-                                                @endif
-                                            @endif
-                                        </div>
-                                    @endif
-                                @endif
+            {{-- BUTTON / DATA --}}
+            @if (!$jsa)
+                <button @click="activeModal = 'modal-jsa-create'"
+                    class="flex items-center gap-1 mt-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-4 py-[5px] rounded-full transition">
+                    {{ $label }}
+                </button>
+            @else
+                <a href="{{ route('jsa.pdf.view', ['notification_id' => $notification->id]) }}" target="_blank"
+                    class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[10px] px-4 py-[5px] rounded-full">
+                    Lihat PDF
+                </a>
 
+                <button @click="activeModal = 'modal-jsa-edit'"
+                    class="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-[10px] px-4 py-[5px] rounded-full transition">
+                    Edit JSA
+                </button>
+
+                @if ($jsa->token)
+                    <div class="mt-2 text-xs text-gray-700">
+                        Salin link berikut dan kirimkan ke pihak terkait untuk tanda tangan:
+                        <div class="flex items-center gap-2 mt-1">
+                            <input type="text" value="{{ route('jsa.form.token', $jsa->token) }}" readonly
+                                class="text-xs border-gray-300 rounded p-1 w-full bg-gray-100">
+                            <button type="button"
+                                onclick="navigator.clipboard.writeText('{{ route('jsa.form.token', $jsa->token) }}'); alert('Link berhasil disalin!')"
+                                class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+                                Salin
+                            </button>
+                        </div>
+                    </div>
+                @endif
+            @endif
+
+            {{-- CATATAN REVISI --}}
+            @if ($step['status'] === 'revisi' && !empty($stepNotes['jsa']))
+                <p class="text-[10px] text-red-600 italic mt-1">
+                    Catatan: {{ $stepNotes['jsa'] }}
+                </p>
+            @endif
+
+        </div>
+    @endif
+@endif
+    
                                 @if ($step['code'] === 'working_permit')
-                                    @php
-                                        $prevStepStatus = $steps[$index - 1]['status'] ?? 'done';
-                                        $prevStepApproved = $prevStepStatus === 'done';
+                                   @php
+    $permitUmum = $permits['umum'] ?? null;
+    $permitGas = $permits['gaspanas'] ?? null;
+    $permitAir = $permits['air'] ?? null;
+    $permitKetinggian = $permits['ketinggian'] ?? null;
+    $permitRuangTertutup = $permits['ruang-tertutup'] ?? null;
+    $permitPerancah = $permits['perancah'] ?? null;
+    $permitRisikoPanas = $permits['risiko-panas'] ?? null;
+    $permitBeban = $permits['beban'] ?? null;
+    $permitPenggalian = $permits['penggalian'] ?? null;
+    $permitPengangkatan = $permits['pengangkatan'] ?? null;
+@endphp
 
-                                        $permitUmum = $notification
-                                            ? \App\Models\UmumWorkPermit::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitGas = $notification
-                                            ? \App\Models\WorkPermitGasPanas::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitAir = $notification
-                                            ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitKetinggian = $notification
-                                            ? \App\Models\WorkPermitKetinggian::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitRuangTertutup = $notification
-                                            ? \App\Models\WorkPermitRuangTertutup::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitPerancah = $notification
-                                            ? \App\Models\WorkPermitPerancah::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitRisikoPanas = $notification
-                                            ? \App\Models\WorkPermitRisikoPanas::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitBeban = $notification
-                                            ? \App\Models\WorkPermitBeban::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitPenggalian = $notification
-                                            ? \App\Models\WorkPermitPenggalian::where('notification_id', $notification->id)->first()
-                                            : null;
-                                        $permitPengangkatan = $notification
-                                            ? \App\Models\WorkPermitPengangkatan::where('notification_id', $notification->id)->first()
-                                            : null;
-                                    @endphp
-
-                                    @if (!$prevStepApproved)
+                                    @if (!$step['enabled'])
                                         <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
                                     @else
                                         <div class="flex flex-col items-center gap-2 mt-1">

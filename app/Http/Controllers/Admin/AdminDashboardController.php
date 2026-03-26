@@ -18,66 +18,102 @@ public function index()
     ];
     $totalSteps = count($stepTitles);
 
+    // =========================
+    // SUMMARY REQUEST
+    // =========================
     $summaryRequests = $allNotifications->map(function ($notif) use ($stepTitles) {
+
         $approvals = \App\Models\StepApproval::where('notification_id', $notif->id)->get();
+
         $approvedSteps = $approvals->where('status', 'disetujui')->count();
-        $currentStep = min($approvedSteps + 1, count($stepTitles));
         $stepTitle = $stepTitles[$approvedSteps] ?? 'Belum Diketahui';
 
         $sikApproval = $approvals->firstWhere('step', 'sik');
-        $sikFile = $sikApproval?->file_path;
         $isSikApproved = ($sikApproval?->status ?? null) === 'disetujui';
 
         $status = match (true) {
-            $approvals->where('status', 'revisi')->isNotEmpty() && $approvals->where('status', 'disetujui')->count() < count($stepTitles)
-                => 'Perlu Revisi',
-            in_array(strtolower($notif->status), ['disetujui', 'selesai'])
-                => 'Terbit SIK',
+            $approvals->where('status', 'revisi')->isNotEmpty() => 'Perlu Revisi',
+            $isSikApproved => 'Terbit SIK', // 🔥 FIX LEBIH AKURAT
             default => 'Menunggu',
         };
 
         return (object)[
             'id' => $notif->id,
             'user_name' => $notif->user->vendor_name ?? $notif->user->name ?? 'User',
-            'user_jabatan' => $notif->user->jabatan ?? '-',
+            'usertype' => $notif->user->usertype ?? 'user',
             'tanggal' => $notif->created_at->format('d-m-Y H:i'),
             'handled_by' => $notif->assignedAdmin?->name ?? '-',
             'status' => $status,
             'progress' => round(($approvedSteps / count($stepTitles)) * 100),
-            'current_step' => $currentStep,
             'current_step_title' => $stepTitle,
-            'sik_file' => $sikFile,
+            'created_at' => $notif->created_at,
             'is_sik_approved' => $isSikApproved,
-            'created_at' => $notif->created_at
         ];
     });
 
-    $topVendorRequests = $summaryRequests
-        ->groupBy(fn ($item) => filled(trim((string) $item->user_name)) ? trim((string) $item->user_name) : 'Tanpa Nama Vendor')
-        ->map(function ($items, $vendorName) {
+    // =========================
+    // GROUP BY USER + TYPE
+    // =========================
+    $grouped = $summaryRequests
+        ->groupBy(fn ($item) => $item->user_name . '|' . $item->usertype)
+        ->map(function ($items) {
+            $first = $items->first();
+
             return (object)[
-                'name' => $vendorName,
+                'name' => $first->user_name,
+                'usertype' => $first->usertype,
                 'total_requests' => $items->count(),
                 'avg_progress' => round($items->avg('progress') ?? 0),
             ];
-        })
+        });
+
+    // =========================
+    // 🔵 TOP 5 PGO (KARYAWAN INTERNAL)
+    // =========================
+    $topVendorPgo = $grouped
+        ->filter(fn ($item) => $item->usertype === 'pgo')
+        ->sortByDesc('total_requests')
+        ->take(5)
+        ->values();
+
+    // =========================
+    // 🟢 TOP 5 USER (VENDOR / EXTERNAL)
+    // =========================
+    $topVendorUser = $grouped
+        ->filter(fn ($item) => $item->usertype === 'user')
         ->sortByDesc('total_requests')
         ->take(10)
         ->values();
 
-    $filteredRequests = $summaryRequests->filter(function ($req) {
-        return $req->sik_file &&
-               $req->created_at->format('Y-m') === now()->format('Y-m');
-    });
+    // =========================
+    // 🔥 FALLBACK BIAR GAK KOSONG
+    // =========================
+    if ($topVendorPgo->isEmpty()) {
+        $topVendorPgo = $grouped->sortByDesc('total_requests')->take(5)->values();
+    }
+
+    if ($topVendorUser->isEmpty()) {
+        $topVendorUser = $grouped->sortByDesc('total_requests')->take(5)->values();
+    }
+
+    // =========================
+    // RECENT ACTIVITY
+    // =========================
+    $recentRequests = $summaryRequests
+        ->sortByDesc('created_at')
+        ->take(5)
+        ->values();
 
     return view('admin.dashboard', [
-        'requests' => $filteredRequests,
         'summaryRequests' => $summaryRequests,
         'totalSteps' => $totalSteps,
-        'topVendorRequests' => $topVendorRequests,
+
+        'topVendorPgo' => $topVendorPgo,
+        'topVendorUser' => $topVendorUser,
+
+        'recentRequests' => $recentRequests,
     ]);
 }
-
 public function permintaanSIK(Request $request)
 {
     $query = \App\Models\Notification::with(['user', 'assignedAdmin'])

@@ -28,25 +28,27 @@ class IzinKerjaPgoController extends Controller
     {
         $userId = auth()->id();
 
+        // Ambil semua pengajuan
         $allNotifications = Notification::where('user_id', $userId)->latest()->get();
         $selectedId = $request->get('notification_id') ?? $allNotifications->first()?->id;
 
+        // Step khusus PGO (3 step saja)
         $stepTitles = [
             'op_spk' => 'Buat Notifikasi/OP/SPK',
             'jsa' => 'Input JSA',
             'working_permit' => 'Input Working Permit',
         ];
 
+        // Jika belum ada pengajuan sama sekali
         if (!$selectedId) {
-            $steps = [];
-            foreach ($stepTitles as $code => $title) {
-                $steps[] = [
+            $steps = collect($stepTitles)->map(function ($title, $code) {
+                return [
                     'title' => $title,
                     'code' => $code,
                     'status' => 'pending',
                     'enabled' => false,
                 ];
-            }
+            })->values();
 
             return view('pengajuan-user.izin-kerja-pgo', [
                 'notifications' => $allNotifications,
@@ -62,13 +64,17 @@ class IzinKerjaPgoController extends Controller
             ]);
         }
 
+        // Ambil data utama
         $notification = Notification::where('id', $selectedId)
             ->where('user_id', $userId)
             ->firstOrFail();
+
         $generatedNoJsa = (new JsaController)->getGeneratedNoJsa();
 
+        // Data terkait
         $dataKontraktor = DataKontraktor::where('notification_id', $selectedId)->first();
         $jsa = Jsa::where('notification_id', $selectedId)->first();
+
         $permits = [
             'umum' => UmumWorkPermit::where('notification_id', $selectedId)->first(),
             'gaspanas' => WorkPermitGasPanas::where('notification_id', $selectedId)->first(),
@@ -85,35 +91,32 @@ class IzinKerjaPgoController extends Controller
         $detail = WorkPermitDetail::where('notification_id', $selectedId)->first();
         $closure = $detail ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first() : null;
 
+        // Ambil approval status dari admin
         $stepApprovals = StepApproval::where('notification_id', $selectedId)
             ->pluck('status', 'step')
             ->toArray();
+        $stepNotes = StepApproval::where('notification_id', $selectedId)
+    ->pluck('catatan', 'step')
+    ->toArray();
 
-        $hasOpSpk = (bool)($notification->number || $notification->file);
-        $hasJsa = (bool)$jsa;
-        $hasPermit = collect($permits)->filter()->isNotEmpty();
-
+        // 🔥 BUILD STEP (FIX TOTAL)
         $steps = [];
         $previousApproved = true;
 
         foreach ($stepTitles as $code => $title) {
-            $approvalStatus = strtolower($stepApprovals[$code] ?? '');
-            $hasData = match ($code) {
-                'op_spk' => $hasOpSpk,
-                'jsa' => $hasJsa,
-                'working_permit' => $hasPermit,
-                default => false,
+
+            $approvalStatus = strtolower($stepApprovals[$code] ?? 'menunggu');
+
+            // ✅ Status hanya berdasarkan approval admin
+            $status = match ($approvalStatus) {
+                'disetujui' => 'done',
+                'revisi' => 'revisi',
+                default => 'pending',
             };
 
-            if ($approvalStatus === 'revisi') {
-                $status = 'revisi';
-            } elseif ($approvalStatus === 'disetujui' || $hasData) {
-                $status = 'done';
-            } else {
-                $status = 'pending';
-            }
-
+            // ✅ Step hanya aktif jika sebelumnya sudah selesai
             $enabled = $previousApproved;
+
             $steps[] = [
                 'title' => $title,
                 'code' => $code,
@@ -121,6 +124,7 @@ class IzinKerjaPgoController extends Controller
                 'enabled' => $enabled,
             ];
 
+            // 🔒 Lock step berikutnya
             if ($status !== 'done') {
                 $previousApproved = false;
             }
@@ -137,6 +141,7 @@ class IzinKerjaPgoController extends Controller
             'dataKontraktor' => $dataKontraktor,
             'steps' => $steps,
             'generatedNoJsa' => $generatedNoJsa,
+            'stepNotes' => $stepNotes,
         ]);
     }
 }

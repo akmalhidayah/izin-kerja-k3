@@ -9,19 +9,27 @@ use Illuminate\Http\Request;
 
 class UserPanelController extends Controller
 {
-  public function index(Request $request)
+ public function index(Request $request)
 {
     $query = User::with('role');
 
+    // 🔍 SEARCH
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%')
+              ->orWhere('email', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    // 🎯 FILTER USER TYPE
     if ($request->filled('usertype')) {
         $query->where('usertype', $request->usertype);
     }
 
-    $users = $query->paginate(15);
+    $users = $query->latest()->paginate(10);
 
     return view('admin.user-panel.index', compact('users'));
 }
-
     public function create()
     {
         $roles = Role::all();

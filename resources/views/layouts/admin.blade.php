@@ -23,6 +23,7 @@
 
     <!-- Lucide Icons (modern) -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         [x-cloak]{ display:none !important; }

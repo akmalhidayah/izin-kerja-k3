@@ -7,6 +7,7 @@ use App\Models\Notification;
 use App\Models\StepApproval;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class RolePermissionController extends Controller
 {
@@ -14,23 +15,36 @@ class RolePermissionController extends Controller
     {
         $query = Notification::with(['user', 'assignedAdmin']);
 
-        // Filter pencarian umum
+        // 🔍 SEARCH
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('number', 'like', "%{$search}%")
                     ->orWhere('type', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
                     ->orWhere('status', 'like', "%{$search}%")
-                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('user', function ($u) use ($search) {
+                        $u->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
-        // Ambil semua data untuk filter manual nanti
+        // 🎯 FILTER USERTYPE (🔥 BARU)
+        if ($request->filled('usertype')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('usertype', $request->usertype);
+            });
+        }
+
+        // 📥 GET DATA
         $notifications = $query->latest()->get();
 
-        // Hitung step dan progress manual
+        // 📊 HITUNG PROGRESS (OPTIMIZED)
+        $stepApprovals = StepApproval::whereIn('notification_id', $notifications->pluck('id'))
+            ->get()
+            ->groupBy('notification_id');
+
         foreach ($notifications as $notif) {
-            $steps = StepApproval::where('notification_id', $notif->id)->get();
+            $steps = $stepApprovals[$notif->id] ?? collect();
             $approved = $steps->where('status', 'disetujui')->count();
 
             $notif->current_step = $approved;
@@ -39,26 +53,31 @@ class RolePermissionController extends Controller
             $notif->status = $notif->is_done ? 'selesai' : ($notif->status ?? 'menunggu');
         }
 
-        // Filter berdasarkan status selesai/belum
-        $statusFilter = $request->input('status_filter');
-        if ($statusFilter === 'selesai') {
-            $notifications = $notifications->filter(fn ($n) => $n->is_done)->values();
-        } elseif ($statusFilter === 'belum') {
-            $notifications = $notifications->filter(fn ($n) => !$n->is_done)->values();
+        // 🎯 FILTER STATUS
+        if ($request->filled('status_filter')) {
+            if ($request->status_filter === 'selesai') {
+                $notifications = $notifications->filter(fn ($n) => $n->is_done)->values();
+            } elseif ($request->status_filter === 'belum') {
+                $notifications = $notifications->filter(fn ($n) => !$n->is_done)->values();
+            }
         }
 
-        // Manual pagination (karena kita filter di collection)
+        // 📄 PAGINATION MANUAL
         $perPage = 10;
         $currentPage = $request->input('page', 1);
-        $currentItems = $notifications->slice(($currentPage - 1) * $perPage, $perPage)->values();
-        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
-            $currentItems,
+
+        $paginated = new LengthAwarePaginator(
+            $notifications->slice(($currentPage - 1) * $perPage, $perPage)->values(),
             $notifications->count(),
             $perPage,
             $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
         );
 
+        // 👤 ADMIN LIST
         $admins = User::where('usertype', 'admin')->get();
 
         return view('admin.role-permission.index', [
@@ -83,12 +102,17 @@ class RolePermissionController extends Controller
             'assigned_admin_id' => $request->assigned_admin_id,
         ]);
 
-        return redirect()->route('admin.role_permission.index')->with('success', 'Assigned admin updated.');
+        return redirect()
+            ->route('admin.role_permission.index')
+            ->with('success', 'Assigned admin berhasil diperbarui.');
     }
 
     public function destroy(Notification $notification)
     {
         $notification->delete();
-        return redirect()->route('admin.role_permission.index')->with('success', 'Notification berhasil dihapus.');
+
+        return redirect()
+            ->route('admin.role_permission.index')
+            ->with('success', 'Notification berhasil dihapus.');
     }
 }
