@@ -26,7 +26,16 @@
         <!-- Preload bg image -->
         <img src="/images/bg-login.jpg" alt="" loading="lazy" class="hidden">
 
-        <div class="min-h-screen bg-blue-100 dark:bg-gray-900" style="background-image: url('/images/bg-login.jpg');">
+       <div class="min-h-screen relative">
+    <!-- Background -->
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/images/bg-login.jpg');"></div>
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
+
+<!-- Content -->
+<div class="relative z-10">
+
             @include('layouts.navigation')
 
             @isset($header)
@@ -41,6 +50,7 @@
                 {{ $slot }}
             </main>
         </div>
+</div>
 
         <!-- Move signature_pad to bottom & defer -->
         <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js" defer></script>

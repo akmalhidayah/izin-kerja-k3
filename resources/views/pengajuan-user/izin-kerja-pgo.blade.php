@@ -1,12 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-sm text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Pengajuan Izin Kerja - User PT. Semen Tonasa') }}
-        </h2>
-    </x-slot>
-
-    <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
-        <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
+    <section class="pt-20 pb-10 px-3 sm:px-6">
+<div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
             <div x-data="{ expanded: true, activeModal: null, selectedPermit: 'umum' }">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
                     <form method="GET" action="{{ route('dashboard') }}" class="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
@@ -14,8 +8,15 @@
                             Pilih Pengajuan
                         </label>
 
-                        <select name="notification_id" id="notification_id" onchange="this.form.submit()"
-                            class="w-full sm:w-[280px] border border-gray-300 text-sm rounded px-3 py-2 shadow focus:outline-none focus:ring-1 focus:ring-blue-500">
+                     <select name="notification_id" id="notification_id" onchange="this.form.submit()"
+    class="w-full sm:w-[300px] 
+    border border-gray-200 
+    bg-gray-50 
+    text-sm rounded-lg 
+    px-3 py-2.5 
+    shadow-sm 
+    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+    transition">
                             @foreach ($notifications as $notif)
                                 <option value="{{ $notif->id }}" {{ $notif->id == $selectedId ? 'selected' : '' }}>
                                     {{ $notif->number }} - {{ $notif->created_at->format('d/m/Y') }}
@@ -42,10 +43,20 @@
                     </div>
                 @endif
 
-                <div class="flex flex-wrap justify-between items-center text-sm text-gray-800 mb-4">
-                    <div>
-                        <p><span class="font-semibold">Nama User:</span> {{ Auth::user()->name }}</p>
-                        <p class="text-[11px] text-gray-600 mt-1">
+            <div class="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-700 mb-4">
+
+    <!-- LEFT -->
+    <div class="flex flex-col gap-1">
+
+        <div class="flex items-center gap-2">
+            <i class="fas fa-user text-green-600 text-xs"></i>
+            <span class="text-gray-500">Vendor/User:</span>
+            <span class="font-semibold text-gray-800">
+                {{ Auth::user()->name }}
+            </span>
+            
+        </div>
+   <p class="text-[11px] text-gray-600 mt-1">
                             <span class="font-semibold">Jabatan:</span>
                             @if (Auth::user()->jabatan)
                                 {{ Auth::user()->jabatan }}
@@ -53,12 +64,26 @@
                                 <span class="text-red-600">Harap isi jabatan di halaman profile.</span>
                             @endif
                         </p>
-                        <p><span class="font-semibold">Admin K3:</span> {{ $notification?->assignedAdmin?->name ?? '-' }}</p>
-                    </div>
-                    <div>
-                        <p><span class="font-semibold">Tanggal:</span> {{ now()->format('d-m-Y H:i') }}</p>
-                    </div>
-                </div>
+        <div class="flex items-center gap-2">
+            <i class="fas fa-user-shield text-blue-600 text-xs"></i>
+            <span class="text-gray-500">Admin K3:</span>
+            <span class="font-semibold text-gray-800">
+                {{ $notification?->assignedAdmin?->name ?? '-' }}
+            </span>
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="flex items-center gap-2">
+        <i class="fas fa-clock text-gray-500 text-xs"></i>
+        <span class="text-gray-500">Tanggal:</span>
+        <span class="font-semibold text-gray-800">
+            {{ now()->format('d-m-Y H:i') }}
+        </span>
+    </div>
+
+</div>
 
                 <div x-show="expanded">
                     <h2 class="text-xl font-bold text-center text-gray-800 mb-6">Step Pengajuan Izin Kerja User</h2>

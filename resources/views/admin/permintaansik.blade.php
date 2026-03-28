@@ -336,9 +336,18 @@
                                     <div class="font-semibold text-gray-900">{{ $request->user_name }}</div>
                                 </td>
                                 <td class="px-4 py-3 text-gray-700 text-xs align-middle max-w-[220px] break-all">
-                                    <div class="font-medium text-gray-900 leading-tight text-xs">
-                                        {{ $request->number }}
-                                    </div>
+<div class="font-medium text-gray-900 leading-tight text-xs">
+    {{ $request->number }}
+</div>
+
+{{-- 🔥 DESKRIPSI PEKERJAAN --}}
+@if(!empty($request->description))
+<div 
+    class="text-[10px] text-gray-500 mt-1 leading-snug break-words max-h-8 overflow-hidden"
+    title="{{ $request->description }}">
+    {{ $request->description }}
+</div>
+@endif
                                     @if ($request->file)
                                         <div class="mt-1 text-[11px]">
                                             <a href="{{ asset('storage/' . $request->file) }}"

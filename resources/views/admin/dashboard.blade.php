@@ -7,7 +7,7 @@
    $completed = $summaryRequests->where('is_sik_approved', true)->count();
         $avgProgress = round($summaryRequests->avg('progress') ?? 0);
         $recentRequests = $summaryRequests->sortByDesc('created_at')->take(5);
-        $adminLoads = $summaryRequests->groupBy('handled_by')->map->count()->sortDesc()->take(3);
+        $adminLoads = $summaryRequests->groupBy('handled_by')->map->count()->sortDesc()->take(5);
         $maxVendorRequest = max((int) ($topVendorRequests->max('total_requests') ?? 0), 1);
     @endphp
 
@@ -21,21 +21,6 @@
                 <p class="text-xs text-gray-100 mt-1">Ringkasan status pengajuan dan performa penanganan.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <span class="inline-flex items-center rounded-full bg-white/90 text-gray-800 text-[11px] px-3 py-1">
-                    Total: {{ $totalRequests }}
-                </span>
-                <span class="inline-flex items-center rounded-full bg-white/90 text-gray-800 text-[11px] px-3 py-1">
-                    Proses: {{ $inProgress }}
-                </span>
-                <span class="inline-flex items-center rounded-full bg-white/90 text-gray-800 text-[11px] px-3 py-1">
-                    Revisi: {{ $needRevision }}
-                </span>
-                <span class="inline-flex items-center rounded-full bg-white/90 text-gray-800 text-[11px] px-3 py-1">
-                    Selesai: {{ $completed }}
-                </span>
-                <span class="inline-flex items-center rounded-full bg-white/90 text-gray-800 text-[11px] px-3 py-1">
-                    Rata-rata: {{ $avgProgress }}%
-                </span>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <div class="relative">
@@ -65,7 +50,7 @@
 
             <div>
                 <p class="text-[11px] text-white/80">Pengajuan Proses</p>
-                <p class="text-2xl font-extrabold">{{ $inProgress }}</p>
+                <p class="text-2xl font-extrabold counter" data-value="{{ $inProgress }}">0</p>
 
                 <!-- 🔥 insight kecil -->
                 <p class="text-[10px] text-white/70">Aktif saat ini</p>
@@ -85,7 +70,7 @@
 
             <div>
                 <p class="text-[11px] text-white/80">SIK Terbit</p>
-                <p class="text-2xl font-extrabold">{{ $completed }}</p>
+                <p class="text-2xl font-extrabold counter" data-value="{{ $completed }}">0</p>
 
                 <p class="text-[10px] text-white/70">Dokumen selesai</p>
             </div>
@@ -104,7 +89,7 @@
 
             <div>
                 <p class="text-[11px] text-white/80">Perlu Revisi</p>
-                <p class="text-2xl font-extrabold">{{ $needRevision }}</p>
+                <p class="text-2xl font-extrabold counter" data-value="{{ $needRevision }}">0</p>
 
                 <p class="text-[10px] text-white/70">Butuh tindakan</p>
             </div>
@@ -123,7 +108,7 @@
 
             <div>
                 <p class="text-[11px] text-white/80">Rata-rata Progress</p>
-                <p class="text-2xl font-extrabold">{{ $avgProgress }}%</p>
+                <p class="text-2xl font-extrabold counter" data-value="{{ $avgProgress }}" data-suffix="%">0%</p>
 
                 <p class="text-[10px] text-white/70">Kinerja sistem</p>
             </div>
@@ -177,83 +162,129 @@
 
     <!-- RIGHT SIDEBAR -->
     <div class="space-y-6">
-
 <!-- AKTIVITAS -->
 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-    
+
     <!-- HEADER -->
     <div class="flex items-center justify-between mb-3">
         <h3 class="text-xs font-semibold text-gray-700 flex items-center gap-2">
             <span class="w-6 h-6 flex items-center justify-center rounded-lg bg-blue-100">
-                <i class="fas fa-clock text-blue-500 text-xs"></i>
+                <i class="fas fa-bolt text-blue-500 text-xs"></i>
             </span>
             Aktivitas Terbaru
         </h3>
     </div>
 
-    <div class="space-y-2">
+    <div class="space-y-3">
         @forelse ($recentRequests as $item)
+
             @php
+                // =========================
+                // STATUS STYLE
+                // =========================
                 $badgeClass = match($item->status) {
                     'Perlu Revisi' => 'bg-yellow-100 text-yellow-700',
                     'Terbit SIK' => 'bg-green-100 text-green-700',
                     'Perlu Disetujui' => 'bg-blue-100 text-blue-700',
-                    'Diproses' => 'bg-sky-100 text-sky-700',
                     default => 'bg-gray-100 text-gray-700',
                 };
 
+                // =========================
+                // ICON STATUS
+                // =========================
                 $icon = match($item->status) {
                     'Perlu Revisi' => 'fa-rotate-left text-yellow-500',
                     'Terbit SIK' => 'fa-check-circle text-green-500',
                     'Perlu Disetujui' => 'fa-hourglass-half text-blue-500',
-                    'Diproses' => 'fa-spinner text-sky-500',
                     default => 'fa-circle text-gray-400',
                 };
 
+                // =========================
+                // STEP HUMAN READABLE
+                // =========================
                 $stepLabel = match($item->current_step_title) {
                     'op_spk' => 'Pengajuan dibuat',
+                    'data_kontraktor' => 'Data kontraktor',
+                    'bpjs' => 'Upload BPJS',
                     'jsa' => 'Analisis pekerjaan (JSA)',
-                    'working_permit' => 'Izin kerja diproses',
-                    default => 'Tahap proses berjalan'
+                    'working_permit' => 'Izin kerja',
+                    'sik' => 'Penerbitan SIK',
+                    default => 'Proses berjalan'
                 };
+
+                // =========================
+                // ACTIVITY MESSAGE (🔥 BARU)
+                // =========================
+                if ($item->status === 'Terbit SIK') {
+                    $activityText = "SIK sudah terbit & selesai";
+                } elseif ($item->status === 'Perlu Revisi') {
+                    $activityText = "Perlu revisi pada tahap " . $stepLabel;
+                } elseif ($item->status === 'Perlu Disetujui') {
+                    $activityText = "Menunggu approval admin";
+                } else {
+                    $activityText = "Sedang di tahap " . $stepLabel;
+                }
             @endphp
 
-            <div class="flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-gray-50 transition">
+            <div class="flex gap-3 items-start p-2 rounded-lg hover:bg-gray-50 transition">
 
-                <!-- LEFT -->
-                <div class="flex items-center gap-2 min-w-0">
+                <!-- TIMELINE DOT -->
+                <div class="flex flex-col items-center mt-1">
+                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></div>
+                    <div class="w-[1px] flex-1 bg-gray-200 mt-1"></div>
+                </div>
 
-                    <!-- ICON -->
-                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
-                        <i class="fas {{ $icon }} text-xs"></i>
-                    </div>
+                <!-- CONTENT -->
+                <div class="flex-1 min-w-0">
 
-                    <!-- TEXT -->
-                    <div class="min-w-0">
-                        <div class="text-xs font-semibold text-gray-800 truncate">
+                    <!-- USER -->
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-semibold text-gray-800 truncate">
                             {{ $item->user_name }}
-                        </div>
+                        </p>
 
-                        <div class="text-[10px] text-gray-500">
-                            {{ $stepLabel }}
-                        </div>
-
-                        <div class="text-[9px] text-gray-400">
+                        <span class="text-[9px] text-gray-400">
                             {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
-                        </div>
+                        </span>
                     </div>
+
+                    <!-- ACTIVITY TEXT (🔥 UTAMA) -->
+                    <p class="text-[11px] text-gray-600 mt-0.5">
+                        {{ $activityText }}
+                    </p>
+
+                    <!-- DETAIL MINI -->
+                    <div class="flex items-center gap-2 mt-1 flex-wrap">
+
+                        <!-- STEP -->
+                        <span class="text-[9px] text-gray-400">
+                            Step: {{ $stepLabel }}
+                        </span>
+
+                        <!-- ADMIN -->
+                        @if($item->handled_by && $item->handled_by !== '-')
+                        <span class="text-[9px] text-gray-400">
+                            • Admin: {{ $item->handled_by }}
+                        </span>
+                        @endif
+
+                    </div>
+
                 </div>
 
                 <!-- RIGHT -->
                 <div class="flex flex-col items-end gap-1">
 
+                    <!-- ICON -->
+                    <i class="fas {{ $icon }} text-xs"></i>
+
                     <!-- STATUS -->
-                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold {{ $badgeClass }}">
-                        <i class="fas fa-circle text-[5px]"></i>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold {{ $badgeClass }}">
                         {{ $item->status }}
                     </span>
 
                 </div>
+
             </div>
 
         @empty
@@ -263,7 +294,6 @@
         @endforelse
     </div>
 </div>
-
 <!-- SIK -->
 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
     <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -300,11 +330,42 @@
         @endforeach
     </div>
 </div>
-   <script>
+  <script>
 document.addEventListener("DOMContentLoaded", function () {
+const counters = document.querySelectorAll('.counter');
 
+    counters.forEach(counter => {
+        const target = parseFloat(counter.getAttribute('data-value'));
+        const suffix = counter.getAttribute('data-suffix') || '';
+        let current = 0;
 
+        const duration = 1200; // ms
+        const startTime = performance.now();
 
+        function animate(time) {
+            const progress = Math.min((time - startTime) / duration, 1);
+
+            // easing biar smooth (🔥 ini penting)
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            current = target * ease;
+
+            // tampilkan angka
+            counter.textContent = Math.floor(current) + suffix;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                counter.textContent = target + suffix;
+            }
+        }
+
+        requestAnimationFrame(animate);
+    });
+
+    // ======================
+    // 🔵 PIE CHART ADMIN
+    // ======================
     const ctx = document.getElementById('adminChart');
 
     if (ctx) {
@@ -318,32 +379,41 @@ document.addEventListener("DOMContentLoaded", function () {
         ];
 
         new Chart(ctx, {
-            type: 'pie', // 🔥 FULL LINGKARAN
+            type: 'pie',
             data: {
                 labels: labels,
                 datasets: [{
                     data: dataValues,
                     backgroundColor: colors,
-                    borderWidth: 0
+                    borderWidth: 0,
+                    hoverOffset: 10 // 🔥 efek hover naik
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, // 🔥 penting biar ikut container
+                maintainAspectRatio: false,
+
+                // 🔥 ANIMASI MASUK
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1200,
+                    easing: 'easeOutQuart'
+                },
+
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         backgroundColor: '#111827',
                         titleColor: '#fff',
                         bodyColor: '#fff',
+                        padding: 10,
                         callbacks: {
                             label: function(context) {
                                 let total = context.dataset.data.reduce((a,b)=>a+b,0);
                                 let value = context.raw;
                                 let percent = Math.round((value / total) * 100);
-                                return `${value} (${percent}%)`;
+                                return `${context.label}: ${value} (${percent}%)`;
                             }
                         }
                     }
@@ -353,88 +423,115 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-   function createChart(ctx, labels, data, color) {
+    // ======================
+    // 🔥 FUNCTION LINE CHART (UPGRADE)
+    // ======================
+    function createChart(ctx, labels, data, color) {
 
-    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
-    gradient.addColorStop(0, color.replace('1)', '0.25)'));
-    gradient.addColorStop(1, color.replace('1)', '0.02)'));
+        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, color.replace('1)', '0.25)'));
+        gradient.addColorStop(1, color.replace('1)', '0.02)'));
 
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                borderColor: color,
-                backgroundColor: gradient,
-                borderWidth: 2.5,
-                tension: 0.45,
-                fill: true,
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: gradient,
+                    borderWidth: 3, // 🔥 lebih tegas
+                    tension: 0.5,   // 🔥 lebih smooth naik turun
+                    fill: true,
 
-                // 🔥 titik halus
-                pointRadius: 3,
-                pointHoverRadius: 6,
-                pointBackgroundColor: color,
-                pointBorderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            animation: {
-                duration: 1000,
-                easing: 'easeOutCubic'
+                    // 🔥 titik lebih hidup
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: color,
+                    pointBorderWidth: 2,
+
+                    cubicInterpolationMode: 'monotone' // 🔥 smooth curve
+                }]
             },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#111827',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    padding: 10,
-                    displayColors: false
-                }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'nearest'
-            },
-            scales: {
-                x: {
-                    ticks: { display: false },
-                    grid: {
-                        display: false
+            options: {
+                responsive: true,
+
+                // 🔥 ANIMASI NAIK DARI BAWAH
+                animation: {
+                    duration: 1400,
+                    easing: 'easeInOutQuart'
+                },
+
+                animations: {
+                    y: {
+                        from: 0 // 🔥 efek naik dari bawah
                     }
                 },
-                y: {
-                    ticks: { display: false },
-                    grid: {
-                        color: 'rgba(0,0,0,0.04)' // 🔥 garis halus banget
+
+                interaction: {
+                    intersect: false,
+                    mode: 'nearest'
+                },
+
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#111827',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 10,
+                        displayColors: false
+                    }
+                },
+
+                elements: {
+                    line: {
+                        borderJoinStyle: 'round'
+                    }
+                },
+
+                scales: {
+                    x: {
+                        ticks: { display: false },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { display: false },
+                        grid: {
+                            color: 'rgba(0,0,0,0.04)'
+                        }
                     }
                 }
             }
-        }
-    });
-}
+        });
+    }
 
+
+    // ======================
     // 🔵 PGO (KARYAWAN)
+    // ======================
     const ctxPgo = document.getElementById('chartPgo');
     if (ctxPgo) {
         createChart(
             ctxPgo,
             {!! json_encode($topVendorPgo->pluck('name')) !!},
             {!! json_encode($topVendorPgo->pluck('total_requests')) !!},
-            'rgba(37, 99, 235, 1)' // biru
+            'rgba(37, 99, 235, 1)'
         );
     }
 
+
+    // ======================
     // 🟢 VENDOR
+    // ======================
     const ctxVendor = document.getElementById('chartVendor');
     if (ctxVendor) {
         createChart(
             ctxVendor,
             {!! json_encode($topVendorUser->pluck('name')) !!},
             {!! json_encode($topVendorUser->pluck('total_requests')) !!},
-            'rgba(22, 163, 74, 1)' // hijau
+            'rgba(22, 163, 74, 1)'
         );
     }
 

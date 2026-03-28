@@ -48,6 +48,8 @@ public function index()
             'current_step_title' => $stepTitle,
             'created_at' => $notif->created_at,
             'is_sik_approved' => $isSikApproved,
+            'last_action' => $approvals->sortByDesc('updated_at')->first()?->step ?? null,
+            'last_status' => $approvals->sortByDesc('updated_at')->first()?->status ?? null,
         ];
     });
 
@@ -246,6 +248,7 @@ public function permintaanSIK(Request $request)
             'user_name' => $notif->user->name ?? '-',
             'user_jabatan' => $notif->user->jabatan ?? '-',
             'number' => $notif->number,
+            'description' => $notif->description ?? null,
             'file' => $notif->file,
             'tanggal' => $notif->created_at->format('d-m-Y H:i'),
             'handled_by' => $notif->assignedAdmin?->name ?? '-',
