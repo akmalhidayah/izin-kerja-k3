@@ -1,12 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-sm text-gray-800 dark:text-gray-200 leading-tight">
-            Form Data Kontraktor
-        </h2>
-    </x-slot>
-
     <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
-        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+<div class="w-full mx-auto bg-white rounded-xl shadow-md p-4 sm:p-6">
             <h1 class="text-lg font-semibold mb-4">Form Data Kontraktor</h1>
 {{-- ALERT SUCCESS / ERROR --}}
 @if(session('success'))
@@ -49,51 +43,79 @@
     <input type="hidden" name="diverifikasi_signature" id="diverifikasi_signature" value="{{ old('diverifikasi_signature', $dataKontraktor->diverifikasi_signature ?? '') }}">
 
 
-                <div class="grid grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label class="text-sm font-semibold">Nama Perusahaan/Kontraktor</label>
-                        <input type="text"
-                            name="nama_perusahaan"
-                            class="w-full text-sm border-gray-300 rounded p-2"
-                            placeholder="PT. Contoh"
-                            value="{{ old('nama_perusahaan', $notification?->user?->name ?? Auth::user()->name ?? '') }}">
-                    </div>
-                    <div>
-                        <label class="text-sm font-semibold">Jenis/Type Pekerjaan</label>
-                        <input type="text"
-                            name="jenis_pekerjaan"
-                            class="w-full text-sm border-gray-300 rounded p-2"
-                            placeholder="Deskripsi Pekerjaan"
-                            value="{{ old('jenis_pekerjaan', $notification?->description ?? '') }}">
-                    </div>
-                    <div>
-                        <label class="text-sm font-semibold">Lokasi Kerja</label>
-                        <input type="text"
-                            name="lokasi_kerja"
-                            class="w-full text-sm border-gray-300 rounded p-2"
-                            placeholder="Lokasi Kerja"
-                            value="{{ old('lokasi_kerja', $dataKontraktor->lokasi_kerja ?? '') }}">
-                    </div>
-                </div>
+               <!-- ================= INFORMASI PEKERJAAN ================= -->
 
-               <div class="grid grid-cols-2 gap-2 mb-4">
-    <div>
-        <label class="text-sm font-semibold">Jadwal Pekerjaan (Dari)</label>
-        <input type="date"
-            name="tanggal_mulai"
-            class="w-full text-sm border-gray-300 rounded p-2"
-            value="{{ old('tanggal_mulai', isset($dataKontraktor) && $dataKontraktor->tanggal_mulai ? \Carbon\Carbon::parse($dataKontraktor->tanggal_mulai)->format('Y-m-d') : '') }}">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+
+        <!-- NAMA -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Nama Perusahaan / Kontraktor
+            </label>
+            <input type="text"
+                name="nama_perusahaan"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="PT. Contoh"
+                value="{{ old('nama_perusahaan', $notification?->user?->name ?? Auth::user()->name ?? '') }}">
+        </div>
+
+        <!-- JENIS -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Jenis / Type Pekerjaan
+            </label>
+            <input type="text"
+                name="jenis_pekerjaan"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Deskripsi pekerjaan"
+                value="{{ old('jenis_pekerjaan', $notification?->description ?? '') }}">
+        </div>
+
+        <!-- LOKASI -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Lokasi Kerja
+            </label>
+            <input type="text"
+                name="lokasi_kerja"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Lokasi kerja"
+                value="{{ old('lokasi_kerja', $dataKontraktor->lokasi_kerja ?? '') }}">
+        </div>
+
     </div>
-    <div>
-        <label class="text-sm font-semibold">(Sampai)</label>
-        <input type="date"
-            name="tanggal_selesai"
-            class="w-full text-sm border-gray-300 rounded p-2"
-            value="{{ old('tanggal_selesai', isset($dataKontraktor) && $dataKontraktor->tanggal_selesai ? \Carbon\Carbon::parse($dataKontraktor->tanggal_selesai)->format('Y-m-d') : '') }}">
-    </div>
+
+
+<!-- ================= JADWAL ================= -->
+
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        <!-- DARI -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Tanggal Mulai
+            </label>
+            <input type="date"
+                name="tanggal_mulai"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                value="{{ old('tanggal_mulai', isset($dataKontraktor) && $dataKontraktor->tanggal_mulai ? \Carbon\Carbon::parse($dataKontraktor->tanggal_mulai)->format('Y-m-d') : '') }}">
+        </div>
+
+        <!-- SAMPAI -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Tanggal Selesai
+            </label>
+            <input type="date"
+                name="tanggal_selesai"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                value="{{ old('tanggal_selesai', isset($dataKontraktor) && $dataKontraktor->tanggal_selesai ? \Carbon\Carbon::parse($dataKontraktor->tanggal_selesai)->format('Y-m-d') : '') }}">
+        </div>
+
 </div>
-
-                                <div class="mb-4">
+                                <div class="mb-2">
                     <label class="text-sm font-semibold">No. OP/SPK/Notifikasi</label>
                     <input type="text"
                         name="nomor_notifikasi"

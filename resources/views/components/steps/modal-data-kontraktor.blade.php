@@ -41,47 +41,86 @@
     <input type="hidden" name="diverifikasi_signature" id="diverifikasi_signature" value="{{ old('diverifikasi_signature', $dataKontraktor->diverifikasi_signature ?? '') }}">
 
 
-                <div class="grid grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label class="text-sm font-semibold">Nama Perusahaan/Kontraktor</label>
-                        <input type="text"
-                            name="nama_perusahaan"
-                            class="w-full text-sm border-gray-300 rounded p-2"
-                            placeholder="PT. Contoh"
-                            value="{{ old('nama_perusahaan', $notification?->user?->name ?? Auth::user()->name ?? '') }}">
-                    </div>
-                    <div>
-                        <label class="text-sm font-semibold">Jenis/Type Pekerjaan</label>
-                        <input type="text"
-                            name="jenis_pekerjaan"
-                            class="w-full text-sm border-gray-300 rounded p-2"
-                            placeholder="Deskripsi Pekerjaan"
-                            value="{{ old('jenis_pekerjaan', $notification?->description ?? '') }}">
-                    </div>
-                    <div>
-                        <label class="text-sm font-semibold">Lokasi Kerja</label>
-                        <input type="text"
-                            name="lokasi_kerja"
-                            class="w-full text-sm border-gray-300 rounded p-2"
-                            placeholder="Lokasi Kerja"
-                            value="{{ old('lokasi_kerja', $dataKontraktor->lokasi_kerja ?? '') }}">
-                    </div>
-                </div>
+                <!-- ================= INFORMASI PEKERJAAN ================= -->
+<div class="bg-gray-50/70 border border-gray-200 rounded-xl p-4 mb-4">
 
-               <div class="grid grid-cols-2 gap-2 mb-4">
-    <div>
-        <label class="text-sm font-semibold">Jadwal Pekerjaan (Dari)</label>
-        <input type="date"
-            name="tanggal_mulai"
-            class="w-full text-sm border-gray-300 rounded p-2"
-            value="{{ old('tanggal_mulai', isset($dataKontraktor) && $dataKontraktor->tanggal_mulai ? \Carbon\Carbon::parse($dataKontraktor->tanggal_mulai)->format('Y-m-d') : '') }}">
+    <h3 class="text-xs font-semibold text-gray-600 mb-3 tracking-wide">
+        INFORMASI PEKERJAAN
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+
+        <!-- NAMA -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Nama Perusahaan / Kontraktor
+            </label>
+            <input type="text"
+                name="nama_perusahaan"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="PT. Contoh"
+                value="{{ old('nama_perusahaan', $notification?->user?->name ?? Auth::user()->name ?? '') }}">
+        </div>
+
+        <!-- JENIS -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Jenis / Type Pekerjaan
+            </label>
+            <input type="text"
+                name="jenis_pekerjaan"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Deskripsi pekerjaan"
+                value="{{ old('jenis_pekerjaan', $notification?->description ?? '') }}">
+        </div>
+
+        <!-- LOKASI -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Lokasi Kerja
+            </label>
+            <input type="text"
+                name="lokasi_kerja"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Lokasi kerja"
+                value="{{ old('lokasi_kerja', $dataKontraktor->lokasi_kerja ?? '') }}">
+        </div>
+
     </div>
-    <div>
-        <label class="text-sm font-semibold">(Sampai)</label>
-        <input type="date"
-            name="tanggal_selesai"
-            class="w-full text-sm border-gray-300 rounded p-2"
-            value="{{ old('tanggal_selesai', isset($dataKontraktor) && $dataKontraktor->tanggal_selesai ? \Carbon\Carbon::parse($dataKontraktor->tanggal_selesai)->format('Y-m-d') : '') }}">
+</div>
+
+
+<!-- ================= JADWAL ================= -->
+<div class="bg-gray-50/70 border border-gray-200 rounded-xl p-4 mb-4">
+
+    <h3 class="text-xs font-semibold text-gray-600 mb-3 tracking-wide">
+        JADWAL PEKERJAAN
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        <!-- DARI -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Tanggal Mulai
+            </label>
+            <input type="date"
+                name="tanggal_mulai"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                value="{{ old('tanggal_mulai', isset($dataKontraktor) && $dataKontraktor->tanggal_mulai ? \Carbon\Carbon::parse($dataKontraktor->tanggal_mulai)->format('Y-m-d') : '') }}">
+        </div>
+
+        <!-- SAMPAI -->
+        <div>
+            <label class="text-[11px] font-medium text-gray-600 mb-1 block">
+                Tanggal Selesai
+            </label>
+            <input type="date"
+                name="tanggal_selesai"
+                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                value="{{ old('tanggal_selesai', isset($dataKontraktor) && $dataKontraktor->tanggal_selesai ? \Carbon\Carbon::parse($dataKontraktor->tanggal_selesai)->format('Y-m-d') : '') }}">
+        </div>
+
     </div>
 </div>
 

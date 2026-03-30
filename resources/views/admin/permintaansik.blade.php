@@ -52,24 +52,6 @@
             </select>
         </div>
 
-        {{-- Status Dokumen --}}
-        <div class="relative">
-            <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
-                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M9 12l2 2 4-4" />
-                    <path d="M12 3a9 9 0 1 0 9 9" />
-                </svg>
-            </span>
-            <select name="status" class="w-full pl-9 pr-3 py-2 border rounded-lg text-xs">
-                <option value="">Status Dokumen</option>
-                <option value="Menunggu" {{ request('status') == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
-                <option value="Perlu Disetujui" {{ request('status') == 'Perlu Disetujui' ? 'selected' : '' }}>Perlu Disetujui</option>
-                <option value="Disetujui" {{ request('status') == 'Disetujui' ? 'selected' : '' }}>Disetujui</option>
-                <option value="Perlu Revisi" {{ request('status') == 'Perlu Revisi' ? 'selected' : '' }}>Perlu Revisi</option>
-                <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
-            </select>
-        </div>
-
         {{-- Dari Bulan dan Tahun --}}
         <div class="flex gap-2 w-full">
             <div class="relative w-1/2">

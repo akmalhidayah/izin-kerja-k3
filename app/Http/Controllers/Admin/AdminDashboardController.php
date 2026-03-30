@@ -134,23 +134,7 @@ public function permintaanSIK(Request $request)
         $query->whereHas('assignedAdmin', fn($q) => $q->where('name', 'like', '%' . $request->admin . '%'));
     }
 
-    if ($request->filled('status')) {
-        $status = strtolower($request->status);
-
-        $query->whereHas('stepApprovals', function ($q) use ($status) {
-            if ($status === 'selesai') {
-                $q->where('step', 'bukti_serah_terima')->where('status', 'disetujui');
-            } elseif ($status === 'disetujui') {
-                $q->where('status', 'disetujui');
-            } elseif ($status === 'perlu disetujui') {
-                $q->where('status', 'perlu_disetujui');
-            } elseif ($status === 'perlu revisi') {
-                $q->where('status', 'revisi');
-            } elseif ($status === 'menunggu') {
-                $q->where('status', 'menunggu');
-            }
-        });
-    }
+   
 
     if ($request->filled('bulan_dari') && $request->filled('tahun_dari') &&
         $request->filled('bulan_sampai') && $request->filled('tahun_sampai')) {
