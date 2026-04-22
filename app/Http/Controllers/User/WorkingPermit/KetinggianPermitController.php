@@ -97,7 +97,9 @@ class KetinggianPermitController extends Controller
 
         // ✅ Simpan signature
 $existing = WorkPermitKetinggian::where('notification_id', $validated['notification_id'])->first();
-$detail = WorkPermitDetail::where('notification_id', $validated['notification_id'])->first();
+$detail = WorkPermitDetail::where('notification_id', $validated['notification_id'])
+    ->where('permit_type', 'ketinggian')
+    ->first();
 $closure = $detail
     ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
     : null;
@@ -181,9 +183,11 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
 
         // ✅ Simpan ke WorkPermitDetail
         $detail = WorkPermitDetail::updateOrCreate(
-            ['notification_id' => $validated['notification_id']],
             [
+                'notification_id' => $validated['notification_id'],
                 'permit_type' => 'ketinggian',
+            ],
+            [
                 'location' => $validated['lokasi_pekerjaan'] ?? null,
                 'work_date' => $validated['tanggal_pekerjaan'] ?? null,
                 'job_description' => $validated['uraian_pekerjaan'] ?? null,
@@ -272,13 +276,11 @@ private function saveSignature($base64, $role)
 public function preview($id)
 {
     $permit = \App\Models\WorkPermitKetinggian::where('notification_id', $id)->first();
-    $detail = \App\Models\WorkPermitDetail::where('notification_id', $id)->first();
-    $closure = $detail
-        ? \App\Models\WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-        : null;
+    $detail = $permit?->detail;
+    $closure = $permit?->closure;
 
     if (!$permit && !$detail) {
-        abort(404, 'Data izin kerja gas panas tidak ditemukan.');
+        abort(404, 'Data izin kerja ketinggian tidak ditemukan.');
     }
 
     return \Barryvdh\DomPDF\Facade\Pdf::loadView('pengajuan-user.workingpermit.ketinggianpdf', compact('permit', 'detail', 'closure'))

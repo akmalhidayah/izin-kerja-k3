@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Izin Kerja</title>
+    <title>Surat Penyelesaian Pekerjaan</title>
     <style>
         body { font-family: sans-serif; font-size: 12px; margin: 40px; line-height: 1.6; }
         h1, h2, h3, p { margin: 0; padding: 0; }
@@ -23,6 +23,12 @@
         7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
     ];
     $bulanSaatIni = $bulanRomawi[now()->format('n')];
+    $documentLabel = match (strtolower($notification->type ?? '')) {
+        'po' => 'No. PO',
+        'spk' => 'No. SPK',
+        'notif' => 'No. Notification',
+        default => 'No. Dokumen',
+    };
 @endphp
     {{-- HEADER FIXED --}}
     <header>
@@ -34,7 +40,7 @@
                 <td style="text-align: center;">
                     <div style="font-size: 14px; font-weight: bold;">PT. SEMEN TONASA</div>
                     <div>Utamakan Keselamatan dan Kesehatan Kerja</div>
-                    <div style="font-size: 13px; font-weight: bold; text-decoration: underline;">Surat Izin Kerja</div>
+                    <div style="font-size: 13px; font-weight: bold; text-decoration: underline;">Surat Penyelesaian Pekerjaan</div>
                     <div style="font-size: 12px;">No. {{ $notification->id }} / 22.4.0/SIK/ST/{{ $bulanSaatIni }} / {{ date('Y') }}</div>
                 </td>
                 <td style="width: 15%; text-align: right;">
@@ -55,11 +61,11 @@
 
         <br>
 
-        <p>Telah memenuhi persyaratan Keselamatan dan Kesehatan Kerja (K3) dan <strong>Diizinkan</strong> melakukan pekerjaan yang ditunjuk oleh PT. Semen Tonasa sesuai <strong>No. PO:</strong> {{ $notification->number ?? '-' }}, terhitung tanggal <strong>{{ \Carbon\Carbon::parse($dataKontraktor->tanggal_mulai)->translatedFormat('d F Y') }}</strong> s/d <strong>{{ \Carbon\Carbon::parse($dataKontraktor->tanggal_selesai)->translatedFormat('d F Y') }}</strong>.</p>
+        <p>Telah memenuhi persyaratan Keselamatan dan Kesehatan Kerja (K3) serta <strong>menyelesaikan</strong> pekerjaan yang ditunjuk oleh PT. Semen Tonasa sesuai <strong>{{ $documentLabel }}:</strong> {{ $notification->number ?? '-' }}, terhitung tanggal <strong>{{ \Carbon\Carbon::parse($dataKontraktor->tanggal_mulai)->translatedFormat('d F Y') }}</strong> s/d <strong>{{ \Carbon\Carbon::parse($dataKontraktor->tanggal_selesai)->translatedFormat('d F Y') }}</strong>.</p>
 
         <br>
 
-        <p>Demikian Surat Izin Kerja ini diberikan untuk dipergunakan sebagaimana mestinya kepada Perusahaan di atas dan tidak diperkenankan untuk dipindahtangankan kepada pihak lain.</p>
+        <p>Demikian Surat Penyelesaian Pekerjaan ini diberikan untuk dipergunakan sebagaimana mestinya kepada Perusahaan di atas dan tidak diperkenankan untuk dipindahtangankan kepada pihak lain.</p>
     </div>
 
     <div class="signature">
@@ -77,7 +83,7 @@
             @if($sikStep && $sikStep->signature_manager)
                 <img src="{{ public_path($sikStep->signature_manager) }}" alt="TTD Manager" style="height: 26px; vertical-align: middle; margin: 0 -6px;">
             @endif
-            <span style="margin-left: -2px;">/Surat Izin Kerja</span>
+            <span style="margin-left: -2px;">/Surat Penyelesaian Pekerjaan</span>
         </div>
     </div>
 

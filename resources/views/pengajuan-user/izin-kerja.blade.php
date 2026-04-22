@@ -980,15 +980,15 @@
     @endphp
 
     @if (!$prevStepApproved)
-        <span class="text-[10px] text-gray-400 italic mt-1">Menunggu Surat Izin Kerja dari K3 Semen Tonasa</span>
+        <span class="text-[10px] text-gray-400 italic mt-1">Menunggu Surat Penyelesaian Pekerjaan dari K3 Semen Tonasa</span>
     @else
         @if ($statusSik === 'disetujui')
             <a href="{{ route('izin-kerja.sik.pdf', $notification->id) }}" target="_blank"
                 class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
-                <i class="fas fa-file-pdf text-xs"></i> Lihat Surat Izin Kerja
+                <i class="fas fa-file-pdf text-xs"></i> Lihat Surat Penyelesaian Pekerjaan
             </a>
         @else
-            <span class="text-[10px] text-gray-500 italic">Surat Izin Kerja belum tersedia</span>
+            <span class="text-[10px] text-gray-500 italic">Surat Penyelesaian Pekerjaan belum tersedia</span>
         @endif
     @endif
 @endif
@@ -1090,8 +1090,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitGas' => $permitGas ?? null,
-                        'detail' => $detail ?? null,
-            'closure' => $closure ?? null
+            'detail' => $permitGas?->detail,
+            'closure' => $permitGas?->closure
         ])
 
         {{-- Modal Permit Air --}}
@@ -1101,8 +1101,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitAir' => $permitAir ?? null,
-                        'detail' => $detail ?? null,
-            'closure' => $closure ?? null
+            'detail' => $permitAir?->detail,
+            'closure' => $permitAir?->closure
         ])
                 {{-- Modal Permit Ketinggian --}}
         @include('components.steps.modal-working-permit-ketinggian', [
@@ -1111,8 +1111,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitKetinggian' => $permitKetinggian ?? null,
-                        'detail' => $detail ?? null,
-            'closure' => $closure ?? null
+            'detail' => $permitKetinggian?->detail,
+            'closure' => $permitKetinggian?->closure
         ])
         {{-- Modal Permit Ruang Tertutup --}}
         @include('components.steps.modal-working-permit-ruang-tertutup', [
@@ -1121,8 +1121,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitRuangTertutup' => $permitRuangTertutup ?? null,
-            'detail' => $detail ?? null,
-            'closure' => $closure ?? null
+            'detail' => $permitRuangTertutup?->detail,
+            'closure' => $permitRuangTertutup?->closure
         ])
         {{-- Modal Permit Perancah --}}
         @include('components.steps.modal-working-permit-perancah', [
@@ -1131,8 +1131,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitPerancah' => $permitPerancah ?? null,
-            'detail' => $detail ?? null,
-            'closure' => $closure ?? null
+            'detail' => $permitPerancah?->detail,
+            'closure' => $permitPerancah?->closure
         ])
         {{-- Modal Permit Risiko Panas --}}
         @include('components.steps.modal-working-permit-risiko-panas', [
@@ -1141,8 +1141,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitRisikoPanas' => $permitRisikoPanas ?? null,
-            'detail' => $detail ?? null,
-            'closure' => $closure ?? null
+            'detail' => $permitRisikoPanas?->detail,
+            'closure' => $permitRisikoPanas?->closure
         ])
 {{-- Modal Permit Beban --}}
 @include('components.steps.modal-working-permit-beban', [
@@ -1151,8 +1151,8 @@
     'notification' => $notification,
     'stepName' => $step['code'],
     'permitBeban' => $permitBeban ?? null,
-    'detail' => $detail ?? null,
-    'closure' => $closure ?? null
+    'detail' => $permitBeban?->detail,
+    'closure' => $permitBeban?->closure
 ])
 {{-- Modal Permit Penggalian --}}
 @include('components.steps.modal-working-permit-penggalian', [
@@ -1161,8 +1161,8 @@
     'notification' => $notification,
     'stepName' => $step['code'],
     'permitPenggalian' => $permitPenggalian ?? null,
-    'detail' => $detail ?? null,
-    'closure' => $closure ?? null
+    'detail' => $permitPenggalian?->detail,
+    'closure' => $permitPenggalian?->closure
 ])
 {{-- Modal Permit Pengangkatan --}}
 @include('components.steps.modal-working-permit-pengangkatan', [

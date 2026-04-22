@@ -14,6 +14,8 @@
         @include('components.permits.air', [
             'permit' => $permits['air'] ?? null,
             'notification' => $notification,
+            'detail' => $detail ?? (($permits['air'] ?? null)?->detail),
+            'closure' => $closure ?? (($permits['air'] ?? null)?->closure),
         ])
 
         <div class="flex justify-end gap-2 mt-6">

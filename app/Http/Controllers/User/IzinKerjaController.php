@@ -56,7 +56,7 @@ public function index(Request $request)
             'struktur_organisasi' => 'Upload Struktur Organisasi',
             'post_test' => 'Upload Dokumen Safety Induction',
             'bukti_serah_terima' => 'Upload BAST',
-            'surat_izin_kerja' => 'Surat Izin Kerja',
+            'surat_izin_kerja' => 'Surat Penyelesaian Pekerjaan',
         ];
 
         $steps = [];
@@ -102,7 +102,7 @@ public function index(Request $request)
         'struktur_organisasi' => 'Upload Struktur Organisasi',
         'post_test' => 'Upload Dokumen Safety Induction',
         'bukti_serah_terima' => 'Upload BAST',
-        'surat_izin_kerja' => 'Surat Izin Kerja',
+        'surat_izin_kerja' => 'Surat Penyelesaian Pekerjaan',
     ];
 
     $dataKontraktor = DataKontraktor::where('notification_id', $selectedId)->first();

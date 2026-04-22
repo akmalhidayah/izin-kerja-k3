@@ -148,9 +148,11 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
 
         // Simpan ke tabel detail (Bagian 1)
         $detail = WorkPermitDetail::updateOrCreate(
-            ['notification_id' => $notification_id],
-            array_filter([
+            [
+                'notification_id' => $notification_id,
                 'permit_type' => 'ruangtertutup',
+            ],
+            array_filter([
                 'location' => $validated['lokasi_pekerjaan'] ?? null,
                 'work_date' => $validated['tanggal_pekerjaan'] ?? null,
                 'job_description' => $validated['uraian_pekerjaan'] ?? null,
@@ -175,7 +177,7 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
         );
 
         if ($clearAllSignatures) {
-            $permit->forceFill([
+            $ruangTertutup->forceFill([
                 'signature_permit_requestor' => null,
                 'signature_confined_verificator' => null,
                 'signature_permit_issuer' => null,
@@ -241,10 +243,8 @@ public function storeByToken(Request $request, $token)
     public function preview($id)
     {
         $permit = WorkPermitRuangTertutup::where('notification_id', $id)->first();
-        $detail = WorkPermitDetail::where('notification_id', $id)->first();
-        $closure = $detail
-            ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-            : null;
+        $detail = $permit?->detail;
+        $closure = $permit?->closure;
 
         if (!$permit && !$detail) {
             abort(404, 'Data izin kerja ruang tertutup tidak ditemukan.');

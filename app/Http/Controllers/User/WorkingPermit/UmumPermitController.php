@@ -137,9 +137,11 @@ public function store(Request $request)
     );
 
     $detail = WorkPermitDetail::updateOrCreate(
-        ['notification_id' => $validated['notification_id']],
-        array_filter([
+        [
+            'notification_id' => $validated['notification_id'],
             'permit_type' => 'umum',
+        ],
+        array_filter([
             'location' => $request->input('lokasi_pekerjaan'),
             'work_date' => $request->input('tanggal_pekerjaan'),
             'job_description' => $request->input('uraian_pekerjaan'),
@@ -302,9 +304,11 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
         $permit->update(array_filter($validated, fn ($v) => $v !== null && $v !== ''));
  // ✅ Tambahkan bagian ini SETELAH update permit:
     $detail = WorkPermitDetail::updateOrCreate(
-        ['notification_id' => $permit->notification_id],
-        array_filter([
+        [
+            'notification_id' => $permit->notification_id,
             'permit_type' => 'umum',
+        ],
+        array_filter([
             'location' => $request->input('lokasi_pekerjaan'),
             'work_date' => $request->input('tanggal_pekerjaan'),
             'job_description' => $request->input('uraian_pekerjaan'),
@@ -353,15 +357,13 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
  public function preview($id)
 {
     $permit = UmumWorkPermit::where('notification_id', $id)->first();
-    $detail = WorkPermitDetail::where('notification_id', $id)->first();
+    $detail = $permit?->detail;
 
     if (!$permit && !$detail) {
         abort(404, 'Data izin kerja umum tidak ditemukan.');
     }
 
-    $closure = $detail
-        ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-        : null;
+    $closure = $permit?->closure;
 
     // ✅ Tambahan: konversi izin_khusus menjadi array
     $permit->izin_khusus = is_array($permit->izin_khusus)

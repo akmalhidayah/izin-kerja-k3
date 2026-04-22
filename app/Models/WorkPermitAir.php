@@ -64,7 +64,8 @@ class WorkPermitAir extends Model
     ];
 public function detail()
 {
-    return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id');
+    return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id')
+        ->where('permit_type', 'air');
 }
 
     public function closure()
@@ -76,7 +77,7 @@ public function detail()
         'work_permit_detail_id', // Foreign key di WorkPermitClosure
         'notification_id', // Local key di WorkPermitAir
         'id' // Local key di WorkPermitDetail
-    );
+    )->where('permit_type', 'air');
 }
 
 }

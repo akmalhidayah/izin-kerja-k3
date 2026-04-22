@@ -12,7 +12,11 @@
 
         {{-- Langsung tampilkan permit UMUM --}}
         <div>
-@include('components.permits.umum', ['permit' => $permits['umum'] ?? null])
+@include('components.permits.umum', [
+    'permit' => $permits['umum'] ?? null,
+    'detail' => ($permits['umum'] ?? null)?->detail,
+    'closure' => ($permits['umum'] ?? null)?->closure,
+])
 
         </div>
 

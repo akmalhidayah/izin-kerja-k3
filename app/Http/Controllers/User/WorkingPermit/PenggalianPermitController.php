@@ -151,9 +151,11 @@ $validated['file_denah'] = $path;
         }
 
         $detail = WorkPermitDetail::updateOrCreate(
-            ['notification_id' => $notification_id],
-            array_filter([
+            [
+                'notification_id' => $notification_id,
                 'permit_type' => 'penggalian',
+            ],
+            array_filter([
                 'location' => $validated['lokasi_pekerjaan'] ?? null,
                 'work_date' => $validated['tanggal_pekerjaan'] ?? null,
                 'job_description' => $validated['uraian_pekerjaan'] ?? null,
@@ -209,10 +211,8 @@ $validated['file_denah'] = $path;
     public function preview($id)
     {
         $permit = WorkPermitPenggalian::where('notification_id', $id)->first();
-        $detail = WorkPermitDetail::where('notification_id', $id)->first();
-        $closure = $detail
-            ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-            : null;
+        $detail = $permit?->detail;
+        $closure = $permit?->closure;
 
         if (!$permit && !$detail) {
             abort(404, 'Data izin kerja penggalian tidak ditemukan.');

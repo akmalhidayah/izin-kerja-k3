@@ -143,15 +143,17 @@ $validated['signature_permit_receiver'] = $this->saveSignature(
             ['notification_id' => $validated['notification_id']],
             array_merge(
                 $validated,
-                ['token' => Str::uuid()]
+                ['token' => $existing?->token ?? Str::uuid()]
             )
         );
 
         // Simpan detail
         $detail = WorkPermitDetail::updateOrCreate(
-            ['notification_id' => $validated['notification_id']],
-            array_filter([
+            [
+                'notification_id' => $validated['notification_id'],
                 'permit_type' => 'beban',
+            ],
+            array_filter([
                 'location' => $validated['lokasi_pekerjaan'] ?? null,
                 'work_date' => $validated['tanggal_pekerjaan'] ?? null,
                 'job_description' => $validated['uraian_pekerjaan'] ?? null,
@@ -250,10 +252,8 @@ public function storeByToken(Request $request, $token)
 public function preview($id)
 {
     $permit = WorkPermitBeban::where('notification_id', $id)->first();
-    $detail = WorkPermitDetail::where('notification_id', $id)->first();
-    $closure = $detail
-        ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-        : null;
+    $detail = $permit?->detail;
+    $closure = $permit?->closure;
 
     if (!$permit && !$detail) {
         abort(404, 'Data izin kerja pengangkatan beban tidak ditemukan.');

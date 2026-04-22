@@ -143,9 +143,11 @@ $validated['receiver_signature'] = $this->saveSignature($request->input('receive
 
         // Simpan ke tabel detail
         $detail = WorkPermitDetail::updateOrCreate(
-            ['notification_id' => $validated['notification_id']],
-            array_filter([
+            [
+                'notification_id' => $validated['notification_id'],
                 'permit_type' => 'risiko-panas',
+            ],
+            array_filter([
                 'location' => $validated['lokasi_pekerjaan'] ?? null,
                 'work_date' => $validated['tanggal_pekerjaan'] ?? null,
                 'job_description' => $validated['uraian_pekerjaan'] ?? null,
@@ -244,10 +246,8 @@ $validated['receiver_signature'] = $this->saveSignature($request->input('receive
 public function preview($id)
 {
     $permit = \App\Models\WorkPermitRisikoPanas::where('notification_id', $id)->first();
-    $detail = \App\Models\WorkPermitDetail::where('notification_id', $id)->first();
-    $closure = $detail
-        ? \App\Models\WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-        : null;
+    $detail = $permit?->detail;
+    $closure = $permit?->closure;
 
     if (!$permit && !$detail) {
         abort(404, 'Data izin kerja risiko panas tidak ditemukan.');

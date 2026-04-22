@@ -52,34 +52,66 @@
             <!-- Dynamic Includes -->
 <!-- Dynamic Includes -->
 <div x-show="selectedPermit === 'gaspanas'" x-cloak>
-    @include('components.permits.gaspanas', ['permit' => $permits['gaspanas'] ?? null])
+    @include('components.permits.gaspanas', [
+        'permit' => $permits['gaspanas'] ?? null,
+        'detail' => ($permits['gaspanas'] ?? null)?->detail,
+        'closure' => ($permits['gaspanas'] ?? null)?->closure,
+    ])
 </div>
 <div x-show="selectedPermit === 'air'" x-cloak>
-    @include('components.permits.air', ['permit' => $permits['air'] ?? null])
+    @include('components.permits.air', [
+        'permit' => $permits['air'] ?? null,
+        'detail' => ($permits['air'] ?? null)?->detail,
+        'closure' => ($permits['air'] ?? null)?->closure,
+    ])
 </div>
 <div x-show="selectedPermit === 'ketinggian'" x-cloak>
-    @include('components.permits.ketinggian', ['permit' => $permits['ketinggian'] ?? null])
+    @include('components.permits.ketinggian', [
+        'permit' => $permits['ketinggian'] ?? null,
+        'detail' => ($permits['ketinggian'] ?? null)?->detail,
+        'closure' => ($permits['ketinggian'] ?? null)?->closure,
+    ])
 </div>
 <div x-show="selectedPermit === 'pengangkatan'" x-cloak>
     @include('components.permits.pengangkatan', ['permit' => $permits['pengangkatan'] ?? null])
 </div>
 <div x-show="selectedPermit === 'penggalian'" x-cloak>
-    @include('components.permits.penggalian', ['permit' => $permits['penggalian'] ?? null])
+    @include('components.permits.penggalian', [
+        'permit' => $permits['penggalian'] ?? null,
+        'detail' => ($permits['penggalian'] ?? null)?->detail,
+        'closure' => ($permits['penggalian'] ?? null)?->closure,
+    ])
 </div>
 <div x-show="selectedPermit === 'beban'" x-cloak>
-    @include('components.permits.beban', ['permit' => $permits['beban'] ?? null])
+    @include('components.permits.beban', [
+        'permit' => $permits['beban'] ?? null,
+        'detail' => ($permits['beban'] ?? null)?->detail,
+        'closure' => ($permits['beban'] ?? null)?->closure,
+    ])
 </div>
 <div x-show="selectedPermit === 'panas-risiko'" x-cloak>
-    @include('components.permits.risiko-panas', ['permit' => $permits['panas-risiko'] ?? null])
+    @include('components.permits.risiko-panas', [
+        'permit' => $permits['risiko-panas'] ?? null,
+        'detail' => ($permits['risiko-panas'] ?? null)?->detail,
+        'closure' => ($permits['risiko-panas'] ?? null)?->closure,
+    ])
 </div>
 <div x-show="selectedPermit === 'ruang-tertutup'" x-cloak>
-    @include('components.permits.ruang-tertutup', ['permit' => $permits['ruang-tertutup'] ?? null])
+    @include('components.permits.ruang-tertutup', [
+        'permit' => $permits['ruang-tertutup'] ?? null,
+        'detail' => ($permits['ruang-tertutup'] ?? null)?->detail,
+        'closure' => ($permits['ruang-tertutup'] ?? null)?->closure,
+    ])
 </div>
 <div x-show="selectedPermit === 'lifesaving'" x-cloak>
     @include('components.permits.lifesaving', ['permit' => $permits['lifesaving'] ?? null])
 </div>
 <div x-show="selectedPermit === 'perancah'" x-cloak>
-    @include('components.permits.perancah', ['permit' => $permits['perancah'] ?? null])
+    @include('components.permits.perancah', [
+        'permit' => $permits['perancah'] ?? null,
+        'detail' => ($permits['perancah'] ?? null)?->detail,
+        'closure' => ($permits['perancah'] ?? null)?->closure,
+    ])
 </div>
 <div x-show="selectedPermit === 'procedures'" x-cloak>
     @include('components.permits.procedures', ['permit' => $permits['procedures'] ?? null])

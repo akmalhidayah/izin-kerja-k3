@@ -148,9 +148,11 @@ if ($request->hasFile('sketsa_perancah_file')) {
 
         // Simpan ke tabel work_permit_details
         $detail = WorkPermitDetail::updateOrCreate(
-            ['notification_id' => $request->notification_id],
-            array_filter([
+            [
+                'notification_id' => $request->notification_id,
                 'permit_type' => 'perancah',
+            ],
+            array_filter([
                 'location' => $request->lokasi_pekerjaan,
                 'work_date' => $request->tanggal_pekerjaan,
                 'job_description' => $request->uraian_pekerjaan,
@@ -244,10 +246,8 @@ if ($request->hasFile('sketsa_perancah_file')) {
     public function preview($id)
     {
         $permit = WorkPermitPerancah::where('notification_id', $id)->first();
-        $detail = WorkPermitDetail::where('notification_id', $id)->first();
-        $closure = $detail
-            ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-            : null;
+        $detail = $permit?->detail;
+        $closure = $permit?->closure;
 
         if (!$permit && !$detail) {
             abort(404, 'Data izin kerja perancah tidak ditemukan.');

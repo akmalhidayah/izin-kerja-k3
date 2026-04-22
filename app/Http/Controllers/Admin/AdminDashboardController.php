@@ -182,7 +182,7 @@ public function permintaanSIK(Request $request)
         'struktur_organisasi' => 'Upload Struktur Organisasi',
         'post_test' => 'Upload Post Test',
         'bukti_serah_terima' => 'Upload Bukti Serah Terima',
-        'sik' => 'Surat Izin Kerja',
+        'sik' => 'Surat Penyelesaian Pekerjaan',
     ];
     $stepKeys = array_keys($stepTitles);
     $totalSteps = count($stepTitles);

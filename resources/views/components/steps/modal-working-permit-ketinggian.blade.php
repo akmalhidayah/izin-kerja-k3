@@ -9,6 +9,8 @@
         @include('components.permits.ketinggian', [
             'permit' => $permitKetinggian ?? null,
             'notification' => $notification,
+            'detail' => $detail ?? ($permitKetinggian?->detail),
+            'closure' => $closure ?? ($permitKetinggian?->closure),
         ])
 
         <div class="flex justify-end gap-2 mt-6">
