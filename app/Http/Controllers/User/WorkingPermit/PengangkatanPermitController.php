@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User\WorkingPermit;
 
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -151,5 +152,18 @@ public function store(Request $request)
         file_put_contents($path . $filename, base64_decode($image));
 
         return 'storage/' . $folder . $filename;
+    }
+
+    public function preview($id)
+    {
+        $permit = WorkPermitPengangkatan::where('notification_id', $id)->first();
+
+        if (!$permit) {
+            abort(404, 'Data izin kerja pengangkatan tidak ditemukan.');
+        }
+
+        return Pdf::loadView('pengajuan-user.workingpermit.pengangkatanpdf', compact('permit'))
+            ->setPaper('A4')
+            ->stream('izin-kerja-pengangkatan.pdf');
     }
 }

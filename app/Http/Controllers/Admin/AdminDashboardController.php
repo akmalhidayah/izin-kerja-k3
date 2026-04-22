@@ -105,6 +105,27 @@ public function index()
         ->sortByDesc('created_at')
         ->take(5)
         ->values();
+    
+    // =========================
+// 📈 DATA CHART BULANAN (1 TAHUN)
+// =========================
+$currentYear = request('year', now()->year);
+$years = \App\Models\Notification::selectRaw('YEAR(created_at) as year')
+    ->distinct()
+    ->orderByDesc('year')
+    ->pluck('year');
+
+$monthlyRaw = \App\Models\Notification::selectRaw('MONTH(created_at) as bulan, COUNT(*) as total')
+    ->whereYear('created_at', $currentYear)
+    ->groupBy('bulan')
+    ->pluck('total', 'bulan');
+
+// mapping ke 12 bulan (biar tidak bolong)
+$monthlyChart = [];
+
+for ($i = 1; $i <= 12; $i++) {
+    $monthlyChart[] = $monthlyRaw[$i] ?? 0;
+}
 
     return view('admin.dashboard', [
         'summaryRequests' => $summaryRequests,
@@ -114,6 +135,9 @@ public function index()
         'topVendorUser' => $topVendorUser,
 
         'recentRequests' => $recentRequests,
+        'monthlyChart' => $monthlyChart,
+        'years' => $years,
+'selectedYear' => $currentYear,
     ]);
 }
 public function permintaanSIK(Request $request)

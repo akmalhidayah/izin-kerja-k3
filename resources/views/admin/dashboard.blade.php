@@ -120,44 +120,82 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-    <!-- LEFT (CHART 2 COL) -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 lg:col-span-2">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
-                <i class="fas fa-chart-area text-blue-500"></i>
-                Statistik Pengajuan Vendor & Karyawan
-            </h2>
+    <!-- LEFT (CHART AREA) -->
+    <div class="lg:col-span-2 space-y-6">
+
+        <!-- ========================= -->
+        <!-- 🔥 CHART EXISTING -->
+        <!-- ========================= -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-chart-area text-blue-500"></i>
+                    Statistik Pengajuan Vendor & Karyawan
+                </h2>
+            </div>
+
+            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 pt-6 pb-8">
+
+                @if ($topVendorPgo->isNotEmpty() || $topVendorUser->isNotEmpty())
+
+                    <!-- 🟢 VENDOR -->
+                    <div class="mb-6">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                            <h3 class="text-xs font-semibold text-gray-700">Top 10 Pengajuan SIK Vendor</h3>
+                        </div>
+                        <canvas id="chartVendor" height="120"></canvas>
+                    </div>
+
+                    <!-- 🔵 PGO -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                            <h3 class="text-xs font-semibold text-gray-700">Top 5 Pengajuan SIK Karyawan</h3>
+                        </div>
+                        <canvas id="chartPgo" height="120"></canvas>
+                    </div>
+
+                @else
+                    <div class="py-10 text-center text-sm text-gray-500">
+                        Belum ada data vendor.
+                    </div>
+                @endif
+
+            </div>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 pt-6 pb-8">
+        <!-- ========================= -->
+        <!-- 🔥 NEW: CHART BULANAN -->
+        <!-- ========================= -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-indigo-500"></i>
+Tren Pengajuan Izin Kerja ({{ $selectedYear }})
+                </h2>
+                 <!-- 🔥 DROPDOWN TAHUN -->
+    <form method="GET">
+        <select name="year" onchange="this.form.submit()"
+            class="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500">
 
-            @if ($topVendorPgo->isNotEmpty() || $topVendorUser->isNotEmpty())
+            @foreach ($years as $year)
+                <option value="{{ $year }}" 
+                    {{ $year == $selectedYear ? 'selected' : '' }}>
+                    {{ $year }}
+                </option>
+            @endforeach
 
+        </select>
+    </form>
 
-                <!-- 🟢 VENDOR -->
-                  <div class="mb-6">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                        <h3 class="text-xs font-semibold text-gray-700">Top 10 Pengajuan SIK Vendor</h3>
-                    </div>
-                    <canvas id="chartVendor" height="120"></canvas>
-                </div>
-                 <!-- 🔵 PGO -->
-                <div class="mb-8">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
-                        <h3 class="text-xs font-semibold text-gray-700">Top 5 Pengajuan SIK Karyawan</h3>
-                    </div>
-                    <canvas id="chartPgo" height="120"></canvas>
-                </div>
+            </div>
 
-            @else
-                <div class="py-10 text-center text-sm text-gray-500">
-                    Belum ada data vendor.
-                </div>
-            @endif
-
+            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 pt-6 pb-8">
+                <canvas id="monthlyChart" height="100"></canvas>
+            </div>
         </div>
+
     </div>
 
     <!-- RIGHT SIDEBAR -->
@@ -362,7 +400,109 @@ const counters = document.querySelectorAll('.counter');
 
         requestAnimationFrame(animate);
     });
+// ======================
+// 🔥 MONTHLY CHART (TAHUNAN)
+// ======================
+const ctxMonthly = document.getElementById('monthlyChart');
 
+if (ctxMonthly) {
+
+    const labels = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
+
+    const data = @json($monthlyChart);
+
+    // 🔥 GRADIENT
+    const gradient = ctxMonthly.getContext('2d').createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.25)');
+gradient.addColorStop(1, 'rgba(37, 99, 235, 0.03)');
+
+    new Chart(ctxMonthly, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Pengajuan',
+                data: data,
+                bborderColor: 'rgba(37, 99, 235, 1)',
+                backgroundColor: gradient,
+                fill: true,
+
+                // 🔥 smooth line
+                tension: 0.5,
+                cubicInterpolationMode: 'monotone',
+
+                // 🔥 titik
+                pointRadius: 4,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: 'rgba(37, 99, 235, 1)',
+                pointBorderWidth: 2,
+
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            // 🔥 animasi naik dari bawah
+            animation: {
+                duration: 1400,
+                easing: 'easeInOutQuart'
+            },
+            animations: {
+                y: {
+                    from: 0
+                }
+            },
+
+            interaction: {
+                intersect: false,
+                mode: 'nearest'
+            },
+
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#111827',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 10,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return context.raw + ' pengajuan';
+                        }
+                    }
+                }
+            },
+
+            elements: {
+                line: {
+                    borderJoinStyle: 'round'
+                }
+            },
+
+            scales: {
+                x: {
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 10 // opsional
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                }
+            }
+        }
+    });
+}
     // ======================
     // 🔵 PIE CHART ADMIN
     // ======================

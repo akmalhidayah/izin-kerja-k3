@@ -7,14 +7,14 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-sm text-gray-800 dark:text-gray-200 leading-tight">
-            WORKING PERMIT GAS PANAS
+            WORKING PERMIT PENGANGKATAN
         </h2>
     </x-slot>
 
     <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
         <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
 
-  <form method="POST" action="{{ route('working-permit.pengangkatan.token.store', $permit->token) }}">
+  <form method="POST" action="{{ route('working-permit.pengangkatan.token.store', $permit->token) }}" enctype="multipart/form-data">
     @csrf
 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 
