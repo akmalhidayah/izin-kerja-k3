@@ -376,9 +376,13 @@
     <input type="hidden" name="signature_permit_authorizer"
         id="signature_permit_authorizer_perancah"
         value="{{ old('signature_permit_authorizer', $permit->signature_permit_authorizer ?? '') }}">
-    @if(old('signature_permit_authorizer', $permit->signature_permit_authorizer ?? null))
-        <img src="{{ asset(old('signature_permit_authorizer', $permit->signature_permit_authorizer)) }}" alt="TTD" class="h-12 mx-auto mt-1">
-    @endif
+   @php
+    $signaturePermitAuthorizer = old('signature_permit_authorizer', $permit->signature_permit_authorizer ?? '');
+@endphp
+
+@if($signaturePermitAuthorizer)
+    <img src="{{ asset($signaturePermitAuthorizer) }}" alt="TTD" class="h-12 mx-auto mt-1">
+@endif
 </td>
 
                 <td class="border text-center px-2 py-2">
