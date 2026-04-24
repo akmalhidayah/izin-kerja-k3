@@ -407,6 +407,8 @@
     ? \App\Models\WorkPermitPengangkatan::where('notification_id', $notification->id)->first()
     : null;
 
+    $permitUmumDetail = $permitUmum?->detail;
+    $permitUmumClosure = $permitUmum?->closure;
 
 
 @endphp
@@ -1090,8 +1092,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitGas' => $permitGas ?? null,
-            'detail' => $permitGas?->detail,
-            'closure' => $permitGas?->closure
+            'detail' => $permitGas?->detail ?? $permitUmumDetail,
+            'closure' => $permitGas?->closure ?? $permitUmumClosure
         ])
 
         {{-- Modal Permit Air --}}
@@ -1101,8 +1103,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitAir' => $permitAir ?? null,
-            'detail' => $permitAir?->detail,
-            'closure' => $permitAir?->closure
+            'detail' => $permitAir?->detail ?? $permitUmumDetail,
+            'closure' => $permitAir?->closure ?? $permitUmumClosure
         ])
                 {{-- Modal Permit Ketinggian --}}
         @include('components.steps.modal-working-permit-ketinggian', [
@@ -1111,8 +1113,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitKetinggian' => $permitKetinggian ?? null,
-            'detail' => $permitKetinggian?->detail,
-            'closure' => $permitKetinggian?->closure
+            'detail' => $permitKetinggian?->detail ?? $permitUmumDetail,
+            'closure' => $permitKetinggian?->closure ?? $permitUmumClosure
         ])
         {{-- Modal Permit Ruang Tertutup --}}
         @include('components.steps.modal-working-permit-ruang-tertutup', [
@@ -1121,8 +1123,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitRuangTertutup' => $permitRuangTertutup ?? null,
-            'detail' => $permitRuangTertutup?->detail,
-            'closure' => $permitRuangTertutup?->closure
+            'detail' => $permitRuangTertutup?->detail ?? $permitUmumDetail,
+            'closure' => $permitRuangTertutup?->closure ?? $permitUmumClosure
         ])
         {{-- Modal Permit Perancah --}}
         @include('components.steps.modal-working-permit-perancah', [
@@ -1131,8 +1133,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitPerancah' => $permitPerancah ?? null,
-            'detail' => $permitPerancah?->detail,
-            'closure' => $permitPerancah?->closure
+            'detail' => $permitPerancah?->detail ?? $permitUmumDetail,
+            'closure' => $permitPerancah?->closure ?? $permitUmumClosure
         ])
         {{-- Modal Permit Risiko Panas --}}
         @include('components.steps.modal-working-permit-risiko-panas', [
@@ -1141,8 +1143,8 @@
             'notification' => $notification,
             'stepName' => $step['code'],
             'permitRisikoPanas' => $permitRisikoPanas ?? null,
-            'detail' => $permitRisikoPanas?->detail,
-            'closure' => $permitRisikoPanas?->closure
+            'detail' => $permitRisikoPanas?->detail ?? $permitUmumDetail,
+            'closure' => $permitRisikoPanas?->closure ?? $permitUmumClosure
         ])
 {{-- Modal Permit Beban --}}
 @include('components.steps.modal-working-permit-beban', [
@@ -1151,8 +1153,8 @@
     'notification' => $notification,
     'stepName' => $step['code'],
     'permitBeban' => $permitBeban ?? null,
-    'detail' => $permitBeban?->detail,
-    'closure' => $permitBeban?->closure
+    'detail' => $permitBeban?->detail ?? $permitUmumDetail,
+    'closure' => $permitBeban?->closure ?? $permitUmumClosure
 ])
 {{-- Modal Permit Penggalian --}}
 @include('components.steps.modal-working-permit-penggalian', [
@@ -1161,8 +1163,8 @@
     'notification' => $notification,
     'stepName' => $step['code'],
     'permitPenggalian' => $permitPenggalian ?? null,
-    'detail' => $permitPenggalian?->detail,
-    'closure' => $permitPenggalian?->closure
+    'detail' => $permitPenggalian?->detail ?? $permitUmumDetail,
+    'closure' => $permitPenggalian?->closure ?? $permitUmumClosure
 ])
 {{-- Modal Permit Pengangkatan --}}
 @include('components.steps.modal-working-permit-pengangkatan', [
@@ -1171,8 +1173,8 @@
     'notification' => $notification,
     'stepName' => $step['code'],
     'permitPengangkatan' => $permitPengangkatan ?? null,
-    'detail' => $detail ?? null,
-    'closure' => $closure ?? null
+    'detail' => $permitPengangkatan?->detail ?? $permitUmumDetail,
+    'closure' => $permitPengangkatan?->closure ?? $permitUmumClosure
 ])
         {{-- Modal Permit Lainnya --}}
         @include('components.steps.modal-tambah-lainnya', [

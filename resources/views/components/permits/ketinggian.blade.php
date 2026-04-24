@@ -621,8 +621,9 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                     @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
                         <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
                     @else
-                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <button type="button" onclick="openSignPad('ketinggian_signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
+                    <input type="hidden" name="signature_close_requestor" id="ketinggian_signature_close_requestor" value="{{ $closeRequestorSign }}">
                 </td>
 
                 <!-- Issuer -->
@@ -631,9 +632,9 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                     @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
                         <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
                     @else
-                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <button type="button" onclick="openSignPad('ketinggian_signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
-                
+                    <input type="hidden" name="signature_close_issuer" id="ketinggian_signature_close_issuer" value="{{ $closeIssuerSign }}">
                 </td>
             </tr>
         </tbody>

@@ -751,7 +751,7 @@
 <!-- Tombol Simpan -->
 <div class="flex justify-center gap-3 mt-8">
     <button type="button"
-        onclick="if (confirm('Hapus semua tanda tangan?')) { document.getElementById('clear_all_signatures').value = '1'; this.closest('form').submit(); }"
+        onclick="if (confirm('Hapus semua tanda tangan?')) { this.closest('form').querySelector('[name=clear_all_signatures]').value = '1'; this.closest('form').submit(); }"
         class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
         Hapus Semua TTD
     </button>

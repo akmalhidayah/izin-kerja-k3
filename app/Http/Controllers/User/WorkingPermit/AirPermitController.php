@@ -73,15 +73,16 @@ class AirPermitController extends Controller
             'permit_receiver_time' => 'nullable',
 
             // Bagian 10 (Closure)
-            'lock_tag' => 'nullable|string',
-            'sampah_peralatan' => 'nullable|string',
-            'machine_guarding' => 'nullable|string',
-            'penutupan_tanggal' => 'nullable|date',
-            'penutupan_jam' => 'nullable',
-            'requestor_name' => 'nullable|string',
-            'requestor_signature' => 'nullable|string',
-            'issuer_name' => 'nullable|string',
-            'issuer_signature' => 'nullable|string',
+            'close_lock_tag' => 'nullable|string',
+            'close_tools' => 'nullable|string',
+            'close_guarding' => 'nullable|string',
+            'close_date' => 'nullable|date',
+            'close_time' => 'nullable',
+            'close_requestor_name' => 'nullable|string',
+            'signature_close_requestor' => 'nullable|string',
+            'close_issuer_name' => 'nullable|string',
+            'signature_close_issuer' => 'nullable|string',
+            'jumlah_rfid' => 'nullable|integer|min:0',
         ])->validate();
 
         if (!$request->boolean('_token_access')) {
@@ -127,10 +128,10 @@ class AirPermitController extends Controller
         $validated['signature_permit_receiver'] = $this->saveSignature($request->input('signature_permit_receiver'), 'receiver')
             ?? $existing?->signature_permit_receiver;
 
-        $validated['requestor_signature'] = $this->saveSignature($request->input('requestor_signature'), 'close_requestor')
+        $validated['signature_close_requestor'] = $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor')
             ?? ($existingClosure?->requestor_sign ?? null);
 
-        $validated['issuer_signature'] = $this->saveSignature($request->input('issuer_signature'), 'close_issuer')
+        $validated['signature_close_issuer'] = $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer')
             ?? ($existingClosure?->issuer_sign ?? null);
 
 
@@ -213,15 +214,16 @@ if (!$permit->token) {
 
         // Closure logic aman
         $closure = WorkPermitClosure::firstOrNew(['work_permit_detail_id' => $detail->id]);
-        $closure->lock_tag_removed = $request->filled('lock_tag') ? $request->input('lock_tag') === 'ya' : $closure->lock_tag_removed;
-        $closure->equipment_cleaned = $request->filled('sampah_peralatan') ? $request->input('sampah_peralatan') === 'ya' : $closure->equipment_cleaned;
-        $closure->guarding_restored = $request->filled('machine_guarding') ? $request->input('machine_guarding') === 'ya' : $closure->guarding_restored;
-        $closure->closed_date = $validated['penutupan_tanggal'] ?? $closure->closed_date;
-        $closure->closed_time = $validated['penutupan_jam'] ?? $closure->closed_time;
-        $closure->requestor_name = $validated['requestor_name'] ?? $closure->requestor_name;
-        $closure->requestor_sign = $validated['requestor_signature'] ?? $closure->requestor_sign;
-        $closure->issuer_name = $validated['issuer_name'] ?? $closure->issuer_name;
-        $closure->issuer_sign = $validated['issuer_signature'] ?? $closure->issuer_sign;
+        $closure->lock_tag_removed = $request->filled('close_lock_tag') ? $request->input('close_lock_tag') === 'ya' : $closure->lock_tag_removed;
+        $closure->equipment_cleaned = $request->filled('close_tools') ? $request->input('close_tools') === 'ya' : $closure->equipment_cleaned;
+        $closure->guarding_restored = $request->filled('close_guarding') ? $request->input('close_guarding') === 'ya' : $closure->guarding_restored;
+        $closure->closed_date = $validated['close_date'] ?? $closure->closed_date;
+        $closure->closed_time = $validated['close_time'] ?? $closure->closed_time;
+        $closure->requestor_name = $validated['close_requestor_name'] ?? $closure->requestor_name;
+        $closure->requestor_sign = $validated['signature_close_requestor'] ?? $closure->requestor_sign;
+        $closure->issuer_name = $validated['close_issuer_name'] ?? $closure->issuer_name;
+        $closure->issuer_sign = $validated['signature_close_issuer'] ?? $closure->issuer_sign;
+        $closure->jumlah_rfid = $validated['jumlah_rfid'] ?? $closure->jumlah_rfid;
         $closure->save();
 
         if ($clearAllSignatures) {
@@ -273,7 +275,9 @@ public function storeByToken(Request $request, $token)
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+        if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
         $folder = 'signatures/working-permit/air/';
         $filename = $role . '_' . Str::random(10) . '.png';
         $path = storage_path('app/public/' . $folder);

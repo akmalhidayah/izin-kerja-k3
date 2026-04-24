@@ -78,8 +78,11 @@ class KetinggianPermitController extends Controller
             'close_guarding' => 'nullable|string',
             'close_date' => 'nullable|date',
             'close_time' => 'nullable',
+            'close_requestor_name' => 'nullable|string',
+            'close_issuer_name' => 'nullable|string',
             'signature_close_requestor' => 'nullable|string',
             'signature_close_issuer' => 'nullable|string',
+            'jumlah_rfid' => 'nullable|integer|min:0',
         ])->validate();
 
         if (!$request->boolean('_token_access')) {
@@ -206,8 +209,11 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
                 'guarding_restored' => $request->input('close_guarding') === 'ya',
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
-        'requestor_sign' => $requestor_sign,
-        'issuer_sign' => $issuer_sign,
+                'requestor_name' => $validated['close_requestor_name'] ?? null,
+                'requestor_sign' => $requestor_sign,
+                'issuer_name' => $validated['close_issuer_name'] ?? null,
+                'issuer_sign' => $issuer_sign,
+                'jumlah_rfid' => $validated['jumlah_rfid'] ?? null,
             ]
         );
 
@@ -263,7 +269,9 @@ private function saveSignature($base64, $role)
 {
     \Log::info("[$role] Signature Input: " . substr($base64, 0, 30)); // Potong biar ga kepanjangan
 
-    if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+    if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
     $folder = 'signatures/working-permit/ketinggian/';
     $filename = $role . '_' . Str::random(10) . '.png';

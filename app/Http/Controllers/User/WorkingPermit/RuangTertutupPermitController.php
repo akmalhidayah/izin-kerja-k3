@@ -86,8 +86,11 @@ class RuangTertutupPermitController extends Controller
                 'close_guarding' => 'nullable|string',
                 'close_date' => 'nullable|date',
                 'close_time' => 'nullable',
+                'close_requestor_name' => 'nullable|string',
+                'close_issuer_name' => 'nullable|string',
                 'signature_close_requestor' => 'nullable|string',
                 'signature_close_issuer' => 'nullable|string',
+                'jumlah_rfid' => 'nullable|integer|min:0',
             ])->validate();
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
@@ -171,8 +174,11 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
                 'guarding_restored' => $request->input('close_guarding') === 'ya',
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
+                'requestor_name' => $validated['close_requestor_name'] ?? null,
                 'requestor_sign' => $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor'),
+                'issuer_name' => $validated['close_issuer_name'] ?? null,
                 'issuer_sign' => $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer'),
+                'jumlah_rfid' => $validated['jumlah_rfid'] ?? null,
             ], fn($v) => $v !== null && $v !== '')
         );
 
@@ -225,7 +231,9 @@ public function storeByToken(Request $request, $token)
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+        if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
         $folder = 'signatures/working-permit/ruangtertutup/';
         $filename = $role . '_' . Str::random(10) . '.png';

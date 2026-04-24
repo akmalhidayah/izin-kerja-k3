@@ -228,7 +228,9 @@ if ($request->hasFile('sketsa_perancah_file')) {
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+        if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
         $folder = 'signatures/working-permit/perancah/';
         $filename = $role . '_' . Str::random(10) . '.png';

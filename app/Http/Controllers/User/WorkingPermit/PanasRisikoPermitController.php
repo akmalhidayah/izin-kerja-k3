@@ -73,6 +73,7 @@ class PanasRisikoPermitController extends Controller
 'signature_close_requestor' => 'nullable|string',
 'close_issuer_name' => 'nullable|string',
 'signature_close_issuer' => 'nullable|string',
+'jumlah_rfid' => 'nullable|integer|min:0',
 
 
                 // Detail
@@ -99,9 +100,17 @@ class PanasRisikoPermitController extends Controller
         }
         $clearAllSignatures = $request->boolean('clear_all_signatures');
 
-        $validated['requestor_signature_close'] = $this->saveSignature($request->input('requestor_signature_close'), 'close_requestor');
-        $validated['issuer_signature_close'] = $this->saveSignature($request->input('issuer_signature_close'), 'close_issuer');
+        $closeRequestorSign = $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor');
+        $closeIssuerSign = $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer');
 $existing = WorkPermitRisikoPanas::where('notification_id', $validated['notification_id'])->first();
+
+if ($closeRequestorSign) {
+    $validated['requestor_signature_close'] = $closeRequestorSign;
+}
+
+if ($closeIssuerSign) {
+    $validated['issuer_signature_close'] = $closeIssuerSign;
+}
 
 $validated['signature_requestor'] = $this->saveSignature($request->input('signature_requestor'), 'requestor')
     ?? $existing?->signature_requestor;
@@ -167,9 +176,10 @@ $validated['receiver_signature'] = $this->saveSignature($request->input('receive
 'closed_date' => $validated['close_date'] ?? null,
 'closed_time' => $validated['close_time'] ?? null,
 'requestor_name' => $validated['close_requestor_name'] ?? null,
-'requestor_sign' => $validated['signature_close_requestor'],
+'requestor_sign' => $closeRequestorSign,
 'issuer_name' => $validated['close_issuer_name'] ?? null,
-'issuer_sign' => $validated['signature_close_issuer'],
+'issuer_sign' => $closeIssuerSign,
+'jumlah_rfid' => $validated['jumlah_rfid'] ?? null,
 
             ], fn($v) => $v !== null && $v !== '')
         );
@@ -183,6 +193,8 @@ $validated['receiver_signature'] = $this->saveSignature($request->input('receive
                 'signature_general_manager' => null,
                 'authorizer_signature' => null,
                 'receiver_signature' => null,
+                'requestor_signature_close' => null,
+                'issuer_signature_close' => null,
             ])->save();
 
             if ($closure) {
@@ -228,7 +240,9 @@ $validated['receiver_signature'] = $this->saveSignature($request->input('receive
 {
     \Log::info("Signature input for {$role}: " . substr($base64, 0, 50)); // log sebagian
     
-    if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+    if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
     $folder = 'signatures/working-permit/risiko-panas/';
     $filename = $role . '_' . Str::random(10) . '.png';

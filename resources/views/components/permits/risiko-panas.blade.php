@@ -1,7 +1,7 @@
 <form method="POST" action="{{ route('working-permit.risiko-panas.store') }}">
     @csrf
 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
-<input type="hidden" name="clear_all_signatures" id="clear_all_signatures" value="0">
+<input type="hidden" name="clear_all_signatures" id="risikopanas_clear_all_signatures" value="0">
 
     <!-- Bagian 1: Detail Pekerjaan -->
     <div class="text-center mb-4">
@@ -457,11 +457,11 @@
     @endif
 
     <button type="button"
-        @click="openSignPad('signature_permit_issuer')"
+        @click="openSignPad('risikopanas_signature_permit_issuer')"
         class="text-blue-600 underline text-xs">Tanda Tangan</button>
 
     <input type="hidden"
-        id="signature_permit_issuer"
+        id="risikopanas_signature_permit_issuer"
         name="signature_permit_issuer"
         value="{{ old('signature_permit_issuer', $permit->signature_permit_issuer ?? '') }}">
 </td>
@@ -477,11 +477,11 @@
     @endif
 
     <button type="button"
-        @click="openSignPad('signature_senior_manager')"
+        @click="openSignPad('risikopanas_signature_senior_manager')"
         class="text-blue-600 underline text-xs">Tanda Tangan</button>
 
     <input type="hidden"
-        id="signature_senior_manager"
+        id="risikopanas_signature_senior_manager"
         name="signature_senior_manager"
         value="{{ old('signature_senior_manager', $permit->signature_senior_manager ?? '') }}">
 </td>
@@ -497,11 +497,11 @@
     @endif
 
     <button type="button"
-        @click="openSignPad('signature_general_manager')"
+        @click="openSignPad('risikopanas_signature_general_manager')"
         class="text-blue-600 underline text-xs">Tanda Tangan</button>
 
     <input type="hidden"
-        id="signature_general_manager"
+        id="risikopanas_signature_general_manager"
         name="signature_general_manager"
         value="{{ old('signature_general_manager', $permit->signature_general_manager ?? '') }}">
 </td>
@@ -570,11 +570,11 @@
     <button 
         type="button" 
         class="text-blue-600 underline text-xs"
-        @click="openSignPad('signature_authorizer')">
+        @click="openSignPad('risikopanas_signature_authorizer')">
         Tanda Tangan
     </button>
 
-    <input type="hidden" id="signature_authorizer" name="authorizer_signature"
+    <input type="hidden" id="risikopanas_signature_authorizer" name="authorizer_signature"
         value="{{ old('authorizer_signature', $permit->authorizer_signature ?? '') }}">
 </td>
                 <td class="border px-2 py-2">
@@ -629,11 +629,11 @@
     <button 
         type="button" 
         class="text-blue-600 underline text-xs"
-        @click="openSignPad('signature_receiver')">
+        @click="openSignPad('risikopanas_signature_receiver')">
         Tanda Tangan
     </button>
 
-    <input type="hidden" id="signature_receiver" name="receiver_signature"
+    <input type="hidden" id="risikopanas_signature_receiver" name="receiver_signature"
         value="{{ old('receiver_signature', $permit->receiver_signature ?? '') }}">
 </td>
                 <td class="border px-2 py-2">
@@ -718,9 +718,9 @@
                     @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
                         <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
                     @else
-                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <button type="button" onclick="openSignPad('risikopanas_signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
-                    <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}">
+                    <input type="hidden" name="signature_close_requestor" id="risikopanas_signature_close_requestor" value="{{ $closeRequestorSign }}">
                 </td>
 
                 <!-- Issuer -->
@@ -729,9 +729,9 @@
                     @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
                         <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
                     @else
-                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <button type="button" onclick="openSignPad('risikopanas_signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
-                    <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}">
+                    <input type="hidden" name="signature_close_issuer" id="risikopanas_signature_close_issuer" value="{{ $closeIssuerSign }}">
                 </td>
             </tr>
         </tbody>
@@ -756,7 +756,7 @@
 <!-- Tombol Simpan -->
 <div class="flex justify-center gap-3 mt-8">
     <button type="button"
-        onclick="if (confirm('Hapus semua tanda tangan?')) { document.getElementById('clear_all_signatures').value = '1'; this.closest('form').submit(); }"
+        onclick="if (confirm('Hapus semua tanda tangan?')) { document.getElementById('risikopanas_clear_all_signatures').value = '1'; this.closest('form').submit(); }"
         class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
         Hapus Semua TTD
     </button>

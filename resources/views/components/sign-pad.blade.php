@@ -16,6 +16,22 @@
 <script>
 let signaturePadInstance;
 
+function findSignatureTarget(targetId) {
+    const escapedId = window.CSS && CSS.escape ? CSS.escape(targetId) : targetId.replace(/"/g, '\\"');
+    const candidates = Array.from(document.querySelectorAll('[id="' + escapedId + '"]'));
+    return candidates.find((element) => {
+        let current = element.parentElement;
+        while (current && current !== document.body) {
+            const style = window.getComputedStyle(current);
+            if (style.display === 'none' || style.visibility === 'hidden') {
+                return false;
+            }
+            current = current.parentElement;
+        }
+        return true;
+    }) || candidates[0] || null;
+}
+
 function openSignPad(targetId) {
     document.getElementById('signPadModal').classList.remove('hidden');
     document.getElementById('currentSignatureField').value = targetId;
@@ -29,9 +45,10 @@ function openSignPad(targetId) {
 
     signaturePadInstance = new SignaturePad(canvas);
 console.log('targetId:', targetId);
-console.log('element:', document.getElementById(targetId));
+console.log('element:', findSignatureTarget(targetId));
 
-    const existingSignature = document.getElementById(targetId).value;
+    const targetInput = findSignatureTarget(targetId);
+    const existingSignature = targetInput ? targetInput.value : '';
     if (existingSignature) {
         const img = new Image();
         img.src = existingSignature;
@@ -61,7 +78,7 @@ function saveSignature() {
         return;
     }
     const dataURL = signaturePadInstance.toDataURL();
-    const targetInput = document.getElementById(document.getElementById('currentSignatureField').value);
+    const targetInput = findSignatureTarget(document.getElementById('currentSignatureField').value);
     if (targetInput) {
         targetInput.value = dataURL;
         console.log('✅ Signature saved to input:', targetInput.id);

@@ -68,6 +68,7 @@ class GasPanasPermitController extends Controller
                 'signature_close_requestor' => 'nullable|string',
                 'close_issuer_name' => 'nullable|string',
                 'signature_close_issuer' => 'nullable|string',
+                'jumlah_rfid' => 'nullable|integer|min:0',
 
                 // Detail Pekerjaan
                 'lokasi_pekerjaan' => 'nullable|string',
@@ -194,6 +195,7 @@ if (!$permit->token) {
                 'requestor_sign' => $closeRequestorSign,
                 'issuer_name' => $validated['close_issuer_name'] ?? null,
                 'issuer_sign' => $closeIssuerSign,
+                'jumlah_rfid' => $validated['jumlah_rfid'] ?? null,
             ], fn($v) => $v !== null && $v !== '')
         );
 
@@ -250,7 +252,9 @@ public function storeByToken(Request $request, $token)
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+        if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
         $folder = 'signatures/working-permit/gaspanas/';
         $filename = $role . '_' . Str::random(10) . '.png';
