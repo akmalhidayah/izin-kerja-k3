@@ -34,7 +34,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            justify-content: center;
             padding: 26px;
             overflow: hidden;
         }
@@ -51,6 +51,7 @@
             position: relative;
             max-width: 720px;
             color: white;
+            text-align: center;
         }
 
         .eyebrow {
