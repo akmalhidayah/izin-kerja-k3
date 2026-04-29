@@ -75,9 +75,16 @@
 
         .login-visual h1 {
             margin: 22px 0 14px;
-            font-size: clamp(36px, 5vw, 60px);
+            font-size: clamp(34px, 4.4vw, 56px);
             line-height: 1.02;
             letter-spacing: 0;
+        }
+
+        .login-visual h1 span {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.72em;
+            line-height: 1.08;
         }
 
         .login-visual p {
@@ -317,7 +324,7 @@
         <section class="login-visual">
             <div class="visual-content">
                 <div class="eyebrow">Sistem K3</div>
-                <h1>Keselamatan Kerja<br>PT. Semen Tonasa</h1>
+                <h1>Unit Keselamatan dan Kesehatan Kerja<span>PT. Semen Tonasa</span></h1>
             </div>
         </section>
 
