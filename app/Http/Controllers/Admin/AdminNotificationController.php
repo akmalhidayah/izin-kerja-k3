@@ -3,21 +3,27 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AdminNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Models\AdminNotification;
 
 class AdminNotificationController extends Controller
 {
-    public function read(Request $request, AdminNotification $notification): RedirectResponse
+    public function read(Request $request, int $notification): RedirectResponse
     {
-        abort_unless($notification->recipient_id === $request->user()->id, 403);
+        $adminNotification = AdminNotification::where('id', $notification)
+            ->where('recipient_id', $request->user()->id)
+            ->first();
 
-        if (!$notification->read_at) {
-            $notification->update(['read_at' => now()]);
+        if (!$adminNotification) {
+            return redirect()->route('admin.dashboard');
         }
 
-        return redirect($notification->url ?: route('admin.dashboard'));
+        if (!$adminNotification->read_at) {
+            $adminNotification->update(['read_at' => now()]);
+        }
+
+        return redirect($adminNotification->url ?: route('admin.dashboard'));
     }
 
     public function readAll(Request $request): RedirectResponse
