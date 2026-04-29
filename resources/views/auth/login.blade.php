@@ -1,50 +1,375 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - K3 PT. Semen Tonasa</title>
+    <link rel="icon" href="{{ asset('images/logo-k3.png') }}">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
-        <div class="flex justify-center">
-            <img src="{{ asset('images/logo-k3.png') }}" alt="Logo" class="w-50 h-40 fill-current text-gray-500">
-        </div>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #172033;
+            background:
+                linear-gradient(135deg, rgba(153, 27, 27, 0.9), rgba(15, 23, 42, 0.72)),
+                url("{{ asset('images/bg-login.jpg') }}") center / cover no-repeat fixed;
+        }
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        .login-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(390px, 0.85fr);
+            align-items: stretch;
+        }
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        .login-visual {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 64px;
+            overflow: hidden;
+        }
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+        .login-visual::before {
+            content: "";
+            position: absolute;
+            inset: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 28px;
+        }
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        .visual-content {
+            position: relative;
+            max-width: 720px;
+            color: white;
+        }
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
+        .eyebrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #fbbf24;
+            box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.18);
+        }
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+        .login-visual h1 {
+            margin: 22px 0 14px;
+            font-size: clamp(40px, 6vw, 74px);
+            line-height: 0.98;
+            letter-spacing: 0;
+        }
+
+        .login-visual p {
+            margin: 0;
+            max-width: 580px;
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .login-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 42px;
+            background: rgba(248, 250, 252, 0.92);
+            backdrop-filter: blur(18px);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            padding: 34px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+        }
+
+        .login-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 76px;
+            height: 58px;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .login-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .login-card h2 {
+            margin: 0;
+            font-size: 30px;
+            line-height: 1.2;
+            color: #991b1b;
+        }
+
+        .login-card .subtitle {
+            margin: 8px 0 26px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .alert {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .alert-danger {
+            color: #991b1b;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            color: #166534;
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+        }
+
+        .form-stack {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 7px;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #172033;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .form-control:focus {
+            border-color: #dc2626;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            font-size: 13px;
+        }
+
+        .remember {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #475569;
+            user-select: none;
+        }
+
+        .remember input {
+            width: 16px;
+            height: 16px;
+            accent-color: #dc2626;
+        }
+
+        .forgot-link {
+            color: #b91c1c;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            min-height: 48px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(185, 28, 28, 0.24);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .login-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(185, 28, 28, 0.3);
+        }
+
+        .login-note {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #e5e7eb;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 900px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .login-visual {
+                min-height: 320px;
+                padding: 42px 24px;
+            }
+
+            .login-visual::before {
+                inset: 18px;
+                border-radius: 22px;
+            }
+
+            .login-panel {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .login-panel {
+                padding: 18px;
+            }
+
+            .login-card {
+                padding: 24px;
+                border-radius: 18px;
+            }
+
+            .login-logo-group {
+                gap: 8px;
+            }
+
+            .logo-box {
+                width: 64px;
+                height: 52px;
+            }
+
+            .form-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="login-shell">
+        <section class="login-visual">
+            <div class="visual-content">
+                <div class="eyebrow">Sistem K3</div>
+                <h1>Keselamatan Kerja<br>PT. Semen Tonasa</h1>
+                <p>Portal pengajuan, pemantauan, dan approval dokumen keselamatan kerja untuk operasional yang lebih tertib dan terkontrol.</p>
+            </div>
+        </section>
+
+        <section class="login-panel">
+            <div class="login-card">
+                <div class="login-logo-group">
+                    <div class="logo-box">
+                        <img src="{{ asset('images/logo-sig.png') }}" alt="SIG" class="login-logo">
+                    </div>
+                    <div class="logo-box">
+                        <img src="{{ asset('images/logo-st2.png') }}" alt="Semen Tonasa" class="login-logo">
+                    </div>
+                    <div class="logo-box">
+                        <img src="{{ asset('images/logo-k3.png') }}" alt="K3" class="login-logo">
+                    </div>
+                </div>
+
+                <h2>Masuk</h2>
+                <p class="subtitle">Gunakan akun yang sudah terdaftar untuk mengakses sistem K3.</p>
+
+                @if (session('status'))
+                    <div class="alert alert-success">{{ session('status') }}</div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="alert alert-danger">{{ $errors->first() }}</div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}" class="form-stack">
+                    @csrf
+
+                    <div>
+                        <label class="form-label" for="email">Email</label>
+                        <input class="form-control" id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username">
+                    </div>
+
+                    <div>
+                        <label class="form-label" for="password">Password</label>
+                        <input class="form-control" id="password" type="password" name="password" required autocomplete="current-password">
+                    </div>
+
+                    <div class="form-row">
+                        <label class="remember" for="remember_me">
+                            <input type="checkbox" name="remember" id="remember_me">
+                            <span>Ingat saya</span>
+                        </label>
+
+                        @if (Route::has('password.request'))
+                            <a class="forgot-link" href="{{ route('password.request') }}">Lupa password?</a>
+                        @endif
+                    </div>
+
+                    <button class="login-button" type="submit">Login</button>
+                </form>
+
+                <div class="login-note">
+                    Akses hanya untuk pengguna resmi. Pastikan data pekerjaan dan izin kerja diisi sesuai prosedur K3 yang berlaku.
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
