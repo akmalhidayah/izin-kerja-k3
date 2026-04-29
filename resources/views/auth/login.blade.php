@@ -23,7 +23,7 @@
         .login-shell {
             min-height: 100vh;
             display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(390px, 0.85fr);
+            grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
             align-items: stretch;
         }
 
@@ -32,14 +32,14 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 64px;
+            padding: 44px;
             overflow: hidden;
         }
 
         .login-visual::before {
             content: "";
             position: absolute;
-            inset: 32px;
+            inset: 28px;
             border: 1px solid rgba(255, 255, 255, 0.22);
             border-radius: 28px;
         }
@@ -75,8 +75,8 @@
 
         .login-visual h1 {
             margin: 22px 0 14px;
-            font-size: clamp(40px, 6vw, 74px);
-            line-height: 0.98;
+            font-size: clamp(36px, 5vw, 60px);
+            line-height: 1.02;
             letter-spacing: 0;
         }
 
@@ -92,17 +92,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 42px;
+            padding: 30px;
             background: rgba(248, 250, 252, 0.92);
             backdrop-filter: blur(18px);
         }
 
         .login-card {
             width: 100%;
-            max-width: 440px;
-            padding: 34px;
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            border-radius: 24px;
+            max-width: 390px;
+            padding: 26px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 20px;
             background: rgba(255, 255, 255, 0.96);
             box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
         }
@@ -110,16 +110,16 @@
         .login-logo-group {
             display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 28px;
+            gap: 10px;
+            margin-bottom: 22px;
         }
 
         .logo-box {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 76px;
-            height: 58px;
+            width: 64px;
+            height: 50px;
             padding: 8px;
             border: 1px solid #e5e7eb;
             border-radius: 14px;
@@ -134,16 +134,9 @@
 
         .login-card h2 {
             margin: 0;
-            font-size: 30px;
+            font-size: 26px;
             line-height: 1.2;
             color: #991b1b;
-        }
-
-        .login-card .subtitle {
-            margin: 8px 0 26px;
-            color: #64748b;
-            font-size: 14px;
-            line-height: 1.5;
         }
 
         .alert {
@@ -167,7 +160,7 @@
 
         .form-stack {
             display: grid;
-            gap: 16px;
+            gap: 13px;
         }
 
         .form-label {
@@ -180,8 +173,8 @@
 
         .form-control {
             width: 100%;
-            min-height: 46px;
-            padding: 11px 13px;
+            min-height: 42px;
+            padding: 9px 12px;
             border: 1px solid #cbd5e1;
             border-radius: 12px;
             background: #f8fafc;
@@ -231,7 +224,7 @@
 
         .login-button {
             width: 100%;
-            min-height: 48px;
+            min-height: 44px;
             border: 0;
             border-radius: 12px;
             background: linear-gradient(135deg, #dc2626, #991b1b);
@@ -248,42 +241,53 @@
             box-shadow: 0 16px 30px rgba(185, 28, 28, 0.3);
         }
 
-        .login-note {
-            margin-top: 22px;
-            padding-top: 18px;
-            border-top: 1px solid #e5e7eb;
-            color: #64748b;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
         @media (max-width: 900px) {
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 18px;
+            }
+
             .login-shell {
-                grid-template-columns: 1fr;
+                width: 100%;
+                min-height: auto;
+                display: flex;
+                justify-content: center;
             }
 
             .login-visual {
-                min-height: 320px;
-                padding: 42px 24px;
-            }
-
-            .login-visual::before {
-                inset: 18px;
-                border-radius: 22px;
+                display: none;
             }
 
             .login-panel {
-                padding: 24px;
+                width: 100%;
+                padding: 0;
+                background: transparent;
+                backdrop-filter: none;
+            }
+
+            .login-card {
+                max-width: 420px;
+                margin: 0 auto;
             }
         }
 
         @media (max-width: 520px) {
+            body {
+                padding: 14px;
+                background:
+                    linear-gradient(135deg, rgba(153, 27, 27, 0.78), rgba(15, 23, 42, 0.66)),
+                    url("{{ asset('images/bg-login.jpg') }}") center / cover no-repeat fixed;
+            }
+
             .login-panel {
-                padding: 18px;
+                min-height: calc(100vh - 28px);
+                align-items: center;
             }
 
             .login-card {
-                padding: 24px;
+                padding: 22px;
                 border-radius: 18px;
             }
 
@@ -292,8 +296,13 @@
             }
 
             .logo-box {
-                width: 64px;
-                height: 52px;
+                width: 58px;
+                height: 46px;
+                padding: 7px;
+            }
+
+            .login-card h2 {
+                font-size: 24px;
             }
 
             .form-row {
@@ -309,7 +318,6 @@
             <div class="visual-content">
                 <div class="eyebrow">Sistem K3</div>
                 <h1>Keselamatan Kerja<br>PT. Semen Tonasa</h1>
-                <p>Portal pengajuan, pemantauan, dan approval dokumen keselamatan kerja untuk operasional yang lebih tertib dan terkontrol.</p>
             </div>
         </section>
 
@@ -328,7 +336,6 @@
                 </div>
 
                 <h2>Masuk</h2>
-                <p class="subtitle">Gunakan akun yang sudah terdaftar untuk mengakses sistem K3.</p>
 
                 @if (session('status'))
                     <div class="alert alert-success">{{ session('status') }}</div>
@@ -364,10 +371,6 @@
 
                     <button class="login-button" type="submit">Login</button>
                 </form>
-
-                <div class="login-note">
-                    Akses hanya untuk pengguna resmi. Pastikan data pekerjaan dan izin kerja diisi sesuai prosedur K3 yang berlaku.
-                </div>
             </div>
         </section>
     </main>
