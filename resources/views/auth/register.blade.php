@@ -73,8 +73,8 @@
             width: 8px;
             height: 8px;
             border-radius: 999px;
-            background: #fbbf24;
-            box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.18);
+            background: #22c55e;
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18);
         }
 
         .auth-visual h1 {
@@ -306,7 +306,7 @@
     <main class="auth-shell">
         <section class="auth-visual">
             <div class="visual-content">
-                <div class="eyebrow">Sistem K3</div>
+                <div class="eyebrow">Occupational Health and Safety</div>
                 <h1>Unit Keselamatan dan Kesehatan Kerja<span>PT. Semen Tonasa</span></h1>
             </div>
         </section>
