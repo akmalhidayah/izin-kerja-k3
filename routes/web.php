@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserPanelController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\ApproveSikController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\User\IzinKerjaController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UploadController;
@@ -108,6 +109,8 @@ Route::get('/permintaansik/{id}/view-sik', [AdminPermintaanController::class, 'v
     Route::delete('/permintaansik/{id}/data-kontraktor', [AdminPermintaanController::class, 'deleteDataKontraktor'])->name('permintaansik.deleteDataKontraktor');
     Route::delete('/permintaansik/{id}/jsa', [AdminPermintaanController::class, 'deleteJsa'])->name('permintaansik.deleteJsa');
     Route::delete('/permintaansik/{id}/working-permit/{type}', [AdminPermintaanController::class, 'deleteWorkingPermit'])->name('permintaansik.deleteWorkingPermit');
+    Route::post('/notifications/{notification}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
 });
 
 // ✅ SUPER ADMIN - Manajemen User Panel
