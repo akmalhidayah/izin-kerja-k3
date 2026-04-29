@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Login - K3 PT. Semen Tonasa</title>
     <link rel="icon" href="{{ asset('images/logo-k3.png') }}">
     <style>
@@ -12,7 +12,9 @@
 
         body {
             margin: 0;
-            min-height: 100vh;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
             font-family: Arial, Helvetica, sans-serif;
             color: #172033;
             background:
@@ -21,9 +23,10 @@
         }
 
         .login-shell {
-            min-height: 100vh;
+            height: 100vh;
+            height: 100dvh;
             display: grid;
-            grid-template-columns: minmax(0, 0.82fr) minmax(380px, 0.78fr);
+            grid-template-columns: minmax(0, 0.68fr) minmax(380px, 0.92fr);
             align-items: stretch;
         }
 
@@ -32,14 +35,14 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 34px;
+            padding: 26px;
             overflow: hidden;
         }
 
         .login-visual::before {
             content: "";
             position: absolute;
-            inset: 22px;
+            inset: 18px;
             border: 1px solid rgba(255, 255, 255, 0.22);
             border-radius: 28px;
         }
@@ -54,11 +57,11 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 12px;
+            padding: 7px 11px;
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.14);
             border: 1px solid rgba(255, 255, 255, 0.22);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -74,8 +77,8 @@
         }
 
         .login-visual h1 {
-            margin: 22px 0 14px;
-            font-size: clamp(28px, 3.6vw, 46px);
+            margin: 18px 0 0;
+            font-size: clamp(24px, 3vw, 38px);
             line-height: 1.02;
             letter-spacing: 0;
         }
@@ -99,17 +102,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 26px;
+            padding: 20px;
             background: rgba(248, 250, 252, 0.92);
             backdrop-filter: blur(18px);
         }
 
         .login-card {
             width: 100%;
-            max-width: 390px;
-            padding: 26px;
+            max-width: 350px;
+            padding: 22px;
             border: 1px solid rgba(148, 163, 184, 0.3);
-            border-radius: 20px;
+            border-radius: 18px;
             background: rgba(255, 255, 255, 0.96);
             box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
         }
@@ -117,19 +120,19 @@
         .login-logo-group {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 22px;
+            gap: 8px;
+            margin-bottom: 18px;
         }
 
         .logo-box {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 64px;
-            height: 50px;
-            padding: 8px;
+            width: 56px;
+            height: 44px;
+            padding: 7px;
             border: 1px solid #e5e7eb;
-            border-radius: 14px;
+            border-radius: 12px;
             background: #fff;
         }
 
@@ -141,7 +144,7 @@
 
         .login-card h2 {
             margin: 0;
-            font-size: 26px;
+            font-size: 24px;
             line-height: 1.2;
             color: #991b1b;
         }
@@ -167,12 +170,12 @@
 
         .form-stack {
             display: grid;
-            gap: 13px;
+            gap: 11px;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 7px;
+            margin-bottom: 5px;
             color: #334155;
             font-size: 13px;
             font-weight: 700;
@@ -180,8 +183,8 @@
 
         .form-control {
             width: 100%;
-            min-height: 42px;
-            padding: 9px 12px;
+            min-height: 40px;
+            padding: 8px 11px;
             border: 1px solid #cbd5e1;
             border-radius: 12px;
             background: #f8fafc;
@@ -231,7 +234,7 @@
 
         .login-button {
             width: 100%;
-            min-height: 44px;
+            min-height: 42px;
             border: 0;
             border-radius: 12px;
             background: linear-gradient(135deg, #dc2626, #991b1b);
@@ -254,6 +257,9 @@
                 align-items: center;
                 justify-content: center;
                 padding: 18px;
+                overflow-x: hidden;
+                overflow-y: auto;
+                background-attachment: scroll;
             }
 
             .login-shell {
@@ -285,11 +291,11 @@
                 padding: 14px;
                 background:
                     linear-gradient(135deg, rgba(153, 27, 27, 0.78), rgba(15, 23, 42, 0.66)),
-                    url("{{ asset('images/bg-login.jpg') }}") center / cover no-repeat fixed;
+                    url("{{ asset('images/bg-login.jpg') }}") center / cover no-repeat;
             }
 
             .login-panel {
-                min-height: calc(100vh - 28px);
+                min-height: calc(100dvh - 28px);
                 align-items: center;
             }
 
@@ -310,6 +316,10 @@
 
             .login-card h2 {
                 font-size: 24px;
+            }
+
+            .form-control {
+                font-size: 16px;
             }
 
             .form-row {
