@@ -23,7 +23,7 @@
         .login-shell {
             min-height: 100vh;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
+            grid-template-columns: minmax(0, 0.82fr) minmax(380px, 0.78fr);
             align-items: stretch;
         }
 
@@ -32,14 +32,14 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 44px;
+            padding: 34px;
             overflow: hidden;
         }
 
         .login-visual::before {
             content: "";
             position: absolute;
-            inset: 28px;
+            inset: 22px;
             border: 1px solid rgba(255, 255, 255, 0.22);
             border-radius: 28px;
         }
@@ -75,14 +75,14 @@
 
         .login-visual h1 {
             margin: 22px 0 14px;
-            font-size: clamp(34px, 4.4vw, 56px);
+            font-size: clamp(28px, 3.6vw, 46px);
             line-height: 1.02;
             letter-spacing: 0;
         }
 
         .login-visual h1 span {
             display: block;
-            margin-top: 10px;
+            margin-top: 8px;
             font-size: 0.72em;
             line-height: 1.08;
         }
@@ -99,7 +99,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 30px;
+            padding: 26px;
             background: rgba(248, 250, 252, 0.92);
             backdrop-filter: blur(18px);
         }
