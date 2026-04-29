@@ -286,14 +286,14 @@
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; margin-top: 10px;">
     <thead>
         <tr>
-            <th colspan="4" style="background-color: black; color: white; font-weight: bold; text-align: left; padding: 5px;">
-                7. Penerbitan Izin Kerja <span style="font-weight: normal;">(Tanda tangan General Manager jika diperlukan)</span>
+            <th colspan="2" style="background-color: black; color: white; font-weight: bold; text-align: left; padding: 5px;">
+                7. Penerbitan Izin Kerja
             </th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td colspan="4" style="border: 1px solid black; padding: 5px;">
+            <td colspan="2" style="border: 1px solid black; padding: 5px;">
                 <i>Permit Issuer & Senior Manager:</i><br>
                 Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan
                 atau rekomendasi persyaratan kerja aman tambahan dari <i>Permit Verificator/Permit Issuer</i> telah dipenuhi untuk
@@ -303,7 +303,6 @@
         <tr>
             <td style="border: 1px solid black; text-align: center;"><i>Permit Issuer</i></td>
             <td style="border: 1px solid black; text-align: center;"><i>Senior Manager</i></td>
-            <td colspan="2" style="border: 1px solid black; text-align: center;"><i>General Manager</i></td>
         </tr>
         <tr>
           <td style="border: 1px solid black;">
@@ -318,16 +317,10 @@
         <img src="{{ public_path($permit->signature_senior_manager) }}" style="height: 40px;">
     @endif
 </td>
-<td colspan="2" style="border: 1px solid black;">
-    {{ $permit->general_manager_name ?? '' }}<br>
-    @if($permit->signature_general_manager && file_exists(public_path($permit->signature_general_manager)))
-        <img src="{{ public_path($permit->signature_general_manager) }}" style="height: 40px;">
-    @endif
-</td>
 
         </tr>
         <tr>
-            <td colspan="4" style="border: 1px solid black; padding: 5px;">
+            <td colspan="2" style="border: 1px solid black; padding: 5px;">
                 Izin kerja ini berlaku dari tanggal:
                 {{ \Carbon\Carbon::parse($permit->izin_berlaku_dari ?? '')->format('d-m-Y') }} jam: {{ $permit->izin_berlaku_jam_dari ?? '' }},
                 sampai tanggal: {{ \Carbon\Carbon::parse($permit->izin_berlaku_sampai ?? '')->format('d-m-Y') }} jam: {{ $permit->izin_berlaku_jam_sampai ?? '' }}

@@ -40,6 +40,19 @@
     </style>
 </head>
 <body>
+@php
+    $formatDate = function ($value) {
+        if (empty($value) || $value === '-') {
+            return '-';
+        }
+
+        try {
+            return \Carbon\Carbon::parse($value)->format('d-m-Y');
+        } catch (\Throwable $e) {
+            return $value;
+        }
+    };
+@endphp
 <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
     <tr>
         <td style="border: 1px solid black; width: 20%; text-align: center;">
@@ -64,7 +77,7 @@
     </tr>
     <tr>
         <td>{{ $detail->location ?? '-' }}</td>
-        <td>{{ $detail->work_date ?? '-' }}</td>
+        <td>{{ $formatDate($detail->work_date ?? null) }}</td>
     </tr>
     <tr>
         <th colspan="2">Uraian pekerjaan:</th>
@@ -278,7 +291,7 @@
 @php
     $name = $permit->permit_requestor_name ?? '-';
     $sign = $permit->permit_requestor_sign ?? null;
-    $date = $permit->permit_requestor_date ?? '-';
+    $date = $formatDate($permit->permit_requestor_date ?? null);
     $time = $permit->permit_requestor_time ?? '-';
 @endphp
 
@@ -323,11 +336,11 @@
 @php
     $name = $permit->permit_issuer_name ?? '-';
     $sign = $permit->permit_issuer_sign ?? null;
-    $date = $permit->permit_issuer_date ?? '-';
+    $date = $formatDate($permit->permit_issuer_date ?? null);
     $time = $permit->permit_issuer_time ?? '-';
-    $from_date = $permit->izin_berlaku_dari ?? '-';
+    $from_date = $formatDate($permit->izin_berlaku_dari ?? null);
     $from_time = $permit->izin_berlaku_jam_dari ?? '-';
-    $to_date = $permit->izin_berlaku_sampai ?? '-';
+    $to_date = $formatDate($permit->izin_berlaku_sampai ?? null);
     $to_time = $permit->izin_berlaku_jam_sampai ?? '-';
 @endphp
 
@@ -377,7 +390,7 @@
 @php
     $name = $permit->permit_authorizer_name ?? '-';
     $sign = $permit->permit_authorizer_sign ?? null;
-    $date = $permit->permit_authorizer_date ?? '-';
+    $date = $formatDate($permit->permit_authorizer_date ?? null);
     $time = $permit->permit_authorizer_time ?? '-';
 @endphp
 
@@ -423,7 +436,7 @@
 @php
     $name = $permit->permit_receiver_name ?? '-';
     $sign = $permit->permit_receiver_sign ?? null;
-    $date = $permit->permit_receiver_date ?? '-';
+    $date = $formatDate($permit->permit_receiver_date ?? null);
     $time = $permit->permit_receiver_time ?? '-';
 @endphp
 
@@ -481,7 +494,7 @@
     $checklist = json_decode($permit->live_testing_items ?? '[]', true);
     $name = $permit->live_testing_name ?? '-';
     $sign = $permit->live_testing_sign ?? null;
-    $date = $permit->live_testing_date ?? '-';
+    $date = $formatDate($permit->live_testing_date ?? null);
     $time = $permit->live_testing_time ?? '-';
 @endphp
 
@@ -530,7 +543,7 @@
     $lock = $closure?->lock_tag_removed ? '☑ Ya' : '';
     $tools = $closure?->equipment_cleaned ? '☑ Ya' : '';
     $guarding = $closure?->guarding_restored ? '☑ Ya' : '';
-    $date = $closure?->closed_date ?? '-';
+    $date = $formatDate($closure?->closed_date ?? null);
     $time = $closure?->closed_time ?? '-';
     $req_name = $closure?->requestor_name ?? '-';
     $req_sign = $closure?->requestor_sign ?? null;

@@ -93,9 +93,7 @@ class BebanPermitController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
         if (!$request->boolean('_token_access')) {
-            $notification = Notification::where('id', $validated['notification_id'])
-                ->where('user_id', auth()->id())
-                ->first();
+            $notification = $this->findAccessibleNotification($validated['notification_id']);
 
             if (!$notification) {
                 return back()->with('error', 'Notifikasi tidak valid.');
@@ -143,7 +141,7 @@ $validated['signature_permit_receiver'] = $this->saveSignature(
         $permit = WorkPermitBeban::updateOrCreate(
             ['notification_id' => $validated['notification_id']],
             array_merge(
-                $validated,
+                collect($validated)->only((new WorkPermitBeban())->getFillable())->toArray(),
                 ['token' => $existing?->token ?? Str::uuid()]
             )
         );

@@ -26,6 +26,17 @@
                 <div class="relative">
                     <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
                         <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="m21 21-4.35-4.35" />
+                            <circle cx="11" cy="11" r="7" />
+                        </svg>
+                    </span>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Cari nomor, nama, deskripsi..."
+                        class="w-64 max-w-full pl-9 pr-3 py-2 border rounded-lg text-xs">
+                </div>
+                <div class="relative">
+                    <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path d="M7 3v3M17 3v3M3 9h18M5 7h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
                         </svg>
                     </span>
@@ -58,6 +69,12 @@
                     </svg>
                     Filter
                 </button>
+                @if(request()->hasAny(['search', 'bulan', 'tahun', 'usertype']))
+                    <a href="{{ route('admin.approvesik.index') }}"
+                        class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 text-xs rounded-lg">
+                        Reset
+                    </a>
+                @endif
             </form>
             <div class="text-[11px] text-gray-500">
                 Total: {{ $vendorRows->count() + $pgoRows->count() }}
@@ -67,6 +84,11 @@
         @php
             $baseQuery = request()->except('usertype');
         @endphp
+        @if(request('search'))
+            <div class="mb-4 text-xs text-gray-600">
+                Hasil pencarian untuk: <span class="font-semibold text-gray-900">{{ request('search') }}</span>
+            </div>
+        @endif
         <div class="flex flex-wrap items-center gap-2 mb-6 text-[11px]">
             <span class="font-semibold text-gray-600">Filter:</span>
             <a href="{{ route('admin.approvesik.index', $baseQuery) }}"

@@ -69,6 +69,25 @@ class ApproveSikController extends Controller
     {
         $query = Notification::with(['user', 'assignedAdmin', 'sikStep', 'stepApprovals']);
 
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+
+            $query->where(function ($q) use ($search) {
+                $q->where('number', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('assignedAdmin', function ($adminQuery) use ($search) {
+                        $adminQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
         if ($request->filled('bulan')) {
             $query->whereMonth('created_at', $request->bulan);
         } else {

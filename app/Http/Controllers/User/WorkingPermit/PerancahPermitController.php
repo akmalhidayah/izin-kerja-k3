@@ -97,9 +97,7 @@ class PerancahPermitController extends Controller
         }
 
         if (!$request->boolean('_token_access')) {
-            $notification = Notification::where('id', $validated['notification_id'])
-                ->where('user_id', auth()->id())
-                ->first();
+            $notification = $this->findAccessibleNotification($validated['notification_id']);
 
             if (!$notification) {
                 return back()->with('error', 'Notifikasi tidak valid.');
@@ -137,9 +135,12 @@ if ($request->hasFile('sketsa_perancah_file')) {
 
 
         // Simpan ke tabel work_permit_perancah
+        $permitData = collect($validated)->only((new WorkPermitPerancah())->getFillable())->toArray();
+        $permitData['notification_id'] = (int) $validated['notification_id'];
+
         $permit = WorkPermitPerancah::updateOrCreate(
-            ['notification_id' => $request->notification_id],
-            array_filter($validated, fn($v) => $v !== null && $v !== '')
+            ['notification_id' => $permitData['notification_id']],
+            array_filter($permitData, fn($v) => $v !== null && $v !== '')
         );
         if ($permit && !$permit->token) {
     $permit->token = Str::uuid();

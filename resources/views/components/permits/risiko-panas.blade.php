@@ -413,9 +413,6 @@
     $senior_manager_name = old('senior_manager_name', $permit->senior_manager_name ?? '');
     $senior_manager_signature = old('senior_manager_signature', $permit->senior_manager_signature ?? '');
 
-    $general_manager_name = old('general_manager_name', $permit->general_manager_name ?? '');
-    $general_manager_signature = old('general_manager_signature', $permit->general_manager_signature ?? '');
-
     $izin_dari = old('izin_berlaku_dari', $permit->izin_berlaku_dari ?? '');
     $izin_jam_dari = old('izin_berlaku_jam_dari', $permit->izin_berlaku_jam_dari ?? '');
     $izin_sampai = old('izin_berlaku_sampai', $permit->izin_berlaku_sampai ?? '');
@@ -424,8 +421,7 @@
 
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6 text-xs">
     <h3 class="font-bold bg-black text-white px-2 py-1">
-        7. Penerbitan Izin Kerja 
-        <span class="text-xs font-normal italic">(Tanda tangan General Manager jika diperlukan)</span>
+        7. Penerbitan Izin Kerja
     </h3>
 
     <div class="border border-t-0 border-gray-300 p-3">
@@ -441,7 +437,6 @@
             <tr>
                 <th class="border px-2 py-1 italic">Permit Issuer</th>
                 <th class="border px-2 py-1 italic">Senior Manager</th>
-                <th class="border px-2 py-1 italic">General Manager</th>
             </tr>
         </thead>
         <tbody>
@@ -484,26 +479,6 @@
         id="risikopanas_signature_senior_manager"
         name="signature_senior_manager"
         value="{{ old('signature_senior_manager', $permit->signature_senior_manager ?? '') }}">
-</td>
-
-<!-- General Manager -->
-<td class="border px-2 py-2">
-    <input type="text" name="general_manager_name" class="input w-full text-center mb-1 text-xs" placeholder="Nama"
-        value="{{ old('general_manager_name', $permit->general_manager_name ?? '') }}">
-
-    @if(old('signature_general_manager', $permit->signature_general_manager ?? null))
-        <img src="{{ asset(old('signature_general_manager', $permit->signature_general_manager)) }}"
-            class="h-12 mx-auto mt-1 border">
-    @endif
-
-    <button type="button"
-        @click="openSignPad('risikopanas_signature_general_manager')"
-        class="text-blue-600 underline text-xs">Tanda Tangan</button>
-
-    <input type="hidden"
-        id="risikopanas_signature_general_manager"
-        name="signature_general_manager"
-        value="{{ old('signature_general_manager', $permit->signature_general_manager ?? '') }}">
 </td>
 
             </tr>
@@ -762,7 +737,7 @@
     </button>
     <button type="submit" name="action" value="save"
         class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
-        ?? Simpan
+        Simpan
     </button>
 </div>
 </form>

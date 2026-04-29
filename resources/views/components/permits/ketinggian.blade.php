@@ -658,7 +658,7 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
     <div class="flex justify-center mt-8">
         <button type="submit" name="action" value="save"
             class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
-            💾 Simpan
+            Simpan
         </button>
     </div>
     </form>

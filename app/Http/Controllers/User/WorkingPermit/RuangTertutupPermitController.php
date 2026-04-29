@@ -97,9 +97,7 @@ class RuangTertutupPermitController extends Controller
         }
 
         if (!$request->boolean('_token_access')) {
-            $notification = Notification::where('id', $validated['notification_id'])
-                ->where('user_id', auth()->id())
-                ->first();
+            $notification = $this->findAccessibleNotification($validated['notification_id']);
 
             if (!$notification) {
                 return back()->with('error', 'Notifikasi tidak valid.');
@@ -139,9 +137,12 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
     ?? $existing?->live_testing_signature;
 
         // Simpan ke tabel utama
+        $permitData = collect($validated)->only((new WorkPermitRuangTertutup())->getFillable())->toArray();
+        $permitData['notification_id'] = $notification_id;
+
         $ruangTertutup = WorkPermitRuangTertutup::updateOrCreate(
             ['notification_id' => $notification_id],
-            array_merge($validated, ['notification_id' => $notification_id])
+            $permitData
         );
         if (!$ruangTertutup->token) {
     $ruangTertutup->token = Str::uuid();
