@@ -102,10 +102,10 @@
 
         .auth-card {
             width: 100%;
-            max-width: 360px;
-            padding: 22px;
+            max-width: 520px;
+            padding: 32px;
             border: 1px solid rgba(148, 163, 184, 0.3);
-            border-radius: 18px;
+            border-radius: 24px;
             background: rgba(255, 255, 255, 0.96);
             box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
         }
@@ -113,19 +113,19 @@
         .auth-logo-group {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 14px;
+            margin-bottom: 22px;
         }
 
         .logo-box {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 56px;
-            height: 44px;
-            padding: 7px;
+            width: 78px;
+            height: 58px;
+            padding: 10px;
             border: 1px solid #e5e7eb;
-            border-radius: 12px;
+            border-radius: 16px;
             background: #fff;
         }
 
@@ -136,8 +136,8 @@
         }
 
         .auth-card h2 {
-            margin: 0 0 14px;
-            font-size: 24px;
+            margin: 0 0 18px;
+            font-size: 32px;
             line-height: 1.2;
             color: #991b1b;
         }
@@ -157,7 +157,7 @@
 
         .form-stack {
             display: grid;
-            gap: 10px;
+            gap: 14px;
         }
 
         .form-label {
@@ -170,13 +170,13 @@
 
         .form-control {
             width: 100%;
-            min-height: 40px;
-            padding: 8px 11px;
+            min-height: 50px;
+            padding: 12px 15px;
             border: 1px solid #cbd5e1;
             border-radius: 12px;
             background: #f8fafc;
             color: #172033;
-            font-size: 14px;
+            font-size: 16px;
             outline: none;
             transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
@@ -214,13 +214,13 @@
         }
 
         .auth-button {
-            min-height: 42px;
-            min-width: 120px;
+            min-height: 52px;
+            min-width: 150px;
             border: 0;
             border-radius: 12px;
             background: linear-gradient(135deg, #dc2626, #991b1b);
             color: #fff;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 800;
             cursor: pointer;
             box-shadow: 0 12px 24px rgba(185, 28, 28, 0.24);
@@ -262,7 +262,7 @@
             }
 
             .auth-card {
-                max-width: 420px;
+                max-width: 520px;
                 margin: 0 auto;
             }
         }
@@ -287,6 +287,8 @@
 
             .form-control {
                 font-size: 16px;
+                min-height: 44px;
+                padding: 10px 12px;
             }
 
             .form-row {

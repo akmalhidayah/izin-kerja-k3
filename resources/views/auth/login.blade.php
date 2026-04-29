@@ -110,10 +110,10 @@
 
         .login-card {
             width: 100%;
-            max-width: 350px;
-            padding: 22px;
+            max-width: 520px;
+            padding: 34px;
             border: 1px solid rgba(148, 163, 184, 0.3);
-            border-radius: 18px;
+            border-radius: 24px;
             background: rgba(255, 255, 255, 0.96);
             box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
         }
@@ -121,19 +121,19 @@
         .login-logo-group {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 18px;
+            gap: 14px;
+            margin-bottom: 26px;
         }
 
         .logo-box {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 56px;
-            height: 44px;
-            padding: 7px;
+            width: 84px;
+            height: 64px;
+            padding: 10px;
             border: 1px solid #e5e7eb;
-            border-radius: 12px;
+            border-radius: 16px;
             background: #fff;
         }
 
@@ -145,7 +145,7 @@
 
         .login-card h2 {
             margin: 0;
-            font-size: 24px;
+            font-size: 34px;
             line-height: 1.2;
             color: #991b1b;
         }
@@ -171,12 +171,12 @@
 
         .form-stack {
             display: grid;
-            gap: 11px;
+            gap: 16px;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 7px;
             color: #334155;
             font-size: 13px;
             font-weight: 700;
@@ -184,13 +184,13 @@
 
         .form-control {
             width: 100%;
-            min-height: 40px;
-            padding: 8px 11px;
+            min-height: 54px;
+            padding: 13px 16px;
             border: 1px solid #cbd5e1;
             border-radius: 12px;
             background: #f8fafc;
             color: #172033;
-            font-size: 14px;
+            font-size: 16px;
             outline: none;
             transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
@@ -206,7 +206,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            font-size: 13px;
+            font-size: 15px;
         }
 
         .remember {
@@ -235,12 +235,12 @@
 
         .login-button {
             width: 100%;
-            min-height: 42px;
+            min-height: 56px;
             border: 0;
             border-radius: 12px;
             background: linear-gradient(135deg, #dc2626, #991b1b);
             color: #fff;
-            font-size: 15px;
+            font-size: 17px;
             font-weight: 800;
             cursor: pointer;
             box-shadow: 0 12px 24px rgba(185, 28, 28, 0.24);
@@ -282,7 +282,7 @@
             }
 
             .login-card {
-                max-width: 420px;
+                max-width: 520px;
                 margin: 0 auto;
             }
         }
@@ -321,6 +321,13 @@
 
             .form-control {
                 font-size: 16px;
+                min-height: 44px;
+                padding: 10px 12px;
+            }
+
+            .login-button {
+                min-height: 46px;
+                font-size: 15px;
             }
 
             .form-row {
