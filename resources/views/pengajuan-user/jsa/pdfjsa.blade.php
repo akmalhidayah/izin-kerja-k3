@@ -118,12 +118,12 @@
         }
 
         .company-title {
-            font-size: 12px;
+            font-size: 10.5px;
             font-weight: bold;
         }
 
         .document-title {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
         }
 
@@ -171,9 +171,9 @@
         }
 
         .section-title {
-            margin: 9px 0 6px 0;
+            margin: 5px 0 4px 0;
             text-align: center;
-            font-size: 12px;
+            font-size: 10.5px;
             font-weight: bold;
         }
 
