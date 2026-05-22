@@ -8,7 +8,7 @@
 
     $steps = is_array($steps) ? $steps : [];
 
-    $formatCell = static function ($value) {
+    $normalizeCell = static function ($value) {
         $text = trim((string) ($value ?? ''));
         $text = str_replace(["\r\n", "\r"], "\n", $text);
         $text = preg_replace('/[ \t]{2,}/', ' ', $text);
@@ -16,7 +16,75 @@
         $text = preg_replace('/(^|\n)((?:\d+|[A-Za-z])\.)\s*/', "$1$2 ", $text);
         $text = preg_replace("/\n{3,}/", "\n\n", $text);
 
-        return nl2br(e($text ?: '-'));
+        return trim($text);
+    };
+
+    $formatCell = static function ($value, $fallback = '-') {
+        $text = trim((string) ($value ?? ''));
+
+        return nl2br(e($text !== '' ? $text : $fallback));
+    };
+
+    $splitCell = static function ($value, $charsPerLine, $maxLines) use ($normalizeCell) {
+        $text = $normalizeCell($value);
+
+        if ($text === '') {
+            return ['-'];
+        }
+
+        $visualLines = [];
+        foreach (explode("\n", $text) as $line) {
+            $line = trim($line);
+
+            if ($line === '') {
+                if (!empty($visualLines) && end($visualLines) !== '') {
+                    $visualLines[] = '';
+                }
+
+                continue;
+            }
+
+            foreach (explode("\n", wordwrap($line, $charsPerLine, "\n", false)) as $wrappedLine) {
+                $visualLines[] = trim($wrappedLine);
+            }
+        }
+
+        $chunks = [];
+        $current = [];
+        foreach ($visualLines as $line) {
+            if (count($current) >= $maxLines && $line !== '') {
+                $chunks[] = trim(implode("\n", $current));
+                $current = [];
+            }
+
+            $current[] = $line;
+        }
+
+        if (!empty($current)) {
+            $chunks[] = trim(implode("\n", $current));
+        }
+
+        return $chunks ?: ['-'];
+    };
+
+    $buildStepRows = static function ($item) use ($splitCell) {
+        $row = (array) $item;
+        $langkahChunks = $splitCell($row['langkah'] ?? null, 34, 4);
+        $bahayaChunks = $splitCell($row['bahaya'] ?? null, 42, 4);
+        $pengendalianChunks = $splitCell($row['pengendalian'] ?? null, 62, 4);
+        $chunkCount = max(count($langkahChunks), count($bahayaChunks), count($pengendalianChunks));
+        $rows = [];
+
+        for ($i = 0; $i < $chunkCount; $i++) {
+            $rows[] = [
+                'first' => $i === 0,
+                'langkah' => $langkahChunks[$i] ?? '',
+                'bahaya' => $bahayaChunks[$i] ?? '',
+                'pengendalian' => $pengendalianChunks[$i] ?? '',
+            ];
+        }
+
+        return $rows;
     };
 
     $signaturePath = static function ($path) {
@@ -178,6 +246,18 @@
             background: #f2f2f2;
         }
 
+        .jsa-table thead {
+            display: table-header-group;
+        }
+
+        .jsa-table tbody {
+            display: table-row-group;
+        }
+
+        .jsa-table tr {
+            page-break-inside: avoid;
+        }
+
         .jsa-table td {
             word-break: normal;
             word-wrap: break-word;
@@ -205,6 +285,11 @@
 
         .cell-text {
             line-height: 1.22;
+        }
+
+        .continuation-row td {
+            border-top: 0;
+            padding-top: 1px;
         }
     </style>
 </head>
@@ -302,13 +387,14 @@
             </thead>
             <tbody>
                 @forelse ($steps as $index => $item)
-                    @php($row = (array) $item)
-                    <tr>
-                        <td class="col-no">{{ $index + 1 }}</td>
-                        <td><div class="cell-text">{!! $formatCell($row['langkah'] ?? null) !!}</div></td>
-                        <td><div class="cell-text">{!! $formatCell($row['bahaya'] ?? null) !!}</div></td>
-                        <td><div class="cell-text">{!! $formatCell($row['pengendalian'] ?? null) !!}</div></td>
-                    </tr>
+                    @foreach ($buildStepRows($item) as $stepRow)
+                        <tr class="{{ $stepRow['first'] ? 'step-start' : 'continuation-row' }}">
+                            <td class="col-no">{{ $stepRow['first'] ? $index + 1 : '' }}</td>
+                            <td><div class="cell-text">{!! $formatCell($stepRow['langkah'], '') !!}</div></td>
+                            <td><div class="cell-text">{!! $formatCell($stepRow['bahaya'], '') !!}</div></td>
+                            <td><div class="cell-text">{!! $formatCell($stepRow['pengendalian'], '') !!}</div></td>
+                        </tr>
+                    @endforeach
                 @empty
                     <tr>
                         <td class="col-no">-</td>
