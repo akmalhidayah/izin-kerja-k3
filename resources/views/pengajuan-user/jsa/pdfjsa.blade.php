@@ -232,10 +232,6 @@
             font-weight: bold;
         }
 
-        .jsa-section {
-            page-break-before: always;
-        }
-
         .jsa-table th {
             text-align: center;
             vertical-align: middle;
