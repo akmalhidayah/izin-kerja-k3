@@ -60,7 +60,7 @@
     <style>
         @page {
             size: A4 landscape;
-            margin: 58px 20px 20px 20px;
+            margin: 92px 24px 28px 24px;
         }
 
         * {
@@ -71,16 +71,16 @@
             margin: 0;
             color: #111;
             font-family: DejaVu Sans, sans-serif;
-            font-size: 8.5px;
-            line-height: 1.18;
+            font-size: 10px;
+            line-height: 1.25;
         }
 
         header {
             position: fixed;
-            top: -44px;
+            top: -72px;
             left: 0;
             right: 0;
-            height: 40px;
+            height: 66px;
         }
 
         table {
@@ -92,7 +92,7 @@
         th,
         td {
             border: 1px solid #111;
-            padding: 2px 4px;
+            padding: 4px 5px;
             vertical-align: top;
         }
 
@@ -108,8 +108,8 @@
         }
 
         .header-logo {
-            height: 36px;
-            max-width: 58px;
+            height: 52px;
+            max-width: 78px;
         }
 
         .header-title {
@@ -118,17 +118,17 @@
         }
 
         .company-title {
-            font-size: 11px;
+            font-size: 14px;
             font-weight: bold;
         }
 
         .document-title {
-            font-size: 10px;
+            font-size: 13px;
             font-weight: bold;
         }
 
         .meta-table td {
-            height: 16px;
+            height: 22px;
         }
 
         .meta-label {
@@ -136,7 +136,7 @@
         }
 
         .signature-table {
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         .signature-table th {
@@ -147,32 +147,28 @@
         }
 
         .signature-box td {
-            height: 46px;
+            height: 72px;
             text-align: center;
             vertical-align: bottom;
         }
 
         .signature-role td {
             text-align: center;
-            padding: 2px 4px;
+            padding: 3px 5px;
         }
 
         .signature-img {
             display: block;
             max-width: 150px;
-            max-height: 30px;
+            max-height: 48px;
             margin: 0 auto 2px auto;
         }
 
         .section-title {
-            margin: 5px 0 3px 0;
+            margin: 9px 0 6px 0;
             text-align: center;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: bold;
-        }
-
-        .jsa-table {
-            font-size: 7.8px;
         }
 
         .jsa-table th {
@@ -208,7 +204,7 @@
         }
 
         .cell-text {
-            line-height: 1.1;
+            line-height: 1.22;
         }
     </style>
 </head>
