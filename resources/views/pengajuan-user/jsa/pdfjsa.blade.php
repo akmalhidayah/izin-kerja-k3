@@ -171,6 +171,10 @@
             font-weight: bold;
         }
 
+        .jsa-section {
+            page-break-before: always;
+        }
+
         .jsa-table th {
             text-align: center;
             vertical-align: middle;
@@ -183,6 +187,7 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
             white-space: normal;
+            vertical-align: middle;
         }
 
         .col-no {
@@ -205,6 +210,7 @@
 
         .cell-text {
             line-height: 1.22;
+            text-align: center;
         }
     </style>
 </head>
@@ -284,39 +290,41 @@
             </tbody>
         </table>
 
-        <h4 class="section-title">Langkah Kerja</h4>
-        <table class="jsa-table">
-            <colgroup>
-                <col class="col-no">
-                <col class="col-langkah">
-                <col class="col-bahaya">
-                <col class="col-pengendalian">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Urutan Langkah Kerja</th>
-                    <th>Bahaya/Risiko</th>
-                    <th>Pengendalian</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($steps as $index => $item)
-                    @php($row = (array) $item)
+        <div class="jsa-section">
+            <h4 class="section-title">Langkah Kerja</h4>
+            <table class="jsa-table">
+                <colgroup>
+                    <col class="col-no">
+                    <col class="col-langkah">
+                    <col class="col-bahaya">
+                    <col class="col-pengendalian">
+                </colgroup>
+                <thead>
                     <tr>
-                        <td class="col-no">{{ $index + 1 }}</td>
-                        <td><div class="cell-text">{!! $formatCell($row['langkah'] ?? null) !!}</div></td>
-                        <td><div class="cell-text">{!! $formatCell($row['bahaya'] ?? null) !!}</div></td>
-                        <td><div class="cell-text">{!! $formatCell($row['pengendalian'] ?? null) !!}</div></td>
+                        <th>No</th>
+                        <th>Urutan Langkah Kerja</th>
+                        <th>Bahaya/Risiko</th>
+                        <th>Pengendalian</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td class="col-no">-</td>
-                        <td colspan="3" style="text-align: center;">Belum ada data langkah kerja.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($steps as $index => $item)
+                        @php($row = (array) $item)
+                        <tr>
+                            <td class="col-no">{{ $index + 1 }}</td>
+                            <td><div class="cell-text">{!! $formatCell($row['langkah'] ?? null) !!}</div></td>
+                            <td><div class="cell-text">{!! $formatCell($row['bahaya'] ?? null) !!}</div></td>
+                            <td><div class="cell-text">{!! $formatCell($row['pengendalian'] ?? null) !!}</div></td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td class="col-no">-</td>
+                            <td colspan="3" style="text-align: center;">Belum ada data langkah kerja.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </main>
 </body>
 </html>
