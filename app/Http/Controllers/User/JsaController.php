@@ -159,10 +159,24 @@ class JsaController extends Controller
     public function showPdf($notification_id)
     {
         $jsa = Jsa::where('notification_id', $notification_id)->firstOrFail();
-        $jsa->langkah_kerja = json_decode($jsa->langkah_kerja, true);
-        $pdf = Pdf::loadView('pengajuan-user.jsa.pdfjsa', compact('jsa'));
+        $langkahKerja = $jsa->langkah_kerja;
+
+        if (is_string($langkahKerja)) {
+            $decoded = json_decode($langkahKerja, true);
+            $langkahKerja = is_array($decoded) ? $decoded : [];
+        }
+
+        $jsa->langkah_kerja = is_array($langkahKerja) ? $langkahKerja : [];
+
+        $pdf = Pdf::loadView('pengajuan-user.jsa.pdfjsa', compact('jsa'))
+            ->setPaper('a4', 'landscape');
         $filename = 'jsa_' . str_replace(['/', '\\'], '_', $jsa->no_jsa) . '.pdf';
         return $pdf->stream($filename);
+    }
+
+    public function downloadPdf($notification_id)
+    {
+        return $this->showPdf($notification_id);
     }
 
     private function saveSignature($base64, $role)
