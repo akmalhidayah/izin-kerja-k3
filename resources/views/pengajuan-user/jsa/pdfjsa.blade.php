@@ -108,8 +108,8 @@
         }
 
         .header-logo {
-            height: 52px;
-            max-width: 78px;
+            height: 56px;
+            max-width: 86px;
         }
 
         .header-title {
@@ -147,9 +147,9 @@
         }
 
         .signature-box td {
-            height: 72px;
+            height: 86px;
             text-align: center;
-            vertical-align: bottom;
+            vertical-align: middle;
         }
 
         .signature-role td {
@@ -159,9 +159,18 @@
 
         .signature-img {
             display: block;
-            max-width: 150px;
-            max-height: 48px;
-            margin: 0 auto 2px auto;
+            max-width: 170px;
+            max-height: 54px;
+            margin: 0 auto 3px auto;
+        }
+
+        .signature-content {
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .signature-name {
+            margin-top: 2px;
         }
 
         .section-title {
@@ -210,7 +219,7 @@
 
         .cell-text {
             line-height: 1.22;
-            text-align: center;
+            text-align: left;
         }
     </style>
 </head>
@@ -264,22 +273,28 @@
             <tbody>
                 <tr class="signature-box">
                     <td>
-                        @if($dibuatSignature)
-                            <img src="{{ $dibuatSignature }}" class="signature-img" alt="TTD Dibuat">
-                        @endif
-                        {{ $jsa->dibuat_nama ?: '-' }}
+                        <div class="signature-content">
+                            @if($dibuatSignature)
+                                <img src="{{ $dibuatSignature }}" class="signature-img" alt="TTD Dibuat">
+                            @endif
+                            <div class="signature-name">{{ $jsa->dibuat_nama ?: '-' }}</div>
+                        </div>
                     </td>
                     <td>
-                        @if($disetujuiSignature)
-                            <img src="{{ $disetujuiSignature }}" class="signature-img" alt="TTD Disetujui">
-                        @endif
-                        {{ $jsa->disetujui_nama ?: '-' }}
+                        <div class="signature-content">
+                            @if($disetujuiSignature)
+                                <img src="{{ $disetujuiSignature }}" class="signature-img" alt="TTD Disetujui">
+                            @endif
+                            <div class="signature-name">{{ $jsa->disetujui_nama ?: '-' }}</div>
+                        </div>
                     </td>
                     <td>
-                        @if($diverifikasiSignature)
-                            <img src="{{ $diverifikasiSignature }}" class="signature-img" alt="TTD Diverifikasi">
-                        @endif
-                        {{ $jsa->diverifikasi_nama ?: '-' }}
+                        <div class="signature-content">
+                            @if($diverifikasiSignature)
+                                <img src="{{ $diverifikasiSignature }}" class="signature-img" alt="TTD Diverifikasi">
+                            @endif
+                            <div class="signature-name">{{ $jsa->diverifikasi_nama ?: '-' }}</div>
+                        </div>
                     </td>
                 </tr>
                 <tr class="signature-role">
