@@ -618,23 +618,29 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                 <!-- Requestor -->
                 <td class="border text-center px-2 py-2">
                     <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
-                    @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
+                    @if ($closeRequestorSign)
                         <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('ketinggian_signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
-                    <input type="hidden" name="signature_close_requestor" id="ketinggian_signature_close_requestor" value="{{ $closeRequestorSign }}">
+                    <button type="button" onclick="openSignPad('ketinggian_signature_close_requestor')" class="text-blue-600 underline text-xs">
+                        {{ $closeRequestorSign ? 'Ganti Tanda Tangan' : 'Tanda Tangan' }}
+                    </button>
+                    <input type="hidden" name="signature_close_requestor" id="ketinggian_signature_close_requestor"
+                        value="{{ $closeRequestorSign }}"
+                        data-signature-url="{{ $closeRequestorSign ? asset($closeRequestorSign) : '' }}">
                 </td>
 
                 <!-- Issuer -->
                 <td class="border text-center px-2 py-2">
                     <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
-                    @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
+                    @if ($closeIssuerSign)
                         <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('ketinggian_signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
-                    <input type="hidden" name="signature_close_issuer" id="ketinggian_signature_close_issuer" value="{{ $closeIssuerSign }}">
+                    <button type="button" onclick="openSignPad('ketinggian_signature_close_issuer')" class="text-blue-600 underline text-xs">
+                        {{ $closeIssuerSign ? 'Ganti Tanda Tangan' : 'Tanda Tangan' }}
+                    </button>
+                    <input type="hidden" name="signature_close_issuer" id="ketinggian_signature_close_issuer"
+                        value="{{ $closeIssuerSign }}"
+                        data-signature-url="{{ $closeIssuerSign ? asset($closeIssuerSign) : '' }}">
                 </td>
             </tr>
         </tbody>

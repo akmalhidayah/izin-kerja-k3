@@ -33,6 +33,13 @@ function findSignatureTarget(targetId) {
 }
 
 function openSignPad(targetId) {
+    const targetInput = findSignatureTarget(targetId);
+    if (!targetInput) {
+        console.error('Input target tidak ditemukan:', targetId);
+        alert('Input target tanda tangan tidak ditemukan!');
+        return;
+    }
+
     document.getElementById('signPadModal').classList.remove('hidden');
     document.getElementById('currentSignatureField').value = targetId;
 
@@ -44,14 +51,13 @@ function openSignPad(targetId) {
     ctx.scale(ratio, ratio);
 
     signaturePadInstance = new SignaturePad(canvas);
-console.log('targetId:', targetId);
-console.log('element:', findSignatureTarget(targetId));
 
-    const targetInput = findSignatureTarget(targetId);
-    const existingSignature = targetInput ? targetInput.value : '';
+    const existingSignature = targetInput.value;
     if (existingSignature) {
         const img = new Image();
-        img.src = existingSignature;
+        img.src = existingSignature.startsWith('data:image')
+            ? existingSignature
+            : (targetInput.dataset.signatureUrl || existingSignature);
         img.onload = function () {
             ctx.drawImage(img, 0, 0, canvas.width / ratio, canvas.height / ratio);
         };
@@ -81,6 +87,7 @@ function saveSignature() {
     const targetInput = findSignatureTarget(document.getElementById('currentSignatureField').value);
     if (targetInput) {
         targetInput.value = dataURL;
+        targetInput.dataset.signatureUrl = dataURL;
         console.log('✅ Signature saved to input:', targetInput.id);
         alert('✅ Tanda tangan berhasil tersimpan!');
     } else {
