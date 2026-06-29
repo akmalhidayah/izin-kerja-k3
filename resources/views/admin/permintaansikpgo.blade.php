@@ -1,14 +1,14 @@
 <x-admin-layout>
-    <div class="rounded-2xl border border-gray-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 p-6 shadow-sm mb-6">
+    <div class="min-w-0 rounded-2xl border border-gray-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 p-4 shadow-sm mb-6 sm:p-6">
         <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-600 text-white shadow">
+            <div class="min-w-0">
+                <div class="flex min-w-0 items-start gap-2 sm:items-center">
+                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-600 text-white shadow">
                         <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path d="M4 5h16v5H4zM4 13h9v6H4zM15 13h5v6h-5z" />
                         </svg>
                     </span>
-                    <h1 class="text-3xl font-extrabold text-amber-700 tracking-wide">Permintaan Izin Kerja Karyawan</h1>
+                    <h1 class="min-w-0 break-words text-xl font-extrabold leading-tight text-amber-700 sm:text-2xl lg:text-3xl">Permintaan Izin Kerja Karyawan</h1>
                 </div>
                 <p class="text-xs text-gray-600 mt-1">Pantau progres pengajuan User, status dokumen, dan penanggung jawab.</p>
             </div>
@@ -19,7 +19,7 @@
     </div>
 
     <form method="GET" action="{{ route('admin.permintaansikpgo') }}"
-        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 bg-white/90 backdrop-blur p-4 border border-gray-200 rounded-xl mb-6 shadow-sm">
+        class="grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur mb-6 sm:p-4 md:grid-cols-2 xl:grid-cols-3">
 
         <div class="relative">
             <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
@@ -67,8 +67,8 @@
             </select>
         </div>
 
-        <div class="flex gap-2 w-full">
-            <div class="relative w-1/2">
+        <div class="flex w-full flex-col gap-2 sm:flex-row">
+            <div class="relative w-full sm:w-1/2">
                 <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
                     <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M7 3v3M17 3v3M3 9h18M5 7h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
@@ -81,7 +81,7 @@
                 @endforeach
                 </select>
             </div>
-            <div class="relative w-1/2">
+            <div class="relative w-full sm:w-1/2">
                 <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
                     <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M4 7h16M7 3v3M17 3v3M5 11h14v8H5z" />
@@ -96,8 +96,8 @@
             </div>
         </div>
 
-        <div class="flex gap-2 w-full">
-            <div class="relative w-1/2">
+        <div class="flex w-full flex-col gap-2 sm:flex-row">
+            <div class="relative w-full sm:w-1/2">
                 <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
                     <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M7 3v3M17 3v3M3 9h18M5 7h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
@@ -110,7 +110,7 @@
                 @endforeach
                 </select>
             </div>
-            <div class="relative w-1/2">
+            <div class="relative w-full sm:w-1/2">
                 <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
                     <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M4 7h16M7 3v3M17 3v3M5 11h14v8H5z" />
@@ -125,15 +125,15 @@
             </div>
         </div>
 
-        <div class="flex gap-2 w-full">
-            <button type="submit" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-xs rounded-lg">
+        <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+            <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-xs text-white hover:bg-amber-700 sm:w-auto">
                 <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M4 6h16M7 12h10M10 18h4" />
                 </svg>
                 Filter
             </button>
             <a href="{{ route('admin.permintaansikpgo') }}"
-               class="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-blue-600 underline self-center">
+               class="inline-flex items-center justify-center gap-1.5 self-center text-xs text-gray-600 underline hover:text-blue-600 sm:justify-start">
                 <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M4 12a8 8 0 1 0 8-8" />
                     <path d="M4 4v4h4" />
@@ -143,22 +143,22 @@
         </div>
     </form>
 
-    <div class="bg-white p-6 rounded-2xl shadow-md">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
+    <div class="min-w-0 rounded-2xl bg-white p-3 shadow-md sm:p-6">
+        <div class="mb-4 flex items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-2">
                 <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white">
                     <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M4 6h16M4 12h16M4 18h10" />
                     </svg>
                 </span>
-                <h2 class="text-base font-semibold text-gray-800">Daftar Permintaan Masuk</h2>
+                <h2 class="min-w-0 break-words text-base font-semibold text-gray-800">Daftar Permintaan Masuk</h2>
             </div>
-            <div class="text-[11px] text-gray-500">
+            <div class="shrink-0 text-[11px] text-gray-500">
                 Total: {{ $requests->total() }}
             </div>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50/60">
+        <div class="min-w-0 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50/60">
             <div class="md:hidden space-y-3 p-3">
                 @forelse ($requests as $request)
                     @php
@@ -209,13 +209,13 @@
                         };
                     @endphp
                     <div class="rounded-xl border {{ $borderClass }} bg-white p-4 shadow-sm">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="text-sm font-semibold text-gray-900">{{ $request->user_name }}</div>
-                                <div class="text-[11px] text-gray-500">Jabatan: {{ $request->user_jabatan ?? '-' }}</div>
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div class="min-w-0">
+                                <div class="break-words text-sm font-semibold text-gray-900">{{ $request->user_name }}</div>
+                                <div class="break-words text-[11px] text-gray-500">Jabatan: {{ $request->user_jabatan ?? '-' }}</div>
                                 <div class="text-[11px] text-gray-500">{{ $request->tanggal }}</div>
                             </div>
-                            <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $statusClass }}">
+                            <span class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $statusClass }}">
                                 <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
                                     {!! $statusIcon !!}
                                 </svg>
@@ -224,9 +224,9 @@
                             </span>
                         </div>
                         <div class="mt-2 space-y-1 text-[11px] text-gray-600">
-                            <div><span class="font-semibold">No:</span> {{ $request->number }}</div>
-                            <div><span class="font-semibold">Ditangani:</span> {{ $request->handled_by ?? '-' }}</div>
-                            <div><span class="font-semibold">Step:</span> {{ $isCompleted ? $totalSteps . ' - Selesai' : $request->current_step . ' - ' . ($request->current_step_title ?? 'Belum Diketahui') }}</div>
+                            <div class="break-words"><span class="font-semibold">No:</span> {{ $request->number }}</div>
+                            <div class="break-words"><span class="font-semibold">Ditangani:</span> {{ $request->handled_by ?? '-' }}</div>
+                            <div class="break-words"><span class="font-semibold">Step:</span> {{ $isCompleted ? $totalSteps . ' - Selesai' : $request->current_step . ' - ' . ($request->current_step_title ?? 'Belum Diketahui') }}</div>
                         </div>
                         @if ($request->file)
                             <a href="{{ asset('storage/' . $request->file) }}" target="_blank"
@@ -263,7 +263,7 @@
                 @endforelse
             </div>
 
-            <div class="hidden md:block overflow-auto">
+            <div class="hidden overflow-x-auto md:block">
                 <table class="min-w-full text-xs table-auto">
                     <thead class="bg-gray-50/90 text-gray-700 text-[11px] uppercase tracking-wider sticky top-0 backdrop-blur">
                         <tr>

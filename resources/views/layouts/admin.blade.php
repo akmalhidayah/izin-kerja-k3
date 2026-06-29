@@ -30,7 +30,7 @@
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 overflow-x-hidden">
 <div
     x-data="{
         sidebarOpen: true,
@@ -44,7 +44,7 @@
         closeMobile(){ this.mobileOpen = false; }
     }"
     x-init="$watch('mobileOpen', v => document.body.classList.toggle('overflow-hidden', v))"
-    class="min-h-screen"
+    class="min-h-screen overflow-x-hidden"
 >
 
     <!-- MOBILE OVERLAY -->
@@ -294,14 +294,14 @@
     </aside>
 
     <!-- MAIN WRAPPER -->
-    <div class="min-h-screen transition-all duration-300"
+    <div class="min-h-screen min-w-0 transition-all duration-300"
          :class="sidebarOpen ? 'lg:pl-72' : 'lg:pl-20'">
 
         <!-- TOPBAR -->
         <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-slate-200">
-            <div class="px-4 lg:px-6 py-4 flex items-center justify-between">
+            <div class="px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
                 <!-- Left: mobile menu button -->
-                <div class="flex items-center gap-3">
+                <div class="flex min-w-0 items-center gap-3">
                     <button
                         @click="toggle()"
                         class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-700 transition"
@@ -317,7 +317,7 @@
                 </div>
 
                 <!-- Right -->
-                <div class="flex items-center gap-3">
+                <div class="flex shrink-0 items-center gap-2 sm:gap-3">
                     @php
                         $adminNotifications = collect();
                         $adminUnreadNotifications = 0;
@@ -361,7 +361,7 @@
                             x-transition.origin.top.right
                             @click.away="open=false"
                             x-cloak
-                            class="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50"
+                            class="fixed left-3 right-3 top-16 mt-0 max-h-[calc(100vh-5rem)] bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 sm:max-w-[calc(100vw-2rem)]"
                         >
                             <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-200">
                                 <div>
@@ -379,7 +379,7 @@
                                 @endif
                             </div>
 
-                            <div class="max-h-96 overflow-y-auto">
+                            <div class="max-h-[calc(100vh-10rem)] overflow-y-auto sm:max-h-96">
                                 @forelse($adminNotifications as $item)
                                     @php
                                         $source = $item->notification;
@@ -396,17 +396,17 @@
                                                 <span class="mt-1 inline-flex w-8 h-8 items-center justify-center rounded-xl {{ $item->read_at ? 'bg-slate-100 text-slate-500' : 'bg-red-100 text-red-600' }}">
                                                     <i data-lucide="file-plus-2" class="w-4 h-4"></i>
                                                 </span>
-                                                <span class="min-w-0 flex-1">
+                                                <span class="min-w-0 flex-1 overflow-hidden">
                                                     <span class="flex items-center justify-between gap-2">
-                                                        <span class="text-sm font-semibold text-slate-900">{{ $item->title }}</span>
+                                                        <span class="min-w-0 break-words text-sm font-semibold text-slate-900">{{ $item->title }}</span>
                                                         @if(!$item->read_at)
                                                             <span class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
                                                         @endif
                                                     </span>
-                                                    <span class="mt-1 block text-xs text-slate-600">
+                                                    <span class="mt-1 block break-words text-xs text-slate-600">
                                                         {{ $submitter }} membuat pengajuan {{ $type }} {{ $number }}
                                                     </span>
-                                                    <span class="mt-1 block text-xs text-slate-500 truncate">
+                                                    <span class="mt-1 block break-words text-xs text-slate-500">
                                                         Pekerjaan: {{ $job }}
                                                     </span>
                                                     <span class="mt-1 block text-[11px] text-slate-400">
@@ -468,8 +468,8 @@
         </header>
 
         <!-- CONTENT -->
-        <main class="p-4 lg:p-6">
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 lg:p-6">
+        <main class="min-w-0 overflow-x-hidden p-3 sm:p-4 lg:p-6">
+            <div class="min-w-0 overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm p-3 sm:p-4 lg:p-6">
                 {{ $slot }}
             </div>
         </main>
