@@ -6,14 +6,16 @@
     <style>
         body { font-family: sans-serif; font-size: 12px; margin: 40px 42px; line-height: 2; color: #111; }
         h1, h2, h3, p { margin: 0; padding: 0; }
-        .header-table { width: 100%; margin-bottom: 34px; }
+        .header-table { width: 100%; margin-bottom: 0; }
         .header-table td { vertical-align: middle; }
-        .company-name { font-size: 16px; font-weight: 700; line-height: 1.2; margin-bottom: 7px; }
-        .company-tagline { font-size: 11px; font-weight: 500; line-height: 1.25; margin-bottom: 8px; }
-        .document-title { font-size: 14px; font-weight: 700; line-height: 1.25; text-decoration: underline; margin-bottom: 5px; }
-        .document-number { font-size: 11px; font-weight: 500; line-height: 1.2; }
+        .company-name { font-size: 19px; font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
+        .company-tagline { font-size: 13px; font-weight: 700; line-height: 1.25; }
+        .document-heading { text-align: center; margin-top: 18px; margin-bottom: 38px; }
+        .document-title { font-size: 15px; font-weight: 700; line-height: 1.25; text-decoration: underline; margin-bottom: 7px; }
+        .document-number { font-size: 12px; font-weight: 700; line-height: 1.2; }
         .content { text-align: justify; }
         .content p.paragraph { text-indent: 34px; line-height: 2; margin-bottom: 12px; }
+        .content p.closing-paragraph { text-indent: 0; line-height: 2; margin-bottom: 12px; }
         .party-block { line-height: 1.8; margin: 16px 0 18px; }
         .signature { text-align: right; margin-top: 42px; line-height: 1.55; }
         .signature p { margin: 3px 0; line-height: 1.55; }
@@ -46,14 +48,17 @@
                 <td style="text-align: center;">
                     <div class="company-name">PT. SEMEN TONASA</div>
                     <div class="company-tagline">Utamakan Keselamatan dan Kesehatan Kerja</div>
-                    <div class="document-title">Surat Penyelesaian Pekerjaan</div>
-                    <div class="document-number">No. {{ $notification->id }} / 22.4.0/SIK/ST/{{ $bulanSaatIni }} / {{ date('Y') }}</div>
                 </td>
                 <td style="width: 15%; text-align: right;">
                     <img src="{{ public_path('images/logo-k3.png') }}" alt="Logo K3" style="height: 60px;">
                 </td>
             </tr>
         </table>
+
+        <div class="document-heading">
+            <div class="document-title">Surat Penyelesaian Pekerjaan</div>
+            <div class="document-number">No. {{ $notification->id }} / 22.4.0/SIK/ST/{{ $bulanSaatIni }} / {{ date('Y') }}</div>
+        </div>
     </header>
 
     {{-- Konten Surat --}}
@@ -67,7 +72,7 @@
 
         <p class="paragraph">Telah memenuhi persyaratan Keselamatan dan Kesehatan Kerja (K3) serta <strong>menyelesaikan</strong> pekerjaan yang ditunjuk oleh PT. Semen Tonasa sesuai <strong>{{ $documentLabel }}:</strong> {{ $notification->number ?? '-' }}, terhitung tanggal <strong>{{ \Carbon\Carbon::parse($dataKontraktor->tanggal_mulai)->translatedFormat('d F Y') }}</strong> s/d <strong>{{ \Carbon\Carbon::parse($dataKontraktor->tanggal_selesai)->translatedFormat('d F Y') }}</strong>.</p>
 
-        <p class="paragraph">Demikian Surat Penyelesaian Pekerjaan ini diberikan untuk dipergunakan sebagaimana mestinya kepada Perusahaan di atas dan tidak diperkenankan untuk dipindahtangankan kepada pihak lain.</p>
+        <p class="closing-paragraph">Demikian Surat Penyelesaian Pekerjaan ini diberikan untuk dipergunakan sebagaimana mestinya kepada Perusahaan di atas dan tidak diperkenankan untuk dipindahtangankan kepada pihak lain.</p>
     </div>
 
     <div class="signature">
