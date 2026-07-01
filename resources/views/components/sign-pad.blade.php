@@ -220,9 +220,5 @@ function saveSignature() {
 document.addEventListener('DOMContentLoaded', () => {
     syncSignatureControls();
     setTimeout(syncSignatureControls, 250);
-    setTimeout(syncSignatureControls, 1000);
-
-    const observer = new MutationObserver(() => syncSignatureControls());
-    observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
