@@ -5,7 +5,7 @@
 @php
     $signatureButtonClass = fn ($hasSignature) => $hasSignature
         ? 'mt-1 inline-flex items-center justify-center rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100'
-        : 'text-blue-600 underline text-xs';
+        : 'mt-1 inline-flex items-center justify-center rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm hover:bg-blue-700';
     $signatureUrl = fn ($signature) => $signature
         ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
         : '';
