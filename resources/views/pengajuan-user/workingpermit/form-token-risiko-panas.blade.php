@@ -13,9 +13,9 @@
 
     <section class="bg-cover bg-center bg-no-repeat py-10 px-4" style="background-image: url('/images/bg-login.jpg');">
         <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
-<form method="POST" action="{{ route('working-permit.risiko-panas.token.store', $permit->token) }}" enctype="multipart/form-data">
-    @csrf
-<input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
+            <form method="POST" action="{{ route('working-permit.risiko-panas.token.store', $permit->token) }}" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 
     <!-- Bagian 1: Detail Pekerjaan -->
     <div class="text-center mb-4">
@@ -153,40 +153,63 @@
                             <td class="border px-2 py-1">
                                 <input type="time" x-model="row.jam" :name="'pengukuran_gas[' + gas + '][' + index + '][jam]'" class="input w-full text-xs">
                             </td>
-                         <td class="border px-1 py-1 text-center">
-    <template x-if="row.sign">
-        <img :src="row.sign" class="h-10 mx-auto mb-1">
-    </template>
+                                            <td class="border px-1 py-1 text-center">
+                                                <template x-if="row.sign">
+                                                    <div class="space-y-1">
+                                                        <img :src="row.sign" class="h-10 mx-auto mb-1 border">
 
-    <button 
-        type="button"
-        @click="openSignPad(
-            'risikopanas_signature_' + gas.replaceAll(' ', '_')
-                                         .replaceAll('(', '')
-                                         .replaceAll(')', '')
-                                         .replaceAll('%', '')
-                                         .replaceAll('.', '')
-                                         .replaceAll('<', '')
-                                         .replaceAll('=', '') 
-                                         + '_' + index
-        )"
-        class="text-blue-600 underline text-xs">
-        TTD
-    </button>
+                                                        <button
+                                                            type="button"
+                                                            @click="openSignPad(
+                                                                'risikopanas_signature_' + gas.replaceAll(' ', '_')
+                                                                    .replaceAll('(', '')
+                                                                    .replaceAll(')', '')
+                                                                    .replaceAll('%', '')
+                                                                    .replaceAll('.', '')
+                                                                    .replaceAll('<', '')
+                                                                    .replaceAll('=', '')
+                                                                    + '_' + index
+                                                            )"
+                                                            class="text-yellow-600 underline text-xs"
+                                                        >
+                                                            Ubah TTD
+                                                        </button>
+                                                    </div>
+                                                </template>
 
-    <input 
-        type="hidden"
-        :id="'risikopanas_signature_' + gas.replaceAll(' ', '_')
-                                         .replaceAll('(', '')
-                                         .replaceAll(')', '')
-                                         .replaceAll('%', '')
-                                         .replaceAll('.', '')
-                                         .replaceAll('<', '')
-                                         .replaceAll('=', '') 
-                                         + '_' + index"
-        :name="'pengukuran_gas[' + gas + '][' + index + '][sign]'"
-        x-model="row.sign">
-</td>
+                                                <template x-if="!row.sign">
+                                                    <button
+                                                        type="button"
+                                                        @click="openSignPad(
+                                                            'risikopanas_signature_' + gas.replaceAll(' ', '_')
+                                                                .replaceAll('(', '')
+                                                                .replaceAll(')', '')
+                                                                .replaceAll('%', '')
+                                                                .replaceAll('.', '')
+                                                                .replaceAll('<', '')
+                                                                .replaceAll('=', '')
+                                                                + '_' + index
+                                                        )"
+                                                        class="text-blue-600 underline text-xs"
+                                                    >
+                                                        Tanda Tangan
+                                                    </button>
+                                                </template>
+
+                                                <input
+                                                    type="hidden"
+                                                    :id="'risikopanas_signature_' + gas.replaceAll(' ', '_')
+                                                        .replaceAll('(', '')
+                                                        .replaceAll(')', '')
+                                                        .replaceAll('%', '')
+                                                        .replaceAll('.', '')
+                                                        .replaceAll('<', '')
+                                                        .replaceAll('=', '')
+                                                        + '_' + index"
+                                                    :name="'pengukuran_gas[' + gas + '][' + index + '][sign]'"
+                                                    x-model="row.sign"
+                                                >
+                                            </td>
 
                         </tr>
                     </template>
@@ -325,23 +348,38 @@
                 <td class="border px-2 py-1 text-center">
                     <input type="text" name="requestor_name" value="{{ $requestor_name }}" class="input w-full text-xs text-center">
                 </td>
-             <td class="border px-2 py-1 text-center">
-    <button type="button"
-        @click="openSignPad('risikopanas_signature_requestor')"
-        class="text-blue-600 underline text-xs">
-        TTD
-    </button>
+                <td class="border px-2 py-1 text-center">
+                    @if ($signature_requestor)
+                        <img
+                            src="{{ str_starts_with($signature_requestor, 'data:image') ? $signature_requestor : asset($signature_requestor) }}"
+                            class="h-12 mx-auto mt-1 border"
+                            alt="Tanda Tangan Permit Requestor"
+                        >
 
-    <input type="hidden"
-        name="signature_requestor"
-        id="risikopanas_signature_requestor"
-        value="{{ old('signature_requestor', $permit->signature_requestor ?? '') }}">
+                        <button
+                            type="button"
+                            @click="openSignPad('risikopanas_signature_requestor')"
+                            class="text-yellow-600 underline text-xs mt-1"
+                        >
+                            Ubah TTD
+                        </button>
+                    @else
+                        <button
+                            type="button"
+                            @click="openSignPad('risikopanas_signature_requestor')"
+                            class="text-blue-600 underline text-xs"
+                        >
+                            Tanda Tangan
+                        </button>
+                    @endif
 
-    @if(old('signature_requestor', $permit->signature_requestor ?? null))
-        <img src="{{ asset(old('signature_requestor', $permit->signature_requestor)) }}"
-            class="h-12 mx-auto mt-1">
-    @endif
-</td>
+                    <input
+                        type="hidden"
+                        name="signature_requestor"
+                        id="risikopanas_signature_requestor"
+                        value="{{ $signature_requestor }}"
+                    >
+                </td>
 
 
                 <td class="border px-2 py-1 text-center">
@@ -388,24 +426,38 @@
                 <td class="border px-2 py-1 text-center">
                     <input type="text" name="verificator_name" value="{{ $verificator_name }}" class="input w-full text-xs text-center">
                 </td>
-              <td class="border px-2 py-1 text-center">
-    <button 
-        type="button"
-        @click="openSignPad('risikopanas_signature_verificator')"
-        class="text-blue-600 underline text-xs">
-        TTD
-    </button>
+                <td class="border px-2 py-1 text-center">
+                    @if ($verificator_signature)
+                        <img
+                            src="{{ str_starts_with($verificator_signature, 'data:image') ? $verificator_signature : asset($verificator_signature) }}"
+                            class="h-12 mx-auto mt-1 border"
+                            alt="Tanda Tangan Permit Verificator"
+                        >
 
-    <input type="hidden"
-        name="signature_verificator"
-        id="risikopanas_signature_verificator"
-        value="{{ old('signature_verificator', $permit->signature_verificator ?? '') }}">
+                        <button
+                            type="button"
+                            @click="openSignPad('risikopanas_signature_verificator')"
+                            class="text-yellow-600 underline text-xs mt-1"
+                        >
+                            Ubah TTD
+                        </button>
+                    @else
+                        <button
+                            type="button"
+                            @click="openSignPad('risikopanas_signature_verificator')"
+                            class="text-blue-600 underline text-xs"
+                        >
+                            Tanda Tangan
+                        </button>
+                    @endif
 
-    @if(old('signature_verificator', $permit->signature_verificator ?? null))
-        <img src="{{ asset(old('signature_verificator', $permit->signature_verificator)) }}"
-            class="h-12 mx-auto mt-1">
-    @endif
-</td>
+                    <input
+                        type="hidden"
+                        name="signature_verificator"
+                        id="risikopanas_signature_verificator"
+                        value="{{ $verificator_signature }}"
+                    >
+                </td>
 
                 <td class="border px-2 py-1 text-center">
                     <input type="date" name="verificator_date" value="{{ $verificator_date }}" class="input w-full text-xs text-center">
@@ -422,10 +474,10 @@
 <!-- bagian 7 penerbitan izin kerja -->
 @php
     $permit_issuer_name = old('permit_issuer_name', $permit->permit_issuer_name ?? '');
-    $permit_issuer_signature = old('permit_issuer_signature', $permit->permit_issuer_signature ?? '');
+    $signature_permit_issuer = old('signature_permit_issuer', $permit->signature_permit_issuer ?? '');
 
     $senior_manager_name = old('senior_manager_name', $permit->senior_manager_name ?? '');
-    $senior_manager_signature = old('senior_manager_signature', $permit->senior_manager_signature ?? '');
+    $signature_senior_manager = old('signature_senior_manager', $permit->signature_senior_manager ?? '');
 
     $izin_dari = old('izin_berlaku_dari', $permit->izin_berlaku_dari ?? '');
     $izin_jam_dari = old('izin_berlaku_jam_dari', $permit->izin_berlaku_jam_dari ?? '');
@@ -455,45 +507,89 @@
         </thead>
         <tbody>
             <tr>
-           <!-- Permit Issuer -->
-<td class="border px-2 py-2">
-    <input type="text" name="permit_issuer_name" class="input w-full text-center mb-1 text-xs" placeholder="Nama"
-        value="{{ old('permit_issuer_name', $permit->permit_issuer_name ?? '') }}">
+                <!-- Permit Issuer -->
+                <td class="border px-2 py-2">
+                    <input
+                        type="text"
+                        name="permit_issuer_name"
+                        class="input w-full text-center mb-1 text-xs"
+                        placeholder="Nama"
+                        value="{{ $permit_issuer_name }}"
+                    >
 
-    @if(old('signature_permit_issuer', $permit->signature_permit_issuer ?? null))
-        <img src="{{ asset(old('signature_permit_issuer', $permit->signature_permit_issuer)) }}"
-            class="h-12 mx-auto mt-1 border">
-    @endif
+                    @if ($signature_permit_issuer)
+                        <img
+                            src="{{ str_starts_with($signature_permit_issuer, 'data:image') ? $signature_permit_issuer : asset($signature_permit_issuer) }}"
+                            class="h-12 mx-auto mt-1 border"
+                            alt="Tanda Tangan Permit Issuer"
+                        >
 
-    <button type="button"
-        @click="openSignPad('signature_permit_issuer')"
-        class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <button
+                            type="button"
+                            @click="openSignPad('signature_permit_issuer')"
+                            class="text-yellow-600 underline text-xs mt-1"
+                        >
+                            Ubah TTD
+                        </button>
+                    @else
+                        <button
+                            type="button"
+                            @click="openSignPad('signature_permit_issuer')"
+                            class="text-blue-600 underline text-xs"
+                        >
+                            Tanda Tangan
+                        </button>
+                    @endif
 
-    <input type="hidden"
-        id="signature_permit_issuer"
-        name="signature_permit_issuer"
-        value="{{ old('signature_permit_issuer', $permit->signature_permit_issuer ?? '') }}">
-</td>
+                    <input
+                        type="hidden"
+                        id="signature_permit_issuer"
+                        name="signature_permit_issuer"
+                        value="{{ $signature_permit_issuer }}"
+                    >
+                </td>
 
-<!-- Senior Manager -->
-<td class="border px-2 py-2">
-    <input type="text" name="senior_manager_name" class="input w-full text-center mb-1 text-xs" placeholder="Nama"
-        value="{{ old('senior_manager_name', $permit->senior_manager_name ?? '') }}">
+                <!-- Senior Manager -->
+                <td class="border px-2 py-2">
+                    <input
+                        type="text"
+                        name="senior_manager_name"
+                        class="input w-full text-center mb-1 text-xs"
+                        placeholder="Nama"
+                        value="{{ $senior_manager_name }}"
+                    >
 
-    @if(old('signature_senior_manager', $permit->signature_senior_manager ?? null))
-        <img src="{{ asset(old('signature_senior_manager', $permit->signature_senior_manager)) }}"
-            class="h-12 mx-auto mt-1 border">
-    @endif
+                    @if ($signature_senior_manager)
+                        <img
+                            src="{{ str_starts_with($signature_senior_manager, 'data:image') ? $signature_senior_manager : asset($signature_senior_manager) }}"
+                            class="h-12 mx-auto mt-1 border"
+                            alt="Tanda Tangan Senior Manager"
+                        >
 
-    <button type="button"
-        @click="openSignPad('signature_senior_manager')"
-        class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <button
+                            type="button"
+                            @click="openSignPad('signature_senior_manager')"
+                            class="text-yellow-600 underline text-xs mt-1"
+                        >
+                            Ubah TTD
+                        </button>
+                    @else
+                        <button
+                            type="button"
+                            @click="openSignPad('signature_senior_manager')"
+                            class="text-blue-600 underline text-xs"
+                        >
+                            Tanda Tangan
+                        </button>
+                    @endif
 
-    <input type="hidden"
-        id="signature_senior_manager"
-        name="signature_senior_manager"
-        value="{{ old('signature_senior_manager', $permit->signature_senior_manager ?? '') }}">
-</td>
+                    <input
+                        type="hidden"
+                        id="signature_senior_manager"
+                        name="signature_senior_manager"
+                        value="{{ $signature_senior_manager }}"
+                    >
+                </td>
 
             </tr>
         </tbody>
@@ -551,21 +647,38 @@
                 <td class="border px-2 py-2">
                     <input type="text" name="authorizer_name" class="input w-full text-xs text-center" placeholder="Nama" value="{{ $authorizer_name }}">
                 </td>
-               <td class="border px-2 py-2">
-    @if(old('authorizer_signature', $permit->authorizer_signature ?? null))
-        <img src="{{ asset(old('authorizer_signature', $permit->authorizer_signature)) }}" class="h-12 mx-auto mt-1 border">
-    @endif
+                <td class="border px-2 py-2">
+                    @if ($authorizer_signature)
+                        <img
+                            src="{{ str_starts_with($authorizer_signature, 'data:image') ? $authorizer_signature : asset($authorizer_signature) }}"
+                            class="h-12 mx-auto mt-1 border"
+                            alt="Tanda Tangan Permit Authorizer"
+                        >
 
-    <button 
-        type="button" 
-        class="text-blue-600 underline text-xs"
-        @click="openSignPad('signature_authorizer')">
-        Tanda Tangan
-    </button>
+                        <button
+                            type="button"
+                            class="text-yellow-600 underline text-xs mt-1"
+                            @click="openSignPad('signature_authorizer')"
+                        >
+                            Ubah TTD
+                        </button>
+                    @else
+                        <button
+                            type="button"
+                            class="text-blue-600 underline text-xs"
+                            @click="openSignPad('signature_authorizer')"
+                        >
+                            Tanda Tangan
+                        </button>
+                    @endif
 
-    <input type="hidden" id="signature_authorizer" name="authorizer_signature"
-        value="{{ old('authorizer_signature', $permit->authorizer_signature ?? '') }}">
-</td>
+                    <input
+                        type="hidden"
+                        id="signature_authorizer"
+                        name="authorizer_signature"
+                        value="{{ $authorizer_signature }}"
+                    >
+                </td>
                 <td class="border px-2 py-2">
                     <input type="date" name="authorizer_date" class="input w-full text-xs text-center" value="{{ $authorizer_date }}">
                 </td>
@@ -610,21 +723,38 @@
                 <td class="border px-2 py-2">
                     <input type="text" name="receiver_name" class="input w-full text-xs text-center" placeholder="Nama" value="{{ $receiver_name }}">
                 </td>
-               <td class="border px-2 py-2">
-    @if(old('receiver_signature', $permit->receiver_signature ?? null))
-        <img src="{{ asset(old('receiver_signature', $permit->receiver_signature)) }}" class="h-12 mx-auto mt-1 border">
-    @endif
+                <td class="border px-2 py-2">
+                    @if ($receiver_signature)
+                        <img
+                            src="{{ str_starts_with($receiver_signature, 'data:image') ? $receiver_signature : asset($receiver_signature) }}"
+                            class="h-12 mx-auto mt-1 border"
+                            alt="Tanda Tangan Permit Receiver"
+                        >
 
-    <button 
-        type="button" 
-        class="text-blue-600 underline text-xs"
-        @click="openSignPad('signature_receiver')">
-        Tanda Tangan
-    </button>
+                        <button
+                            type="button"
+                            class="text-yellow-600 underline text-xs mt-1"
+                            @click="openSignPad('signature_receiver')"
+                        >
+                            Ubah TTD
+                        </button>
+                    @else
+                        <button
+                            type="button"
+                            class="text-blue-600 underline text-xs"
+                            @click="openSignPad('signature_receiver')"
+                        >
+                            Tanda Tangan
+                        </button>
+                    @endif
 
-    <input type="hidden" id="signature_receiver" name="receiver_signature"
-        value="{{ old('receiver_signature', $permit->receiver_signature ?? '') }}">
-</td>
+                    <input
+                        type="hidden"
+                        id="signature_receiver"
+                        name="receiver_signature"
+                        value="{{ $receiver_signature }}"
+                    >
+                </td>
                 <td class="border px-2 py-2">
                     <input type="date" name="receiver_date" class="input w-full text-xs text-center" value="{{ $receiver_date }}">
                 </td>
@@ -703,24 +833,86 @@
 
                 <!-- Requestor -->
                 <td class="border text-center px-2 py-2">
-                    <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
-                    @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
-                        <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
+                    <input
+                        type="text"
+                        name="close_requestor_name"
+                        class="input w-full text-xs mb-1"
+                        placeholder="Nama"
+                        value="{{ $closeRequestorName }}"
+                    >
+
+                    @if ($closeRequestorSign)
+                        <img
+                            src="{{ str_starts_with($closeRequestorSign, 'data:image') ? $closeRequestorSign : asset($closeRequestorSign) }}"
+                            alt="Tanda Tangan Permit Requestor"
+                            class="h-20 mx-auto border"
+                        >
+
+                        <button
+                            type="button"
+                            onclick="openSignPad('signature_close_requestor')"
+                            class="text-yellow-600 underline text-xs mt-1"
+                        >
+                            Ubah TTD
+                        </button>
                     @else
-                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <button
+                            type="button"
+                            onclick="openSignPad('signature_close_requestor')"
+                            class="text-blue-600 underline text-xs"
+                        >
+                            Tanda Tangan
+                        </button>
                     @endif
-                    <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}">
+
+                    <input
+                        type="hidden"
+                        name="signature_close_requestor"
+                        id="signature_close_requestor"
+                        value="{{ $closeRequestorSign }}"
+                    >
                 </td>
 
                 <!-- Issuer -->
                 <td class="border text-center px-2 py-2">
-                    <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
-                    @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
-                        <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
+                    <input
+                        type="text"
+                        name="close_issuer_name"
+                        class="input w-full text-xs mb-1"
+                        placeholder="Nama"
+                        value="{{ $closeIssuerName }}"
+                    >
+
+                    @if ($closeIssuerSign)
+                        <img
+                            src="{{ str_starts_with($closeIssuerSign, 'data:image') ? $closeIssuerSign : asset($closeIssuerSign) }}"
+                            alt="Tanda Tangan Permit Issuer"
+                            class="h-20 mx-auto border"
+                        >
+
+                        <button
+                            type="button"
+                            onclick="openSignPad('signature_close_issuer')"
+                            class="text-yellow-600 underline text-xs mt-1"
+                        >
+                            Ubah TTD
+                        </button>
                     @else
-                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <button
+                            type="button"
+                            onclick="openSignPad('signature_close_issuer')"
+                            class="text-blue-600 underline text-xs"
+                        >
+                            Tanda Tangan
+                        </button>
                     @endif
-                    <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}">
+
+                    <input
+                        type="hidden"
+                        name="signature_close_issuer"
+                        id="signature_close_issuer"
+                        value="{{ $closeIssuerSign }}"
+                    >
                 </td>
             </tr>
         </tbody>
@@ -749,6 +941,9 @@
         💾 Simpan
     </button>
 </div>
-</form>
-@include('components.sign-pad')
+            </form>
+
+            @include('components.sign-pad')
+        </div>
+    </section>
 </x-app-layout>
