@@ -69,11 +69,20 @@ function showSignatureNotice(type, title, text) {
 
     const toast = document.createElement('div');
     toast.id = 'signatureToast';
-    toast.className = 'fixed right-4 top-4 z-[9999] max-w-sm rounded border px-4 py-3 text-sm shadow-lg';
-    toast.className += type === 'success'
-        ? ' border-green-200 bg-green-50 text-green-800'
-        : ' border-red-200 bg-red-50 text-red-800';
-    toast.innerHTML = '<div class="font-semibold">' + title + '</div><div class="mt-1">' + text + '</div>';
+    toast.style.position = 'fixed';
+    toast.style.top = '16px';
+    toast.style.right = '16px';
+    toast.style.zIndex = '2147483647';
+    toast.style.maxWidth = '360px';
+    toast.style.borderRadius = '8px';
+    toast.style.border = '1px solid ' + (type === 'success' ? '#bbf7d0' : '#fecaca');
+    toast.style.background = type === 'success' ? '#f0fdf4' : '#fef2f2';
+    toast.style.color = type === 'success' ? '#166534' : '#991b1b';
+    toast.style.padding = '12px 16px';
+    toast.style.fontSize = '14px';
+    toast.style.lineHeight = '1.4';
+    toast.style.boxShadow = '0 10px 24px rgba(15, 23, 42, 0.18)';
+    toast.innerHTML = '<div style="font-weight: 700;">' + title + '</div><div style="margin-top: 4px;">' + text + '</div>';
 
     document.body.appendChild(toast);
 
