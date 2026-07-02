@@ -118,7 +118,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="text-blue-600 underline text-xs">
+                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm hover:bg-blue-700">
                                 Tanda Tangan
                             </button>
                         </td>
@@ -166,7 +166,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="text-blue-600 underline text-xs">
+                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm hover:bg-blue-700">
                                 Tanda Tangan
                             </button>
                         </td>
@@ -278,8 +278,8 @@
     $requestorName = old('permit_requestor_name', $permit?->permit_requestor_name ?? '');
     $requestorSign = old('signature_permit_requestor', $permit?->permit_requestor_sign ?? '');
     $signatureButtonClass = fn ($hasSignature) => $hasSignature
-        ? 'mt-1 inline-flex items-center justify-center rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100'
-        : 'text-blue-600 underline text-xs';
+        ? 'mt-1 inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm hover:bg-blue-700';
 
     $requestorDateRaw = old('permit_requestor_date', $permit?->permit_requestor_date ?? '');
     $requestorDate = $requestorDateRaw ? \Carbon\Carbon::parse($requestorDateRaw)->format('Y-m-d') : '';

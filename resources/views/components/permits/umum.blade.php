@@ -110,7 +110,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="text-blue-600 underline text-xs">
+                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm hover:bg-blue-700">
                                 Tanda Tangan
                             </button>
                         </td>
@@ -158,7 +158,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="text-blue-600 underline text-xs">
+                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm hover:bg-blue-700">
                                 Tanda Tangan
                             </button>
                         </td>
@@ -269,6 +269,9 @@
 
     $requestorName = old('permit_requestor_name', $permit?->permit_requestor_name ?? '');
     $requestorSign = old('signature_permit_requestor', $permit?->permit_requestor_sign ?? '');
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm hover:bg-blue-700';
 
     $requestorDateRaw = old('permit_requestor_date', $permit?->permit_requestor_date ?? '');
     $requestorDate = $requestorDateRaw ? \Carbon\Carbon::parse($requestorDateRaw)->format('Y-m-d') : '';
@@ -306,7 +309,7 @@
     <button
         type="button"
         onclick="openSignPad('signature_permit_requestor')"
-        class="text-blue-600 underline text-xs">
+        class="{{ $signatureButtonClass($requestorSign) }}">
         {{ $requestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}
     </button>
     <input type="hidden" name="signature_permit_requestor" id="signature_permit_requestor" value="{{ $requestorSign }}" data-signature-url="{{ $requestorSign ? asset($requestorSign) : '' }}">
@@ -372,7 +375,7 @@
     <button
         type="button"
         onclick="openSignPad('signature_permit_issuer')"
-        class="text-blue-600 underline text-xs">
+        class="{{ $signatureButtonClass($issuerSign) }}">
         {{ $issuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
     </button>
     <input type="hidden" name="signature_permit_issuer" id="signature_permit_issuer" value="{{ $issuerSign }}" data-signature-url="{{ $issuerSign ? asset($issuerSign) : '' }}">
@@ -451,7 +454,7 @@
                     <button
                         type="button"
                         onclick="openSignPad('signature_permit_authorizer')"
-                        class="text-blue-600 underline text-xs">
+                        class="{{ $signatureButtonClass($authorizerSign) }}">
                         {{ $authorizerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
                     <input type="hidden" name="signature_permit_authorizer" id="signature_permit_authorizer" value="{{ $authorizerSign }}" data-signature-url="{{ $authorizerSign ? asset($authorizerSign) : '' }}">
@@ -509,7 +512,7 @@
     <button
         type="button"
         onclick="openSignPad('signature_permit_receiver')"
-        class="text-blue-600 underline text-xs">
+        class="{{ $signatureButtonClass($receiverSign) }}">
         {{ $receiverSign ? 'Ubah TTD' : 'Tanda Tangan' }}
     </button>
 
@@ -594,7 +597,7 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
                  @if ($liveTestingSign)
     <img src="{{ asset($liveTestingSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
 @endif
-    <button type="button" onclick="openSignPad('signature_live_testing')" class="text-blue-600 underline text-xs">
+    <button type="button" onclick="openSignPad('signature_live_testing')" class="{{ $signatureButtonClass($liveTestingSign) }}">
         {{ $liveTestingSign ? 'Ubah TTD' : 'Tanda Tangan' }}
     </button>
 
@@ -687,7 +690,7 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
                  @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
     <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
 @endif
-    <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">{{ $closeRequestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
+    <button type="button" onclick="openSignPad('signature_close_requestor')" class="{{ $signatureButtonClass($closeRequestorSign) }}">{{ $closeRequestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
 
                     <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}" data-signature-url="{{ $closeRequestorSign ? asset($closeRequestorSign) : '' }}">
                 </td>
@@ -698,7 +701,7 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
                     @if ($closeIssuerSign)
                         <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
                     @endif
-                    <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">{{ $closeIssuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
+                    <button type="button" onclick="openSignPad('signature_close_issuer')" class="{{ $signatureButtonClass($closeIssuerSign) }}">{{ $closeIssuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
                     <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}" data-signature-url="{{ $closeIssuerSign ? asset($closeIssuerSign) : '' }}">
                 </td>
             </tr>

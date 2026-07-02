@@ -11,6 +11,12 @@
     </div>
 @endif
 
+@php
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex min-w-[86px] items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm hover:bg-blue-700';
+@endphp
+
 {{-- WRAP X-DATA DI LUAR --}}
 <div x-data="formJSA()" x-init="console.log('✅ langkahKerja loaded:', langkahKerja)">
     {{-- MODAL --}}
@@ -98,15 +104,15 @@
                     <tr>
                         <td class="border p-2 text-center">
                             <input type="text" name="dibuat_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('dibuat_nama') }}" required>
-                            <button type="button" onclick="openSignPad('dibuat_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                            <button type="button" onclick="openSignPad('dibuat_signature')" class="{{ $signatureButtonClass(false) }}">Tanda Tangan</button>
                         </td>
                         <td class="border p-2 text-center">
                             <input type="text" name="disetujui_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('disetujui_nama') }}" required>
-                            <button type="button" onclick="openSignPad('disetujui_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                            <button type="button" onclick="openSignPad('disetujui_signature')" class="{{ $signatureButtonClass(false) }}">Tanda Tangan</button>
                         </td>
                         <td class="border p-2 text-center">
                             <input type="text" name="diverifikasi_nama" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ old('diverifikasi_nama') }}" required>
-                            <button type="button" onclick="openSignPad('diverifikasi_signature')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                            <button type="button" onclick="openSignPad('diverifikasi_signature')" class="{{ $signatureButtonClass(false) }}">Tanda Tangan</button>
                         </td>
                     </tr>
                 </table>
