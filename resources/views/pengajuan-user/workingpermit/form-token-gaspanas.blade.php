@@ -17,6 +17,16 @@
   <form method="POST" action="{{ route('working-permit.gaspanas.token.store', $permit->token) }}" enctype="multipart/form-data">
     @csrf
 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
+
+@php
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureUrl = fn ($signature) => $signature
+        ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
+        : '';
+@endphp
+
     <!-- Bagian 1: Detail Pekerjaan -->
     <div class="text-center mb-4">
         <h2 class="text-2xl font-bold uppercase">IZIN KERJA</h2>
@@ -97,21 +107,20 @@
                         <input type="text" :name="'daftar_pekerja[' + index + '][nama]'" x-model="item.nama" class="input w-full text-sm">
                     </td>
                    <td class="border px-2 py-1 text-center">
-    <button 
-        type="button"
-        class="text-blue-600 underline text-xs"
-        @click="openSignPad('daftar_pekerja_' + index + '_signature')">
-        Tanda Tangan
-    </button>
-
     <input type="hidden" 
         :id="'daftar_pekerja_' + index + '_signature'" 
         :name="'daftar_pekerja[' + index + '][signature]'" 
         x-model="item.signature">
 
     <template x-if="item.signature">
-        <img :src="item.signature" class="mx-auto mt-1 h-10 border rounded shadow" />
+        <img :src="item.signature" class="mx-auto mb-1 h-10 border rounded shadow" />
     </template>
+    <button
+        type="button"
+        class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
+        @click="openSignPad('daftar_pekerja_' + index + '_signature')"
+        x-text="item.signature ? 'Ubah TTD' : 'Tanda Tangan'">
+    </button>
 </td>
 
                 </tr>
@@ -268,15 +277,16 @@
                     <button 
                         type="button"
                         onclick="openSignPad('gaspanas_signature_permit_requestor')"
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $reqSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($reqSign) }}">
+                        {{ $reqSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
                     <input 
                         type="hidden" 
                         name="permit_requestor_sign" 
                         id="gaspanas_signature_permit_requestor" 
-                        value="{{ $reqSign }}">
+                        value="{{ $reqSign }}"
+                        data-signature-url="{{ $signatureUrl($reqSign) }}">
                 </td>
 
                 <td class="border px-2 py-2 text-center">
@@ -355,11 +365,11 @@
                     <button 
                         type="button" 
                         onclick="openSignPad('gaspanas_signature_verificator')" 
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $verificatorSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($verificatorSign) }}">
+                        {{ $verificatorSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input type="hidden" name="signature_verificator" id="gaspanas_signature_verificator" value="{{ $verificatorSign }}">
+                    <input type="hidden" name="signature_verificator" id="gaspanas_signature_verificator" value="{{ $verificatorSign }}" data-signature-url="{{ $signatureUrl($verificatorSign) }}">
                 </td>
                 <td class="border text-center px-2 py-2">
                     <input type="date" name="verificator_date" class="input w-full text-center" value="{{ $verificatorDate }}">
@@ -415,11 +425,11 @@ $issuerTime = $issuerTimeRaw ? \Carbon\Carbon::parse($issuerTimeRaw)->format('H:
                     <button 
                         type="button" 
                         onclick="openSignPad('gaspanas_signature_permit_issuer')" 
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $issuerSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($issuerSign) }}">
+                        {{ $issuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input type="hidden" name="signature_permit_issuer" id="gaspanas_signature_permit_issuer" value="{{ $issuerSign }}">
+                    <input type="hidden" name="signature_permit_issuer" id="gaspanas_signature_permit_issuer" value="{{ $issuerSign }}" data-signature-url="{{ $signatureUrl($issuerSign) }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
                     <input type="date" name="permit_issuer_date" class="input w-full text-center" value="{{ $issuerDate }}">
@@ -487,11 +497,11 @@ $authorizerTime = $authorizerTimeRaw ? \Carbon\Carbon::parse($authorizerTimeRaw)
                     <button 
                         type="button" 
                         onclick="openSignPad('gaspanas_signature_permit_authorizer')" 
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $authorizerSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($authorizerSign) }}">
+                        {{ $authorizerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input type="hidden" name="signature_permit_authorizer" id="gaspanas_signature_permit_authorizer" value="{{ $authorizerSign }}">
+                    <input type="hidden" name="signature_permit_authorizer" id="gaspanas_signature_permit_authorizer" value="{{ $authorizerSign }}" data-signature-url="{{ $signatureUrl($authorizerSign) }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
                     <input type="date" name="permit_authorizer_date" class="input w-full text-center" value="{{ $authorizerDate }}">
@@ -544,11 +554,11 @@ $receiverTime = $receiverTimeRaw ? \Carbon\Carbon::parse($receiverTimeRaw)->form
                     <button 
                         type="button" 
                         onclick="openSignPad('gaspanas_signature_permit_receiver')" 
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $receiverSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($receiverSign) }}">
+                        {{ $receiverSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input type="hidden" name="signature_permit_receiver" id="gaspanas_signature_permit_receiver" value="{{ $receiverSign }}">
+                    <input type="hidden" name="signature_permit_receiver" id="gaspanas_signature_permit_receiver" value="{{ $receiverSign }}" data-signature-url="{{ $signatureUrl($receiverSign) }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
                     <input type="date" name="permit_receiver_date" class="input w-full text-center" value="{{ $receiverDate }}">
@@ -630,10 +640,9 @@ $receiverTime = $receiverTimeRaw ? \Carbon\Carbon::parse($receiverTimeRaw)->form
                     <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
                     @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
                         <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
-                    <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}">
+                    <button type="button" onclick="openSignPad('signature_close_requestor')" class="{{ $signatureButtonClass($closeRequestorSign) }}">{{ $closeRequestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
+                    <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}" data-signature-url="{{ $signatureUrl($closeRequestorSign) }}">
                 </td>
 
                 <!-- Issuer -->
@@ -641,10 +650,9 @@ $receiverTime = $receiverTimeRaw ? \Carbon\Carbon::parse($receiverTimeRaw)->form
                     <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
                     @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
                         <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
-                    <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}">
+                    <button type="button" onclick="openSignPad('signature_close_issuer')" class="{{ $signatureButtonClass($closeIssuerSign) }}">{{ $closeIssuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
+                    <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}" data-signature-url="{{ $signatureUrl($closeIssuerSign) }}">
                 </td>
             </tr>
         </tbody>
