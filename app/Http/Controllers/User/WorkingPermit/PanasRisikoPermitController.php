@@ -95,68 +95,43 @@ class PanasRisikoPermitController extends Controller
                 return back()->with('error', 'Notifikasi tidak valid.');
             }
         }
-
         $clearAllSignatures = $request->boolean('clear_all_signatures');
-
         $existing = WorkPermitRisikoPanas::where('notification_id', $validated['notification_id'])->first();
+        $existingClosure = $existing?->closure;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Logic TTD Utama
-        |--------------------------------------------------------------------------
-        | Jika user menggambar TTD baru, simpan file baru.
-        | Jika user tidak menggambar ulang, pertahankan TTD lama.
-        | Jika hidden input berisi path storage lama, tetap gunakan path lama.
-        */
-        $validated['signature_requestor'] = $this->resolveSignature(
-            $request,
-            'signature_requestor',
-            'requestor',
-            $existing?->signature_requestor
-        );
+        $closeRequestorSign = $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor')
+            ?? $existingClosure?->requestor_sign;
+        $closeIssuerSign = $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer')
+            ?? $existingClosure?->issuer_sign;
 
-        $validated['signature_verificator'] = $this->resolveSignature(
-            $request,
-            'signature_verificator',
-            'verificator',
-            $existing?->signature_verificator
-        );
+        if ($closeRequestorSign) {
+            $validated['requestor_signature_close'] = $closeRequestorSign;
+        }
 
-        $validated['signature_permit_issuer'] = $this->resolveSignature(
-            $request,
-            'signature_permit_issuer',
-            'issuer',
-            $existing?->signature_permit_issuer
-        );
+        if ($closeIssuerSign) {
+            $validated['issuer_signature_close'] = $closeIssuerSign;
+        }
 
-        $validated['signature_senior_manager'] = $this->resolveSignature(
-            $request,
-            'signature_senior_manager',
-            'senior',
-            $existing?->signature_senior_manager
-        );
+        $validated['signature_requestor'] = $this->saveSignature($request->input('signature_requestor'), 'requestor')
+            ?? $existing?->signature_requestor;
 
-        $validated['signature_general_manager'] = $this->resolveSignature(
-            $request,
-            'signature_general_manager',
-            'gm',
-            $existing?->signature_general_manager
-        );
+        $validated['signature_verificator'] = $this->saveSignature($request->input('signature_verificator'), 'verificator')
+            ?? $existing?->signature_verificator;
 
-        $validated['authorizer_signature'] = $this->resolveSignature(
-            $request,
-            'authorizer_signature',
-            'authorizer',
-            $existing?->authorizer_signature
-        );
+        $validated['signature_permit_issuer'] = $this->saveSignature($request->input('signature_permit_issuer'), 'issuer')
+            ?? $existing?->signature_permit_issuer;
 
-        $validated['receiver_signature'] = $this->resolveSignature(
-            $request,
-            'receiver_signature',
-            'receiver',
-            $existing?->receiver_signature
-        );
+        $validated['signature_senior_manager'] = $this->saveSignature($request->input('signature_senior_manager'), 'senior')
+            ?? $existing?->signature_senior_manager;
 
+        $validated['signature_general_manager'] = $this->saveSignature($request->input('signature_general_manager'), 'gm')
+            ?? $existing?->signature_general_manager;
+
+        $validated['authorizer_signature'] = $this->saveSignature($request->input('authorizer_signature'), 'authorizer')
+            ?? $existing?->authorizer_signature;
+
+        $validated['receiver_signature'] = $this->saveSignature($request->input('receiver_signature'), 'receiver')
+            ?? $existing?->receiver_signature;
         // Encode JSON
         $validated['pengukuran_gas'] = json_encode($request->input('pengukuran_gas', []));
         $validated['persyaratan_kerja_panas'] = json_encode($request->input('persyaratan_kerja_panas', []));
@@ -188,35 +163,6 @@ class PanasRisikoPermitController extends Controller
             ], fn($v) => $v !== null && $v !== '')
         );
 
-        $closureExisting = WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Logic TTD Penutupan
-        |--------------------------------------------------------------------------
-        | Ini bagian yang disamakan dengan Permit Umum.
-        | Nama field wajib sesuai form:
-        | - signature_close_requestor
-        | - signature_close_issuer
-        |
-        | Jangan pakai:
-        | - requestor_signature_close
-        | - issuer_signature_close
-        */
-        $closeRequestorSign = $this->resolveSignature(
-            $request,
-            'signature_close_requestor',
-            'close_requestor',
-            $closureExisting?->requestor_sign
-        );
-
-        $closeIssuerSign = $this->resolveSignature(
-            $request,
-            'signature_close_issuer',
-            'close_issuer',
-            $closureExisting?->issuer_sign
-        );
-
         // Simpan ke tabel closure
         $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
@@ -243,6 +189,8 @@ class PanasRisikoPermitController extends Controller
                 'signature_general_manager' => null,
                 'authorizer_signature' => null,
                 'receiver_signature' => null,
+                'requestor_signature_close' => null,
+                'issuer_signature_close' => null,
             ])->save();
 
             if ($closure) {
@@ -284,36 +232,17 @@ class PanasRisikoPermitController extends Controller
         return back();
     }
 
-    private function resolveSignature(Request $request, string $inputName, string $role, ?string $existingPath = null): ?string
-    {
-        $newPath = $this->saveSignature($request->input($inputName), $role);
-
-        return $newPath ?: $existingPath;
-    }
-
     private function saveSignature($base64, $role)
     {
-        \Log::info("Signature input for {$role}: " . (is_string($base64) ? substr($base64, 0, 50) : ''));
-
-        if (!$base64) {
-            return null;
-        }
-
-        if (is_string($base64) && str_starts_with($base64, 'storage/')) {
-            return $base64;
-        }
-
-        if (!is_string($base64) || !str_starts_with($base64, 'data:image')) {
-            return null;
-        }
+        if (!$base64 || !is_string($base64)) return null;
+        if (str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
         $folder = 'signatures/working-permit/risiko-panas/';
         $filename = $role . '_' . Str::random(10) . '.png';
         $path = storage_path('app/public/' . $folder);
 
-        if (!file_exists($path)) {
-            mkdir($path, 0777, true);
-        }
+        if (!file_exists($path)) mkdir($path, 0777, true);
 
         $image = str_replace('data:image/png;base64,', '', $base64);
         $image = str_replace(' ', '+', $image);
@@ -336,4 +265,5 @@ class PanasRisikoPermitController extends Controller
             ->setPaper('A4')
             ->stream('izin-kerja-risiko-panas.pdf');
     }
+
 }
