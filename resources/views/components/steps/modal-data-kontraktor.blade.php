@@ -21,6 +21,17 @@
     $apdOld = old('apd')
         ? json_decode(old('apd'), true)
         : (isset($dataKontraktor) && $dataKontraktor->apd ? json_decode($dataKontraktor->apd, true) : []);
+
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-2 inline-flex items-center justify-center rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100'
+        : 'text-blue-600 underline text-xs mt-2';
+    $signatureUrl = fn ($signature) => $signature
+        ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
+        : '';
+
+    $ttdManager = old('ttd_manager', $dataKontraktor->ttd_manager ?? '');
+    $ttdPerusahaan = old('ttd_perusahaan', $dataKontraktor->ttd_perusahaan ?? '');
+    $diverifikasiSignature = old('diverifikasi_signature', $dataKontraktor->diverifikasi_signature ?? '');
 @endphp
 
 <div
@@ -36,9 +47,9 @@
     <input type="hidden" name="tenaga_kerja" id="tenaga_kerja">
     <input type="hidden" name="peralatan_kerja" id="peralatan_kerja">
     <input type="hidden" name="apd" id="apd">
-    <input type="hidden" name="ttd_manager" id="ttd_manager" value="{{ old('ttd_manager', $dataKontraktor->ttd_manager ?? '') }}">
-    <input type="hidden" name="ttd_perusahaan" id="ttd_perusahaan" value="{{ old('ttd_perusahaan', $dataKontraktor->ttd_perusahaan ?? '') }}">
-    <input type="hidden" name="diverifikasi_signature" id="diverifikasi_signature" value="{{ old('diverifikasi_signature', $dataKontraktor->diverifikasi_signature ?? '') }}">
+    <input type="hidden" name="ttd_manager" id="ttd_manager" value="{{ $ttdManager }}" data-signature-url="{{ $signatureUrl($ttdManager) }}">
+    <input type="hidden" name="ttd_perusahaan" id="ttd_perusahaan" value="{{ $ttdPerusahaan }}" data-signature-url="{{ $signatureUrl($ttdPerusahaan) }}">
+    <input type="hidden" name="diverifikasi_signature" id="diverifikasi_signature" value="{{ $diverifikasiSignature }}" data-signature-url="{{ $signatureUrl($diverifikasiSignature) }}">
 
 
                 <!-- ================= INFORMASI PEKERJAAN ================= -->
@@ -237,23 +248,23 @@
                  <tr>
     <td class="border px-2 py-6 text-center align-top" style="width: 50%;">
         Manager K3 Plant Site <br>
-        <button type="button" onclick="openSignPad('ttd_manager')" class="text-blue-600 underline text-xs mt-2">Tanda Tangan</button>
-        @if(!empty($dataKontraktor->ttd_manager))
+        @if($ttdManager)
             <div class="flex justify-center mt-2">
-                <img src="{{ asset($dataKontraktor->ttd_manager) }}" class="h-12" alt="TTD Manager">
+                <img src="{{ $signatureUrl($ttdManager) }}" class="h-12" alt="TTD Manager">
             </div>
         @endif
+        <button type="button" onclick="openSignPad('ttd_manager')" class="{{ $signatureButtonClass($ttdManager) }}">{{ $ttdManager ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
     </td>
 
 
    <td class="border px-2 py-6 text-center align-top">
     Perusahaan/Kontraktor <br>
-    <button type="button" onclick="openSignPad('ttd_perusahaan')" class="text-blue-600 underline text-xs mt-2">Tanda Tangan</button>
-    @if(!empty($dataKontraktor->ttd_perusahaan))
+    @if($ttdPerusahaan)
         <div class="flex justify-center mt-2">
-            <img src="{{ asset($dataKontraktor->ttd_perusahaan) }}" class="h-12" alt="TTD Perusahaan">
+            <img src="{{ $signatureUrl($ttdPerusahaan) }}" class="h-12" alt="TTD Perusahaan">
         </div>
     @endif
+    <button type="button" onclick="openSignPad('ttd_perusahaan')" class="{{ $signatureButtonClass($ttdPerusahaan) }}">{{ $ttdPerusahaan ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
 </td>
 
 </tr>
@@ -271,10 +282,10 @@
                             <div class="flex justify-between items-center">
                                 <span class="font-semibold text-xs">Paraf Diverifikasi Uji Reksa oleh</span>
                                 <input type="text" name="diverifikasi_nama" class="text-xs border-gray-300 rounded p-1 w-1/3 ml-2" placeholder="Nama Verifikator/Uji Reksa" value="{{ old('diverifikasi_nama', $dataKontraktor->diverifikasi_nama ?? '') }}">
-                                <button type="button" onclick="openSignPad('diverifikasi_signature')" class="text-blue-600 underline text-xs ml-2">Tanda Tangan</button>
-                                @if(!empty($dataKontraktor->diverifikasi_signature))
-                                    <img src="{{ asset($dataKontraktor->diverifikasi_signature) }}" class="h-10 ml-3 inline-block" alt="Paraf Verifikasi">
+                                @if($diverifikasiSignature)
+                                    <img src="{{ $signatureUrl($diverifikasiSignature) }}" class="h-10 ml-3 inline-block" alt="Paraf Verifikasi">
                                 @endif
+                                <button type="button" onclick="openSignPad('diverifikasi_signature')" class="{{ $signatureButtonClass($diverifikasiSignature) }} ml-2">{{ $diverifikasiSignature ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
                             </div>
                         </td>
                     </tr>
