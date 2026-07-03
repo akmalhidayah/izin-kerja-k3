@@ -86,17 +86,18 @@ class RuangTertutupPermitController extends Controller
                 'close_guarding' => 'nullable|string',
                 'close_date' => 'nullable|date',
                 'close_time' => 'nullable',
+                'close_requestor_name' => 'nullable|string',
+                'close_issuer_name' => 'nullable|string',
                 'signature_close_requestor' => 'nullable|string',
                 'signature_close_issuer' => 'nullable|string',
+                'jumlah_rfid' => 'nullable|integer|min:0',
             ])->validate();
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }
 
         if (!$request->boolean('_token_access')) {
-            $notification = Notification::where('id', $validated['notification_id'])
-                ->where('user_id', auth()->id())
-                ->first();
+            $notification = $this->findAccessibleNotification($validated['notification_id']);
 
             if (!$notification) {
                 return back()->with('error', 'Notifikasi tidak valid.');
@@ -136,21 +137,23 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
     ?? $existing?->live_testing_signature;
 
         // Simpan ke tabel utama
+        $permitData = collect($validated)->only((new WorkPermitRuangTertutup())->getFillable())->toArray();
+        $permitData['notification_id'] = $notification_id;
+
         $ruangTertutup = WorkPermitRuangTertutup::updateOrCreate(
             ['notification_id' => $notification_id],
-            array_merge($validated, ['notification_id' => $notification_id])
+            $permitData
         );
-        if (!$ruangTertutup->token) {
-    $ruangTertutup->token = Str::uuid();
-    $ruangTertutup->save();
-}
+        $this->ensurePermitToken($ruangTertutup);
 
 
         // Simpan ke tabel detail (Bagian 1)
         $detail = WorkPermitDetail::updateOrCreate(
-            ['notification_id' => $notification_id],
-            array_filter([
+            [
+                'notification_id' => $notification_id,
                 'permit_type' => 'ruangtertutup',
+            ],
+            array_filter([
                 'location' => $validated['lokasi_pekerjaan'] ?? null,
                 'work_date' => $validated['tanggal_pekerjaan'] ?? null,
                 'job_description' => $validated['uraian_pekerjaan'] ?? null,
@@ -164,18 +167,21 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
         $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
-                'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-                'equipment_cleaned' => $request->input('close_tools') === 'ya',
-                'guarding_restored' => $request->input('close_guarding') === 'ya',
+                'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+                'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+                'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
+                'requestor_name' => $validated['close_requestor_name'] ?? null,
                 'requestor_sign' => $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor'),
+                'issuer_name' => $validated['close_issuer_name'] ?? null,
                 'issuer_sign' => $this->saveSignature($request->input('signature_close_issuer'), 'close_issuer'),
+                'jumlah_rfid' => $validated['jumlah_rfid'] ?? null,
             ], fn($v) => $v !== null && $v !== '')
         );
 
         if ($clearAllSignatures) {
-            $permit->forceFill([
+            $ruangTertutup->forceFill([
                 'signature_permit_requestor' => null,
                 'signature_confined_verificator' => null,
                 'signature_permit_issuer' => null,
@@ -196,6 +202,7 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
     public function showByToken($token)
 {
     $permit = WorkPermitRuangTertutup::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $notification = $permit->notification;
     $detail = $permit->detail;
     $closure = $permit->closure;
@@ -211,19 +218,21 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
 public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitRuangTertutup::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $request->merge(['notification_id' => $permit->notification_id]);
     $request->merge(['_token_access' => true]);
 
-    app()->call([$this, 'store'], ['request' => $request]);
-    session()->flash('alert', 'Data berhasil disimpan melalui link token!');
-    
-    return back();
+    $response = app()->call([$this, 'store'], ['request' => $request]);
+
+    return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui link token!', route('token-pdf.show', ['type' => 'ruang-tertutup', 'token' => $permit->token]));
 }
 
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+        if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
         $folder = 'signatures/working-permit/ruangtertutup/';
         $filename = $role . '_' . Str::random(10) . '.png';
@@ -241,10 +250,8 @@ public function storeByToken(Request $request, $token)
     public function preview($id)
     {
         $permit = WorkPermitRuangTertutup::where('notification_id', $id)->first();
-        $detail = WorkPermitDetail::where('notification_id', $id)->first();
-        $closure = $detail
-            ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-            : null;
+        $detail = $permit?->detail;
+        $closure = $permit?->closure;
 
         if (!$permit && !$detail) {
             abort(404, 'Data izin kerja ruang tertutup tidak ditemukan.');

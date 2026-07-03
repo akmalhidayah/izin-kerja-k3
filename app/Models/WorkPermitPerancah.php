@@ -89,7 +89,8 @@ class WorkPermitPerancah extends Model
     // Relasi ke detail melalui notification_id
     public function detail()
     {
-        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id');
+        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id')
+            ->where('permit_type', 'perancah');
     }
 
     // Relasi ke closure melalui work_permit_detail_id
@@ -102,6 +103,6 @@ class WorkPermitPerancah extends Model
             'work_permit_detail_id',    // Foreign key on closure
             'notification_id',          // Local key on this model
             'id'                        // Local key on detail
-        );
+        )->where('permit_type', 'perancah');
     }
 }

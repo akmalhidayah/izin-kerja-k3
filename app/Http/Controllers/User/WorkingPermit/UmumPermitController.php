@@ -75,9 +75,7 @@ public function store(Request $request)
     }
 
     if (!$request->boolean('_token_access')) {
-        $notification = Notification::where('id', $validated['notification_id'])
-            ->where('user_id', auth()->id())
-            ->first();
+        $notification = $this->findAccessibleNotification($validated['notification_id']);
 
         if (!$notification) {
             return back()->with('error', 'Notifikasi tidak valid.');
@@ -137,9 +135,11 @@ public function store(Request $request)
     );
 
     $detail = WorkPermitDetail::updateOrCreate(
-        ['notification_id' => $validated['notification_id']],
-        array_filter([
+        [
+            'notification_id' => $validated['notification_id'],
             'permit_type' => 'umum',
+        ],
+        array_filter([
             'location' => $request->input('lokasi_pekerjaan'),
             'work_date' => $request->input('tanggal_pekerjaan'),
             'job_description' => $request->input('uraian_pekerjaan'),
@@ -165,9 +165,9 @@ public function store(Request $request)
     $closure = WorkPermitClosure::updateOrCreate(
         ['work_permit_detail_id' => $detail->id],
         array_filter([
-            'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-            'equipment_cleaned' => $request->input('close_tools') === 'ya',
-            'guarding_restored' => $request->input('close_guarding') === 'ya',
+            'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+            'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+            'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
             'closed_date' => $request->input('close_date'),
             'closed_time' => $request->input('close_time'),
             'requestor_name' => $request->input('close_requestor_name'),
@@ -194,17 +194,16 @@ public function store(Request $request)
             ])->save();
         }
     }
-if (!$permit->token) {
-    $permit->token = Str::uuid();
-    $permit->save();
-}
+    $this->ensurePermitToken($permit);
 
     return back()->with('success', 'Data Working Permit Umum berhasil disimpan!')->withInput();
 }
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+        if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
         $folder = 'signatures/working-permit/umum/';
         $filename = $role . '_' . Str::random(10) . '.png';
@@ -221,6 +220,7 @@ if (!$permit->token) {
  public function showByToken($token)
 {
     $permit = UmumWorkPermit::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $notification = $permit->notification;
 
     // Fix: Ambil dari relasi langsung ke permit
@@ -236,6 +236,7 @@ if (!$permit->token) {
     public function storeByToken(Request $request, $token)
     {
         $permit = UmumWorkPermit::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
 
         try {
             $validated = $request->validate([
@@ -302,9 +303,11 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
         $permit->update(array_filter($validated, fn ($v) => $v !== null && $v !== ''));
  // ✅ Tambahkan bagian ini SETELAH update permit:
     $detail = WorkPermitDetail::updateOrCreate(
-        ['notification_id' => $permit->notification_id],
-        array_filter([
+        [
+            'notification_id' => $permit->notification_id,
             'permit_type' => 'umum',
+        ],
+        array_filter([
             'location' => $request->input('lokasi_pekerjaan'),
             'work_date' => $request->input('tanggal_pekerjaan'),
             'job_description' => $request->input('uraian_pekerjaan'),
@@ -317,9 +320,9 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
     $closure = WorkPermitClosure::updateOrCreate(
         ['work_permit_detail_id' => $detail->id],
         array_filter([
-            'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-            'equipment_cleaned' => $request->input('close_tools') === 'ya',
-            'guarding_restored' => $request->input('close_guarding') === 'ya',
+            'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+            'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+            'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
             'closed_date' => $request->input('close_date'),
             'closed_time' => $request->input('close_time'),
             'requestor_name' => $request->input('close_requestor_name'),
@@ -347,21 +350,24 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
                 ])->save();
             }
         }
-        return back()->with('success', 'Form Working Permit Umum berhasil diperbarui.');
+        $message = 'Form Working Permit Umum berhasil diperbarui.';
+
+        return back()
+            ->with('success', $message)
+            ->with('token_saved', $message)
+            ->with('token_pdf_url', route('token-pdf.show', ['type' => 'umum', 'token' => $permit->token]));
     }
 
  public function preview($id)
 {
     $permit = UmumWorkPermit::where('notification_id', $id)->first();
-    $detail = WorkPermitDetail::where('notification_id', $id)->first();
+    $detail = $permit?->detail;
 
     if (!$permit && !$detail) {
         abort(404, 'Data izin kerja umum tidak ditemukan.');
     }
 
-    $closure = $detail
-        ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first()
-        : null;
+    $closure = $permit?->closure;
 
     // ✅ Tambahan: konversi izin_khusus menjadi array
     $permit->izin_khusus = is_array($permit->izin_khusus)

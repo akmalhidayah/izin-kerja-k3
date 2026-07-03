@@ -2,12 +2,21 @@
     @csrf
 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 <input type="hidden" name="clear_all_signatures" id="clear_all_signatures" value="0">
-<!-- Izin Kerja Penggalian - Bagian 1: Detail Pekerjaan -->
+
+@php
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureButtonSmallClass = 'inline-flex h-8 w-20 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureUrl = fn ($signature) => $signature
+        ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
+        : '';
+@endphp<!-- Izin Kerja Penggalian - Bagian 1: Detail Pekerjaan -->
 <div class="text-center mb-4">
     <h2 class="text-2xl font-bold uppercase">IZIN KERJA PENGGALIAN</h2>
     <p class="text-sm mt-2 text-gray-600 leading-snug">
         Izin kerja ini diberikan untuk semua pekerjaan penggalian dengan kedalaman ≥ 300 mm, izin ini tidak berlaku untuk penggalian di area tambang aktif.
-        Pekerjaan tidak bisa dimulai hingga izin kerja diverifikasi oleh <em>Permit Verificator</em>, diterbitkan oleh <em>Permit Issuer</em>, disahkan oleh 
+        Pekerjaan tidak bisa dimulai hingga izin kerja diverifikasi oleh <em>Permit Verificator</em>, diterbitkan oleh <em>Permit Issuer</em>, disahkan oleh
         <em>Permit Authorizer</em>, dan <em>major hazards & control</em> disosialisasikan oleh <em>Permit Receiver</em>.
     </p>
 </div>
@@ -59,7 +68,7 @@
 
 <div x-data="{ showUpload: '{{ $denahStatus === 'ya' ? 'true' : 'false' }}' }" class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6">
     <h3 class="font-bold bg-black text-white px-2 py-1">
-        2. Gambar/Denah Fasilitas Bawah Tanah yang Diperlukan 
+        2. Gambar/Denah Fasilitas Bawah Tanah yang Diperlukan
         <span class="text-xs font-normal">(beri tanda centang)</span>
     </h3>
 
@@ -190,8 +199,8 @@
 <!-- Bagian 4: Rekomendasi Persyaratan Kerja Aman Tambahan -->
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6">
     <h3 class="font-bold bg-black text-white px-2 py-1">
-        4. Rekomendasi Persyaratan Kerja Aman Tambahan dari 
-        <em>Permit Verificator/Permit Issuer</em> 
+        4. Rekomendasi Persyaratan Kerja Aman Tambahan dari
+        <em>Permit Verificator/Permit Issuer</em>
         <span class="text-gray-300 text-xs">(jika ada)</span>
     </h3>
 
@@ -226,7 +235,7 @@
     <div class="p-2 border-t-0 border border-gray-300">
         <p class="text-sm italic font-semibold mb-2">Permit Requestor:</p>
         <p class="text-sm">
-            Saya menyatakan bahwa semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
+            Saya menyatakan bahwa semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari
             <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini.
         </p>
     </div>
@@ -252,17 +261,17 @@
                         <img src="{{ asset($reqSign) }}" alt="Tanda Tangan" class="h-16 mx-auto mb-1 border">
                     @endif
 
-                    <button 
+                    <button
                         type="button"
                         onclick="openSignPad('penggalian_signature_permit_requestor')"
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $reqSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($reqSign) }}">
+                        {{ $reqSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input 
-                        type="hidden" 
-                        name="signature_permit_requestor" 
-                        id="penggalian_signature_permit_requestor" 
+                    <input
+                        type="hidden"
+                        name="signature_permit_requestor"
+                        id="penggalian_signature_permit_requestor"
                         value="{{ $reqSign }}">
                 </td>
 
@@ -294,7 +303,7 @@
         <p class="text-sm italic font-semibold mb-2">Digging Permit Verificator:</p>
         <p class="text-sm">
             Saya menyatakan bahwa saya telah memeriksa area kerja dan memverifikasi semua persyaratan kerja aman yang telah
-            ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
+            ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari
             <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk pekerjaan ini dapat dilakukan.
         </p>
     </div>
@@ -318,17 +327,17 @@
                         <img src="{{ asset($verifSign) }}" alt="Tanda Tangan" class="h-16 mx-auto mb-1 border">
                     @endif
 
-                    <button 
+                    <button
                         type="button"
                         onclick="openSignPad('penggalian_signature_verificator')"
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $verifSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($verifSign) }}">
+                        {{ $verifSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input 
-                        type="hidden" 
-                        name="signature_verificator" 
-                        id="penggalian_signature_verificator" 
+                    <input
+                        type="hidden"
+                        name="signature_verificator"
+                        id="penggalian_signature_verificator"
                         value="{{ $verifSign }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
@@ -386,17 +395,17 @@
                         <img src="{{ asset($issuerSign) }}" alt="Tanda Tangan" class="h-16 mx-auto mb-1 border">
                     @endif
 
-                    <button 
+                    <button
                         type="button"
                         onclick="openSignPad('penggalian_signature_permit_issuer')"
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $issuerSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($issuerSign) }}">
+                        {{ $issuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input 
-                        type="hidden" 
-                        name="signature_permit_issuer" 
-                        id="penggalian_signature_permit_issuer" 
+                    <input
+                        type="hidden"
+                        name="signature_permit_issuer"
+                        id="penggalian_signature_permit_issuer"
                         value="{{ $issuerSign }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
@@ -441,8 +450,8 @@
     <div class="border border-t-0 border-gray-300 p-3">
         <p class="text-sm">
             <strong><em>Permit Authorizer:</em></strong><br>
-            Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
-            <em>Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah menekankan apa saja <em>major hazards</em> dan pengendaliannya yang harus disosialisasikan oleh 
+            Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari
+            <em>Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah menekankan apa saja <em>major hazards</em> dan pengendaliannya yang harus disosialisasikan oleh
             <em>Permit Receiver</em> kepada seluruh pekerja terkait.
         </p>
     </div>
@@ -466,17 +475,17 @@
                         <img src="{{ asset($authSign) }}" alt="Tanda Tangan" class="h-16 mx-auto mb-1 border">
                     @endif
 
-                    <button 
+                    <button
                         type="button"
                         onclick="openSignPad('penggalian_signature_permit_authorizer')"
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $authSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($authSign) }}">
+                        {{ $authSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input 
-                        type="hidden" 
-                        name="signature_permit_authorizer" 
-                        id="penggalian_signature_permit_authorizer" 
+                    <input
+                        type="hidden"
+                        name="signature_permit_authorizer"
+                        id="penggalian_signature_permit_authorizer"
                         value="{{ $authSign }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
@@ -529,17 +538,17 @@
                         <img src="{{ asset($recvSign) }}" alt="Tanda Tangan" class="h-16 mx-auto mb-1 border">
                     @endif
 
-                    <button 
+                    <button
                         type="button"
                         onclick="openSignPad('penggalian_signature_permit_receiver')"
-                        class="text-blue-600 underline text-xs mt-1">
-                        {{ $recvSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                        class="{{ $signatureButtonClass($recvSign) }}">
+                        {{ $recvSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
 
-                    <input 
-                        type="hidden" 
-                        name="signature_permit_receiver" 
-                        id="penggalian_signature_permit_receiver" 
+                    <input
+                        type="hidden"
+                        name="signature_permit_receiver"
+                        id="penggalian_signature_permit_receiver"
                         value="{{ $recvSign }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
@@ -624,9 +633,8 @@
                     <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
                     @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
                         <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
+                    <button type="button" onclick="openSignPad('signature_close_requestor')" class="{{ $signatureButtonClass($closeRequestorSign) }}">{{ $closeRequestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
                     <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}">
                 </td>
 
@@ -635,9 +643,8 @@
                     <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
                     @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
                         <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
+                    <button type="button" onclick="openSignPad('signature_close_issuer')" class="{{ $signatureButtonClass($closeIssuerSign) }}">{{ $closeIssuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
                     <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}">
                 </td>
             </tr>
@@ -663,13 +670,13 @@
 <!-- Tombol Simpan -->
 <div class="flex justify-center gap-3 mt-8">
     <button type="button"
-        onclick="if (confirm('Hapus semua tanda tangan?')) { document.getElementById('clear_all_signatures').value = '1'; this.closest('form').submit(); }"
+        onclick="if (confirm('Hapus semua tanda tangan?')) { this.closest('form').querySelector('[name=clear_all_signatures]').value = '1'; this.closest('form').submit(); }"
         class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
         Hapus Semua TTD
     </button>
     <button type="submit" name="action" value="save"
         class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
-        ?? Simpan
+        Simpan
     </button>
 </div>
 </form>

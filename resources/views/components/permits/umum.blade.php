@@ -110,7 +110,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="text-blue-600 underline text-xs">
+                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
                                 Tanda Tangan
                             </button>
                         </td>
@@ -158,7 +158,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="text-blue-600 underline text-xs">
+                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
                                 Tanda Tangan
                             </button>
                         </td>
@@ -269,6 +269,9 @@
 
     $requestorName = old('permit_requestor_name', $permit?->permit_requestor_name ?? '');
     $requestorSign = old('signature_permit_requestor', $permit?->permit_requestor_sign ?? '');
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
 
     $requestorDateRaw = old('permit_requestor_date', $permit?->permit_requestor_date ?? '');
     $requestorDate = $requestorDateRaw ? \Carbon\Carbon::parse($requestorDateRaw)->format('Y-m-d') : '';
@@ -301,16 +304,15 @@
                 </td>
               <td class="border px-2 py-2 text-center">
     @if ($requestorSign)
-        <img src="{{ asset($requestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-    @else
-        <button 
-            type="button"
-            onclick="openSignPad('signature_permit_requestor')"
-            class="text-blue-600 underline text-xs">
-            Tanda Tangan
-        </button>
+        <img src="{{ asset($requestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
     @endif
-    <input type="hidden" name="signature_permit_requestor" id="signature_permit_requestor" value="{{ $requestorSign }}">
+    <button
+        type="button"
+        onclick="openSignPad('signature_permit_requestor')"
+        class="{{ $signatureButtonClass($requestorSign) }}">
+        {{ $requestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+    </button>
+    <input type="hidden" name="signature_permit_requestor" id="signature_permit_requestor" value="{{ $requestorSign }}" data-signature-url="{{ $requestorSign ? asset($requestorSign) : '' }}">
 </td>
 
                 <td class="border px-2 py-2 text-center">
@@ -368,16 +370,15 @@
                     </td>
                   <td class="border px-2 py-2 text-center">
     @if ($issuerSign)
-        <img src="{{ asset($issuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-    @else
-        <button 
-            type="button"
-            onclick="openSignPad('signature_permit_issuer')"
-            class="text-blue-600 underline text-xs">
-            Tanda Tangan
-        </button>
+        <img src="{{ asset($issuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
     @endif
-    <input type="hidden" name="signature_permit_issuer" id="signature_permit_issuer" value="{{ $issuerSign }}">
+    <button
+        type="button"
+        onclick="openSignPad('signature_permit_issuer')"
+        class="{{ $signatureButtonClass($issuerSign) }}">
+        {{ $issuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+    </button>
+    <input type="hidden" name="signature_permit_issuer" id="signature_permit_issuer" value="{{ $issuerSign }}" data-signature-url="{{ $issuerSign ? asset($issuerSign) : '' }}">
 </td>
 
                     <td class="border px-2 py-2 text-center">
@@ -448,16 +449,15 @@
                 </td>
                 <td class="border px-2 py-2 text-center">
                     @if ($authorizerSign)
-                        <img src="{{ asset($authorizerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button 
-                            type="button"
-                            onclick="openSignPad('signature_permit_authorizer')"
-                            class="text-blue-600 underline text-xs">
-                            Tanda Tangan
-                        </button>
+                        <img src="{{ asset($authorizerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
                     @endif
-                    <input type="hidden" name="signature_permit_authorizer" id="signature_permit_authorizer" value="{{ $authorizerSign }}">
+                    <button
+                        type="button"
+                        onclick="openSignPad('signature_permit_authorizer')"
+                        class="{{ $signatureButtonClass($authorizerSign) }}">
+                        {{ $authorizerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+                    </button>
+                    <input type="hidden" name="signature_permit_authorizer" id="signature_permit_authorizer" value="{{ $authorizerSign }}" data-signature-url="{{ $authorizerSign ? asset($authorizerSign) : '' }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
                     <input type="date" name="permit_authorizer_date" class="input w-full text-center" value="{{ $authorizerDate }}">
@@ -507,17 +507,16 @@
                 </td>
                 <td class="border px-2 py-2 text-center">
                @if ($receiverSign)
-    <img src="{{ asset($receiverSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-@else
-    <button 
+    <img src="{{ asset($receiverSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
+@endif
+    <button
         type="button"
         onclick="openSignPad('signature_permit_receiver')"
-        class="text-blue-600 underline text-xs">
-        Tanda Tangan
+        class="{{ $signatureButtonClass($receiverSign) }}">
+        {{ $receiverSign ? 'Ubah TTD' : 'Tanda Tangan' }}
     </button>
-@endif
 
-                    <input type="hidden" name="signature_permit_receiver" id="signature_permit_receiver" value="{{ $receiverSign }}">
+                    <input type="hidden" name="signature_permit_receiver" id="signature_permit_receiver" value="{{ $receiverSign }}" data-signature-url="{{ $receiverSign ? asset($receiverSign) : '' }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
                     <input type="date" name="permit_receiver_date" class="input w-full text-center" value="{{ $receiverDate }}">
@@ -596,14 +595,13 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
                 </td>
                 <td class="border text-center px-2 py-2">
                  @if ($liveTestingSign)
-    <img src="{{ asset($liveTestingSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-@else
-    <button type="button" onclick="openSignPad('signature_live_testing')" class="text-blue-600 underline text-xs">
-        Tanda Tangan
-    </button>
+    <img src="{{ asset($liveTestingSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
 @endif
+    <button type="button" onclick="openSignPad('signature_live_testing')" class="{{ $signatureButtonClass($liveTestingSign) }}">
+        {{ $liveTestingSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+    </button>
 
-                    <input type="hidden" name="signature_live_testing" id="signature_live_testing" value="{{ $liveTestingSign }}">
+                    <input type="hidden" name="signature_live_testing" id="signature_live_testing" value="{{ $liveTestingSign }}" data-signature-url="{{ $liveTestingSign ? asset($liveTestingSign) : '' }}">
                 </td>
                 <td class="border text-center px-2 py-2">
                     <input type="date" name="live_testing_date" class="input w-full text-center" value="{{ $liveTestingDate }}">
@@ -690,23 +688,21 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
                 <td class="border text-center px-2 py-2">
                     <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
                  @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
-    <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-@else
-    <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+    <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
 @endif
+    <button type="button" onclick="openSignPad('signature_close_requestor')" class="{{ $signatureButtonClass($closeRequestorSign) }}">{{ $closeRequestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
 
-                    <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}">
+                    <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}" data-signature-url="{{ $closeRequestorSign ? asset($closeRequestorSign) : '' }}">
                 </td>
 
                 <!-- Permit Issuer -->
                 <td class="border text-center px-2 py-2">
                     <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
                     @if ($closeIssuerSign)
-                        <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
+                        <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto mb-1">
                     @endif
-                    <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}">
+                    <button type="button" onclick="openSignPad('signature_close_issuer')" class="{{ $signatureButtonClass($closeIssuerSign) }}">{{ $closeIssuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
+                    <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}" data-signature-url="{{ $closeIssuerSign ? asset($closeIssuerSign) : '' }}">
                 </td>
             </tr>
         </tbody>
@@ -729,13 +725,13 @@ $liveTestingSign = old('signature_live_testing', $permit?->live_testing_sign ?? 
 <!-- Tombol Simpan -->
 <div class="flex justify-center gap-3 mt-8">
     <button type="button"
-        onclick="if (confirm('Hapus semua tanda tangan?')) { document.getElementById('clear_all_signatures').value = '1'; this.closest('form').submit(); }"
+        onclick="if (confirm('Hapus semua tanda tangan?')) { this.closest('form').querySelector('[name=clear_all_signatures]').value = '1'; this.closest('form').submit(); }"
         class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
         Hapus Semua TTD
     </button>
     <button type="submit" name="action" value="save"
         class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow-md transition duration-200">
-        ?? Simpan
+        Simpan
     </button>
 </div>
 </form>

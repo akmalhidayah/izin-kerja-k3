@@ -60,9 +60,7 @@ public function store(Request $request)
     }
 
     if (!$request->boolean('_token_access')) {
-        $notification = Notification::where('id', $validated['notification_id'])
-            ->where('user_id', auth()->id())
-            ->first();
+        $notification = $this->findAccessibleNotification($validated['notification_id']);
 
         if (!$notification) {
             return back()->with('error', 'Notifikasi tidak valid.');
@@ -99,8 +97,9 @@ public function store(Request $request)
     // Simpan atau update
     $permit = WorkPermitPengangkatan::updateOrCreate(
         ['notification_id' => $validated['notification_id']],
-        array_merge($validated, ['token' => $existing->token ?? Str::uuid()])
+        $validated
     );
+    $this->ensurePermitToken($permit);
 
     if ($clearAllSignatures) {
         $permit->forceFill([
@@ -117,6 +116,7 @@ public function store(Request $request)
     public function showByToken($token)
     {
         $permit = WorkPermitPengangkatan::where('token', $token)->with('notification')->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
 
         return view('pengajuan-user.workingpermit.form-token-pengangkatan', [
             'permit' => $permit,
@@ -128,18 +128,20 @@ public function store(Request $request)
     public function storeByToken(Request $request, $token)
     {
         $permit = WorkPermitPengangkatan::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
         $request->merge(['notification_id' => $permit->notification_id]);
         $request->merge(['_token_access' => true]);
 
-        app()->call([$this, 'store'], ['request' => $request]);
+        $response = app()->call([$this, 'store'], ['request' => $request]);
 
-        session()->flash('alert', 'Data berhasil disimpan melalui token!');
-        return back();
+        return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui token!', route('token-pdf.show', ['type' => 'pengangkatan', 'token' => $permit->token]));
     }
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
+        if (!$base64) return null;
+        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
+        if (!str_starts_with($base64, 'data:image')) return null;
 
         $folder = 'signatures/working-permit/pengangkatan/';
         $filename = $role . '_' . Str::random(10) . '.png';

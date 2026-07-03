@@ -30,7 +30,7 @@
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 overflow-x-hidden">
 <div
     x-data="{
         sidebarOpen: true,
@@ -44,7 +44,7 @@
         closeMobile(){ this.mobileOpen = false; }
     }"
     x-init="$watch('mobileOpen', v => document.body.classList.toggle('overflow-hidden', v))"
-    class="min-h-screen"
+    class="min-h-screen overflow-x-hidden"
 >
 
     <!-- MOBILE OVERLAY -->
@@ -294,14 +294,14 @@
     </aside>
 
     <!-- MAIN WRAPPER -->
-    <div class="min-h-screen transition-all duration-300"
+    <div class="min-h-screen min-w-0 transition-all duration-300"
          :class="sidebarOpen ? 'lg:pl-72' : 'lg:pl-20'">
 
         <!-- TOPBAR -->
         <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-slate-200">
-            <div class="px-4 lg:px-6 py-4 flex items-center justify-between">
+            <div class="px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
                 <!-- Left: mobile menu button -->
-                <div class="flex items-center gap-3">
+                <div class="flex min-w-0 items-center gap-3">
                     <button
                         @click="toggle()"
                         class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-700 transition"
@@ -317,13 +317,113 @@
                 </div>
 
                 <!-- Right -->
-                <div class="flex items-center gap-3">
+                <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+                    @php
+                        $adminNotifications = collect();
+                        $adminUnreadNotifications = 0;
+
+                        if (Auth::check() && Auth::user()?->isAdmin()) {
+                            try {
+                                $adminNotifications = \App\Models\AdminNotification::with('notification.user')
+                                    ->where('recipient_id', Auth::id())
+                                    ->latest()
+                                    ->limit(8)
+                                    ->get();
+
+                                $adminUnreadNotifications = \App\Models\AdminNotification::where('recipient_id', Auth::id())
+                                    ->whereNull('read_at')
+                                    ->count();
+                            } catch (\Throwable $e) {
+                                $adminNotifications = collect();
+                                $adminUnreadNotifications = 0;
+                            }
+                        }
+                    @endphp
+
                     <!-- Notif -->
-                    <button class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-700 transition">
-                        <i data-lucide="bell" class="w-5 h-5"></i>
-                        {{-- badge optional --}}
-                        {{-- <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></span> --}}
-                    </button>
+                    <div class="relative" x-data="{ open:false }">
+                        <button
+                            type="button"
+                            @click="open=!open"
+                            class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-700 transition"
+                            aria-label="Pemberitahuan"
+                        >
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            @if($adminUnreadNotifications > 0)
+                                <span class="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-red-600 text-white text-[9px] leading-none font-bold flex items-center justify-center ring-2 ring-white">
+                                    {{ $adminUnreadNotifications > 99 ? '99+' : $adminUnreadNotifications }}
+                                </span>
+                            @endif
+                        </button>
+
+                        <div
+                            x-show="open"
+                            x-transition.origin.top.right
+                            @click.away="open=false"
+                            x-cloak
+                            class="fixed left-3 right-3 top-16 mt-0 max-h-[calc(100vh-5rem)] bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 sm:max-w-[calc(100vw-2rem)]"
+                        >
+                            <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-200">
+                                <div>
+                                    <div class="text-sm font-bold text-slate-900">Pemberitahuan</div>
+                                    <div class="text-[11px] text-slate-500">{{ $adminUnreadNotifications }} belum dibaca</div>
+                                </div>
+
+                                @if($adminUnreadNotifications > 0)
+                                    <form method="POST" action="{{ route('admin.notifications.readAll') }}">
+                                        @csrf
+                                        <button type="submit" class="text-[11px] font-semibold text-red-600 hover:text-red-700">
+                                            Tandai dibaca
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+
+                            <div class="max-h-[calc(100vh-10rem)] overflow-y-auto sm:max-h-96">
+                                @forelse($adminNotifications as $item)
+                                    @php
+                                        $source = $item->notification;
+                                        $submitter = $source?->user?->name ?? 'User';
+                                        $type = strtoupper($source?->type ?? '-');
+                                        $number = $source?->number ?? '-';
+                                        $job = $source?->description ?? '-';
+                                    @endphp
+                                    <form method="POST" action="{{ route('admin.notifications.read', $item) }}">
+                                        @csrf
+                                        <button type="submit"
+                                            class="w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition {{ $item->read_at ? 'bg-white' : 'bg-red-50/60' }}">
+                                            <div class="flex items-start gap-3">
+                                                <span class="mt-1 inline-flex w-8 h-8 items-center justify-center rounded-xl {{ $item->read_at ? 'bg-slate-100 text-slate-500' : 'bg-red-100 text-red-600' }}">
+                                                    <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+                                                </span>
+                                                <span class="min-w-0 flex-1 overflow-hidden">
+                                                    <span class="flex items-center justify-between gap-2">
+                                                        <span class="min-w-0 break-words text-sm font-semibold text-slate-900">{{ $item->title }}</span>
+                                                        @if(!$item->read_at)
+                                                            <span class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+                                                        @endif
+                                                    </span>
+                                                    <span class="mt-1 block break-words text-xs text-slate-600">
+                                                        {{ $submitter }} membuat pengajuan {{ $type }} {{ $number }}
+                                                    </span>
+                                                    <span class="mt-1 block break-words text-xs text-slate-500">
+                                                        Pekerjaan: {{ $job }}
+                                                    </span>
+                                                    <span class="mt-1 block text-[11px] text-slate-400">
+                                                        {{ $item->created_at?->diffForHumans() }}
+                                                    </span>
+                                                </span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                @empty
+                                    <div class="px-4 py-8 text-center text-sm text-slate-500">
+                                        Belum ada pemberitahuan.
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Profile dropdown -->
                     <div class="relative" x-data="{ open:false }">
@@ -368,8 +468,8 @@
         </header>
 
         <!-- CONTENT -->
-        <main class="p-4 lg:p-6">
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 lg:p-6">
+        <main class="min-w-0 overflow-x-hidden p-3 sm:p-4 lg:p-6">
+            <div class="min-w-0 overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm p-3 sm:p-4 lg:p-6">
                 {{ $slot }}
             </div>
         </main>

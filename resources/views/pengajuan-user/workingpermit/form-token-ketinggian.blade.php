@@ -17,6 +17,15 @@
     @csrf
         <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 
+@php
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureUrl = fn ($signature) => $signature
+        ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
+        : '';
+@endphp
+
 
   <!-- Bagian 1: Detail Pekerjaan -->
        <div class="text-center mb-4">
@@ -116,13 +125,6 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                     </td>
 
                    <td class="border px-2 py-1 text-center">
-    <button 
-        type="button"
-        class="text-blue-600 underline text-xs"
-        @click="openSignPad(`ketinggian_pekerja_${index}_signature`)">
-        Tanda Tangan
-    </button>
-
     <input 
         type="hidden" 
         :id="`ketinggian_pekerja_${index}_signature`" 
@@ -132,8 +134,14 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
     <template x-if="item.signature">
         <img 
             :src="item.signature" 
-            class="mx-auto mt-1 h-10 border rounded shadow" />
+            class="mx-auto mb-1 h-10 border rounded shadow" />
     </template>
+    <button
+        type="button"
+        class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
+        @click="openSignPad(`ketinggian_pekerja_${index}_signature`)"
+        x-text="item.signature ? 'Ubah TTD' : 'Tanda Tangan'">
+    </button>
 </td>
 
                 </tr>
@@ -295,13 +303,14 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                     @endif
                     <button type="button"
                         onclick="openSignPad('ketinggian_signature_permit_requestor')"
-                        class="text-blue-600 underline text-xs">
-                        Tanda Tangan
+                        class="{{ $signatureButtonClass($requestorSign) }}">
+                        {{ $requestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
                     <input type="hidden"
                         id="ketinggian_signature_permit_requestor"
                         name="signature_permit_requestor"
-                        value="{{ $requestorSign }}">
+                        value="{{ $requestorSign }}"
+                        data-signature-url="{{ $signatureUrl($requestorSign) }}">
                 </td>
                 <td class="border px-2 py-2">
                     <input type="date"
@@ -388,13 +397,14 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                     @endif
                     <button type="button"
                         onclick="openSignPad('signature_verifikator')"
-                        class="text-blue-600 underline text-xs">
-                        Tanda Tangan
+                        class="{{ $signatureButtonClass($verifikatorSign) }}">
+                        {{ $verifikatorSign ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
                     <input type="hidden"
                         name="signature_verifikator"
                         id="signature_verifikator"
-                        value="{{ $verifikatorSign }}">
+                        value="{{ $verifikatorSign }}"
+                        data-signature-url="{{ $signatureUrl($verifikatorSign) }}">
                 </td>
                 <td class="border px-2 py-1 text-center">
                     <input type="date" name="verifikator_date" value="{{ $verifikatorDate }}" class="input w-full text-xs text-center">
@@ -439,8 +449,8 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                     @if ($issuerSign && file_exists(public_path($issuerSign)))
                         <img src="{{ asset($issuerSign) }}" class="h-16 mx-auto mb-1">
                     @endif
-                    <button type="button" onclick="openSignPad('signature_permit_issuer_field')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_permit_issuer" id="signature_permit_issuer_field" value="{{ $issuerSign }}">
+                    <button type="button" onclick="openSignPad('signature_permit_issuer_field')" class="{{ $signatureButtonClass($issuerSign) }}">{{ $issuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
+                    <input type="hidden" name="signature_permit_issuer" id="signature_permit_issuer_field" value="{{ $issuerSign }}" data-signature-url="{{ $signatureUrl($issuerSign) }}">
                 </td>
                 <td class="border px-2 py-2 text-center">
                     <input type="date" name="permit_issuer_date" value="{{ $issuerDate }}" class="input w-full text-xs text-center">
@@ -505,8 +515,8 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                     @if ($authorizerSign && file_exists(public_path($authorizerSign)))
                         <img src="{{ asset($authorizerSign) }}" class="h-16 mx-auto mb-1">
                     @endif
-                    <button type="button" onclick="openSignPad('signature_permit_authorizer_field')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_permit_authorizer" id="signature_permit_authorizer_field" value="{{ $authorizerSign }}">
+                    <button type="button" onclick="openSignPad('signature_permit_authorizer_field')" class="{{ $signatureButtonClass($authorizerSign) }}">{{ $authorizerSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
+                    <input type="hidden" name="signature_permit_authorizer" id="signature_permit_authorizer_field" value="{{ $authorizerSign }}" data-signature-url="{{ $signatureUrl($authorizerSign) }}">
                 </td>
                 <td class="border text-center px-2 py-2">
                     <input type="date" name="permit_authorizer_date" value="{{ $authorizerDate }}" class="input w-full text-xs text-center">
@@ -552,8 +562,8 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                     @if ($receiverSign && file_exists(public_path($receiverSign)))
                         <img src="{{ asset($receiverSign) }}" class="h-16 mx-auto mb-1">
                     @endif
-                    <button type="button" onclick="openSignPad('signature_permit_receiver_field')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
-                    <input type="hidden" name="signature_permit_receiver" id="signature_permit_receiver_field" value="{{ $receiverSign }}">
+                    <button type="button" onclick="openSignPad('signature_permit_receiver_field')" class="{{ $signatureButtonClass($receiverSign) }}">{{ $receiverSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
+                    <input type="hidden" name="signature_permit_receiver" id="signature_permit_receiver_field" value="{{ $receiverSign }}" data-signature-url="{{ $signatureUrl($receiverSign) }}">
                 </td>
                 <td class="border text-center px-2 py-2">
                     <input type="date" name="permit_receiver_date" value="{{ $receiverDate }}" class="input w-full text-xs text-center">
@@ -633,22 +643,30 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
                 <!-- Requestor -->
                 <td class="border text-center px-2 py-2">
                     <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
-                    @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
+                    @if ($closeRequestorSign)
                         <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
+                    <button type="button" onclick="openSignPad('ketinggian_token_signature_close_requestor')" class="{{ $signatureButtonClass($closeRequestorSign) }}">
+                        {{ $closeRequestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+                    </button>
+                    <input type="hidden" name="signature_close_requestor" id="ketinggian_token_signature_close_requestor"
+                        value="{{ $closeRequestorSign }}"
+                        data-signature-url="{{ $closeRequestorSign ? asset($closeRequestorSign) : '' }}">
                 </td>
 
                 <!-- Issuer -->
                 <td class="border text-center px-2 py-2">
                     <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
-                    @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
+                    @if ($closeIssuerSign)
                         <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
-                
+                    <button type="button" onclick="openSignPad('ketinggian_token_signature_close_issuer')" class="{{ $signatureButtonClass($closeIssuerSign) }}">
+                        {{ $closeIssuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+                    </button>
+                    <input type="hidden" name="signature_close_issuer" id="ketinggian_token_signature_close_issuer"
+                        value="{{ $closeIssuerSign }}"
+                        data-signature-url="{{ $closeIssuerSign ? asset($closeIssuerSign) : '' }}">
+
                 </td>
             </tr>
         </tbody>

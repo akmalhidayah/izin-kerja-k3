@@ -8,7 +8,10 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserPanelController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\ApproveSikController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\User\IzinKerjaController;
+use App\Http\Controllers\User\TokenLinkController;
+use App\Http\Controllers\User\TokenPdfController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UploadController;
 use App\Http\Controllers\User\JsaController;
@@ -35,6 +38,7 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin,pgo'])->group(functi
 
     // Dashboard User
     Route::get('pengajuan-user/izin-kerja', [IzinKerjaController::class, 'index'])->name('dashboard');
+    Route::post('/pengajuan-user/token-link/{type}/{id}/regenerate', [TokenLinkController::class, 'regenerate'])->name('token-links.regenerate');
 
     // ✅ Step 1: Create Notification
     Route::post('/pengajuan-user/izin-kerja/notification', [UserNotificationController::class, 'store'])->name('notification.store');
@@ -108,6 +112,8 @@ Route::get('/permintaansik/{id}/view-sik', [AdminPermintaanController::class, 'v
     Route::delete('/permintaansik/{id}/data-kontraktor', [AdminPermintaanController::class, 'deleteDataKontraktor'])->name('permintaansik.deleteDataKontraktor');
     Route::delete('/permintaansik/{id}/jsa', [AdminPermintaanController::class, 'deleteJsa'])->name('permintaansik.deleteJsa');
     Route::delete('/permintaansik/{id}/working-permit/{type}', [AdminPermintaanController::class, 'deleteWorkingPermit'])->name('permintaansik.deleteWorkingPermit');
+    Route::post('/notifications/{notification}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
 });
 
 // ✅ SUPER ADMIN - Manajemen User Panel
@@ -155,6 +161,8 @@ Route::get('/permintaansik/{id}/download-sik', [AdminPermintaanController::class
 // Route untuk form kontraktor dengan token
 Route::get('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::class, 'showByToken'])->name('izin-kerja.data-kontraktor.token');
 Route::post('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::class, 'storeByToken'])->name('izin-kerja.data-kontraktor.store');
+
+Route::get('/izin-kerja/token-pdf/{type}/{token}', [TokenPdfController::class, 'show'])->name('token-pdf.show');
 
 Route::get('/izin-kerja/jsa/form/{token}', [JsaController::class, 'showByToken'])->name('jsa.form.token');
 Route::post('/izin-kerja/jsa/form/{token}', [JsaController::class, 'storeByToken'])->name('jsa.form.token.store');

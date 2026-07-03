@@ -6,7 +6,7 @@
     <div x-show="openSIK" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
         <div class="bg-white rounded-lg p-4 w-full max-w-2xl shadow-lg">
             <div class="flex justify-between items-center mb-2">
-                <h2 class="text-lg font-semibold">Preview Surat Izin Kerja</h2>
+                <h2 class="text-lg font-semibold">Preview Surat Penyelesaian Pekerjaan</h2>
                 <button @click="openSIK = false" class="text-gray-500 hover:text-gray-700">&times;</button>
             </div>
 

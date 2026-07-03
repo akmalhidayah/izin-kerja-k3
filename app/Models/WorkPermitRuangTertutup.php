@@ -91,7 +91,8 @@ class WorkPermitRuangTertutup extends Model
 
     public function detail()
     {
-        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id');
+        return $this->hasOne(WorkPermitDetail::class, 'notification_id', 'notification_id')
+            ->where('permit_type', 'ruangtertutup');
     }
 
     public function closure()
@@ -103,6 +104,6 @@ class WorkPermitRuangTertutup extends Model
             'work_permit_detail_id',  // Foreign key on WorkPermitClosure
             'notification_id',        // Local key on current model
             'id'                      // Local key on WorkPermitDetail
-        );
+        )->where('permit_type', 'ruangtertutup');
     }
 }

@@ -11,6 +11,19 @@
     </div>
 @endif
 
+@php
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureUrl = fn ($signature) => $signature
+        ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
+        : '';
+
+    $dibuatSign = old('dibuat_signature', $jsa->dibuat_signature ?? '');
+    $disetujuiSign = old('disetujui_signature', $jsa->disetujui_signature ?? '');
+    $diverifikasiSign = old('diverifikasi_signature', $jsa->diverifikasi_signature ?? '');
+@endphp
+
 {{-- WRAP X-DATA DI LUAR --}}
 <div x-data="formJSA({{ $jsa->langkah_kerja ? $jsa->langkah_kerja : '[]' }})"
 x-init="console.log('✅ langkahKerja loaded (edit):', langkahKerja)">
@@ -32,9 +45,9 @@ x-init="console.log('✅ langkahKerja loaded (edit):', langkahKerja)">
 
                 {{-- HIDDEN INPUT --}}
                 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
-                <input type="hidden" name="dibuat_signature" id="dibuat_signature" value="{{ $jsa->dibuat_signature ?? '' }}">
-                <input type="hidden" name="disetujui_signature" id="disetujui_signature" value="{{ $jsa->disetujui_signature ?? '' }}">
-                <input type="hidden" name="diverifikasi_signature" id="diverifikasi_signature" value="{{ $jsa->diverifikasi_signature ?? '' }}">
+                <input type="hidden" name="dibuat_signature" id="dibuat_signature" value="{{ $dibuatSign }}" data-signature-url="{{ $signatureUrl($dibuatSign) }}">
+                <input type="hidden" name="disetujui_signature" id="disetujui_signature" value="{{ $disetujuiSign }}" data-signature-url="{{ $signatureUrl($disetujuiSign) }}">
+                <input type="hidden" name="diverifikasi_signature" id="diverifikasi_signature" value="{{ $diverifikasiSign }}" data-signature-url="{{ $signatureUrl($diverifikasiSign) }}">
                 <input type="hidden" name="langkah_kerja" id="langkah_kerja">
 
                 {{-- HEADER --}}
@@ -89,14 +102,14 @@ x-init="console.log('✅ langkahKerja loaded (edit):', langkahKerja)">
                    class="w-full text-xs border-gray-300 rounded p-1 mb-2" 
                    placeholder="Masukkan Nama" 
                    value="{{ old('dibuat_nama', $jsa->dibuat_nama ?? '') }}">
-            <button type="button" onclick="openSignPad('dibuat_signature')" class="text-blue-600 underline text-xs mt-1">
-                Tanda Tangan
-            </button>
-            @if(!empty($jsa->dibuat_signature))
+            @if($dibuatSign)
                 <div class="flex justify-center mt-2">
-                    <img src="{{ asset($jsa->dibuat_signature) }}" class="h-12" alt="TTD Dibuat">
+                    <img src="{{ $signatureUrl($dibuatSign) }}" class="h-12" alt="TTD Dibuat">
                 </div>
             @endif
+            <button type="button" onclick="openSignPad('dibuat_signature')" class="{{ $signatureButtonClass($dibuatSign) }}">
+                {{ $dibuatSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+            </button>
         </td>
 
         {{-- Disetujui oleh --}}
@@ -106,14 +119,14 @@ x-init="console.log('✅ langkahKerja loaded (edit):', langkahKerja)">
                    class="w-full text-xs border-gray-300 rounded p-1 mb-2" 
                    placeholder="Masukkan Nama" 
                    value="{{ old('disetujui_nama', $jsa->disetujui_nama ?? '') }}">
-            <button type="button" onclick="openSignPad('disetujui_signature')" class="text-blue-600 underline text-xs mt-1">
-                Tanda Tangan
-            </button>
-            @if(!empty($jsa->disetujui_signature))
+            @if($disetujuiSign)
                 <div class="flex justify-center mt-2">
-                    <img src="{{ asset($jsa->disetujui_signature) }}" class="h-12" alt="TTD Disetujui">
+                    <img src="{{ $signatureUrl($disetujuiSign) }}" class="h-12" alt="TTD Disetujui">
                 </div>
             @endif
+            <button type="button" onclick="openSignPad('disetujui_signature')" class="{{ $signatureButtonClass($disetujuiSign) }}">
+                {{ $disetujuiSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+            </button>
         </td>
 
         {{-- Diverifikasi oleh --}}
@@ -123,14 +136,14 @@ x-init="console.log('✅ langkahKerja loaded (edit):', langkahKerja)">
                    class="w-full text-xs border-gray-300 rounded p-1 mb-2" 
                    placeholder="Masukkan Nama" 
                    value="{{ old('diverifikasi_nama', $jsa->diverifikasi_nama ?? '') }}">
-            <button type="button" onclick="openSignPad('diverifikasi_signature')" class="text-blue-600 underline text-xs mt-1">
-                Tanda Tangan
-            </button>
-            @if(!empty($jsa->diverifikasi_signature))
+            @if($diverifikasiSign)
                 <div class="flex justify-center mt-2">
-                    <img src="{{ asset($jsa->diverifikasi_signature) }}" class="h-12" alt="TTD Diverifikasi">
+                    <img src="{{ $signatureUrl($diverifikasiSign) }}" class="h-12" alt="TTD Diverifikasi">
                 </div>
             @endif
+            <button type="button" onclick="openSignPad('diverifikasi_signature')" class="{{ $signatureButtonClass($diverifikasiSign) }}">
+                {{ $diverifikasiSign ? 'Ubah TTD' : 'Tanda Tangan' }}
+            </button>
         </td>
     </tr>
 </table>

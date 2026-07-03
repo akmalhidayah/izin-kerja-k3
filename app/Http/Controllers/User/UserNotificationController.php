@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminNotification;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserNotificationController extends Controller
@@ -36,7 +38,7 @@ class UserNotificationController extends Controller
         }
 
         // ⛔ HAPUS LOGIC UPDATE —> Langsung buat baru saja
-        Notification::create([
+        $notification = Notification::create([
             'type' => $validated['type'],
             'number' => $validated['number'] ?? null,
             'description' => $validated['description'] ?? null,
@@ -45,7 +47,34 @@ class UserNotificationController extends Controller
             'status' => 'menunggu',
         ]);
 
+        $this->notifyAdmins($notification);
+
         return back()->with('success', 'Notifikasi berhasil disimpan!');
     }
 
+    private function notifyAdmins(Notification $notification): void
+    {
+        $submitter = auth()->user();
+        $documentType = strtoupper($notification->type ?? '-');
+        $documentNumber = $notification->number ?: '-';
+        $jobName = $notification->description ?: 'Tanpa nama pekerjaan';
+
+        User::where('usertype', User::USERTYPE_ADMIN)
+            ->pluck('id')
+            ->each(function ($adminId) use ($notification, $submitter, $documentType, $documentNumber, $jobName) {
+                AdminNotification::create([
+                    'recipient_id' => $adminId,
+                    'notification_id' => $notification->id,
+                    'title' => 'Pengajuan SIK baru',
+                    'body' => sprintf(
+                        '%s membuat pengajuan %s %s: %s',
+                        $submitter?->name ?? 'User',
+                        $documentType,
+                        $documentNumber,
+                        $jobName
+                    ),
+                    'url' => route('admin.permintaansik.show', $notification->id),
+                ]);
+            });
+    }
 }

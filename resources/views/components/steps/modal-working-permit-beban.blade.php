@@ -11,7 +11,11 @@
         <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Edit Working Permit Beban</h2>
 
         {{-- Include langsung permit beban --}}
-        @include('components.permits.beban', ['permit' => $permits['beban'] ?? null])
+        @include('components.permits.beban', [
+            'permit' => $permits['beban'] ?? null,
+            'detail' => $detail ?? (($permits['beban'] ?? null)?->detail),
+            'closure' => $closure ?? (($permits['beban'] ?? null)?->closure),
+        ])
 
         <div class="flex justify-end gap-2 mt-6">
             <button type="button" @click="activeModal = null" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">

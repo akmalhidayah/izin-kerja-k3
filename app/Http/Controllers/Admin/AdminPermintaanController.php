@@ -45,7 +45,7 @@ class AdminPermintaanController extends Controller
             'struktur_organisasi' => 'Upload Struktur Organisasi',
             'post_test'           => 'Upload Post Test',
             'bukti_serah_terima'  => 'Upload Bukti Serah Terima',
-            'sik'                 => 'Surat Izin Kerja',
+            'sik'                 => 'Surat Penyelesaian Pekerjaan',
         ];
     }
 
@@ -527,7 +527,7 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
 
         $pdf = Pdf::loadView('admin.pdfsik', compact('notification', 'dataKontraktor', 'sikStep'));
 
-        return response($pdf->stream('Surat-Izin-Kerja.pdf'), 200, [
+        return response($pdf->stream('Surat-Penyelesaian-Pekerjaan.pdf'), 200, [
             'Content-Type' => 'application/pdf',
         ]);
     }

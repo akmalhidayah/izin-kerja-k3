@@ -215,10 +215,10 @@
                                         <path d="M14 3v5h5" />
                                         <path d="M8.5 13.5h7M8.5 17h5" />
                                     </svg>
-                                    Lihat Surat Izin Kerja (PDF)
+                                    Lihat Surat Penyelesaian Pekerjaan (PDF)
                                 </a>
                             @else
-                                <div class="text-[11px] text-gray-500">SIK akan tersedia setelah disetujui.</div>
+                                <div class="text-[11px] text-gray-500">Surat Penyelesaian Pekerjaan akan tersedia setelah disetujui.</div>
                             @endif
                             <form method="POST" action="{{ route('admin.permintaansik.updateStatus', [$data->id, $stepKey]) }}" class="mt-3">
                                 @csrf
