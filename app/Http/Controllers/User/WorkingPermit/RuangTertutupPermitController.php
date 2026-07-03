@@ -144,10 +144,7 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
             ['notification_id' => $notification_id],
             $permitData
         );
-        if (!$ruangTertutup->token) {
-    $ruangTertutup->token = Str::uuid();
-    $ruangTertutup->save();
-}
+        $this->ensurePermitToken($ruangTertutup);
 
 
         // Simpan ke tabel detail (Bagian 1)
@@ -170,9 +167,9 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
         $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
-                'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-                'equipment_cleaned' => $request->input('close_tools') === 'ya',
-                'guarding_restored' => $request->input('close_guarding') === 'ya',
+                'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+                'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+                'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
                 'requestor_name' => $validated['close_requestor_name'] ?? null,
@@ -205,6 +202,7 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
     public function showByToken($token)
 {
     $permit = WorkPermitRuangTertutup::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $notification = $permit->notification;
     $detail = $permit->detail;
     $closure = $permit->closure;
@@ -220,13 +218,13 @@ $validated['live_testing_signature'] = $this->saveSignature($request->input('liv
 public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitRuangTertutup::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $request->merge(['notification_id' => $permit->notification_id]);
     $request->merge(['_token_access' => true]);
 
-    app()->call([$this, 'store'], ['request' => $request]);
-    session()->flash('alert', 'Data berhasil disimpan melalui link token!');
-    
-    return back();
+    $response = app()->call([$this, 'store'], ['request' => $request]);
+
+    return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui link token!', route('token-pdf.show', ['type' => 'ruang-tertutup', 'token' => $permit->token]));
 }
 
 

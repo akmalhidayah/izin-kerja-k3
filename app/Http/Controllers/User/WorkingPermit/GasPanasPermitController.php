@@ -155,10 +155,7 @@ if ($request->hasFile('sketsa_pekerjaan')) {
     $gaspanasData
 );
 
-if (!$permit->token) {
-    $permit->token = Str::uuid();
-    $permit->save();
-}
+        $this->ensurePermitToken($permit);
 
 
         $closeRequestorSign = $this->saveSignature($request->input('signature_close_requestor'), 'close_requestor');
@@ -184,9 +181,9 @@ if (!$permit->token) {
         $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
-                'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-                'equipment_cleaned' => $request->input('close_tools') === 'ya',
-                'guarding_restored' => $request->input('close_guarding') === 'ya',
+                'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+                'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+                'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
                 'requestor_name' => $validated['close_requestor_name'] ?? null,
@@ -219,6 +216,7 @@ if (!$permit->token) {
   public function showByToken($token)
 {
 $permit = WorkPermitGasPanas::with(['detail', 'closure', 'notification'])->where('token', $token)->firstOrFail();
+$this->abortIfPermitTokenExpired($permit);
 
     $notification = $permit->notification;
     $detail = $permit->detail;
@@ -236,16 +234,14 @@ $permit = WorkPermitGasPanas::with(['detail', 'closure', 'notification'])->where
 public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitGasPanas::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $request->merge(['notification_id' => $permit->notification_id]);
     $request->merge(['_token_access' => true]);
 
     // Simpan data
-    app()->call([$this, 'store'], ['request' => $request]);
+    $response = app()->call([$this, 'store'], ['request' => $request]);
 
-    // Flash alert JS
-    session()->flash('alert', 'Data berhasil disimpan melalui link token!');
-
-    return back();
+    return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui link token!', route('token-pdf.show', ['type' => 'gaspanas', 'token' => $permit->token]));
 }
 
     private function saveSignature($base64, $role)

@@ -118,9 +118,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
-                                Tanda Tangan
-                            </button>
+                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700" x-text="item.signature ? 'Ubah TTD' : 'Tanda Tangan'"></button>
                         </td>
                     </tr>
                 </template>
@@ -166,9 +164,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
-                                Tanda Tangan
-                            </button>
+                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700" x-text="item.signature ? 'Ubah TTD' : 'Tanda Tangan'"></button>
                         </td>
                     </tr>
                 </template>

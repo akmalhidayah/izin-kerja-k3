@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\ApproveSikController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\User\IzinKerjaController;
+use App\Http\Controllers\User\TokenLinkController;
+use App\Http\Controllers\User\TokenPdfController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UploadController;
 use App\Http\Controllers\User\JsaController;
@@ -36,6 +38,7 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin,pgo'])->group(functi
 
     // Dashboard User
     Route::get('pengajuan-user/izin-kerja', [IzinKerjaController::class, 'index'])->name('dashboard');
+    Route::post('/pengajuan-user/token-link/{type}/{id}/regenerate', [TokenLinkController::class, 'regenerate'])->name('token-links.regenerate');
 
     // ✅ Step 1: Create Notification
     Route::post('/pengajuan-user/izin-kerja/notification', [UserNotificationController::class, 'store'])->name('notification.store');
@@ -158,6 +161,8 @@ Route::get('/permintaansik/{id}/download-sik', [AdminPermintaanController::class
 // Route untuk form kontraktor dengan token
 Route::get('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::class, 'showByToken'])->name('izin-kerja.data-kontraktor.token');
 Route::post('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::class, 'storeByToken'])->name('izin-kerja.data-kontraktor.store');
+
+Route::get('/izin-kerja/token-pdf/{type}/{token}', [TokenPdfController::class, 'show'])->name('token-pdf.show');
 
 Route::get('/izin-kerja/jsa/form/{token}', [JsaController::class, 'showByToken'])->name('jsa.form.token');
 Route::post('/izin-kerja/jsa/form/{token}', [JsaController::class, 'storeByToken'])->name('jsa.form.token.store');

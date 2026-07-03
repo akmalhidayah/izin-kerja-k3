@@ -142,10 +142,9 @@ if ($request->hasFile('sketsa_perancah_file')) {
             ['notification_id' => $permitData['notification_id']],
             array_filter($permitData, fn($v) => $v !== null && $v !== '')
         );
-        if ($permit && !$permit->token) {
-    $permit->token = Str::uuid();
-    $permit->save();
-}
+        if ($permit) {
+            $this->ensurePermitToken($permit);
+        }
 
         // Simpan ke tabel work_permit_details
         $detail = WorkPermitDetail::updateOrCreate(
@@ -167,9 +166,9 @@ if ($request->hasFile('sketsa_perancah_file')) {
         $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
-                'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-                'equipment_cleaned' => $request->input('close_tools') === 'ya',
-                'guarding_restored' => $request->input('close_guarding') === 'ya',
+                'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+                'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+                'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
                 'closed_date' => $request->close_date,
                 'closed_time' => $request->close_time,
                 'requestor_name' => $request->close_requestor_name,
@@ -205,6 +204,7 @@ if ($request->hasFile('sketsa_perancah_file')) {
     public function showByToken($token)
     {
         $permit = WorkPermitPerancah::with(['detail', 'closure', 'notification'])->where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
 
         return view('pengajuan-user.workingpermit.form-token-perancah', [
             'permit' => $permit,
@@ -218,13 +218,13 @@ if ($request->hasFile('sketsa_perancah_file')) {
     public function storeByToken(Request $request, $token)
     {
         $permit = WorkPermitPerancah::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
         $request->merge(['notification_id' => $permit->notification_id]);
         $request->merge(['_token_access' => true]);
 
-        app()->call([$this, 'store'], ['request' => $request]);
+        $response = app()->call([$this, 'store'], ['request' => $request]);
 
-        session()->flash('alert', 'Data berhasil disimpan melalui link token!');
-        return back();
+        return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui link token!', route('token-pdf.show', ['type' => 'perancah', 'token' => $permit->token]));
     }
 
     private function saveSignature($base64, $role)

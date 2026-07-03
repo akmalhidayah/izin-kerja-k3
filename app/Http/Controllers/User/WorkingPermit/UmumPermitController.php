@@ -165,9 +165,9 @@ public function store(Request $request)
     $closure = WorkPermitClosure::updateOrCreate(
         ['work_permit_detail_id' => $detail->id],
         array_filter([
-            'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-            'equipment_cleaned' => $request->input('close_tools') === 'ya',
-            'guarding_restored' => $request->input('close_guarding') === 'ya',
+            'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+            'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+            'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
             'closed_date' => $request->input('close_date'),
             'closed_time' => $request->input('close_time'),
             'requestor_name' => $request->input('close_requestor_name'),
@@ -194,10 +194,7 @@ public function store(Request $request)
             ])->save();
         }
     }
-if (!$permit->token) {
-    $permit->token = Str::uuid();
-    $permit->save();
-}
+    $this->ensurePermitToken($permit);
 
     return back()->with('success', 'Data Working Permit Umum berhasil disimpan!')->withInput();
 }
@@ -223,6 +220,7 @@ if (!$permit->token) {
  public function showByToken($token)
 {
     $permit = UmumWorkPermit::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $notification = $permit->notification;
 
     // Fix: Ambil dari relasi langsung ke permit
@@ -238,6 +236,7 @@ if (!$permit->token) {
     public function storeByToken(Request $request, $token)
     {
         $permit = UmumWorkPermit::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
 
         try {
             $validated = $request->validate([
@@ -321,9 +320,9 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
     $closure = WorkPermitClosure::updateOrCreate(
         ['work_permit_detail_id' => $detail->id],
         array_filter([
-            'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-            'equipment_cleaned' => $request->input('close_tools') === 'ya',
-            'guarding_restored' => $request->input('close_guarding') === 'ya',
+            'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+            'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+            'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
             'closed_date' => $request->input('close_date'),
             'closed_time' => $request->input('close_time'),
             'requestor_name' => $request->input('close_requestor_name'),
@@ -351,7 +350,12 @@ $validated['live_testing_items'] = json_encode($request->input('live_testing', [
                 ])->save();
             }
         }
-        return back()->with('success', 'Form Working Permit Umum berhasil diperbarui.');
+        $message = 'Form Working Permit Umum berhasil diperbarui.';
+
+        return back()
+            ->with('success', $message)
+            ->with('token_saved', $message)
+            ->with('token_pdf_url', route('token-pdf.show', ['type' => 'umum', 'token' => $permit->token]));
     }
 
  public function preview($id)

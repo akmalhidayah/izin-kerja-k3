@@ -18,10 +18,19 @@
     @csrf
 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 
+@php
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureButtonSmallClass = 'inline-flex h-8 w-20 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureUrl = fn ($signature) => $signature
+        ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
+        : '';
+@endphp
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6 text-sm">
     <h2 class="text-xl font-bold uppercase text-center">RENCANA PENGANGKATAN</h2>
     <p class="text-center text-sm text-gray-600 mb-4">
-        Rencana pengangkatan dibuat sebelum memulai kegiatan pengangkatan, dibuat oleh Operator Pesawat Angkat dan Juru Ikat (Rigger) 
+        Rencana pengangkatan dibuat sebelum memulai kegiatan pengangkatan, dibuat oleh Operator Pesawat Angkat dan Juru Ikat (Rigger)
         dan disetujui oleh Lifting Permit Verificator.
     </p>
 
@@ -122,11 +131,11 @@
             <tbody>
                 <tr>
                    @php
-    $selectedWebbing = old('teknik_pengikatan') 
-        ?? (isset($permit) && $permit && $permit->teknik_pengikatan 
-            ? (is_array($permit->teknik_pengikatan) 
-                ? $permit->teknik_pengikatan 
-                : json_decode($permit->teknik_pengikatan, true)) 
+    $selectedWebbing = old('teknik_pengikatan')
+        ?? (isset($permit) && $permit && $permit->teknik_pengikatan
+            ? (is_array($permit->teknik_pengikatan)
+                ? $permit->teknik_pengikatan
+                : json_decode($permit->teknik_pengikatan, true))
             : []);
 @endphp
 
@@ -221,7 +230,7 @@
                 <img src="{{ asset($permit->diagram_pesawat) }}" alt="Diagram Pesawat" class="mb-2 max-h-48 mx-auto border">
             @endif
 
-            <input type="file" name="diagram_pesawat" accept="image/*" class="block w-full text-sm text-gray-700 
+            <input type="file" name="diagram_pesawat" accept="image/*" class="block w-full text-sm text-gray-700
                 file:mr-4 file:py-2 file:px-4
                 file:rounded-full file:border-0
                 file:text-sm file:font-semibold
@@ -237,7 +246,7 @@
                 <img src="{{ asset($permit->diagram_pengikatan) }}" alt="Diagram Pengikatan" class="mb-2 max-h-48 mx-auto border">
             @endif
 
-            <input type="file" name="diagram_pengikatan" accept="image/*" class="block w-full text-sm text-gray-700 
+            <input type="file" name="diagram_pengikatan" accept="image/*" class="block w-full text-sm text-gray-700
                 file:mr-4 file:py-2 file:px-4
                 file:rounded-full file:border-0
                 file:text-sm file:font-semibold
@@ -271,8 +280,8 @@
 
             <button type="button"
                 onclick="openSignPad('pengangkatan_signature_rigger')"
-                class="text-blue-600 underline text-xs mt-1">
-                {{ $riggerSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                class="{{ $signatureButtonClass($riggerSign) }}">
+                {{ $riggerSign ? 'Ubah TTD' : 'Tanda Tangan' }}
             </button>
 
             <input type="hidden" name="signature_rigger" id="pengangkatan_signature_rigger"
@@ -296,8 +305,8 @@
 
             <button type="button"
                 onclick="openSignPad('pengangkatan_signature_operator')"
-                class="text-blue-600 underline text-xs mt-1">
-                {{ $operatorSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                class="{{ $signatureButtonClass($operatorSign) }}">
+                {{ $operatorSign ? 'Ubah TTD' : 'Tanda Tangan' }}
             </button>
 
             <input type="hidden" name="signature_operator" id="pengangkatan_signature_operator"
@@ -321,8 +330,8 @@
 
             <button type="button"
                 onclick="openSignPad('pengangkatan_signature_verificator')"
-                class="text-blue-600 underline text-xs mt-1">
-                {{ $verificatorSign ? 'Ubah Tanda Tangan' : 'Tanda Tangan' }}
+                class="{{ $signatureButtonClass($verificatorSign) }}">
+                {{ $verificatorSign ? 'Ubah TTD' : 'Tanda Tangan' }}
             </button>
 
             <input type="hidden" name="signature_verificator" id="pengangkatan_signature_verificator"

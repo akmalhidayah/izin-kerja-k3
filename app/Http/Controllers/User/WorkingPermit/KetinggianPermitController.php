@@ -177,10 +177,7 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
     )
 );
 
-                if (!$permit->token) {
-            $permit->token = Str::uuid();
-            $permit->save();
-        }
+        $this->ensurePermitToken($permit);
 
         // ✅ Simpan ke WorkPermitDetail
         $detail = WorkPermitDetail::updateOrCreate(
@@ -201,10 +198,10 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
         // ✅ Simpan ke WorkPermitClosure
         $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
-            [
-                'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-                'equipment_cleaned' => $request->input('close_tools') === 'ya',
-                'guarding_restored' => $request->input('close_guarding') === 'ya',
+            $this->filterEmptyPermitValues([
+                'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+                'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+                'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
                 'requestor_name' => $validated['close_requestor_name'] ?? null,
@@ -212,7 +209,7 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
                 'issuer_name' => $validated['close_issuer_name'] ?? null,
                 'issuer_sign' => $issuer_sign,
                 'jumlah_rfid' => $validated['jumlah_rfid'] ?? null,
-            ]
+            ])
         );
 
         if ($clearAllSignatures) {
@@ -237,6 +234,7 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
     public function showByToken($token)
 {
     $permit = WorkPermitKetinggian::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $notification = $permit->notification;
     $detail = $permit->detail;
     $closure = $permit->closure;
@@ -253,13 +251,13 @@ $validated['nama_pekerja'] = collect($request->input('daftar_pekerja', []))
 public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitKetinggian::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $request->merge(['notification_id' => $permit->notification_id]);
     $request->merge(['_token_access' => true]);
 
-    app()->call([$this, 'store'], ['request' => $request]);
-    session()->flash('alert', 'Data berhasil disimpan melalui link token!');
+    $response = app()->call([$this, 'store'], ['request' => $request]);
 
-    return back();
+    return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui link token!', route('token-pdf.show', ['type' => 'ketinggian', 'token' => $permit->token]));
 }
 
 

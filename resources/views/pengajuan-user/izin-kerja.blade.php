@@ -201,18 +201,12 @@
         Lihat PDF
     </a>
 </div>
-@if ($dataKontraktor && $dataKontraktor->token)
-    <div class="mt-2 text-xs text-gray-700">
-        Salin link berikut dan kirimkan ke pihak terkait untuk tanda tangan:
-        <div class="flex items-center gap-2 mt-1">
-            <input type="text" value="{{ route('izin-kerja.data-kontraktor.token', $dataKontraktor->token) }}" readonly
-                class="text-xs border-gray-300 rounded p-1 w-full bg-gray-100">
-            <button type="button" onclick="navigator.clipboard.writeText('{{ route('izin-kerja.data-kontraktor.token', $dataKontraktor->token) }}'); alert('Link berhasil disalin!')"
-                class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                Salin
-            </button>
-        </div>
-    </div>
+@if ($dataKontraktor)
+    @include('components.token-link-action', [
+        'record' => $dataKontraktor,
+        'routeName' => 'izin-kerja.data-kontraktor.token',
+        'regenerateType' => 'data-kontraktor',
+    ])
 @endif
 
 
@@ -330,19 +324,11 @@
                     Edit JSA
                 </button>
 
-                @if ($jsa->token)
-                    <div class="mt-2 text-xs text-gray-700">
-                        Salin link berikut dan kirimkan ke pihak terkait untuk tanda tangan:
-                        <div class="flex items-center gap-2 mt-1">
-                            <input type="text" value="{{ route('jsa.form.token', $jsa->token) }}" readonly
-                                class="text-xs border-gray-300 rounded p-1 w-full bg-gray-100">
-                            <button type="button" onclick="navigator.clipboard.writeText('{{ route('jsa.form.token', $jsa->token) }}'); alert('Link berhasil disalin!')"
-                                class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                                Salin
-                            </button>
-                        </div>
-                    </div>
-                @endif
+                @include('components.token-link-action', [
+                    'record' => $jsa,
+                    'routeName' => 'jsa.form.token',
+                    'regenerateType' => 'jsa',
+                ])
             @endif
 
             @if ($step['status'] === 'revisi')
@@ -443,20 +429,14 @@
                         </button>
                     </div>
                 @endif
-                @if ($permitUmum && $permitUmum->token)
-    <div class="mt-2 text-[10px] text-gray-700 text-center">
-        Salin link berikut dan kirim ke pihak terkait untuk mengisi atau tanda tangan:
-        <div class="flex items-center gap-2 mt-1">
-            <input type="text" value="{{ route('working-permit.umum.token', $permitUmum->token) }}" readonly
-                class="text-[10px] border-gray-300 rounded p-1 w-full bg-gray-100">
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.umum.token', $permitUmum->token) }}'); alert('Link berhasil disalin!')"
-                class="px-2 py-1 bg-blue-600 text-white text-[10px] rounded hover:bg-blue-700">
-                Salin
-            </button>
-        </div>
-    </div>
-@endif
+                @if ($permitUmum)
+                    @include('components.token-link-action', [
+                        'record' => $permitUmum,
+                        'routeName' => 'working-permit.umum.token',
+                        'regenerateType' => 'umum',
+                        'helpText' => 'Salin link berikut dan kirim ke pihak terkait untuk mengisi atau tanda tangan:',
+                    ])
+                @endif
 
 {{-- Permit Gas Panas --}}
 @if ($permitGas)
@@ -470,13 +450,7 @@
             class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitGas->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.gaspanas.token', $permitGas->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitGas, 'routeName' => 'working-permit.gaspanas.token', 'regenerateType' => 'gaspanas', 'compact' => true])
     </div>
 @endif
 
@@ -492,13 +466,7 @@
             class="bg-teal-600 hover:bg-teal-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitAir->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.air.token', $permitAir->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitAir, 'routeName' => 'working-permit.air.token', 'regenerateType' => 'air', 'compact' => true])
     </div>
 @endif
 
@@ -514,13 +482,7 @@
             class="bg-amber-600 hover:bg-amber-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitKetinggian->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.ketinggian.token', $permitKetinggian->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitKetinggian, 'routeName' => 'working-permit.ketinggian.token', 'regenerateType' => 'ketinggian', 'compact' => true])
     </div>
 @endif
 
@@ -536,13 +498,7 @@
             class="bg-purple-600 hover:bg-purple-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitRuangTertutup->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.ruangtertutup.token', $permitRuangTertutup->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitRuangTertutup, 'routeName' => 'working-permit.ruangtertutup.token', 'regenerateType' => 'ruang-tertutup', 'compact' => true])
     </div>
 @endif
 
@@ -558,13 +514,7 @@
             class="bg-orange-600 hover:bg-orange-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitPerancah->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.perancah.token', $permitPerancah->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitPerancah, 'routeName' => 'working-permit.perancah.token', 'regenerateType' => 'perancah', 'compact' => true])
     </div>
 @endif
 
@@ -580,13 +530,7 @@
             class="bg-red-600 hover:bg-red-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitRisikoPanas->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.risiko-panas.token', $permitRisikoPanas->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitRisikoPanas, 'routeName' => 'working-permit.risiko-panas.token', 'regenerateType' => 'risiko-panas', 'compact' => true])
     </div>
 @endif
 {{-- Permit Beban --}}
@@ -601,13 +545,7 @@
             class="bg-indigo-600 hover:bg-indigo-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitBeban->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.beban.token', $permitBeban->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitBeban, 'routeName' => 'working-permit.beban.token', 'regenerateType' => 'beban', 'compact' => true])
     </div>
 @endif
 {{-- Permit Penggalian --}}
@@ -623,13 +561,7 @@
             class="bg-yellow-700 hover:bg-yellow-800 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitPenggalian->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.penggalian.token', $permitPenggalian->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitPenggalian, 'routeName' => 'working-permit.penggalian.token', 'regenerateType' => 'penggalian', 'compact' => true])
     </div>
 @endif
 {{-- Permit Pengangkatan --}}
@@ -644,13 +576,7 @@
             class="bg-pink-600 hover:bg-pink-700 text-white p-1 rounded-full" title="Edit">
             <i class="fas fa-edit text-xs"></i>
         </button>
-        @if ($permitPengangkatan->token)
-            <button type="button"
-                onclick="navigator.clipboard.writeText('{{ route('working-permit.pengangkatan.token', $permitPengangkatan->token) }}'); alert('Link berhasil disalin!')"
-                class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full" title="Salin Link">
-                <i class="fas fa-link text-xs"></i>
-            </button>
-        @endif
+        @include('components.token-link-action', ['record' => $permitPengangkatan, 'routeName' => 'working-permit.pengangkatan.token', 'regenerateType' => 'pengangkatan', 'compact' => true])
     </div>
 @endif
                 {{-- Tambah Permit Lain (Selalu Muncul di Bawah) --}}

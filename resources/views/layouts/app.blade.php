@@ -51,6 +51,29 @@
 </div>
 
         <!-- Move signature_pad to bottom & defer -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        @if (session('token_pdf_url'))
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const pdfUrl = @json(session('token_pdf_url'));
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil disimpan',
+                        text: @json(session('token_saved', 'Data berhasil disimpan.')),
+                        showCancelButton: true,
+                        confirmButtonText: 'Lihat PDF',
+                        cancelButtonText: 'Tetap di Halaman',
+                        confirmButtonColor: '#16a34a',
+                        cancelButtonColor: '#64748b',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.open(pdfUrl, '_blank', 'noopener');
+                        }
+                    });
+                });
+            </script>
+        @endif
         <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js" defer></script>
     </body>
 </html>

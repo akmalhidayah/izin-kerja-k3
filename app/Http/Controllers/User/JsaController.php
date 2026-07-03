@@ -65,11 +65,7 @@ class JsaController extends Controller
         // Simpan Data
         $jsa = Jsa::create($validated);
 
-        // Generate token jika belum ada
-        if (!$jsa->token) {
-            $jsa->token = Str::uuid();
-            $jsa->save();
-        }
+        $this->ensurePermitToken($jsa);
 
         return back()->with('success', 'Data JSA berhasil disimpan!');
     }
@@ -123,12 +119,14 @@ class JsaController extends Controller
     public function showByToken($token)
     {
         $jsa = Jsa::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($jsa);
         return view('pengajuan-user.jsa.form', compact('jsa'));
     }
 
     public function storeByToken(Request $request, $token)
     {
         $jsa = Jsa::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($jsa);
 
         $validated = Validator::make($request->all(), [
             'nama_perusahaan' => 'nullable|string',
@@ -153,7 +151,12 @@ class JsaController extends Controller
 
         $jsa->update($validated);
 
-        return back()->with('success', 'Data JSA berhasil disimpan.');
+        $message = 'Data JSA berhasil disimpan.';
+
+        return back()
+            ->with('success', $message)
+            ->with('token_saved', $message)
+            ->with('token_pdf_url', route('token-pdf.show', ['type' => 'jsa', 'token' => $jsa->token]));
     }
 
     public function showPdf($notification_id)

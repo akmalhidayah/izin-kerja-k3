@@ -3,12 +3,21 @@
     <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
     <input type="hidden" name="clear_all_signatures" id="clear_all_signatures" value="0">
 
+@php
+    $signatureButtonClass = fn ($hasSignature) => $hasSignature
+        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureButtonSmallClass = 'inline-flex h-8 w-20 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureUrl = fn ($signature) => $signature
+        ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
+        : '';
+@endphp
 <!-- bagian 1 detail pekerjaan -->
 <div class="text-center">
     <h2 class="text-2xl font-bold uppercase">IZIN KERJA MENGANGKAT BEBAN</h2>
     <p class="text-sm mt-2 text-gray-600">
         Izin kerja ini diberikan untuk semua pekerjaan mengangkat beban dengan pesawat angkat bergerak seperti <em>mobile crane</em> dan lainnya,
-        pengangkatan diluar rutinitas dengan pesawat angkat tetap berenergi seperti <em>overhead/hoist crane</em>, <em>hoist winch</em> dan lain-lain, 
+        pengangkatan diluar rutinitas dengan pesawat angkat tetap berenergi seperti <em>overhead/hoist crane</em>, <em>hoist winch</em> dan lain-lain,
         pengangkatan tandem. Pekerjaan tidak bisa dimulai hingga izin kerja diverifikasi oleh <em>Permit Verificator</em>,
         diterbitkan oleh <em>Permit Issuer</em>, disahkan oleh <em>Permit Authorizer</em> dan <em>major hazards & control</em> disosialisasikan oleh <em>Permit Receiver</em>.
     </p>
@@ -200,9 +209,9 @@
 <!-- bagian 4 rekomendasi persyaratan -->
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto mt-6 text-sm">
     <h3 class="font-bold bg-black text-white px-2 py-1">
-        4. Rekomendasi Persyaratan Kerja Aman Tambahan dari 
-        <em>Permit Verificator/Permit Issuer</em> 
-        <span class="text-xs font-normal">(Jika ada)</span> 
+        4. Rekomendasi Persyaratan Kerja Aman Tambahan dari
+        <em>Permit Verificator/Permit Issuer</em>
+        <span class="text-xs font-normal">(Jika ada)</span>
         <span class="text-xs font-normal">(lingkari)</span>
     </h3>
 
@@ -230,7 +239,7 @@
     <div class="p-2 border-t-0 border border-gray-300">
         <p class="text-sm italic font-semibold mb-2">Permit Requestor:</p>
         <p class="text-sm">
-            Saya menyatakan bahwa semua dokumentasi persyaratan pengangkatan beban telah dilengkapi, semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
+            Saya menyatakan bahwa semua dokumentasi persyaratan pengangkatan beban telah dilengkapi, semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari
             <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini.
         </p>
     </div>
@@ -255,14 +264,11 @@
 
                 {{-- Signature --}}
                 <td class="border px-2 py-2 text-center">
-                    @if (!$permit?->signature_permit_requestor)
-                        <button 
-                            type="button"
-                            @click="openSignPad('beban_signature_permit_requestor')" 
-                            class="text-blue-600 underline text-xs">
-                            Tanda Tangan
+                    <button type="button"
+                            @click="openSignPad('beban_signature_permit_requestor')"
+                            class="{{ $signatureButtonClass(old('signature_permit_requestor') ?? $permit?->signature_permit_requestor) }}">
+                            {{ (old('signature_permit_requestor') ?? $permit?->signature_permit_requestor) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
-                    @endif
 
                     <input type="hidden" id="beban_signature_permit_requestor" name="signature_permit_requestor"
                         value="{{ old('signature_permit_requestor') ?? $permit?->signature_permit_requestor }}">
@@ -326,14 +332,11 @@
 
                 {{-- Signature --}}
                 <td class="border px-2 py-2 text-center">
-                    @if (!$permit?->signature_verificator)
-                        <button 
-                            type="button"
-                            @click="openSignPad('beban_signature_verificator')" 
-                            class="text-blue-600 underline text-xs">
-                            Tanda Tangan
+                    <button type="button"
+                            @click="openSignPad('beban_signature_verificator')"
+                            class="{{ $signatureButtonClass(old('signature_verificator') ?? $permit?->signature_verificator) }}">
+                            {{ (old('signature_verificator') ?? $permit?->signature_verificator) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
-                    @endif
 
                     <input type="hidden" id="beban_signature_verificator" name="signature_verificator"
                         value="{{ old('signature_verificator', $permit?->signature_verificator) }}">
@@ -370,8 +373,8 @@
     <div class="border border-t-0 border-gray-300 p-3">
         <p class="text-sm italic font-semibold mb-2">Permit Issuer:</p>
         <p class="text-sm">
-            Saya menyatakan bahwa saya telah memeriksa area kerja, semua dokumentasi persyaratan pengangkatan beban telah dilengkapi, 
-            semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
+            Saya menyatakan bahwa saya telah memeriksa area kerja, semua dokumentasi persyaratan pengangkatan beban telah dilengkapi,
+            semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari
             <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk pekerjaan ini dapat dilakukan.
         </p>
     </div>
@@ -395,14 +398,11 @@
 
                 {{-- Signature --}}
                 <td class="border px-2 py-2 text-center">
-                    @if (!$permit?->signature_permit_issuer)
-                        <button 
-                            type="button"
+                    <button type="button"
                             @click="openSignPad('beban_signature_permit_issuer')"
-                            class="text-blue-600 underline text-xs">
-                            Tanda Tangan
+                            class="{{ $signatureButtonClass(old('signature_permit_issuer') ?? $permit?->signature_permit_issuer) }}">
+                            {{ (old('signature_permit_issuer') ?? $permit?->signature_permit_issuer) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
-                    @endif
 
                     <input type="hidden" id="beban_signature_permit_issuer" name="signature_permit_issuer"
                         value="{{ old('signature_permit_issuer') ?? $permit?->signature_permit_issuer }}">
@@ -456,9 +456,9 @@
     <div class="border border-t-0 border-gray-300 p-3">
         <p class="text-sm italic font-semibold mb-2">Permit Authorizer:</p>
         <p class="text-sm">
-            Saya menyatakan bahwa saya telah memeriksa area kerja, semua dokumentasi persyaratan pengangkatan beban telah dilengkapi, 
-            semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
-            <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah menekankan apa saja 
+            Saya menyatakan bahwa saya telah memeriksa area kerja, semua dokumentasi persyaratan pengangkatan beban telah dilengkapi,
+            semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari
+            <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah menekankan apa saja
             <em>major hazards</em> dan pengendaliannya yang harus disosialisasikan oleh <em>Permit Receiver</em> kepada seluruh pekerja terkait.
         </p>
     </div>
@@ -482,14 +482,11 @@
 
                 {{-- Signature --}}
                 <td class="border px-2 py-2 text-center">
-                    @if (!$permit?->signature_permit_authorizer)
-                        <button 
-                            type="button"
+                    <button type="button"
                             @click="openSignPad('beban_signature_permit_authorizer')"
-                            class="text-blue-600 underline text-xs">
-                            Tanda Tangan
+                            class="{{ $signatureButtonClass(old('signature_permit_authorizer') ?? $permit?->signature_permit_authorizer) }}">
+                            {{ (old('signature_permit_authorizer') ?? $permit?->signature_permit_authorizer) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
-                    @endif
 
                     <input type="hidden" id="beban_signature_permit_authorizer" name="signature_permit_authorizer"
                         value="{{ old('signature_permit_authorizer', $permit?->signature_permit_authorizer) }}">
@@ -524,9 +521,9 @@
     <div class="border border-t-0 border-gray-300 p-3">
         <p class="text-sm italic font-semibold mb-2">Permit Receiver:</p>
         <p class="text-sm">
-            Saya menyatakan bahwa semua dokumentasi persyaratan pengangkatan beban telah dilengkapi, 
-            semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari 
-            <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah 
+            Saya menyatakan bahwa semua dokumentasi persyaratan pengangkatan beban telah dilengkapi,
+            semua persyaratan kerja aman yang telah ditentukan dan atau rekomendasi persyaratan kerja aman tambahan dari
+            <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk dapat melakukan pekerjaan ini serta saya sudah
             mensosialisasikan apa saja <em>major hazards</em> dan pengendaliannya dari pekerjaan ini kepada seluruh pekerja terkait.
         </p>
     </div>
@@ -550,14 +547,11 @@
 
                 {{-- Signature --}}
                 <td class="border px-2 py-2 text-center">
-                    @if (!$permit?->signature_permit_receiver)
-                        <button 
-                            type="button"
+                    <button type="button"
                             @click="openSignPad('beban_signature_permit_receiver')"
-                            class="text-blue-600 underline text-xs">
-                            Tanda Tangan
+                            class="{{ $signatureButtonClass(old('signature_permit_receiver') ?? $permit?->signature_permit_receiver) }}">
+                            {{ (old('signature_permit_receiver') ?? $permit?->signature_permit_receiver) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
-                    @endif
 
                     <input type="hidden" id="beban_signature_permit_receiver" name="signature_permit_receiver"
                         value="{{ old('signature_permit_receiver', $permit?->signature_permit_receiver) }}">
@@ -652,9 +646,8 @@
                     <input type="text" name="close_requestor_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeRequestorName }}">
                     @if ($closeRequestorSign && file_exists(public_path($closeRequestorSign)))
                         <img src="{{ asset($closeRequestorSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_requestor')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
+                    <button type="button" onclick="openSignPad('signature_close_requestor')" class="{{ $signatureButtonClass($closeRequestorSign) }}">{{ $closeRequestorSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
                     <input type="hidden" name="signature_close_requestor" id="signature_close_requestor" value="{{ $closeRequestorSign }}">
                 </td>
 
@@ -663,9 +656,8 @@
                     <input type="text" name="close_issuer_name" class="input w-full text-xs mb-1" placeholder="Nama" value="{{ $closeIssuerName }}">
                     @if ($closeIssuerSign && file_exists(public_path($closeIssuerSign)))
                         <img src="{{ asset($closeIssuerSign) }}" alt="Tanda Tangan" class="h-20 mx-auto">
-                    @else
-                        <button type="button" onclick="openSignPad('signature_close_issuer')" class="text-blue-600 underline text-xs">Tanda Tangan</button>
                     @endif
+                    <button type="button" onclick="openSignPad('signature_close_issuer')" class="{{ $signatureButtonClass($closeIssuerSign) }}">{{ $closeIssuerSign ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
                     <input type="hidden" name="signature_close_issuer" id="signature_close_issuer" value="{{ $closeIssuerSign }}">
                 </td>
             </tr>

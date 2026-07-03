@@ -142,10 +142,7 @@ class PanasRisikoPermitController extends Controller
             collect($validated)->only((new WorkPermitRisikoPanas())->getFillable())->toArray()
         );
 
-        if (!$permit->token) {
-            $permit->token = Str::uuid();
-            $permit->save();
-        }
+        $this->ensurePermitToken($permit);
 
         // Simpan ke tabel detail
         $detail = WorkPermitDetail::updateOrCreate(
@@ -167,9 +164,9 @@ class PanasRisikoPermitController extends Controller
         $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
-                'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-                'equipment_cleaned' => $request->input('close_tools') === 'ya',
-                'guarding_restored' => $request->input('close_guarding') === 'ya',
+                'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+                'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+                'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
                 'requestor_name' => $validated['close_requestor_name'] ?? null,
@@ -207,6 +204,7 @@ class PanasRisikoPermitController extends Controller
     public function showByToken($token)
     {
         $permit = WorkPermitRisikoPanas::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
         $notification = $permit->notification;
         $detail = $permit->detail;
         $closure = $permit->closure;
@@ -223,13 +221,13 @@ class PanasRisikoPermitController extends Controller
     public function storeByToken(Request $request, $token)
     {
         $permit = WorkPermitRisikoPanas::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
         $request->merge(['notification_id' => $permit->notification_id]);
         $request->merge(['_token_access' => true]);
 
-        app()->call([$this, 'store'], ['request' => $request]);
-        session()->flash('alert', 'Data berhasil disimpan melalui link token!');
+        $response = app()->call([$this, 'store'], ['request' => $request]);
 
-        return back();
+        return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui link token!', route('token-pdf.show', ['type' => 'risiko-panas', 'token' => $permit->token]));
     }
 
     private function saveSignature($base64, $role)

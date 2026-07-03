@@ -68,11 +68,7 @@ $dataKontraktor = DataKontraktor::updateOrCreate(
                 'apd'             => $validated['apd'],
             ], fn($v) => $v !== null && $v !== '')
         );
-// Generate token jika belum ada
-if (!$dataKontraktor->token) {
-    $dataKontraktor->token = \Str::uuid();
-    $dataKontraktor->save();
-}
+        $this->ensurePermitToken($dataKontraktor);
         return back()->with('success', 'Data kontraktor berhasil disimpan!');
     }
 
@@ -102,6 +98,7 @@ if (!$dataKontraktor->token) {
     public function showByToken($token)
 {
     $dataKontraktor = DataKontraktor::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($dataKontraktor);
     $notification = $dataKontraktor->notification; // Relasi jika ada
 
     return view('pengajuan-user.kontraktor.form', compact('dataKontraktor', 'notification'));
@@ -109,6 +106,7 @@ if (!$dataKontraktor->token) {
 public function storeByToken(Request $request, $token)
 {
     $dataKontraktor = DataKontraktor::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($dataKontraktor);
 
     try {
         $validated = $request->validate([
@@ -138,7 +136,12 @@ $validated['diverifikasi_signature'] = $this->saveSignature($request->input('div
     // Update Data
     $dataKontraktor->update($validated);
 
-    return back()->with('success', 'Data Kontraktor berhasil disimpan.');
+    $message = 'Data Kontraktor berhasil disimpan.';
+
+    return back()
+        ->with('success', $message)
+        ->with('token_saved', $message)
+        ->with('token_pdf_url', route('token-pdf.show', ['type' => 'data-kontraktor', 'token' => $dataKontraktor->token]));
 }
 
     public function previewPdf($id)

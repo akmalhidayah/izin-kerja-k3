@@ -6,6 +6,7 @@
     $signatureButtonClass = fn ($hasSignature) => $hasSignature
         ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
         : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureButtonSmallClass = 'inline-flex h-8 w-20 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
     $signatureUrl = fn ($signature) => $signature
         ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
         : '';
@@ -101,7 +102,7 @@
 @endphp
 
 {{-- BAGIAN 2 - Pengukuran Gas --}}
-<div 
+<div
     x-data="{
         defaultGas: ['O2 (19.5% - 23.5%)', 'LEL (< 5%)', 'CO (≤ 25ppm)', 'H2S (≤ 1ppm)', 'O3 (≤ 0.2ppm)'],
         rawData: JSON.parse(@js($jsonGas)),
@@ -119,7 +120,7 @@
     class="border border-gray-800 rounded-md p-4 bg-white shadow overflow-x-auto text-sm"
 >
     <h3 class="font-bold bg-black text-white px-2 py-1">
-        2. Pengukuran Berkala Kadar Gas di Udara 
+        2. Pengukuran Berkala Kadar Gas di Udara
         <span class="text-xs font-normal italic">(diisi oleh <strong>Permit Verificator</strong>, bisa dalam lampiran terpisah)</span>
     </h3>
 
@@ -152,7 +153,7 @@
         <img :src="row.sign" class="h-10 mx-auto mb-1">
     </template>
 
-    <button 
+    <button
         type="button"
         @click="openSignPad(
             'risikopanas_signature_' + gas.replaceAll(' ', '_')
@@ -161,14 +162,14 @@
                                          .replaceAll('%', '')
                                          .replaceAll('.', '')
                                          .replaceAll('<', '')
-                                         .replaceAll('=', '') 
+                                         .replaceAll('=', '')
                                          + '_' + index
         )"
-        class="text-blue-600 underline text-xs">
-        TTD
+        class="{{ $signatureButtonSmallClass }}">
+        <span x-text="row.sign ? 'Ubah' : 'TTD'"></span>
     </button>
 
-    <input 
+    <input
         type="hidden"
         :id="'risikopanas_signature_' + gas.replaceAll(' ', '_')
                                          .replaceAll('(', '')
@@ -176,7 +177,7 @@
                                          .replaceAll('%', '')
                                          .replaceAll('.', '')
                                          .replaceAll('<', '')
-                                         .replaceAll('=', '') 
+                                         .replaceAll('=', '')
                                          + '_' + index"
         :name="'pengukuran_gas[' + gas + '][' + index + '][sign]'"
         x-model="row.sign">
@@ -265,7 +266,7 @@
 
 <div class="border border-gray-800 rounded-md p-4 bg-white shadow mt-6 text-sm">
     <h3 class="font-bold bg-black text-white px-2 py-1">
-        4. Rekomendasi Persyaratan Kerja Aman Tambahan dari 
+        4. Rekomendasi Persyaratan Kerja Aman Tambahan dari
         <em>Permit Verificator/Permit Issuer</em>
         <span class="text-xs font-normal">(jika ada)</span>
     </h3>
@@ -387,7 +388,7 @@
         <img src="{{ $signatureUrl($verificator_signature) }}" alt="Tanda Tangan" class="h-12 mx-auto mt-1">
     @endif
 
-    <button 
+    <button
         type="button"
         onclick="openSignPad('risikopanas_signature_verificator')"
         class="{{ $signatureButtonClass($verificator_signature) }}">
@@ -435,7 +436,7 @@
     <div class="border border-t-0 border-gray-300 p-3">
         <p class="italic font-semibold mb-2">Permit Issuer & Senior Manager:</p>
         <p>
-            Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan/atau rekomendasi tambahan dari 
+            Saya menyatakan bahwa saya telah memeriksa area kerja dan semua persyaratan kerja aman yang telah ditentukan dan/atau rekomendasi tambahan dari
             <em>Permit Verificator/Permit Issuer</em> telah dipenuhi untuk pekerjaan ini dapat dilakukan.
         </p>
     </div>
@@ -550,8 +551,8 @@
         <img src="{{ $signatureUrl($authorizer_signature) }}" alt="Tanda Tangan" class="h-12 mx-auto mt-1 border">
     @endif
 
-    <button 
-        type="button" 
+    <button
+        type="button"
         class="{{ $signatureButtonClass($authorizer_signature) }}"
         onclick="openSignPad('risikopanas_signature_authorizer')">
         {{ $authorizer_signature ? 'Ubah TTD' : 'Tanda Tangan' }}
@@ -610,8 +611,8 @@
         <img src="{{ $signatureUrl($receiver_signature) }}" alt="Tanda Tangan" class="h-12 mx-auto mt-1 border">
     @endif
 
-    <button 
-        type="button" 
+    <button
+        type="button"
         class="{{ $signatureButtonClass($receiver_signature) }}"
         onclick="openSignPad('risikopanas_signature_receiver')">
         {{ $receiver_signature ? 'Ubah TTD' : 'Tanda Tangan' }}

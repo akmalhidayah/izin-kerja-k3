@@ -190,10 +190,7 @@ $permit = WorkPermitAir::updateOrCreate(
             ])->toArray()
         );
 // Ini baru aman digunakan:
-if (!$permit->token) {
-    $permit->token = Str::uuid();
-    $permit->save();
-}
+        $this->ensurePermitToken($permit);
 
         $detail = WorkPermitDetail::updateOrCreate(
             [
@@ -246,18 +243,19 @@ if (!$permit->token) {
 public function storeByToken(Request $request, $token)
 {
     $permit = WorkPermitAir::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $request->merge(['notification_id' => $permit->notification_id]);
     $request->merge(['_token_access' => true]);
 
-    app()->call([$this, 'store'], ['request' => $request]);
+    $response = app()->call([$this, 'store'], ['request' => $request]);
 
-    session()->flash('alert', 'Data berhasil disimpan melalui link token!');
-    return back();
+    return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui link token!', route('token-pdf.show', ['type' => 'air', 'token' => $permit->token]));
 }
 
     public function showByToken($token)
 {
     $permit = WorkPermitAir::where('token', $token)->firstOrFail();
+    $this->abortIfPermitTokenExpired($permit);
     $notification = $permit->notification;
     $detail = $permit->detail;
     $closure = $permit->closure;

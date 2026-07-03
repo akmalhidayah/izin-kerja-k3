@@ -47,6 +47,26 @@ function resizeSignatureCanvas(canvas) {
     return { ctx, width, height };
 }
 
+function resolveSignatureSource(targetInput, existingSignature) {
+    if (!existingSignature) {
+        return '';
+    }
+
+    if (existingSignature.startsWith('data:image')) {
+        return existingSignature;
+    }
+
+    if (targetInput.dataset.signatureUrl) {
+        return targetInput.dataset.signatureUrl;
+    }
+
+    if (existingSignature.startsWith('storage/')) {
+        return '/' + existingSignature;
+    }
+
+    return existingSignature;
+}
+
 function showSignatureNotice(type, title, text) {
     if (window.Swal) {
         Swal.fire({
@@ -122,9 +142,7 @@ function openSignPad(targetId) {
         const existingSignature = targetInput.value;
         if (existingSignature) {
             const img = new Image();
-            img.src = existingSignature.startsWith('data:image')
-                ? existingSignature
-                : (targetInput.dataset.signatureUrl || existingSignature);
+            img.src = resolveSignatureSource(targetInput, existingSignature);
             img.onload = function () {
                 ctx.drawImage(img, 0, 0, width, height);
             };

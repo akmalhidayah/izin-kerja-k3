@@ -155,10 +155,7 @@ $validated['file_denah'] = $path;
             ])->save();
         }
 
-        if (!$permit->token) {
-            $permit->token = Str::uuid();
-            $permit->save();
-        }
+        $this->ensurePermitToken($permit);
 
         $detail = WorkPermitDetail::updateOrCreate(
             [
@@ -178,9 +175,9 @@ $validated['file_denah'] = $path;
         $closure = WorkPermitClosure::updateOrCreate(
             ['work_permit_detail_id' => $detail->id],
             array_filter([
-                'lock_tag_removed' => $request->input('close_lock_tag') === 'ya',
-                'equipment_cleaned' => $request->input('close_tools') === 'ya',
-                'guarding_restored' => $request->input('close_guarding') === 'ya',
+                'lock_tag_removed' => $this->radioYesValue($request, 'close_lock_tag'),
+                'equipment_cleaned' => $this->radioYesValue($request, 'close_tools'),
+                'guarding_restored' => $this->radioYesValue($request, 'close_guarding'),
                 'closed_date' => $validated['close_date'] ?? null,
                 'closed_time' => $validated['close_time'] ?? null,
                 'requestor_name' => $validated['close_requestor_name'] ?? null,
@@ -204,6 +201,7 @@ $validated['file_denah'] = $path;
     public function showByToken($token)
     {
         $permit = WorkPermitPenggalian::with(['detail', 'closure', 'notification'])->where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
 
         return view('pengajuan-user.workingpermit.form-token-penggalian', [
             'permit' => $permit,
@@ -217,11 +215,12 @@ $validated['file_denah'] = $path;
     public function storeByToken(Request $request, $token)
     {
         $permit = WorkPermitPenggalian::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($permit);
         $request->merge(['notification_id' => $permit->notification_id]);
         $request->merge(['_token_access' => true]);
-        app()->call([$this, 'store'], ['request' => $request]);
-        session()->flash('alert', 'Data berhasil disimpan melalui link token!');
-        return back();
+        $response = app()->call([$this, 'store'], ['request' => $request]);
+
+        return $this->tokenStoreResponse($response, 'Data berhasil disimpan melalui link token!', route('token-pdf.show', ['type' => 'penggalian', 'token' => $permit->token]));
     }
 
     private function saveSignature($base64, $role)
