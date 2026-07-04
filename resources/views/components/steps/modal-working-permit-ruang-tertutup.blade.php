@@ -1,12 +1,12 @@
 <div 
     x-show="activeModal === '{{ $id }}'" 
     x-cloak 
-    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center wp-permit-modal"
     aria-modal="true" role="dialog"
 >
     <div 
         @click.away="activeModal = null" 
-        class="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]"
+        class="bg-white p-6 rounded-lg shadow-lg wp-permit-form w-full max-w-4xl overflow-y-auto max-h-[90vh]"
     >
         <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">{{ $label ?? 'Edit Working Permit Ruang Tertutup' }}</h2>
 

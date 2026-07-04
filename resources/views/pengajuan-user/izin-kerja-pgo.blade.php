@@ -1,4 +1,5 @@
 <x-app-layout>
+    @include('components.permit-mobile-style')
     <section class="pt-20 pb-10 px-3 sm:px-6">
 <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
             <div x-data="{ expanded: true, activeModal: null, selectedPermit: 'umum' }">

@@ -110,7 +110,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
+                            <button type="button" @click="openSignPad(`signature_listrik_${index}`)" class="wp-signature-button inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
                                 Tanda Tangan
                             </button>
                         </td>
@@ -158,7 +158,7 @@
                             <template x-if="item.signature">
                                 <img :src="item.signature" class="h-12 mx-auto mb-1">
                             </template>
-                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
+                            <button type="button" @click="openSignPad(`signature_nonlistrik_${index}`)" class="wp-signature-button inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
                                 Tanda Tangan
                             </button>
                         </td>
@@ -270,8 +270,8 @@
     $requestorName = old('permit_requestor_name', $permit?->permit_requestor_name ?? '');
     $requestorSign = old('signature_permit_requestor', $permit?->permit_requestor_sign ?? '');
     $signatureButtonClass = fn ($hasSignature) => $hasSignature
-        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
-        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+        ? 'wp-signature-button mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'wp-signature-button mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
 
     $requestorDateRaw = old('permit_requestor_date', $permit?->permit_requestor_date ?? '');
     $requestorDate = $requestorDateRaw ? \Carbon\Carbon::parse($requestorDateRaw)->format('Y-m-d') : '';

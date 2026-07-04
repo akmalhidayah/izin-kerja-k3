@@ -1,111 +1,11 @@
-<style>
-@media (max-width: 640px) {
-    .wp-signature-button {
-        position: relative;
-        width: 2rem !important;
-        min-width: 2rem !important;
-        max-width: 2rem !important;
-        height: 2rem !important;
-        padding: 0 !important;
-        font-size: 0 !important;
-        line-height: 0 !important;
-        overflow: hidden;
-        border-radius: .5rem !important;
-    }
-
-    .wp-signature-button::before {
-        content: "✎";
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        font-size: 1rem;
-        line-height: 1;
-    }
-}
-.sign-pad-modal {
-    padding: 1rem;
-}
-
-.sign-pad-panel {
-    max-height: calc(100dvh - 2rem);
-    overflow-y: auto;
-}
-
-.sign-pad-canvas {
-    height: 12rem;
-}
-
-@media (max-width: 640px) {
-    .wp-signature-button::before {
-        content: "\270E";
-    }
-
-    .sign-pad-modal {
-        align-items: flex-start !important;
-        padding: .75rem;
-    }
-
-    .sign-pad-panel {
-        width: 100% !important;
-        max-width: calc(100vw - 1.5rem) !important;
-        max-height: calc(100dvh - 1.5rem);
-        padding: .875rem !important;
-        margin-top: .25rem;
-        border-radius: .75rem !important;
-        box-sizing: border-box;
-    }
-
-    .sign-pad-title {
-        margin-bottom: .5rem !important;
-        font-size: .95rem !important;
-        line-height: 1.25;
-    }
-
-    .sign-pad-canvas {
-        height: min(42dvh, 13rem) !important;
-        min-height: 9rem;
-    }
-
-    .sign-pad-actions {
-        margin-top: .75rem !important;
-        align-items: center;
-        gap: .5rem;
-    }
-
-    .sign-pad-action-buttons {
-        display: flex;
-        gap: .5rem;
-    }
-
-    .sign-pad-action-buttons button,
-    .sign-pad-clear {
-        font-size: .8rem !important;
-        line-height: 1.2;
-    }
-
-    .sign-pad-action-buttons button {
-        padding: .45rem .7rem !important;
-    }
-}
-
-@media (max-width: 640px) and (max-height: 520px) {
-    .sign-pad-canvas {
-        height: 8rem !important;
-        min-height: 8rem;
-    }
-}
-</style>
-
-<div id="signPadModal" class="sign-pad-modal fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="sign-pad-panel bg-white rounded-lg shadow-lg p-6 w-full max-w-lg" onclick="event.stopPropagation()">
-        <h2 class="sign-pad-title text-lg font-bold mb-4">Tanda Tangan</h2>
-        <canvas id="signaturePad" class="sign-pad-canvas w-full border rounded cursor-crosshair" style="touch-action: none;"></canvas>
+<div id="signPadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg" onclick="event.stopPropagation()">
+        <h2 class="text-lg font-bold mb-4">Tanda Tangan</h2>
+        <canvas id="signaturePad" class="w-full border rounded h-48 cursor-crosshair" style="touch-action: none;"></canvas>
         <input type="hidden" id="currentSignatureField">
-        <div class="sign-pad-actions mt-4 flex justify-between">
-            <button type="button" onclick="clearSignature()" class="sign-pad-clear text-sm text-red-600 hover:underline">Clear</button>
-            <div class="sign-pad-action-buttons space-x-2">
+        <div class="mt-4 flex justify-between">
+            <button type="button" onclick="clearSignature()" class="text-sm text-red-600 hover:underline">Clear</button>
+            <div class="space-x-2">
                 <button type="button" onclick="closeSignPad()" class="px-3 py-1 bg-gray-300 text-gray-800 rounded">Batal</button>
                 <button type="button" onclick="saveSignature()" class="px-4 py-1 bg-blue-600 text-white rounded">Simpan</button>
             </div>
