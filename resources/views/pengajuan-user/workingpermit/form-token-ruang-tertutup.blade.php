@@ -19,9 +19,9 @@
 <input type="hidden" name="notification_id" value="{{ $notification->id ?? '' }}">
 @php
     $signatureButtonClass = fn ($hasSignature) => $hasSignature
-        ? 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
-        : 'mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
-    $signatureButtonSmallClass = 'inline-flex h-8 w-20 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+        ? 'wp-signature-button mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
+        : 'wp-signature-button mt-1 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
+    $signatureButtonSmallClass = 'wp-signature-button inline-flex h-8 w-20 items-center justify-center whitespace-nowrap rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700';
     $signatureUrl = fn ($signature) => $signature
         ? (str_starts_with($signature, 'data:image') ? $signature : asset($signature))
         : '';

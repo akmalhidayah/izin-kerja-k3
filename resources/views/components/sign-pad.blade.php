@@ -1,3 +1,31 @@
+<style>
+@media (max-width: 640px) {
+    .wp-signature-button {
+        position: relative;
+        width: 2rem !important;
+        min-width: 2rem !important;
+        max-width: 2rem !important;
+        height: 2rem !important;
+        padding: 0 !important;
+        font-size: 0 !important;
+        line-height: 0 !important;
+        overflow: hidden;
+        border-radius: .5rem !important;
+    }
+
+    .wp-signature-button::before {
+        content: "✎";
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        font-size: 1rem;
+        line-height: 1;
+    }
+}
+</style>
+
 <div id="signPadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg" onclick="event.stopPropagation()">
         <h2 class="text-lg font-bold mb-4">Tanda Tangan</h2>
