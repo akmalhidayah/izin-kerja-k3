@@ -225,25 +225,15 @@ $validated['file_denah'] = $path;
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64) return null;
-        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
-        if (!str_starts_with($base64, 'data:image')) return null;
-
-        $folder = 'signatures/working-permit/penggalian/';
-        $filename = $role . '_' . Str::random(10) . '.png';
-        $path = storage_path('app/public/' . $folder);
-
-        if (!file_exists($path)) mkdir($path, 0777, true);
-
-        $image = str_replace('data:image/png;base64,', '', $base64);
-        $image = str_replace(' ', '+', $image);
-        file_put_contents($path . $filename, base64_decode($image));
-
-        return 'storage/' . $folder . $filename;
+        return $this->saveBase64PngSignature($base64, $role, 'signatures/working-permit/penggalian/');
     }
 
     public function preview($id)
     {
+        if (!$this->tokenPdfAccessAllowed()) {
+            $this->abortUnlessCanAccessNotification($id);
+        }
+
         $permit = WorkPermitPenggalian::where('notification_id', $id)->first();
         $detail = $permit?->detail;
         $closure = $permit?->closure;

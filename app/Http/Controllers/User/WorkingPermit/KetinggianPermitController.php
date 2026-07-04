@@ -263,22 +263,15 @@ public function storeByToken(Request $request, $token)
 
 private function saveSignature($base64, $role)
 {
-    \Log::info("[$role] Signature Input: " . substr($base64, 0, 30)); // Potong biar ga kepanjangan
-
-    if (!$base64) return null;
-        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
-        if (!str_starts_with($base64, 'data:image')) return null;
-
-    $folder = 'signatures/working-permit/ketinggian/';
-    $filename = $role . '_' . Str::random(10) . '.png';
-    $path = storage_path('app/public/' . $folder);
-    if (!file_exists($path)) mkdir($path, 0777, true);
-    file_put_contents($path . $filename, base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64)));
-    return 'storage/' . $folder . $filename;
+    return $this->saveBase64PngSignature($base64, $role, 'signatures/working-permit/ketinggian/');
 }
 
 public function preview($id)
 {
+    if (!$this->tokenPdfAccessAllowed()) {
+        $this->abortUnlessCanAccessNotification($id);
+    }
+
     $permit = \App\Models\WorkPermitKetinggian::where('notification_id', $id)->first();
     $detail = $permit?->detail;
     $closure = $permit?->closure;

@@ -6,6 +6,7 @@ use App\Models\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 abstract class Controller
@@ -39,6 +40,58 @@ abstract class Controller
     protected function filterEmptyPermitValues(array $values): array
     {
         return array_filter($values, fn ($value) => $value !== null && $value !== '');
+    }
+
+    protected function tokenPdfAccessAllowed(): bool
+    {
+        return request()->attributes->get('token_pdf_access') === true;
+    }
+
+    protected function abortUnlessCanAccessNotification($notificationId): ?Notification
+    {
+        if ($this->tokenPdfAccessAllowed()) {
+            return Notification::find($notificationId);
+        }
+
+        $notification = $this->findAccessibleNotification($notificationId);
+
+        if (!$notification) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        return $notification;
+    }
+
+    protected function saveBase64PngSignature($base64, string $role, string $folder): ?string
+    {
+        if (!$base64 || !is_string($base64)) {
+            return null;
+        }
+
+        if (str_starts_with($base64, 'storage/')) {
+            return $base64;
+        }
+
+        if (!str_starts_with($base64, 'data:image/png;base64,')) {
+            return null;
+        }
+
+        $filename = $role . '_' . Str::random(10) . '.png';
+        $image = str_replace('data:image/png;base64,', '', $base64);
+        $image = str_replace(' ', '+', $image);
+        $binary = base64_decode($image, true);
+
+        if ($binary === false) {
+            return null;
+        }
+
+        if (strlen($binary) > 1024 * 1024) {
+            return null;
+        }
+
+        Storage::disk('public')->put($folder . $filename, $binary);
+
+        return 'storage/' . $folder . $filename;
     }
 
     protected function tokenStoreResponse($response, string $message, ?string $pdfUrl = null)

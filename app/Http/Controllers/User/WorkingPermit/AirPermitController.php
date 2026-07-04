@@ -271,19 +271,15 @@ public function storeByToken(Request $request, $token)
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64) return null;
-        if (is_string($base64) && str_starts_with($base64, 'storage/')) return $base64;
-        if (!str_starts_with($base64, 'data:image')) return null;
-        $folder = 'signatures/working-permit/air/';
-        $filename = $role . '_' . Str::random(10) . '.png';
-        $path = storage_path('app/public/' . $folder);
-        if (!file_exists($path)) mkdir($path, 0777, true);
-        file_put_contents($path . $filename, base64_decode(str_replace('data:image/png;base64,', '', str_replace(' ', '+', $base64))));
-        return 'storage/' . $folder . $filename;
+        return $this->saveBase64PngSignature($base64, $role, 'signatures/working-permit/air/');
     }
 
     public function preview($id)
     {
+        if (!$this->tokenPdfAccessAllowed()) {
+            $this->abortUnlessCanAccessNotification($id);
+        }
+
         $permit = WorkPermitAir::where('notification_id', $id)->first();
         $detail = $permit?->detail;
         $closure = $permit?->closure;

@@ -37,6 +37,12 @@ class DataKontraktorController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
+        $notification = $this->findAccessibleNotification($validated['notification_id']);
+
+        if (!$notification) {
+            return back()->with('error', 'Notifikasi tidak valid atau tidak dapat diakses.');
+        }
+
         // Handle signature uploads
         $validated['ttd_manager'] = $this->saveSignature($request->input('ttd_manager'), 'manager');
         $validated['ttd_perusahaan'] = $this->saveSignature($request->input('ttd_perusahaan'), 'perusahaan');
@@ -75,23 +81,7 @@ $dataKontraktor = DataKontraktor::updateOrCreate(
     // Signature Helper
    private function saveSignature($input, $role)
 {
-    if (!$input) return null;
-
-    // Sudah path lama (bukan base64)
-    if (!str_starts_with($input, 'data:image')) return $input;
-
-    // Base64 baru
-    $folder = 'signatures/data-kontraktor/';
-    $filename = $role . '_' . \Illuminate\Support\Str::random(10) . '.png';
-    $path = storage_path('app/public/' . $folder);
-
-    if (!file_exists($path)) mkdir($path, 0777, true);
-
-    $image = str_replace('data:image/png;base64,', '', $input);
-    $image = str_replace(' ', '+', $image);
-    file_put_contents($path . $filename, base64_decode($image));
-
-    return 'storage/' . $folder . $filename;
+    return $this->saveBase64PngSignature($input, $role, 'signatures/data-kontraktor/');
 }
 
 
@@ -146,8 +136,12 @@ $validated['diverifikasi_signature'] = $this->saveSignature($request->input('div
 
     public function previewPdf($id)
     {
-        if (auth()->user()?->isPgo()) {
+        if (!$this->tokenPdfAccessAllowed() && auth()->user()?->isPgo()) {
             abort(403, 'Akses ditolak.');
+        }
+
+        if (!$this->tokenPdfAccessAllowed()) {
+            $this->abortUnlessCanAccessNotification($id);
         }
 
         $data = DataKontraktor::where('notification_id', $id)->firstOrFail();

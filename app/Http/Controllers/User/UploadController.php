@@ -4,8 +4,8 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Upload;
-use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UploadController extends Controller
 {
@@ -23,11 +23,18 @@ class UploadController extends Controller
                 'file' => 'required|file|mimes:pdf,jpg,png|max:5120',
             ]);
 
+            $notification = $this->findAccessibleNotification($request->notification_id);
+
+            if (!$notification) {
+                return back()->with('error', 'Notifikasi tidak valid atau tidak dapat diakses.');
+            }
+
             $filePath = $request->file('file')->store('uploads', 'public');
 
             Upload::create([
                 'notification_id' => $request->notification_id,
-                'step' => $request->step_name,                  'file_path' => $filePath,
+                'step' => $request->step_name,
+                'file_path' => $filePath,
                 'status' => 'pending',
             ]);
             
@@ -44,10 +51,16 @@ class UploadController extends Controller
         return back()->with('error', 'Akses ditolak untuk akun PGO.');
     }
 
-    $upload = \App\Models\Upload::findOrFail($id);
-    if ($upload->file_path && \Storage::disk('public')->exists($upload->file_path)) {
-        \Storage::disk('public')->delete($upload->file_path);
+    $upload = Upload::with('notification')->findOrFail($id);
+
+    if (!$this->findAccessibleNotification($upload->notification_id)) {
+        abort(403, 'Akses ditolak.');
     }
+
+    if ($upload->file_path && Storage::disk('public')->exists($upload->file_path)) {
+        Storage::disk('public')->delete($upload->file_path);
+    }
+
     $upload->delete();
 
     return back()->with('success', 'File berhasil dihapus!');
@@ -64,7 +77,12 @@ class UploadController extends Controller
             'status' => 'required|in:pending,done,revisi',
         ]);
 
-        $upload = Upload::findOrFail($id);
+        $upload = Upload::with('notification')->findOrFail($id);
+
+        if (!$this->findAccessibleNotification($upload->notification_id)) {
+            abort(403, 'Akses ditolak.');
+        }
+
         $upload->update([
             'status' => $request->status,
         ]);

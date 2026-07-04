@@ -51,6 +51,8 @@ class TokenPdfController extends Controller
         $record = $model::where('token', $token)->firstOrFail();
         $this->abortIfPermitTokenExpired($record);
 
+        request()->attributes->set('token_pdf_access', true);
+
         return app($controller)->{$method}($record->notification_id);
     }
 }

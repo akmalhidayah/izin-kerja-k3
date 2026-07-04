@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\Jsa;
-use App\Models\Notification;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class JsaController extends Controller
 {
@@ -35,9 +35,7 @@ class JsaController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
-        $notification = Notification::where('id', $validated['notification_id'])
-            ->where('user_id', auth()->id())
-            ->first();
+        $notification = $this->findAccessibleNotification($validated['notification_id']);
 
         if (!$notification) {
             return back()->with('error', 'Notifikasi tidak valid.');
@@ -51,19 +49,40 @@ class JsaController extends Controller
         // Langkah Kerja JSON
         $validated['langkah_kerja'] = $request->input('langkah_kerja') ?: '[]';
 
-        // Nomor JSA otomatis
-        $bulanTahun = now()->format('mY');
-        $prefix = "JSA/ST/{$bulanTahun}";
-        $lastJsa = Jsa::where('no_jsa', 'like', "%$prefix")->orderBy('created_at', 'desc')->first();
-        $nextNumber = 1;
-        if ($lastJsa) {
-            $lastNo = (int)substr($lastJsa->no_jsa, 0, 3);
-            $nextNumber = $lastNo + 1;
-        }
-        $validated['no_jsa'] = str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . "/$prefix";
+        $jsa = null;
 
-        // Simpan Data
-        $jsa = Jsa::create($validated);
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            try {
+                $jsa = DB::transaction(function () use ($validated) {
+                    $bulanTahun = now()->format('mY');
+                    $prefix = "JSA/ST/{$bulanTahun}";
+
+                    $lastJsa = Jsa::where('no_jsa', 'like', "%/$prefix")
+                        ->lockForUpdate()
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+
+                    $nextNumber = 1;
+
+                    if ($lastJsa) {
+                        $lastNo = (int) substr($lastJsa->no_jsa, 0, 3);
+                        $nextNumber = $lastNo + 1;
+                    }
+
+                    $validated['no_jsa'] = str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . "/$prefix";
+
+                    return Jsa::create($validated);
+                });
+
+                break;
+            } catch (QueryException $e) {
+                if ($attempt >= 3 || $e->getCode() !== '23000') {
+                    throw $e;
+                }
+
+                usleep(50000);
+            }
+        }
 
         $this->ensurePermitToken($jsa);
 
@@ -73,6 +92,8 @@ class JsaController extends Controller
     public function edit($id)
     {
         $jsa = Jsa::findOrFail($id);
+        $this->abortUnlessCanAccessNotification($jsa->notification_id);
+
         $jsa->langkah_kerja = is_string($jsa->langkah_kerja) ? json_decode($jsa->langkah_kerja) : $jsa->langkah_kerja;
         return view('pengajuan-user.jsa.edit', compact('jsa'));
     }
@@ -96,9 +117,7 @@ class JsaController extends Controller
         ])->validate();
 
         $jsa = Jsa::findOrFail($id);
-        $notification = Notification::where('id', $jsa->notification_id)
-            ->where('user_id', auth()->id())
-            ->first();
+        $notification = $this->findAccessibleNotification($jsa->notification_id);
 
         if (!$notification) {
             return back()->with('error', 'Notifikasi tidak valid.');
@@ -161,6 +180,10 @@ class JsaController extends Controller
 
     public function showPdf($notification_id)
     {
+        if (!$this->tokenPdfAccessAllowed()) {
+            $this->abortUnlessCanAccessNotification($notification_id);
+        }
+
         $jsa = Jsa::where('notification_id', $notification_id)->firstOrFail();
         $langkahKerja = $jsa->langkah_kerja;
 
@@ -184,19 +207,7 @@ class JsaController extends Controller
 
     private function saveSignature($base64, $role)
     {
-        if (!$base64 || !str_starts_with($base64, 'data:image')) return null;
-
-        $folder = 'signatures/jsa/';
-        $filename = $role . '_' . Str::random(10) . '.png';
-        $path = storage_path('app/public/' . $folder);
-
-        if (!file_exists($path)) mkdir($path, 0777, true);
-
-        $image = str_replace('data:image/png;base64,', '', $base64);
-        $image = str_replace(' ', '+', $image);
-        file_put_contents($path . $filename, base64_decode($image));
-
-        return 'storage/' . $folder . $filename;
+        return $this->saveBase64PngSignature($base64, $role, 'signatures/jsa/');
     }
 
     public function getGeneratedNoJsa()

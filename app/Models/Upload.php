@@ -13,6 +13,7 @@ class Upload extends Model
         'notification_id',
         'step',
         'file_path',
+        'status',
         'uploaded_at',
     ];
 

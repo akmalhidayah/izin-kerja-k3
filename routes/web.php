@@ -156,8 +156,12 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::get('/permintaansik/{id}/download-sik', [AdminPermintaanController::class, 'downloadSik'])->name('permintaansik.downloadSik');
+Route::middleware(['auth', 'verified', 'usertype:admin'])->group(function () {
+    Route::get('/permintaansik/{id}/download-sik', [AdminPermintaanController::class, 'viewSik'])
+        ->name('permintaansik.downloadSik');
+});
 
+Route::middleware(['throttle:30,1'])->group(function () {
 // Route untuk form kontraktor dengan token
 Route::get('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::class, 'showByToken'])->name('izin-kerja.data-kontraktor.token');
 Route::post('/izin-kerja/data-kontraktor/{token}', [DataKontraktorController::class, 'storeByToken'])->name('izin-kerja.data-kontraktor.store');
@@ -203,4 +207,5 @@ Route::post('/izin-kerja/working-permit/penggalian/{token}', [PenggalianPermitCo
 
 Route::get('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'showByToken'])->name('working-permit.pengangkatan.token');
 Route::post('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'storeByToken'])->name('working-permit.pengangkatan.token.store');
+});
 require __DIR__.'/auth.php';
