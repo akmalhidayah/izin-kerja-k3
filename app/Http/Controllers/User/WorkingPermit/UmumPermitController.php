@@ -196,7 +196,7 @@ public function store(Request $request)
     }
     $this->ensurePermitToken($permit);
 
-    return back()->with('success', 'Data Working Permit Umum berhasil disimpan!')->withInput();
+    return back()->with('success', 'Data Working Permit Umum berhasil disimpan!');
 }
 
     private function saveSignature($base64, $role)
