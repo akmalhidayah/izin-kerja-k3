@@ -99,66 +99,66 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        .jsa-sign-table,
+        .jsa-desktop-steps {
+            table-layout: fixed;
+        }
+
         .jsa-desktop-steps {
             min-width: 760px;
         }
 
         @media (max-width: 640px) {
             .jsa-token-section {
-                padding: 1rem .5rem;
+                padding: .75rem .35rem;
             }
 
             .jsa-token-card {
-                padding: 1rem;
-                border-radius: .75rem;
+                padding: .6rem;
+                border-radius: .6rem;
             }
 
             .jsa-token-card h1 {
-                font-size: 1rem;
+                font-size: .875rem;
+                margin-bottom: .5rem;
             }
 
             .jsa-header-table,
-            .jsa-header-table tbody,
-            .jsa-header-table tr,
-            .jsa-header-table td,
             .jsa-sign-table,
-            .jsa-sign-table tbody,
-            .jsa-sign-table tr,
-            .jsa-sign-table td {
-                display: block;
-                width: 100%;
+            .jsa-desktop-steps {
+                font-size: .56rem;
             }
 
-            .jsa-header-table tr {
-                border-bottom: 1px solid #e5e7eb;
+            .jsa-header-table td,
+            .jsa-sign-table td,
+            .jsa-desktop-steps th,
+            .jsa-desktop-steps td {
+                padding: .18rem .2rem;
             }
 
-            .jsa-header-table tr:last-child {
-                border-bottom: 0;
+            .jsa-input,
+            .jsa-textarea {
+                border-radius: .28rem;
+                padding: .28rem .32rem;
+                font-size: .62rem;
+                line-height: 1.2;
             }
 
-            .jsa-header-table td {
-                border: 0;
-                padding: .35rem .5rem;
+            .jsa-sign-table .jsa-input {
+                margin-bottom: .25rem;
             }
 
-            .jsa-sign-table thead,
-            .jsa-sign-table tr:first-child {
-                display: none;
+            .jsa-signature-button {
+                width: 4.9rem;
+                height: 1.55rem;
+                margin-top: .2rem;
+                padding: .15rem .3rem;
+                border-radius: .3rem;
+                font-size: .58rem;
             }
 
-            .jsa-sign-table td {
-                border: 1px solid #e5e7eb;
-                border-radius: .5rem;
-                margin-bottom: .75rem;
-                padding: .75rem;
-            }
-
-            .jsa-mobile-sign-title {
-                display: block;
-                margin-bottom: .5rem;
-                font-weight: 700;
-                text-align: center;
+            .jsa-sign-table img {
+                height: 1.7rem;
             }
 
             .jsa-table-scroll {
@@ -166,41 +166,43 @@
             }
 
             .jsa-desktop-steps {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .jsa-desktop-steps th:nth-child(1),
+            .jsa-desktop-steps td:nth-child(1) {
+                width: 1.35rem;
+            }
+
+            .jsa-desktop-steps th:nth-child(5),
+            .jsa-desktop-steps td:nth-child(5) {
+                width: 2.2rem;
+            }
+
+            .jsa-textarea {
+                min-height: 3.9rem;
+            }
+
+            .jsa-desktop-steps button,
+            .jsa-mobile-steps {
+                font-size: .58rem;
+            }
+
+            .jsa-mobile-sign-title,
+            .jsa-mobile-steps {
                 display: none;
             }
 
-            .jsa-mobile-steps {
-                display: block;
+            .jsa-token-card > form > button[type="button"] {
+                padding: .35rem .55rem;
+                font-size: .62rem;
+                margin-bottom: .4rem;
             }
 
-            .jsa-mobile-step-card {
-                border: 1px solid #e5e7eb;
-                border-radius: .625rem;
-                padding: .75rem;
-                margin-bottom: .75rem;
-                background: #fff;
-            }
-
-            .jsa-mobile-step-title {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: .75rem;
-                margin-bottom: .75rem;
-                font-size: .8125rem;
-                font-weight: 700;
-            }
-
-            .jsa-mobile-field {
-                display: block;
-                margin-bottom: .75rem;
-            }
-
-            .jsa-mobile-field span {
-                display: block;
-                margin-bottom: .25rem;
-                font-size: .75rem;
-                font-weight: 700;
+            .jsa-token-card button[type="submit"] {
+                padding: .45rem .8rem;
+                font-size: .65rem;
             }
         }
     </style>
