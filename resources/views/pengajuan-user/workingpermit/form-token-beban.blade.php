@@ -280,7 +280,7 @@
                 <td class="border px-2 py-2 text-center">
                     <button
                             type="button"
-                            @click="openSignPad('beban_signature_permit_requestor')"
+                            onclick="window.openSignPad('beban_signature_permit_requestor')"
                             class="{{ $signatureButtonClass(old('signature_permit_requestor') ?? $permit?->signature_permit_requestor) }}">
                             {{ (old('signature_permit_requestor') ?? $permit?->signature_permit_requestor) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
@@ -349,7 +349,7 @@
                 <td class="border px-2 py-2 text-center">
                     <button
                             type="button"
-                            @click="openSignPad('beban_signature_verificator')"
+                            onclick="window.openSignPad('beban_signature_verificator')"
                             class="{{ $signatureButtonClass(old('signature_verificator') ?? $permit?->signature_verificator) }}">
                             {{ (old('signature_verificator') ?? $permit?->signature_verificator) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
@@ -416,7 +416,7 @@
                 <td class="border px-2 py-2 text-center">
                     <button
                             type="button"
-                            @click="openSignPad('beban_signature_permit_issuer')"
+                            onclick="window.openSignPad('beban_signature_permit_issuer')"
                             class="{{ $signatureButtonClass(old('signature_permit_issuer') ?? $permit?->signature_permit_issuer) }}">
                             {{ (old('signature_permit_issuer') ?? $permit?->signature_permit_issuer) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
@@ -501,7 +501,7 @@
                 <td class="border px-2 py-2 text-center">
                     <button
                             type="button"
-                            @click="openSignPad('beban_signature_permit_authorizer')"
+                            onclick="window.openSignPad('beban_signature_permit_authorizer')"
                             class="{{ $signatureButtonClass(old('signature_permit_authorizer') ?? $permit?->signature_permit_authorizer) }}">
                             {{ (old('signature_permit_authorizer') ?? $permit?->signature_permit_authorizer) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>
@@ -567,7 +567,7 @@
                 <td class="border px-2 py-2 text-center">
                     <button
                             type="button"
-                            @click="openSignPad('beban_signature_permit_receiver')"
+                            onclick="window.openSignPad('beban_signature_permit_receiver')"
                             class="{{ $signatureButtonClass(old('signature_permit_receiver') ?? $permit?->signature_permit_receiver) }}">
                             {{ (old('signature_permit_receiver') ?? $permit?->signature_permit_receiver) ? 'Ubah TTD' : 'Tanda Tangan' }}
                         </button>

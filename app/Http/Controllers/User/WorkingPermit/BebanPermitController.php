@@ -46,12 +46,12 @@ class BebanPermitController extends Controller
                 'permit_requestor_time' => 'nullable',
 
                 'verificator_name' => 'nullable|string',
-                'verificator_sign' => 'nullable|string',
+                'signature_verificator' => 'nullable|string',
                 'verificator_date' => 'nullable|date',
                 'verificator_time' => 'nullable',
 
                 'permit_issuer_name' => 'nullable|string',
-                'permit_issuer_sign' => 'nullable|string',
+                'signature_permit_issuer' => 'nullable|string',
                 'permit_issuer_date' => 'nullable|date',
                 'permit_issuer_time' => 'nullable',
                 'izin_berlaku_dari' => 'nullable|date',
@@ -60,12 +60,12 @@ class BebanPermitController extends Controller
                 'izin_berlaku_jam_sampai' => 'nullable',
 
                 'permit_authorizer_name' => 'nullable|string',
-                'permit_authorizer_sign' => 'nullable|string',
+                'signature_permit_authorizer' => 'nullable|string',
                 'permit_authorizer_date' => 'nullable|date',
                 'permit_authorizer_time' => 'nullable',
 
                 'permit_receiver_name' => 'nullable|string',
-                'permit_receiver_sign' => 'nullable|string',
+                'signature_permit_receiver' => 'nullable|string',
                 'permit_receiver_date' => 'nullable|date',
                 'permit_receiver_time' => 'nullable',
 
