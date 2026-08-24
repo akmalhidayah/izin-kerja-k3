@@ -30,12 +30,12 @@ public function store(Request $request)
             'rekomendasi_status' => 'nullable|string',
 
             'permit_requestor_name' => 'nullable|string',
-            'permit_requestor_sign' => 'nullable|string',
+            'signature_permit_requestor' => 'nullable|string',
             'permit_requestor_date' => 'nullable|date',
             'permit_requestor_time' => 'nullable',
 
             'permit_issuer_name' => 'nullable|string',
-            'permit_issuer_sign' => 'nullable|string',
+            'signature_permit_issuer' => 'nullable|string',
             'permit_issuer_date' => 'nullable|date',
             'permit_issuer_time' => 'nullable',
             'izin_berlaku_dari' => 'nullable|date',
@@ -44,18 +44,18 @@ public function store(Request $request)
             'izin_berlaku_jam_sampai' => 'nullable',
 
             'permit_authorizer_name' => 'nullable|string',
-            'permit_authorizer_sign' => 'nullable|string',
+            'signature_permit_authorizer' => 'nullable|string',
             'permit_authorizer_date' => 'nullable|date',
             'permit_authorizer_time' => 'nullable',
 
             'permit_receiver_name' => 'nullable|string',
-            'permit_receiver_sign' => 'nullable|string',
+            'signature_permit_receiver' => 'nullable|string',
             'permit_receiver_date' => 'nullable|date',
             'permit_receiver_time' => 'nullable',
 
             'live_testing_items' => 'nullable|array',
             'live_testing_name' => 'nullable|string',
-            'live_testing_sign' => 'nullable|string',
+            'signature_live_testing' => 'nullable|string',
             'live_testing_date' => 'nullable|date',
             'live_testing_time' => 'nullable',
 
@@ -234,12 +234,12 @@ public function store(Request $request)
                 'rekomendasi_status' => 'nullable|string',
 
                 'permit_requestor_name' => 'nullable|string',
-                'permit_requestor_sign' => 'nullable|string',
+                'signature_permit_requestor' => 'nullable|string',
                 'permit_requestor_date' => 'nullable|date',
                 'permit_requestor_time' => 'nullable',
 
                 'permit_issuer_name' => 'nullable|string',
-                'permit_issuer_sign' => 'nullable|string',
+                'signature_permit_issuer' => 'nullable|string',
                 'permit_issuer_date' => 'nullable|date',
                 'permit_issuer_time' => 'nullable',
                 'izin_berlaku_dari' => 'nullable|date',
@@ -248,18 +248,18 @@ public function store(Request $request)
                 'izin_berlaku_jam_sampai' => 'nullable',
 
                 'permit_authorizer_name' => 'nullable|string',
-                'permit_authorizer_sign' => 'nullable|string',
+                'signature_permit_authorizer' => 'nullable|string',
                 'permit_authorizer_date' => 'nullable|date',
                 'permit_authorizer_time' => 'nullable',
 
                 'permit_receiver_name' => 'nullable|string',
-                'permit_receiver_sign' => 'nullable|string',
+                'signature_permit_receiver' => 'nullable|string',
                 'permit_receiver_date' => 'nullable|date',
                 'permit_receiver_time' => 'nullable',
 
                 'live_testing_items' => 'nullable|array',
                 'live_testing_name' => 'nullable|string',
-                'live_testing_sign' => 'nullable|string',
+                'signature_live_testing' => 'nullable|string',
                 'live_testing_date' => 'nullable|date',
                 'live_testing_time' => 'nullable',
                 

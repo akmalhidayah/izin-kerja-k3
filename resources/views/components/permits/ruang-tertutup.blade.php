@@ -377,7 +377,7 @@
                 {{-- Tanda Tangan --}}
                 <td class="border px-2 py-2 text-center">
                     <button type="button"
-                        @click="openSignPad('ruangtertutup_signature_permit_requestor')"
+                        onclick="window.openSignPad('ruangtertutup_signature_permit_requestor')"
                         class="{{ $signatureButtonClass(old('signature_permit_requestor', $permit->signature_permit_requestor ?? '')) }}">
                         {{ old('signature_permit_requestor', $permit->signature_permit_requestor ?? '') ? 'Ubah TTD' : 'Tanda Tangan' }}
                     </button>
@@ -441,7 +441,7 @@
                 </td>
                 <td class="border px-2 py-2 text-center">
                   <button type="button"
-    @click="openSignPad('ruangtertutup_signature_confined_verificator')"
+    onclick="window.openSignPad('ruangtertutup_signature_confined_verificator')"
     class="{{ $signatureButtonClass(old('signature_confined_verificator', $permit->signature_confined_verificator ?? '')) }}">
     {{ old('signature_confined_verificator', $permit->signature_confined_verificator ?? '') ? 'Ubah TTD' : 'Tanda Tangan' }}
 </button>
@@ -492,7 +492,7 @@
                 </td>
                 <td class="border px-2 py-2 text-center">
                     <button type="button"
-    @click="openSignPad('ruangtertutup_signature_permit_issuer')"
+    onclick="window.openSignPad('ruangtertutup_signature_permit_issuer')"
     class="{{ $signatureButtonClass(old('signature_permit_issuer', $permit->signature_permit_issuer ?? '')) }}">
     {{ old('signature_permit_issuer', $permit->signature_permit_issuer ?? '') ? 'Ubah TTD' : 'Tanda Tangan' }}
 </button>
@@ -571,7 +571,7 @@
               <td class="border px-2 py-2 text-center">
     <button 
         type="button"
-        @click="openSignPad('ruangtertutup_signature_permit_authorizer')"
+        onclick="window.openSignPad('ruangtertutup_signature_permit_authorizer')"
         class="{{ $signatureButtonClass(old('signature_permit_authorizer', $permit->signature_permit_authorizer ?? '')) }}">
         {{ old('signature_permit_authorizer', $permit->signature_permit_authorizer ?? '') ? 'Ubah TTD' : 'Tanda Tangan' }}
     </button>
@@ -625,7 +625,7 @@
                <td class="border px-2 py-2 text-center">
     <button 
         type="button"
-        @click="openSignPad('ruangtertutup_signature_permit_receiver')"
+        onclick="window.openSignPad('ruangtertutup_signature_permit_receiver')"
         class="{{ $signatureButtonClass(old('signature_permit_receiver', $permit->signature_permit_receiver ?? '')) }}">
         {{ old('signature_permit_receiver', $permit->signature_permit_receiver ?? '') ? 'Ubah TTD' : 'Tanda Tangan' }}
     </button>
@@ -808,7 +808,7 @@
             </td>
             <td class="border px-2 py-2 text-center">
     <button type="button"
-        @click="openSignPad('ruangtertutup_signature_live_testing')"
+        onclick="window.openSignPad('ruangtertutup_signature_live_testing')"
         class="{{ $signatureButtonClass(old('live_testing_signature', $permit->live_testing_signature ?? '')) }}">{{ old('live_testing_signature', $permit->live_testing_signature ?? '') ? 'Ubah TTD' : 'Tanda Tangan' }}</button>
     <input type="hidden"
         id="ruangtertutup_signature_live_testing"
