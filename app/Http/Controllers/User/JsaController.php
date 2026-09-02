@@ -54,22 +54,7 @@ class JsaController extends Controller
         for ($attempt = 1; $attempt <= 3; $attempt++) {
             try {
                 $jsa = DB::transaction(function () use ($validated) {
-                    $bulanTahun = now()->format('mY');
-                    $prefix = "JSA/ST/{$bulanTahun}";
-
-                    $lastJsa = Jsa::where('no_jsa', 'like', "%/$prefix")
-                        ->lockForUpdate()
-                        ->orderBy('created_at', 'desc')
-                        ->first();
-
-                    $nextNumber = 1;
-
-                    if ($lastJsa) {
-                        $lastNo = (int) substr($lastJsa->no_jsa, 0, 3);
-                        $nextNumber = $lastNo + 1;
-                    }
-
-                    $validated['no_jsa'] = str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . "/$prefix";
+                    $validated['no_jsa'] = $this->nextJsaNumber(true);
 
                     return Jsa::create($validated);
                 });
@@ -212,14 +197,58 @@ class JsaController extends Controller
 
     public function getGeneratedNoJsa()
     {
+        return $this->nextJsaNumber();
+    }
+
+    /**
+     * Generate the next global JSA number for the current month/year.
+     *
+     * Number values are parsed in PHP so this remains compatible with both
+     * MySQL and SQLite, and malformed legacy values do not break numbering.
+     */
+    private function nextJsaNumber(bool $lock = false): string
+    {
         $bulanTahun = now()->format('mY');
         $prefix = "JSA/ST/{$bulanTahun}";
-        $lastJsa = Jsa::where('no_jsa', 'like', "%$prefix")->orderBy('created_at', 'desc')->first();
-        $nextNumber = 1;
-        if ($lastJsa) {
-            $lastNo = (int)substr($lastJsa->no_jsa, 0, 3);
-            $nextNumber = $lastNo + 1;
+
+        $query = Jsa::query()
+            ->where('no_jsa', 'like', "%/{$prefix}");
+
+        if ($lock) {
+            $query->lockForUpdate();
         }
-        return str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . "/$prefix";
+
+        $maxNumber = 0;
+        $maxInteger = (string) PHP_INT_MAX;
+
+        foreach ($query->pluck('no_jsa') as $noJsa) {
+            if (!is_string($noJsa)) {
+                continue;
+            }
+
+            [$numberPart, $suffix] = array_pad(explode('/', $noJsa, 2), 2, null);
+
+            if ($suffix !== $prefix || $numberPart === '' || !ctype_digit($numberPart)) {
+                continue;
+            }
+
+            // Ignore numeric values that cannot be represented by PHP's int.
+            $normalizedNumber = ltrim($numberPart, '0');
+            $normalizedNumber = $normalizedNumber === '' ? '0' : $normalizedNumber;
+
+            if (
+                strlen($normalizedNumber) > strlen($maxInteger)
+                || (
+                    strlen($normalizedNumber) === strlen($maxInteger)
+                    && strcmp($normalizedNumber, $maxInteger) > 0
+                )
+            ) {
+                continue;
+            }
+
+            $maxNumber = max($maxNumber, (int) $normalizedNumber);
+        }
+
+        return str_pad($maxNumber + 1, 3, '0', STR_PAD_LEFT) . "/$prefix";
     }
 }
