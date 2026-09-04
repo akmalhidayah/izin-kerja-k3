@@ -8,7 +8,10 @@ use Illuminate\Http\Request;
 use App\Models\Jsa;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class JsaController extends Controller
 {
@@ -109,9 +112,9 @@ class JsaController extends Controller
         }
 
         // Signature Handling
-        $validated['dibuat_signature'] = $this->saveSignature($request->input('dibuat_signature'), 'dibuat') ?: $jsa->dibuat_signature;
-        $validated['disetujui_signature'] = $this->saveSignature($request->input('disetujui_signature'), 'disetujui') ?: $jsa->disetujui_signature;
-        $validated['diverifikasi_signature'] = $this->saveSignature($request->input('diverifikasi_signature'), 'diverifikasi') ?: $jsa->diverifikasi_signature;
+        $validated['dibuat_signature'] = $this->saveSignature($request->input('dibuat_signature'), 'dibuat', $jsa->dibuat_signature);
+        $validated['disetujui_signature'] = $this->saveSignature($request->input('disetujui_signature'), 'disetujui', $jsa->disetujui_signature);
+        $validated['diverifikasi_signature'] = $this->saveSignature($request->input('diverifikasi_signature'), 'diverifikasi', $jsa->diverifikasi_signature);
 
         $validated['langkah_kerja'] = $request->input('langkah_kerja') ?: '[]';
 
@@ -147,9 +150,9 @@ class JsaController extends Controller
             'langkah_kerja' => 'nullable|string',
         ])->validate();
 
-        $validated['dibuat_signature'] = $this->saveSignature($request->input('dibuat_signature'), 'dibuat') ?: $jsa->dibuat_signature;
-        $validated['disetujui_signature'] = $this->saveSignature($request->input('disetujui_signature'), 'disetujui') ?: $jsa->disetujui_signature;
-        $validated['diverifikasi_signature'] = $this->saveSignature($request->input('diverifikasi_signature'), 'diverifikasi') ?: $jsa->diverifikasi_signature;
+        $validated['dibuat_signature'] = $this->saveSignature($request->input('dibuat_signature'), 'dibuat', $jsa->dibuat_signature);
+        $validated['disetujui_signature'] = $this->saveSignature($request->input('disetujui_signature'), 'disetujui', $jsa->disetujui_signature);
+        $validated['diverifikasi_signature'] = $this->saveSignature($request->input('diverifikasi_signature'), 'diverifikasi', $jsa->diverifikasi_signature);
 
         $validated['langkah_kerja'] = $request->input('langkah_kerja') ?: '[]';
 
@@ -190,9 +193,105 @@ class JsaController extends Controller
         return $this->showPdf($notification_id);
     }
 
-    private function saveSignature($base64, $role)
+    private function saveSignature($value, string $role, ?string $existingSignature = null): ?string
     {
-        return $this->saveBase64PngSignature($base64, $role, 'signatures/jsa/');
+        $signature = is_string($value) && $value !== '' ? $value : $existingSignature;
+
+        if (! $signature) {
+            return null;
+        }
+
+        if (str_starts_with($signature, 'storage/signatures/jsa/')) {
+            $relativePath = substr($signature, strlen('storage/'));
+
+            try {
+                $binary = Storage::disk('public')->get($relativePath);
+            } catch (\Throwable $e) {
+                report($e);
+                $this->throwInvalidSignature($role);
+            }
+
+            if (! $this->isValidPngSignature($binary)) {
+                $this->throwInvalidSignature($role);
+            }
+
+            return $signature;
+        }
+
+        if (! str_starts_with($signature, 'data:image/png;base64,')) {
+            $this->throwInvalidSignature($role);
+        }
+
+        $encodedImage = substr($signature, strlen('data:image/png;base64,'));
+        $binary = base64_decode(str_replace(' ', '+', $encodedImage), true);
+
+        if ($binary === false || ! $this->isValidPngSignature($binary)) {
+            $this->throwInvalidSignature($role);
+        }
+
+        $relativePath = 'signatures/jsa/'.$role.'_'.Str::random(10).'.png';
+        $disk = Storage::disk('public');
+        $stored = false;
+        $storedBinary = null;
+
+        try {
+            $stored = $disk->put($relativePath, $binary);
+
+            if ($stored) {
+                $storedBinary = $disk->get($relativePath);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        if (
+            ! $stored
+            || ! is_string($storedBinary)
+            || strlen($storedBinary) !== strlen($binary)
+            || ! $this->isValidPngSignature($storedBinary)
+        ) {
+            try {
+                $disk->delete($relativePath);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            throw ValidationException::withMessages([
+                $role.'_signature' => 'Tanda tangan gagal disimpan dengan lengkap. Silakan gambar ulang dan coba lagi.',
+            ]);
+        }
+
+        return 'storage/'.$relativePath;
+    }
+
+    private function isValidPngSignature(string $binary): bool
+    {
+        if (strlen($binary) > 1024 * 1024 || ! function_exists('imagecreatefromstring')) {
+            return false;
+        }
+
+        $imageInfo = @getimagesizefromstring($binary);
+
+        if (! $imageInfo || ($imageInfo[2] ?? null) !== IMAGETYPE_PNG) {
+            return false;
+        }
+
+        $image = @imagecreatefromstring($binary);
+
+        if ($image === false) {
+            return false;
+        }
+
+        imagedestroy($image);
+
+        return true;
+    }
+
+    private function throwInvalidSignature(string $role): never
+    {
+        throw ValidationException::withMessages([
+            $role.'_signature' => 'Tanda tangan tidak valid atau file gambarnya tidak lengkap. Silakan gambar ulang.',
+        ]);
     }
 
     public function getGeneratedNoJsa()
