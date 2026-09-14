@@ -12,15 +12,23 @@
 @endif
 
 @php
-    $tenagaKerjaOld = old('tenaga_kerja')
-        ? json_decode(old('tenaga_kerja'), true)
-        : (isset($dataKontraktor) && $dataKontraktor->tenaga_kerja ? json_decode($dataKontraktor->tenaga_kerja, true) : []);
-    $peralatanKerjaOld = old('peralatan_kerja')
-        ? json_decode(old('peralatan_kerja'), true)
-        : (isset($dataKontraktor) && $dataKontraktor->peralatan_kerja ? json_decode($dataKontraktor->peralatan_kerja, true) : []);
-    $apdOld = old('apd')
-        ? json_decode(old('apd'), true)
-        : (isset($dataKontraktor) && $dataKontraktor->apd ? json_decode($dataKontraktor->apd, true) : []);
+    $normalizeRows = static function ($value): array {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (!is_string($value) || $value === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded) ? $decoded : [];
+    };
+
+    $tenagaKerjaOld = $normalizeRows(old('tenaga_kerja', $dataKontraktor->tenaga_kerja ?? []));
+    $peralatanKerjaOld = $normalizeRows(old('peralatan_kerja', $dataKontraktor->peralatan_kerja ?? []));
+    $apdOld = $normalizeRows(old('apd', $dataKontraktor->apd ?? []));
 
     $signatureButtonClass = fn ($hasSignature) => $hasSignature
         ? 'mt-2 inline-flex h-8 w-28 items-center justify-center whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100'
@@ -70,7 +78,7 @@
                 name="nama_perusahaan"
                 class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 placeholder="PT. Contoh"
-                value="{{ old('nama_perusahaan', $notification?->user?->name ?? Auth::user()->name ?? '') }}">
+                value="{{ old('nama_perusahaan', $dataKontraktor->nama_perusahaan ?? $notification?->user?->name ?? Auth::user()?->name ?? '') }}">
         </div>
 
         <!-- JENIS -->
@@ -82,7 +90,7 @@
                 name="jenis_pekerjaan"
                 class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 placeholder="Deskripsi pekerjaan"
-                value="{{ old('jenis_pekerjaan', $notification?->description ?? '') }}">
+                value="{{ old('jenis_pekerjaan', $dataKontraktor->jenis_pekerjaan ?? $notification?->description ?? '') }}">
         </div>
 
         <!-- LOKASI -->

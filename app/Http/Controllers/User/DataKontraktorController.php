@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\DataKontraktor;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class DataKontraktorController extends Controller
@@ -20,18 +20,18 @@ class DataKontraktorController extends Controller
                 'notification_id' => 'required|exists:notifications,id',
                 'nama_perusahaan' => 'required|string|max:255',
                 'jenis_pekerjaan' => 'nullable|string|max:255',
-                'lokasi_kerja'    => 'nullable|string|max:255',
-                'tanggal_mulai'   => 'nullable|date',
+                'lokasi_kerja' => 'nullable|string|max:255',
+                'tanggal_mulai' => 'nullable|date',
                 'tanggal_selesai' => 'nullable|date',
-                'manager_nama'    => 'nullable|string|max:255',
-                'ttd_manager'     => 'nullable|string',
+                'manager_nama' => 'nullable|string|max:255',
+                'ttd_manager' => 'nullable|string',
                 'perusahaan_nama' => 'nullable|string|max:255',
-                'ttd_perusahaan'  => 'nullable|string',
+                'ttd_perusahaan' => 'nullable|string',
                 'diverifikasi_nama' => 'nullable|string|max:255',
                 'diverifikasi_signature' => 'nullable|string',
-                'tenaga_kerja'    => 'nullable|json',
+                'tenaga_kerja' => 'nullable|json',
                 'peralatan_kerja' => 'nullable|json',
-                'apd'             => 'nullable|json',
+                'apd' => 'nullable|json',
             ])->validate();
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
@@ -39,7 +39,7 @@ class DataKontraktorController extends Controller
 
         $notification = $this->findAccessibleNotification($validated['notification_id']);
 
-        if (!$notification) {
+        if (! $notification) {
             return back()->with('error', 'Notifikasi tidak valid atau tidak dapat diakses.');
         }
 
@@ -48,104 +48,123 @@ class DataKontraktorController extends Controller
         $validated['ttd_perusahaan'] = $this->saveSignature($request->input('ttd_perusahaan'), 'perusahaan');
         $validated['diverifikasi_signature'] = $this->saveSignature($request->input('diverifikasi_signature'), 'verifikator');
 
-        // JSON fields (default ke '[]' string JSON)
-        $validated['tenaga_kerja'] = $request->input('tenaga_kerja') ?: '[]';
-        $validated['peralatan_kerja'] = $request->input('peralatan_kerja') ?: '[]';
-        $validated['apd'] = $request->input('apd') ?: '[]';
+        // Model meng-cast ketiga field ini sebagai array. Decode input dari form
+        // agar Eloquent tidak menyimpan JSON string yang ter-encode dua kali.
+        $validated['tenaga_kerja'] = $this->decodeRows($request->input('tenaga_kerja'));
+        $validated['peralatan_kerja'] = $this->decodeRows($request->input('peralatan_kerja'));
+        $validated['apd'] = $this->decodeRows($request->input('apd'));
 
         // Simpan atau update
-$dataKontraktor = DataKontraktor::updateOrCreate(
+        $dataKontraktor = DataKontraktor::updateOrCreate(
 
             ['notification_id' => $validated['notification_id']],
             array_filter([
                 'nama_perusahaan' => $validated['nama_perusahaan'],
                 'jenis_pekerjaan' => $validated['jenis_pekerjaan'],
-                'lokasi_kerja'    => $validated['lokasi_kerja'],
-                'tanggal_mulai'   => $validated['tanggal_mulai'],
+                'lokasi_kerja' => $validated['lokasi_kerja'],
+                'tanggal_mulai' => $validated['tanggal_mulai'],
                 'tanggal_selesai' => $validated['tanggal_selesai'],
-                'manager_nama'    => $validated['manager_nama'],
-                'ttd_manager'     => $validated['ttd_manager'],
+                'manager_nama' => $validated['manager_nama'],
+                'ttd_manager' => $validated['ttd_manager'],
                 'perusahaan_nama' => $validated['perusahaan_nama'],
-                'ttd_perusahaan'  => $validated['ttd_perusahaan'],
+                'ttd_perusahaan' => $validated['ttd_perusahaan'],
                 'diverifikasi_nama' => $validated['diverifikasi_nama'],
                 'diverifikasi_signature' => $validated['diverifikasi_signature'],
-                'tenaga_kerja'    => $validated['tenaga_kerja'],
+                'tenaga_kerja' => $validated['tenaga_kerja'],
                 'peralatan_kerja' => $validated['peralatan_kerja'],
-                'apd'             => $validated['apd'],
-            ], fn($v) => $v !== null && $v !== '')
+                'apd' => $validated['apd'],
+            ], fn ($v) => $v !== null && $v !== '')
         );
         $this->ensurePermitToken($dataKontraktor);
+
         return back()->with('success', 'Data kontraktor berhasil disimpan!');
     }
 
     // Signature Helper
-   private function saveSignature($input, $role)
-{
-    return $this->saveBase64PngSignature($input, $role, 'signatures/data-kontraktor/');
-}
+    private function saveSignature($input, $role)
+    {
+        return $this->saveBase64PngSignature($input, $role, 'signatures/data-kontraktor/');
+    }
 
+    private function decodeRows(?string $value): array
+    {
+        if (! $value) {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
 
     public function showByToken($token)
-{
-    $dataKontraktor = DataKontraktor::where('token', $token)->firstOrFail();
-    $this->abortIfPermitTokenExpired($dataKontraktor);
-    $notification = $dataKontraktor->notification; // Relasi jika ada
+    {
+        $dataKontraktor = DataKontraktor::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($dataKontraktor);
+        $notification = $dataKontraktor->notification; // Relasi jika ada
 
-    return view('pengajuan-user.kontraktor.form', compact('dataKontraktor', 'notification'));
-}
-public function storeByToken(Request $request, $token)
-{
-    $dataKontraktor = DataKontraktor::where('token', $token)->firstOrFail();
-    $this->abortIfPermitTokenExpired($dataKontraktor);
-
-    try {
-        $validated = $request->validate([
-            'nama_perusahaan' => 'required|string|max:255',
-            'jenis_pekerjaan' => 'nullable|string|max:255',
-            'lokasi_kerja'    => 'nullable|string|max:255',
-            'tanggal_mulai'   => 'nullable|date',
-            'tanggal_selesai' => 'nullable|date',
-            'manager_nama'    => 'nullable|string|max:255',
-            'ttd_manager'     => 'nullable|string',
-            'perusahaan_nama' => 'nullable|string|max:255',
-            'ttd_perusahaan'  => 'nullable|string',
-            'diverifikasi_nama' => 'nullable|string|max:255',
-            'diverifikasi_signature' => 'nullable|string',
-            'tenaga_kerja'    => 'nullable|json',
-            'peralatan_kerja' => 'nullable|json',
-            'apd'             => 'nullable|json',
-        ]);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return back()->withErrors($e->errors())->withInput();
+        return view('pengajuan-user.kontraktor.form', compact('dataKontraktor', 'notification'));
     }
- // Simpan tanda tangan base64 ke file
-  $validated['ttd_manager'] = $this->saveSignature($request->input('ttd_manager'), 'manager') ?? $dataKontraktor->ttd_manager;
-$validated['ttd_perusahaan'] = $this->saveSignature($request->input('ttd_perusahaan'), 'perusahaan') ?? $dataKontraktor->ttd_perusahaan;
-$validated['diverifikasi_signature'] = $this->saveSignature($request->input('diverifikasi_signature'), 'verifikator') ?? $dataKontraktor->diverifikasi_signature;
 
-    // Update Data
-    $dataKontraktor->update($validated);
+    public function storeByToken(Request $request, $token)
+    {
+        $dataKontraktor = DataKontraktor::where('token', $token)->firstOrFail();
+        $this->abortIfPermitTokenExpired($dataKontraktor);
 
-    $message = 'Data Kontraktor berhasil disimpan.';
+        try {
+            $validated = $request->validate([
+                'nama_perusahaan' => 'required|string|max:255',
+                'jenis_pekerjaan' => 'nullable|string|max:255',
+                'lokasi_kerja' => 'nullable|string|max:255',
+                'tanggal_mulai' => 'nullable|date',
+                'tanggal_selesai' => 'nullable|date',
+                'manager_nama' => 'nullable|string|max:255',
+                'ttd_manager' => 'nullable|string',
+                'perusahaan_nama' => 'nullable|string|max:255',
+                'ttd_perusahaan' => 'nullable|string',
+                'diverifikasi_nama' => 'nullable|string|max:255',
+                'diverifikasi_signature' => 'nullable|string',
+                'tenaga_kerja' => 'nullable|json',
+                'peralatan_kerja' => 'nullable|json',
+                'apd' => 'nullable|json',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        }
 
-    return back()
-        ->with('success', $message)
-        ->with('token_saved', $message)
-        ->with('token_pdf_url', route('token-pdf.show', ['type' => 'data-kontraktor', 'token' => $dataKontraktor->token]));
-}
+        $validated['tenaga_kerja'] = $this->decodeRows($request->input('tenaga_kerja'));
+        $validated['peralatan_kerja'] = $this->decodeRows($request->input('peralatan_kerja'));
+        $validated['apd'] = $this->decodeRows($request->input('apd'));
+
+        // Simpan tanda tangan base64 ke file
+        $validated['ttd_manager'] = $this->saveSignature($request->input('ttd_manager'), 'manager') ?? $dataKontraktor->ttd_manager;
+        $validated['ttd_perusahaan'] = $this->saveSignature($request->input('ttd_perusahaan'), 'perusahaan') ?? $dataKontraktor->ttd_perusahaan;
+        $validated['diverifikasi_signature'] = $this->saveSignature($request->input('diverifikasi_signature'), 'verifikator') ?? $dataKontraktor->diverifikasi_signature;
+
+        // Update Data
+        $dataKontraktor->update($validated);
+
+        $message = 'Data Kontraktor berhasil disimpan.';
+
+        return back()
+            ->with('success', $message)
+            ->with('token_saved', $message)
+            ->with('token_pdf_url', route('token-pdf.show', ['type' => 'data-kontraktor', 'token' => $dataKontraktor->token]));
+    }
 
     public function previewPdf($id)
     {
-        if (!$this->tokenPdfAccessAllowed() && auth()->user()?->isPgo()) {
+        if (! $this->tokenPdfAccessAllowed() && auth()->user()?->isPgo()) {
             abort(403, 'Akses ditolak.');
         }
 
-        if (!$this->tokenPdfAccessAllowed()) {
+        if (! $this->tokenPdfAccessAllowed()) {
             $this->abortUnlessCanAccessNotification($id);
         }
 
         $data = DataKontraktor::where('notification_id', $id)->firstOrFail();
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengajuan-user.kontraktor.pdfdatakontraktor', compact('data'));
+
         return $pdf->stream('Form-Data-Kontraktor.pdf');
     }
 }
