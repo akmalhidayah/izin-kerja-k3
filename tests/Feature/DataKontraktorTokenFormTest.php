@@ -65,6 +65,40 @@ class DataKontraktorTokenFormTest extends TestCase
         $this->assertSame($rows, json_decode($storedRows, true));
     }
 
+    public function test_token_pdf_renders_rows_cast_to_arrays(): void
+    {
+        $dataKontraktor = $this->createDataKontraktor();
+
+        $response = $this->get(route('token-pdf.show', [
+            'type' => 'data-kontraktor',
+            'token' => $dataKontraktor->token,
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
+    }
+
+    public function test_token_pdf_can_render_legacy_double_encoded_rows(): void
+    {
+        $dataKontraktor = $this->createDataKontraktor();
+
+        DB::table('data_kontraktors')
+            ->where('id', $dataKontraktor->id)
+            ->update([
+                'tenaga_kerja' => json_encode(json_encode([['nama' => 'Legacy Worker', 'jumlah' => 1, 'satuan' => 'orang']])),
+            ]);
+
+        $response = $this->get(route('token-pdf.show', [
+            'type' => 'data-kontraktor',
+            'token' => $dataKontraktor->token,
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
+    }
+
     private function createDataKontraktor(): DataKontraktor
     {
         $user = User::factory()->create();

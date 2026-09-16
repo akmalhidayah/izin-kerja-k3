@@ -1,7 +1,21 @@
 @php
-    $tenagaKerja = isset($data->tenaga_kerja) ? json_decode($data->tenaga_kerja, true) : [];
-    $peralatan = isset($data->peralatan_kerja) ? json_decode($data->peralatan_kerja, true) : [];
-    $apd = isset($data->apd) ? json_decode($data->apd, true) : [];
+    $normalizeRows = static function ($value): array {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (!is_string($value) || $value === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded) ? $decoded : [];
+    };
+
+    $tenagaKerja = $normalizeRows($data->tenaga_kerja ?? []);
+    $peralatan = $normalizeRows($data->peralatan_kerja ?? []);
+    $apd = $normalizeRows($data->apd ?? []);
 @endphp
 <!DOCTYPE html>
 <html lang="id">
