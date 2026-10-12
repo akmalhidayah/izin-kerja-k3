@@ -24,6 +24,9 @@
                 { value: 'ruang-tertutup', label: 'Izin Ruang Tertutup' },
                 <!-- { value: 'lifesaving', label: 'Izin Life Saving Appliance' }, -->
                 { value: 'perancah', label: 'Izin Perancah' },
+                @if ($permits['umum'] ?? null)
+                    { value: 'listrik-tegangan-tinggi', label: 'Izin Listrik Tegangan Tinggi' },
+                @endif
                 <!-- { value: 'procedures', label: 'Izin Prosedur Khusus' } -->
             ]
         }">
@@ -74,6 +77,12 @@
 </div>
 <div x-show="selectedPermit === 'pengangkatan'" x-cloak>
     @include('components.permits.pengangkatan', ['permit' => $permits['pengangkatan'] ?? null])
+</div>
+<div x-show="selectedPermit === 'listrik-tegangan-tinggi'" x-cloak>
+    @include('components.permits.listrik-tegangan-tinggi', [
+        'permit' => $permits['listrik-tegangan-tinggi'] ?? null,
+        'signaturePrefix' => 'add-listrik-tegangan-tinggi',
+    ])
 </div>
 <div x-show="selectedPermit === 'penggalian'" x-cloak>
     @include('components.permits.penggalian', [

@@ -54,7 +54,8 @@
             'perancah' => 'Perancah',
             'air' => 'Bekerja di air',
             'beban' => 'Mengangkat beban',
-            'gas_panas' => 'Material/gas panas ≥ 150°C'
+            'gas_panas' => 'Material/gas panas ≥ 150°C',
+            'listrik_tegangan_tinggi' => 'Bekerja pada listrik tegangan tinggi'
         ] as $value => $label)
             <label>
                 <input type="checkbox" name="izin_khusus[]" value="{{ $value }}" class="mr-1"

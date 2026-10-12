@@ -15,6 +15,7 @@ use App\Models\WorkPermitPenggalian;
 use App\Models\WorkPermitPerancah;
 use App\Models\WorkPermitRisikoPanas;
 use App\Models\WorkPermitRuangTertutup;
+use App\Models\WorkPermitListrikTeganganTinggi;
 
 class TokenLinkController extends Controller
 {
@@ -31,6 +32,7 @@ class TokenLinkController extends Controller
         'risiko-panas' => WorkPermitRisikoPanas::class,
         'ruang-tertutup' => WorkPermitRuangTertutup::class,
         'perancah' => WorkPermitPerancah::class,
+        'listrik-tegangan-tinggi' => WorkPermitListrikTeganganTinggi::class,
     ];
 
     public function regenerate(string $type, int $id)

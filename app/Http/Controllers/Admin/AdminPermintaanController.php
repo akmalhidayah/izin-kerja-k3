@@ -19,6 +19,7 @@ use App\Models\WorkPermitPerancah;
 use App\Models\WorkPermitBeban;
 use App\Models\WorkPermitPenggalian;
 use App\Models\WorkPermitPengangkatan;
+use App\Models\WorkPermitListrikTeganganTinggi;
 
 use App\Models\StepApproval;
 use App\Models\User;
@@ -135,6 +136,7 @@ class AdminPermintaanController extends Controller
             'risiko-panas' => WorkPermitRisikoPanas::class,
             'ruangtertutup' => WorkPermitRuangTertutup::class,
             'perancah' => WorkPermitPerancah::class,
+            'listrik-tegangan-tinggi' => WorkPermitListrikTeganganTinggi::class,
         ];
 
         if (class_exists(WorkPermitBeban::class)) {
@@ -223,6 +225,7 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
             'risiko-panas' => WorkPermitRisikoPanas::class,
             'ruangtertutup' => WorkPermitRuangTertutup::class,
             'perancah' => WorkPermitPerancah::class,
+            'listrik-tegangan-tinggi' => WorkPermitListrikTeganganTinggi::class,
         ];
 
         // Tambahan (kalau modelnya beneran ada di project kamu)

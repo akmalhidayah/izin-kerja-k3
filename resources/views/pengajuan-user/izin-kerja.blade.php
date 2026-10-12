@@ -394,6 +394,10 @@
     ? \App\Models\WorkPermitPengangkatan::where('notification_id', $notification->id)->first()
     : null;
 
+    $permitListrikTeganganTinggi = $notification
+    ? \App\Models\WorkPermitListrikTeganganTinggi::where('notification_id', $notification->id)->first()
+    : null;
+
     $permitUmumDetail = $permitUmum?->detail;
     $permitUmumClosure = $permitUmum?->closure;
 
@@ -578,6 +582,26 @@
             <i class="fas fa-edit text-xs"></i>
         </button>
         @include('components.token-link-action', ['record' => $permitPengangkatan, 'routeName' => 'working-permit.pengangkatan.token', 'regenerateType' => 'pengangkatan', 'compact' => true])
+    </div>
+@endif
+{{-- Permit Listrik Tegangan Tinggi --}}
+@if ($permitListrikTeganganTinggi)
+    <div class="flex items-center gap-2 text-[10px] text-gray-600">
+        <span>Permit Listrik Tegangan Tinggi:</span>
+        <a href="{{ route('working-permit.listrik-tegangan-tinggi.preview', ['id' => $permitListrikTeganganTinggi->notification_id]) }}"
+            class="rounded-full bg-green-500 p-1 text-white hover:bg-green-600" title="Lihat PDF">
+            <i class="fas fa-bolt text-xs"></i>
+        </a>
+        <button @click="activeModal = 'modal-{{ $step['code'] }}-listrik-tegangan-tinggi'"
+            class="rounded-full bg-yellow-500 p-1 text-white hover:bg-yellow-600" title="Edit">
+            <i class="fas fa-edit text-xs"></i>
+        </button>
+        @include('components.token-link-action', [
+            'record' => $permitListrikTeganganTinggi,
+            'routeName' => 'working-permit.listrik-tegangan-tinggi.token',
+            'regenerateType' => 'listrik-tegangan-tinggi',
+            'compact' => true,
+        ])
     </div>
 @endif
                 {{-- Tambah Permit Lain (Selalu Muncul di Bawah) --}}
@@ -1102,6 +1126,14 @@
     'permitPengangkatan' => $permitPengangkatan ?? null,
     'detail' => $permitPengangkatan?->detail ?? $permitUmumDetail,
     'closure' => $permitPengangkatan?->closure ?? $permitUmumClosure
+])
+{{-- Modal Permit Listrik Tegangan Tinggi --}}
+@include('components.steps.modal-working-permit-listrik-tegangan-tinggi', [
+    'label' => 'Edit Listrik Tegangan Tinggi',
+    'id' => 'modal-' . $step['code'] . '-listrik-tegangan-tinggi',
+    'notification' => $notification,
+    'stepName' => $step['code'],
+    'permitListrikTeganganTinggi' => $permitListrikTeganganTinggi ?? null,
 ])
         {{-- Modal Permit Lainnya --}}
         @include('components.steps.modal-tambah-lainnya', [

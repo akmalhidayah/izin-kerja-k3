@@ -19,6 +19,7 @@ use App\Models\WorkPermitRuangTertutup;
 // use App\Models\WorkPermitLifesaving;
 use App\Models\WorkPermitPerancah;
 use App\Models\WorkPermitBeban;
+use App\Models\WorkPermitListrikTeganganTinggi;
 // use App\Models\WorkPermitProsedurKhusus;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitClosure;
@@ -118,6 +119,7 @@ public function index(Request $request)
         'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first(),
         'beban' => WorkPermitBeban::where('notification_id', $selectedId)->first(),
         'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first(),
+        'listrik-tegangan-tinggi' => WorkPermitListrikTeganganTinggi::where('notification_id', $selectedId)->first(),
     ];
 
     $detail = WorkPermitDetail::where('notification_id', $selectedId)->first();

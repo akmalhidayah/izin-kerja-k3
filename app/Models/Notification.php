@@ -88,6 +88,11 @@ class Notification extends Model
         return $this->hasOne(WorkPermitRuangTertutup::class, 'notification_id');
     }
 
+    public function workPermitListrikTeganganTinggi()
+    {
+        return $this->hasOne(WorkPermitListrikTeganganTinggi::class, 'notification_id');
+    }
+
     public function closure()
     {
         return $this->hasOne(WorkPermitClosure::class, 'notification_id');
@@ -132,6 +137,7 @@ class Notification extends Model
         $notification->workPermitPerancah()?->delete();
         $notification->workPermitRisikoPanas()?->delete();
         $notification->workPermitRuangTertutup()?->delete();
+        $notification->workPermitListrikTeganganTinggi()?->delete();
         $notification->detail?->closure()?->delete();
         $notification->detail()?->delete();
     });

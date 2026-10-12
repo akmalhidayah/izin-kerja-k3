@@ -218,6 +218,7 @@
     $permitBeban = $permits['beban'] ?? null;
     $permitPenggalian = $permits['penggalian'] ?? null;
     $permitPengangkatan = $permits['pengangkatan'] ?? null;
+    $permitListrikTeganganTinggi = $permits['listrik-tegangan-tinggi'] ?? null;
 @endphp
 
                                     @if (!$step['enabled'])
@@ -391,6 +392,26 @@
                                                 </div>
                                             @endif
 
+                                            @if ($permitListrikTeganganTinggi)
+                                                <div class="flex items-center gap-2 text-[10px] text-gray-600">
+                                                    <span>Permit Listrik Tegangan Tinggi:</span>
+                                                    <a href="{{ route('working-permit.listrik-tegangan-tinggi.preview', ['id' => $permitListrikTeganganTinggi->notification_id]) }}"
+                                                        class="rounded-full bg-green-500 p-1 text-white hover:bg-green-600" title="Lihat PDF">
+                                                        <i class="fas fa-bolt text-xs"></i>
+                                                    </a>
+                                                    <button @click="activeModal = 'modal-working_permit-listrik-tegangan-tinggi'"
+                                                        class="rounded-full bg-yellow-500 p-1 text-white hover:bg-yellow-600" title="Edit">
+                                                        <i class="fas fa-edit text-xs"></i>
+                                                    </button>
+                                                    @include('components.token-link-action', [
+                                                        'record' => $permitListrikTeganganTinggi,
+                                                        'routeName' => 'working-permit.listrik-tegangan-tinggi.token',
+                                                        'regenerateType' => 'listrik-tegangan-tinggi',
+                                                        'compact' => true,
+                                                    ])
+                                                </div>
+                                            @endif
+
                                             <div class="flex flex-col items-center mt-2">
                                                 <span class="text-[10px] text-gray-600 mb-1">Tambah Permit Lain</span>
                                                 <button @click="activeModal = 'modal-tambah-lainnya'"
@@ -519,6 +540,14 @@
                                         'permitPengangkatan' => $permitPengangkatan ?? null,
                                         'detail' => $detail ?? null,
                                         'closure' => $closure ?? null
+                                    ])
+
+                                    @include('components.steps.modal-working-permit-listrik-tegangan-tinggi', [
+                                        'label' => 'Edit Listrik Tegangan Tinggi',
+                                        'id' => 'modal-working_permit-listrik-tegangan-tinggi',
+                                        'notification' => $notification,
+                                        'stepName' => $step['code'],
+                                        'permitListrikTeganganTinggi' => $permitListrikTeganganTinggi ?? null,
                                     ])
 
                                     @include('components.steps.modal-tambah-lainnya', [

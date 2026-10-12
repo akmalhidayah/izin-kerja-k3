@@ -13,6 +13,7 @@ use App\Http\Controllers\User\WorkingPermit\PenggalianPermitController;
 use App\Http\Controllers\User\WorkingPermit\PerancahPermitController;
 use App\Http\Controllers\User\WorkingPermit\RuangTertutupPermitController;
 use App\Http\Controllers\User\WorkingPermit\UmumPermitController;
+use App\Http\Controllers\User\WorkingPermit\ListrikTeganganTinggiPermitController;
 use App\Models\DataKontraktor;
 use App\Models\Jsa;
 use App\Models\UmumWorkPermit;
@@ -25,6 +26,7 @@ use App\Models\WorkPermitPenggalian;
 use App\Models\WorkPermitPerancah;
 use App\Models\WorkPermitRisikoPanas;
 use App\Models\WorkPermitRuangTertutup;
+use App\Models\WorkPermitListrikTeganganTinggi;
 
 class TokenPdfController extends Controller
 {
@@ -41,6 +43,7 @@ class TokenPdfController extends Controller
         'risiko-panas' => [WorkPermitRisikoPanas::class, PanasRisikoPermitController::class, 'preview'],
         'ruang-tertutup' => [WorkPermitRuangTertutup::class, RuangTertutupPermitController::class, 'preview'],
         'perancah' => [WorkPermitPerancah::class, PerancahPermitController::class, 'preview'],
+        'listrik-tegangan-tinggi' => [WorkPermitListrikTeganganTinggi::class, ListrikTeganganTinggiPermitController::class, 'preview'],
     ];
 
     public function show(string $type, string $token)

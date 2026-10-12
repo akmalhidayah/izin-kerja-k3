@@ -17,6 +17,7 @@ use App\Models\WorkPermitPenggalian;
 use App\Models\WorkPermitPerancah;
 use App\Models\WorkPermitRisikoPanas;
 use App\Models\WorkPermitRuangTertutup;
+use App\Models\WorkPermitListrikTeganganTinggi;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -132,6 +133,7 @@ class ApproveSikController extends Controller
                 WorkPermitPerancah::class,
                 WorkPermitRisikoPanas::class,
                 WorkPermitRuangTertutup::class,
+                WorkPermitListrikTeganganTinggi::class,
             ];
 
             $permitIds = collect();

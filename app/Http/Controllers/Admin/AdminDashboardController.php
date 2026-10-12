@@ -205,6 +205,7 @@ public function permintaanSIK(Request $request)
             \App\Models\WorkPermitRuangTertutup::class,
             \App\Models\WorkPermitPerancah::class,
             \App\Models\WorkPermitBeban::class,
+            \App\Models\WorkPermitListrikTeganganTinggi::class,
         ];
         foreach ($permitModels as $model) {
             if ($model::where('notification_id', $notif->id)->exists()) {
@@ -360,6 +361,7 @@ public function permintaanSIKPgo(Request $request)
             \App\Models\WorkPermitRuangTertutup::class,
             \App\Models\WorkPermitPerancah::class,
             \App\Models\WorkPermitBeban::class,
+            \App\Models\WorkPermitListrikTeganganTinggi::class,
         ];
         foreach ($permitModels as $model) {
             if ($model::where('notification_id', $notif->id)->exists()) {

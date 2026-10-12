@@ -131,6 +131,9 @@
         <td>@if(in_array('air', $specials)) {!! $check !!} @endif Bekerja di air</td>
         <td>@if(in_array('gaspanas', $specials)) {!! $check !!} @endif Material/gas panas ≥ 150°C</td>
     </tr>
+    <tr>
+        <td colspan="2">@if(in_array('listrik_tegangan_tinggi', $specials)) {!! $check !!} @endif Bekerja pada listrik tegangan tinggi</td>
+    </tr>
 </table>
 
 {{-- 2. Titik Isolasi dan Penguncian jika Diperlukan --}}

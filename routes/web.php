@@ -26,6 +26,7 @@ use App\Http\Controllers\User\WorkingPermit\PanasRisikoPermitController;
 use App\Http\Controllers\User\WorkingPermit\BebanPermitController;
 use App\Http\Controllers\User\WorkingPermit\PenggalianPermitController;
 use App\Http\Controllers\User\WorkingPermit\PengangkatanPermitController;
+use App\Http\Controllers\User\WorkingPermit\ListrikTeganganTinggiPermitController;
 
 
 Route::get('/', function () {
@@ -80,6 +81,9 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin,pgo'])->group(functi
 
     Route::post('/user/working-permit/pengangkatan/store', [PengangkatanPermitController::class, 'store'])->name('working-permit.pengangkatan.store');
     Route::get('/user/permit/pengangkatan/preview/{id}', [PengangkatanPermitController::class, 'preview'])->name('working-permit.pengangkatan.preview');
+
+    Route::post('/user/working-permit/listrik-tegangan-tinggi/store', [ListrikTeganganTinggiPermitController::class, 'store'])->name('working-permit.listrik-tegangan-tinggi.store');
+    Route::get('/user/permit/listrik-tegangan-tinggi/preview/{id}', [ListrikTeganganTinggiPermitController::class, 'preview'])->name('working-permit.listrik-tegangan-tinggi.preview');
 
     // ✅ View PDF SIK
     Route::get('/izin-kerja/sik/pdf/{id}', [\App\Http\Controllers\Admin\AdminPermintaanController::class, 'viewSik'])->name('izin-kerja.sik.pdf');
@@ -207,5 +211,8 @@ Route::post('/izin-kerja/working-permit/penggalian/{token}', [PenggalianPermitCo
 
 Route::get('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'showByToken'])->name('working-permit.pengangkatan.token');
 Route::post('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'storeByToken'])->name('working-permit.pengangkatan.token.store');
+
+Route::get('/izin-kerja/working-permit/listrik-tegangan-tinggi/{token}', [ListrikTeganganTinggiPermitController::class, 'showByToken'])->name('working-permit.listrik-tegangan-tinggi.token');
+Route::post('/izin-kerja/working-permit/listrik-tegangan-tinggi/{token}', [ListrikTeganganTinggiPermitController::class, 'storeByToken'])->name('working-permit.listrik-tegangan-tinggi.token.store');
 });
 require __DIR__.'/auth.php';
