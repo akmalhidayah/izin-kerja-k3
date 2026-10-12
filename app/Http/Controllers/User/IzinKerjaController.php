@@ -22,8 +22,8 @@ use App\Models\WorkPermitBeban;
 use App\Models\WorkPermitListrikTeganganTinggi;
 // use App\Models\WorkPermitProsedurKhusus;
 use App\Models\WorkPermitDetail;
-use App\Models\WorkPermitClosure;
 use App\Models\StepApproval;
+use App\Models\Upload;
 use App\Http\Controllers\User\IzinKerjaPgoController;
 
 class IzinKerjaController extends Controller
@@ -37,7 +37,9 @@ public function index(Request $request)
     $userId = auth()->id();
 
     // Ambil semua pengajuan notifikasi milik user (buat dropdown)
-    $allNotifications = Notification::where('user_id', $userId)->latest()->get();
+    $allNotifications = Notification::where('user_id', $userId)
+        ->latest()
+        ->get(['id', 'number', 'created_at']);
 
     // Cek jika ada yang dipilih, kalau tidak pakai yang terbaru
     $selectedId = $request->get('notification_id') ?? $allNotifications->first()?->id;
@@ -81,13 +83,18 @@ public function index(Request $request)
             'dataKontraktor' => null,
             'steps' => $steps,
             'generatedNoJsa' => null,
+            'stepApprovals' => [],
+            'stepGateStatuses' => [],
+            'stepNotes' => [],
+            'uploadsByStep' => collect(),
+            'renderPermitFormsEagerly' => false,
         ]);
     }
 
-    $notification = Notification::where('id', $selectedId)
+    $notification = Notification::with('assignedAdmin:id,name')
+        ->where('id', $selectedId)
         ->where('user_id', $userId)
         ->firstOrFail();
-    $generatedNoJsa = (new JsaController)->getGeneratedNoJsa();
 
     // Default stepTitles semua step
     $stepTitles = [
@@ -108,24 +115,52 @@ public function index(Request $request)
 
     $dataKontraktor = DataKontraktor::where('notification_id', $selectedId)->first();
     $jsa = Jsa::where('notification_id', $selectedId)->first();
+    $generatedNoJsa = $jsa ? null : (new JsaController)->getGeneratedNoJsa();
+    $renderPermitFormsEagerly = $request->session()->getOldInput() !== [];
+    $permitColumns = $renderPermitFormsEagerly
+        ? ['*']
+        : ['id', 'notification_id', 'token', 'token_expires_at'];
     $permits = [
-        'umum' => UmumWorkPermit::where('notification_id', $selectedId)->first(),
-        'gaspanas' => WorkPermitGasPanas::where('notification_id', $selectedId)->first(),
-        'air' => WorkPermitAir::where('notification_id', $selectedId)->first(),
-        'ketinggian' => WorkPermitKetinggian::where('notification_id', $selectedId)->first(),
-        'pengangkatan' => WorkPermitPengangkatan::where('notification_id', $selectedId)->first(),
-        'penggalian' => WorkPermitPenggalian::where('notification_id', $selectedId)->first(),
-        'risiko-panas' => WorkPermitRisikoPanas::where('notification_id', $selectedId)->first(),
-        'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first(),
-        'beban' => WorkPermitBeban::where('notification_id', $selectedId)->first(),
-        'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first(),
-        'listrik-tegangan-tinggi' => WorkPermitListrikTeganganTinggi::where('notification_id', $selectedId)->first(),
+        'umum' => UmumWorkPermit::where('notification_id', $selectedId)->first($permitColumns),
+        'gaspanas' => WorkPermitGasPanas::where('notification_id', $selectedId)->first($permitColumns),
+        'air' => WorkPermitAir::where('notification_id', $selectedId)->first($permitColumns),
+        'ketinggian' => WorkPermitKetinggian::where('notification_id', $selectedId)->first($permitColumns),
+        'pengangkatan' => WorkPermitPengangkatan::where('notification_id', $selectedId)->first($permitColumns),
+        'penggalian' => WorkPermitPenggalian::where('notification_id', $selectedId)->first($permitColumns),
+        'risiko-panas' => WorkPermitRisikoPanas::where('notification_id', $selectedId)->first($permitColumns),
+        'ruang-tertutup' => WorkPermitRuangTertutup::where('notification_id', $selectedId)->first($permitColumns),
+        'beban' => WorkPermitBeban::where('notification_id', $selectedId)->first($permitColumns),
+        'perancah' => WorkPermitPerancah::where('notification_id', $selectedId)->first($permitColumns),
+        'listrik-tegangan-tinggi' => WorkPermitListrikTeganganTinggi::where('notification_id', $selectedId)->first($permitColumns),
     ];
 
-    $detail = WorkPermitDetail::where('notification_id', $selectedId)->first();
-    $closure = $detail ? WorkPermitClosure::where('work_permit_detail_id', $detail->id)->first() : null;
+    if ($renderPermitFormsEagerly) {
+        $detailsByType = WorkPermitDetail::with('closure')
+            ->where('notification_id', $selectedId)
+            ->get()
+            ->keyBy('permit_type');
+        $detailTypeMap = ['ruang-tertutup' => 'ruangtertutup'];
 
-    $stepApprovals = StepApproval::where('notification_id', $selectedId)->pluck('status', 'step')->toArray();
+        foreach ($permits as $type => $permit) {
+            if (!$permit) {
+                continue;
+            }
+
+            $detail = $detailsByType->get($detailTypeMap[$type] ?? $type);
+            $permit->setRelation('detail', $detail);
+            $permit->setRelation('closure', $detail?->closure);
+        }
+    }
+
+    $approvalRecords = StepApproval::where('notification_id', $selectedId)
+        ->get(['id', 'step', 'status', 'catatan', 'signature_senior_manager']);
+    $firstApprovalRecords = $approvalRecords->groupBy('step')->map->first();
+    $stepApprovals = $approvalRecords->pluck('status', 'step')->all();
+    $stepGateStatuses = $firstApprovalRecords->pluck('status', 'step')->all();
+    $stepNotes = $firstApprovalRecords->pluck('catatan', 'step')->all();
+    $uploadsByStep = Upload::where('notification_id', $selectedId)
+        ->get(['id', 'step', 'file_path'])
+        ->groupBy('step');
 
     $steps = [];
     $previousApproved = true;
@@ -140,9 +175,7 @@ public function index(Request $request)
 
         // 👇 Logika override status untuk step ke-13
         if ($code === 'surat_izin_kerja') {
-            $sikApproval = StepApproval::where('notification_id', $selectedId)
-                ->where('step', 'sik')
-                ->first();
+            $sikApproval = $firstApprovalRecords->get('sik');
 
             if ($sikApproval && $sikApproval->signature_senior_manager) {
                 $status = 'done';
@@ -167,11 +200,16 @@ public function index(Request $request)
         'notification' => $notification,
         'jsa' => $jsa,
         'permits' => $permits,
-        'detail' => $detail,
-        'closure' => $closure,
+        'detail' => null,
+        'closure' => null,
         'dataKontraktor' => $dataKontraktor,
         'steps' => $steps,
         'generatedNoJsa' => $generatedNoJsa,
+        'stepApprovals' => $stepApprovals,
+        'stepGateStatuses' => $stepGateStatuses,
+        'stepNotes' => $stepNotes,
+        'uploadsByStep' => $uploadsByStep,
+        'renderPermitFormsEagerly' => $renderPermitFormsEagerly,
     ]);
 }
 }

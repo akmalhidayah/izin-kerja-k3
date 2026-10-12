@@ -118,11 +118,7 @@
                               @if ($step['code'] === 'op_spk')
     @php
         $label = $step['label'] ?? 'Input Notification/PO/SPK'; // Default label aman
-        $catatanRevisi = $notification
-            ? \App\Models\StepApproval::where('notification_id', $notification->id)
-                ->where('step', 'op_spk')
-                ->value('catatan')
-            : null;
+        $catatanRevisi = $stepNotes['op_spk'] ?? null;
     @endphp
 
     @if ($notification)
@@ -161,10 +157,8 @@
 @if ($step['code'] === 'data_kontraktor')
     @php
         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-        $prevStepApproved = $prevStepCode 
-            ? (\App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)
-                ->value('status') === 'disetujui')
+        $prevStepApproved = $prevStepCode
+            ? (($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui')
             : true; // Step pertama tidak perlu cek
     @endphp
 
@@ -215,9 +209,7 @@
 
                 @if ($step['status'] === 'revisi')
                     @php
-                        $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                            ->where('step', 'data_kontraktor')
-                            ->value('catatan');
+                        $catatanRevisi = $stepNotes['data_kontraktor'] ?? null;
                     @endphp
                     @if ($catatanRevisi)
                         <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -230,16 +222,11 @@
    @php
     $prevStepCode = $steps[$index - 1]['code'] ?? null;
 
-    $prevStepApproved = $prevStepCode 
-        ? (\App\Models\StepApproval::where('notification_id', $notification?->id)
-            ->where('step', $prevStepCode)->value('status') === 'disetujui')
+    $prevStepApproved = $prevStepCode
+        ? (($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui')
         : true;
 
-    $notifId = $notification?->id;
-    $bpjsFiles = $notifId
-        ? \App\Models\Upload::where('notification_id', $notifId)
-            ->where('step', 'bpjs')->get()
-        : collect();
+    $bpjsFiles = $uploadsByStep->get('bpjs', collect());
 @endphp
 
 
@@ -275,8 +262,7 @@
             {{-- Catatan revisi --}}
             @if ($step['status'] === 'revisi')
                 @php
-                    $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                        ->where('step', 'bpjs')->value('catatan');
+                    $catatanRevisi = $stepNotes['bpjs'] ?? null;
                 @endphp
                 @if ($catatanRevisi)
                     <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -290,9 +276,8 @@
     @if ($step['code'] === 'jsa')
     @php
         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-        $prevStepApproved = $prevStepCode 
-            ? (\App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui')
+        $prevStepApproved = $prevStepCode
+            ? (($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui')
             : false;
         $label = 'Tambah Data'; // Default label
     @endphp
@@ -334,9 +319,7 @@
 
             @if ($step['status'] === 'revisi')
                 @php
-                    $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                        ->where('step', 'jsa')
-                        ->value('catatan');
+                    $catatanRevisi = $stepNotes['jsa'] ?? null;
                 @endphp
                 @if ($catatanRevisi)
                     <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -350,56 +333,23 @@
     $prevStepCode = $steps[$index - 1]['code'] ?? null;
 
     $prevStepApproved = $notification
-        ? \App\Models\StepApproval::where('notification_id', $notification->id)
-            ->where('step', $prevStepCode)
-            ->value('status') === 'disetujui'
+        ? (($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui')
         : false;
 
-    $permitUmum = $notification
-        ? \App\Models\UmumWorkPermit::where('notification_id', $notification->id)->first()
-        : null;
+    $permitUmum = $permits['umum'] ?? null;
+    $permitGas = $permits['gaspanas'] ?? null;
+    $permitAir = $permits['air'] ?? null;
+    $permitKetinggian = $permits['ketinggian'] ?? null;
+    $permitRuangTertutup = $permits['ruang-tertutup'] ?? null;
+    $permitPerancah = $permits['perancah'] ?? null;
+    $permitRisikoPanas = $permits['risiko-panas'] ?? null;
+    $permitBeban = $permits['beban'] ?? null;
+    $permitPenggalian = $permits['penggalian'] ?? null;
+    $permitPengangkatan = $permits['pengangkatan'] ?? null;
+    $permitListrikTeganganTinggi = $permits['listrik-tegangan-tinggi'] ?? null;
 
-    $permitGas = $notification
-        ? \App\Models\WorkPermitGasPanas::where('notification_id', $notification->id)->first()
-        : null;
-
-    $permitAir = $notification
-        ? \App\Models\WorkPermitAir::where('notification_id', $notification->id)->first()
-        : null;
-
-    $permitKetinggian = $notification
-        ? \App\Models\WorkPermitKetinggian::where('notification_id', $notification->id)->first()
-        : null;
-
-    $permitRuangTertutup = $notification
-        ? \App\Models\WorkPermitRuangTertutup::where('notification_id', $notification->id)->first()
-        : null;
-
-    $permitPerancah = $notification
-        ? \App\Models\WorkPermitPerancah::where('notification_id', $notification->id)->first()
-        : null;
-
-    $permitRisikoPanas = $notification
-        ? \App\Models\WorkPermitRisikoPanas::where('notification_id', $notification->id)->first()
-        : null;
-    $permitBeban = $notification
-    ? \App\Models\WorkPermitBeban::where('notification_id', $notification->id)->first()
-    : null;
-
-    $permitPenggalian = $notification
-    ? \App\Models\WorkPermitPenggalian::where('notification_id', $notification->id)->first()
-    : null;
-
-    $permitPengangkatan = $notification
-    ? \App\Models\WorkPermitPengangkatan::where('notification_id', $notification->id)->first()
-    : null;
-
-    $permitListrikTeganganTinggi = $notification
-    ? \App\Models\WorkPermitListrikTeganganTinggi::where('notification_id', $notification->id)->first()
-    : null;
-
-    $permitUmumDetail = $permitUmum?->detail;
-    $permitUmumClosure = $permitUmum?->closure;
+    $permitUmumDetail = $renderPermitFormsEagerly ? $permitUmum?->detail : null;
+    $permitUmumClosure = $renderPermitFormsEagerly ? $permitUmum?->closure : null;
 
 
 @endphp
@@ -619,15 +569,14 @@
     @if ($step['code'] === 'fakta_integritas')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui';
+            $prevStepApproved = ($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui';
         @endphp
 
         @if (!$prevStepApproved)
             <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
         @else
             @if ($notification)
-                @if ($faktaFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'fakta_integritas')->first())
+                @if ($faktaFile = $uploadsByStep->get('fakta_integritas', collect())->first())
                     <div class="flex items-center gap-2">
                         <a href="{{ asset('storage/' . $faktaFile->file_path) }}" target="_blank"
                             class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
@@ -651,9 +600,7 @@
                 @endif
                 @if ($step['status'] === 'revisi')
                         @php
-                            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                                ->where('step', 'fakta_integritas')
-                                ->value('catatan');
+                            $catatanRevisi = $stepNotes['fakta_integritas'] ?? null;
                         @endphp
                         @if ($catatanRevisi)
                             <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -667,15 +614,14 @@
     @if ($step['code'] === 'sertifikasi_ak3')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui';
+            $prevStepApproved = ($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui';
         @endphp
 
         @if (!$prevStepApproved)
             <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
         @else
             @if ($notification)
-                @if ($ak3File = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'sertifikasi_ak3')->first())
+                @if ($ak3File = $uploadsByStep->get('sertifikasi_ak3', collect())->first())
                     <div class="flex items-center gap-2">
                         <a href="{{ asset('storage/' . $ak3File->file_path) }}" target="_blank"
                             class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
@@ -699,9 +645,7 @@
                 @endif
                 @if ($step['status'] === 'revisi')
                         @php
-                            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                                ->where('step', 'sertifikasi_ak3')
-                                ->value('catatan');
+                            $catatanRevisi = $stepNotes['sertifikasi_ak3'] ?? null;
                         @endphp
                         @if ($catatanRevisi)
                             <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -718,16 +662,10 @@
     $prevStepCode = $steps[$index - 1]['code'] ?? null;
 
     $prevStepApproved = $notifId && $prevStepCode
-        ? (\App\Models\StepApproval::where('notification_id', $notifId)
-            ->where('step', $prevStepCode)
-            ->value('status') === 'disetujui')
+        ? (($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui')
         : false;
 
-    $ktpFiles = $notifId
-        ? \App\Models\Upload::where('notification_id', $notifId)
-            ->where('step', 'ktp')
-            ->get()
-        : collect();
+    $ktpFiles = $uploadsByStep->get('ktp', collect());
 @endphp
 
     @if (!$prevStepApproved)
@@ -763,8 +701,7 @@
 
             @if ($step['status'] === 'revisi')
                 @php
-                    $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                        ->where('step', 'ktp')->value('catatan');
+                    $catatanRevisi = $stepNotes['ktp'] ?? null;
                 @endphp
                 @if ($catatanRevisi)
                     <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -779,15 +716,14 @@
     @if ($step['code'] === 'surat_kesehatan')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui';
+            $prevStepApproved = ($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui';
         @endphp
 
         @if (!$prevStepApproved)
             <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
         @else
             @if ($notification)
-                @if ($suratKesehatanFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'surat_kesehatan')->first())
+                @if ($suratKesehatanFile = $uploadsByStep->get('surat_kesehatan', collect())->first())
                     <div class="flex items-center gap-2">
                         <a href="{{ asset('storage/' . $suratKesehatanFile->file_path) }}" target="_blank"
                             class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
@@ -811,9 +747,7 @@
                 @endif
                 @if ($step['status'] === 'revisi')
                         @php
-                            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                                ->where('step', 'surat_kesehatan')
-                                ->value('catatan');
+                            $catatanRevisi = $stepNotes['surat_kesehatan'] ?? null;
                         @endphp
                         @if ($catatanRevisi)
                             <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -827,15 +761,14 @@
     @if ($step['code'] === 'struktur_organisasi')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui';
+            $prevStepApproved = ($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui';
         @endphp
 
         @if (!$prevStepApproved)
             <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
         @else
             @if ($notification)
-                @if ($strukturFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'struktur_organisasi')->first())
+                @if ($strukturFile = $uploadsByStep->get('struktur_organisasi', collect())->first())
                     <div class="flex items-center gap-2">
                         <a href="{{ asset('storage/' . $strukturFile->file_path) }}" target="_blank"
                             class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
@@ -859,9 +792,7 @@
                 @endif
                 @if ($step['status'] === 'revisi')
                         @php
-                            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                                ->where('step', 'struktur_organisasi')
-                                ->value('catatan');
+                            $catatanRevisi = $stepNotes['struktur_organisasi'] ?? null;
                         @endphp
                         @if ($catatanRevisi)
                             <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -875,15 +806,14 @@
     @if ($step['code'] === 'post_test')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui';
+            $prevStepApproved = ($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui';
         @endphp
 
         @if (!$prevStepApproved)
             <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
         @else
             @if ($notification)
-                @if ($postTestFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'post_test')->first())
+                @if ($postTestFile = $uploadsByStep->get('post_test', collect())->first())
                     <div class="flex items-center gap-2">
                         <a href="{{ asset('storage/' . $postTestFile->file_path) }}" target="_blank"
                             class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
@@ -908,9 +838,7 @@
                 @endif
                 @if ($step['status'] === 'revisi')
                         @php
-                            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                                ->where('step', 'post_test')
-                                ->value('catatan');
+                            $catatanRevisi = $stepNotes['post_test'] ?? null;
                         @endphp
                         @if ($catatanRevisi)
                             <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -924,12 +852,8 @@
   @if ($step['code'] === 'surat_izin_kerja') {{-- atau 13 jika urutan 1-based --}}
     @php
         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-        $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-            ->where('step', $prevStepCode)->value('status') === 'disetujui';
-
-        $statusSik = \App\Models\StepApproval::where('notification_id', $notification?->id)
-            ->where('step', 'sik')
-            ->value('status');
+        $prevStepApproved = ($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui';
+        $statusSik = $stepGateStatuses['sik'] ?? null;
     @endphp
 
     @if (!$prevStepApproved)
@@ -950,15 +874,14 @@
     @if ($step['code'] === 'bukti_serah_terima')
         @php
                         $prevStepCode = $steps[$index - 1]['code'] ?? null;
-            $prevStepApproved = \App\Models\StepApproval::where('notification_id', $notification?->id)
-                ->where('step', $prevStepCode)->value('status') === 'disetujui';
+            $prevStepApproved = ($stepGateStatuses[$prevStepCode] ?? null) === 'disetujui';
         @endphp
 
         @if (!$prevStepApproved)
             <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
         @else
             @if ($notification)
-                @if ($buktiSerahFile = \App\Models\Upload::where('notification_id', $notification->id)->where('step', 'bukti_serah_terima')->first())
+                @if ($buktiSerahFile = $uploadsByStep->get('bukti_serah_terima', collect())->first())
                     <div class="flex items-center gap-2">
                         <a href="{{ asset('storage/' . $buktiSerahFile->file_path) }}" target="_blank"
                             class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-[9px] px-3 py-[3px] rounded-full">
@@ -981,9 +904,7 @@
                 @endif
                 @if ($step['status'] === 'revisi')
                         @php
-                            $catatanRevisi = \App\Models\StepApproval::where('notification_id', $notification->id)
-                                ->where('step', 'bukti_serah_terima')
-                                ->value('catatan');
+                            $catatanRevisi = $stepNotes['bukti_serah_terima'] ?? null;
                         @endphp
                         @if ($catatanRevisi)
                             <p class="text-[10px] text-red-600 italic mt-1">Catatan: {{ $catatanRevisi }}</p>
@@ -1028,6 +949,7 @@
                                         ])
                                     @endif
     @elseif ($step['code'] === 'working_permit')
+        @if ($renderPermitFormsEagerly)
         {{-- Modal Permit Umum --}}
         @include('components.steps.modal-working-permit', [
             'id' => 'modal-' . $step['code'],
@@ -1141,8 +1063,30 @@
             'id' => 'modal-tambah-lainnya',
             'notification' => $notification,
             'stepName' => $step['code'],
-            'permits' => $permits ?? []
+            'permits' => $permits ?? [],
+            'eager' => true
         ])
+        @else
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit', 'title' => 'Form Working Permit', 'type' => 'umum', 'notification' => $notification])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-gaspanas', 'title' => 'Edit Working Permit Gas Panas', 'type' => 'gaspanas', 'notification' => $notification])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-air', 'title' => 'Edit Working Permit Air', 'type' => 'air', 'notification' => $notification, 'maxWidth' => 'max-w-5xl'])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-ketinggian', 'title' => 'Edit Working Permit Ketinggian', 'type' => 'ketinggian', 'notification' => $notification, 'maxWidth' => 'max-w-5xl'])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-ruang-tertutup', 'title' => 'Edit Working Permit Ruang Tertutup', 'type' => 'ruang-tertutup', 'notification' => $notification])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-perancah', 'title' => 'Edit Perancah', 'type' => 'perancah', 'notification' => $notification, 'maxWidth' => 'max-w-6xl'])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-risiko-panas', 'title' => 'Edit Risiko Panas', 'type' => 'risiko-panas', 'notification' => $notification])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-beban', 'title' => 'Edit Working Permit Beban', 'type' => 'beban', 'notification' => $notification])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-penggalian', 'title' => 'Edit Working Permit Penggalian', 'type' => 'penggalian', 'notification' => $notification])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-pengangkatan', 'title' => 'Edit Working Permit Pengangkatan', 'type' => 'pengangkatan', 'notification' => $notification])
+            @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-listrik-tegangan-tinggi', 'title' => 'Edit Listrik Tegangan Tinggi', 'type' => 'listrik-tegangan-tinggi', 'notification' => $notification, 'maxWidth' => 'max-w-5xl'])
+            @include('components.steps.modal-tambah-lainnya', [
+                'label' => 'Tambah Permit Lain',
+                'id' => 'modal-tambah-lainnya',
+                'notification' => $notification,
+                'stepName' => $step['code'],
+                'permits' => $permits ?? [],
+                'eager' => false,
+            ])
+        @endif
                                 @else
                                    @include('components.steps.modal-upload', [
                                         'id' => 'modal-' . $step['code'],

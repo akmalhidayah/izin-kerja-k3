@@ -10,9 +10,48 @@
     >
         <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Tambah Jenis Working Permit Lain</h2>
 
-        <div x-data="{
+        <div
+            data-form-url-template="{{ route('working-permit.form', [
+                'notification' => $notification->id,
+                'type' => '__permit_type__',
+            ]) }}"
+            x-data="{
             selectedPermit: '',
             search: '',
+            forms: {},
+            loadedTypes: [],
+            pending: {},
+            errors: {},
+            async loadPermit(type, urlTemplate) {
+                if (!type) return;
+
+                if (this.forms[type] || this.pending[type]) return;
+
+                this.errors = { ...this.errors, [type]: '' };
+                this.pending = { ...this.pending, [type]: true };
+
+                try {
+                    const separator = urlTemplate.includes('?') ? '&' : '?';
+                    const url = urlTemplate.replace('__permit_type__', encodeURIComponent(type)) + separator + 'context=add';
+                    const response = await fetch(url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        credentials: 'same-origin',
+                    });
+
+                    if (!response.ok) throw new Error('Form tidak dapat dimuat.');
+
+                    const html = await response.text();
+                    this.forms = { ...this.forms, [type]: html };
+                    this.loadedTypes.push(type);
+                } catch (error) {
+                    this.errors = {
+                        ...this.errors,
+                        [type]: error.message || 'Form tidak dapat dimuat.',
+                    };
+                } finally {
+                    this.pending = { ...this.pending, [type]: false };
+                }
+            },
             options: [
                 { value: 'gaspanas', label: 'Izin Kerja Gas Panas' },
                 { value: 'air', label: 'Izin Kerja di Air' },
@@ -29,7 +68,8 @@
                 @endif
                 <!-- { value: 'procedures', label: 'Izin Prosedur Khusus' } -->
             ]
-        }">
+        }"
+        >
             <!-- Dropdown -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Jenis Working Permit</label>
@@ -41,7 +81,7 @@
                     class="w-full border rounded px-3 py-2 mb-2 text-sm focus:ring focus:ring-blue-200"
                 >
 
-                <select x-model="selectedPermit" class="w-full border rounded p-2 text-sm">
+                <select x-model="selectedPermit" @change="loadPermit(selectedPermit, $root.dataset.formUrlTemplate)" class="w-full border rounded p-2 text-sm">
                     <template x-for="option in options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()))" :key="option.value">
                         <option :value="option.value" x-text="option.label"></option>
                     </template>
@@ -53,7 +93,7 @@
             </div>
 
             <!-- Dynamic Includes -->
-<!-- Dynamic Includes -->
+@if ($eager ?? false)
 <div x-show="selectedPermit === 'gaspanas'" x-cloak>
     @include('components.permits.gaspanas', [
         'permit' => $permits['gaspanas'] ?? null,
@@ -125,6 +165,13 @@
 <div x-show="selectedPermit === 'procedures'" x-cloak>
     @include('components.permits.procedures', ['permit' => $permits['procedures'] ?? null])
 </div>
+@else
+<div x-show="pending[selectedPermit]" class="py-10 text-center text-sm text-gray-500">Memuat form...</div>
+<div x-show="errors[selectedPermit]" class="rounded bg-red-50 p-3 text-sm text-red-700" x-text="errors[selectedPermit]"></div>
+<template x-for="type in loadedTypes" :key="type">
+    <div x-show="selectedPermit === type" x-html="forms[type]"></div>
+</template>
+@endif
         </div>
         <!-- Tombol -->
         <div class="flex justify-end gap-2 mt-6">

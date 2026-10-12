@@ -445,6 +445,7 @@
                                         ])
                                     @endif
                                 @elseif ($step['code'] === 'working_permit')
+                                    @if ($renderPermitFormsEagerly)
                                     @include('components.steps.modal-working-permit', [
                                         'id' => 'modal-working_permit',
                                         'notification' => $notification,
@@ -555,8 +556,30 @@
                                         'id' => 'modal-tambah-lainnya',
                                         'notification' => $notification,
                                         'stepName' => $step['code'],
-                                        'permits' => $permits ?? []
+                                        'permits' => $permits ?? [],
+                                        'eager' => true
                                     ])
+                                    @else
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit', 'title' => 'Form Working Permit', 'type' => 'umum', 'notification' => $notification])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-gaspanas', 'title' => 'Edit Working Permit Gas Panas', 'type' => 'gaspanas', 'notification' => $notification])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-air', 'title' => 'Edit Working Permit Air', 'type' => 'air', 'notification' => $notification, 'maxWidth' => 'max-w-5xl'])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-ketinggian', 'title' => 'Edit Working Permit Ketinggian', 'type' => 'ketinggian', 'notification' => $notification, 'maxWidth' => 'max-w-5xl'])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-ruang-tertutup', 'title' => 'Edit Working Permit Ruang Tertutup', 'type' => 'ruang-tertutup', 'notification' => $notification])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-perancah', 'title' => 'Edit Perancah', 'type' => 'perancah', 'notification' => $notification, 'maxWidth' => 'max-w-6xl'])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-risiko-panas', 'title' => 'Edit Risiko Panas', 'type' => 'risiko-panas', 'notification' => $notification])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-beban', 'title' => 'Edit Working Permit Beban', 'type' => 'beban', 'notification' => $notification])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-penggalian', 'title' => 'Edit Working Permit Penggalian', 'type' => 'penggalian', 'notification' => $notification])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-pengangkatan', 'title' => 'Edit Working Permit Pengangkatan', 'type' => 'pengangkatan', 'notification' => $notification])
+                                        @include('components.steps.modal-working-permit-lazy', ['id' => 'modal-working_permit-listrik-tegangan-tinggi', 'title' => 'Edit Listrik Tegangan Tinggi', 'type' => 'listrik-tegangan-tinggi', 'notification' => $notification, 'maxWidth' => 'max-w-5xl'])
+                                        @include('components.steps.modal-tambah-lainnya', [
+                                            'label' => 'Tambah Permit Lain',
+                                            'id' => 'modal-tambah-lainnya',
+                                            'notification' => $notification,
+                                            'stepName' => $step['code'],
+                                            'permits' => $permits ?? [],
+                                            'eager' => false,
+                                        ])
+                                    @endif
                                 @endif
                             </div>
                         @endforeach

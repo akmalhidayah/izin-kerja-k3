@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\ApproveSikController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\User\IzinKerjaController;
+use App\Http\Controllers\User\WorkingPermitFormController;
 use App\Http\Controllers\User\TokenLinkController;
 use App\Http\Controllers\User\TokenPdfController;
 use App\Http\Controllers\User\UserNotificationController;
@@ -39,6 +40,8 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin,pgo'])->group(functi
 
     // Dashboard User
     Route::get('pengajuan-user/izin-kerja', [IzinKerjaController::class, 'index'])->name('dashboard');
+    Route::get('pengajuan-user/izin-kerja/{notification}/working-permit-form/{type}', [WorkingPermitFormController::class, 'show'])
+        ->name('working-permit.form');
     Route::post('/pengajuan-user/token-link/{type}/{id}/regenerate', [TokenLinkController::class, 'regenerate'])->name('token-links.regenerate');
 
     // ✅ Step 1: Create Notification
