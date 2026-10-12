@@ -12,12 +12,11 @@
         .header td { border: 0; vertical-align: middle; }
         .logo { max-width: 90px; max-height: 46px; }
         .title { font-size: 16px; font-weight: bold; text-align: center; }
-        .section { margin-top: 4px; background: #000; color: #fff; font-size: 10px; font-weight: bold; padding: 4px 6px; }
+        .section { margin-top: 4px; background: #000; color: #fff; font-size: 10px; font-weight: bold; padding: 4px 6px; page-break-after: avoid; }
         .label { font-weight: bold; }
         .center { text-align: center; }
         .small { font-size: 7px; }
         .value-box { min-height: 18px; }
-        .page-break { page-break-after: always; }
         .signature { max-width: 105px; max-height: 42px; }
         .no-border { border: 0; }
         .instructions { min-height: 300px; white-space: pre-wrap; }
@@ -125,8 +124,6 @@
         <tr><td colspan="3"><span class="label">Sertifikat Kerja Isolasi Energi:</span> {{ $permit->energy_isolation_certificate ? 'Terlampir' : '-' }}</td></tr>
     </tbody>
 </table>
-
-<div class="page-break"></div>
 
 <div class="section">4. Bahaya dan Kontrol Tambahan yang Teridentifikasi</div>
 <table>
