@@ -32,7 +32,7 @@
     $issuerValues = old('issuer_confirmations', $permit?->issuer_confirmations ?? []);
     $hazardRows = old('additional_hazards', $permit?->additional_hazards ?? []);
     $hazardRows = is_array($hazardRows) ? array_values($hazardRows) : [];
-    while (count($hazardRows) < 5) {
+    if (count($hazardRows) === 0) {
         $hazardRows[] = ['hazard' => '', 'control' => '', 'pic' => ''];
     }
 
@@ -50,14 +50,10 @@
     <input type="hidden" name="clear_all_signatures" value="0">
 
     <div class="border border-gray-800 rounded-md bg-white p-4 text-sm shadow">
-        <div class="flex items-start justify-between gap-4 border-b pb-3">
+        <div class="border-b pb-3">
             <div>
                 <h2 class="text-xl font-bold uppercase">Izin Bekerja pada Listrik Tegangan Tinggi</h2>
                 <p class="mt-1 text-xs text-gray-600">Permit Issuer harus melengkapi seluruh bagian pada form ini.</p>
-            </div>
-            <div class="w-48">
-                <label class="block text-xs font-semibold">Nomor Permit</label>
-                <input type="text" name="permit_number" value="{{ old('permit_number', $permit?->permit_number) }}" class="mt-1 w-full rounded border-gray-300 text-sm">
             </div>
         </div>
 
@@ -176,25 +172,54 @@
         </div>
 
         <h3 class="mt-5 bg-black px-3 py-2 font-bold text-white">4. Bahaya dan Kontrol Tambahan yang Teridentifikasi</h3>
-        <div class="mt-3 overflow-x-auto">
+        <div
+            class="mt-3 overflow-x-auto"
+            x-data="{
+                hazardRows: {{ Js::from($hazardRows) }},
+                tambahBaris() {
+                    this.hazardRows.push({ hazard: '', control: '', pic: '' });
+                },
+                hapusBaris(index) {
+                    this.hazardRows.splice(index, 1);
+                    if (this.hazardRows.length === 0) {
+                        this.tambahBaris();
+                    }
+                }
+            }"
+        >
             <table class="w-full border-collapse text-sm">
                 <thead>
                     <tr class="bg-gray-100">
                         <th class="border p-2">Bahaya</th>
                         <th class="border p-2">Kontrol</th>
                         <th class="w-40 border p-2">PIC</th>
+                        <th class="w-20 border p-2">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($hazardRows as $index => $row)
+                    <template x-for="(row, index) in hazardRows" :key="index">
                         <tr>
-                            <td class="border p-1"><textarea name="additional_hazards[{{ $index }}][hazard]" rows="2" class="w-full border-0 text-sm">{{ $row['hazard'] ?? '' }}</textarea></td>
-                            <td class="border p-1"><textarea name="additional_hazards[{{ $index }}][control]" rows="2" class="w-full border-0 text-sm">{{ $row['control'] ?? '' }}</textarea></td>
-                            <td class="border p-1"><input type="text" name="additional_hazards[{{ $index }}][pic]" value="{{ $row['pic'] ?? '' }}" class="w-full border-0 text-sm"></td>
+                            <td class="border p-1">
+                                <textarea :name="`additional_hazards[${index}][hazard]`" x-model="row.hazard" rows="2" class="w-full border-0 text-sm"></textarea>
+                            </td>
+                            <td class="border p-1">
+                                <textarea :name="`additional_hazards[${index}][control]`" x-model="row.control" rows="2" class="w-full border-0 text-sm"></textarea>
+                            </td>
+                            <td class="border p-1">
+                                <input type="text" :name="`additional_hazards[${index}][pic]`" x-model="row.pic" class="w-full border-0 text-sm">
+                            </td>
+                            <td class="border p-1 text-center">
+                                <button type="button" @click="hapusBaris(index)" class="rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white hover:bg-red-600">
+                                    Hapus
+                                </button>
+                            </td>
                         </tr>
-                    @endforeach
+                    </template>
                 </tbody>
             </table>
+            <button type="button" @click="tambahBaris()" class="mt-3 rounded bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700">
+                + Tambah Bahaya
+            </button>
         </div>
 
         <h3 class="mt-5 bg-black px-3 py-2 font-bold text-white">5. Handover Perizinan</h3>

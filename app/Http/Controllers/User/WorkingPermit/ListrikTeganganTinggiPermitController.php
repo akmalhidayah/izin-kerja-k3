@@ -44,7 +44,6 @@ class ListrikTeganganTinggiPermitController extends Controller
     {
         $validated = $request->validate([
             'notification_id' => ['required', 'integer', 'exists:notifications,id'],
-            'permit_number' => ['nullable', 'string', 'max:100'],
             'work_location' => ['nullable', 'string', 'max:255'],
             'work_date' => ['nullable', 'date'],
             'equipment_machine' => ['nullable', 'string'],
@@ -96,7 +95,6 @@ class ListrikTeganganTinggiPermitController extends Controller
 
         $data = $this->filterEmptyPermitValues([
             'notification_id' => (int) $validated['notification_id'],
-            'permit_number' => $validated['permit_number'] ?? null,
             'work_location' => $validated['work_location'] ?? null,
             'work_date' => $validated['work_date'] ?? null,
             'equipment_machine' => $validated['equipment_machine'] ?? null,

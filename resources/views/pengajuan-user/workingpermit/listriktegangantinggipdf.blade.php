@@ -12,7 +12,6 @@
         .header td { border: 0; vertical-align: middle; }
         .logo { max-width: 90px; max-height: 46px; }
         .title { font-size: 16px; font-weight: bold; text-align: center; }
-        .number { margin-top: 3px; font-size: 10px; font-weight: bold; text-align: center; }
         .section { margin-top: 4px; background: #000; color: #fff; font-size: 10px; font-weight: bold; padding: 4px 6px; }
         .label { font-weight: bold; }
         .center { text-align: center; }
@@ -56,10 +55,17 @@
     $safetyValues = $permit->safety_requirements ?? [];
     $issuerValues = $permit->issuer_confirmations ?? [];
     $hazards = is_array($permit->additional_hazards ?? null) ? $permit->additional_hazards : [];
-    while (count($hazards) < 5) {
-        $hazards[] = ['hazard' => '', 'control' => '', 'pic' => ''];
-    }
-    $mark = fn ($actual, $expected) => $actual === $expected ? '[X]' : '[ ]';
+    $hazards = array_values(array_filter($hazards, fn ($row) =>
+        trim((string) ($row['hazard'] ?? '')) !== ''
+        || trim((string) ($row['control'] ?? '')) !== ''
+        || trim((string) ($row['pic'] ?? '')) !== ''
+    ));
+    $answer = fn ($value) => match ($value) {
+        'ya' => 'Ya',
+        'tidak' => 'Tidak',
+        'na' => 'N/A',
+        default => '-',
+    };
     $date = fn ($value) => $value ? $value->format('d-m-Y') : '-';
     $signatureFile = function (?string $path): ?string {
         if (!$path || str_starts_with($path, 'data:image')) {
@@ -75,7 +81,6 @@
         <td style="width: 20%;"><img src="file://{{ public_path('images/logo-sig.png') }}" class="logo" alt="SIG"></td>
         <td>
             <div class="title">IZIN BEKERJA PADA LISTRIK TEGANGAN TINGGI</div>
-            <div class="number">NOMOR: {{ $permit->permit_number ?: '-' }}</div>
         </td>
         <td style="width: 20%; text-align: right;"><img src="file://{{ public_path('images/logo-st.png') }}" class="logo" alt="Semen Tonasa"></td>
     </tr>
@@ -95,12 +100,12 @@
 <table>
     <tr>
         <td><span class="label">Apakah izin kerja lain diperlukan?</span><br>Jenis dan nomor izin: {{ $permit->other_permit_details ?: '-' }}</td>
-        <td class="center" style="width: 18%;">{{ $mark($permit->other_permit_status, 'ya') }} Ya&nbsp;&nbsp;{{ $mark($permit->other_permit_status, 'na') }} N/A</td>
+        <td class="center" style="width: 18%;">{{ $answer($permit->other_permit_status) }}</td>
     </tr>
     @foreach ($documentationItems as $key => $label)
         <tr>
             <td>{{ $label }}</td>
-            <td class="center">{{ $mark($documentationValues[$key] ?? null, 'ya') }} Ya&nbsp;&nbsp;{{ $mark($documentationValues[$key] ?? null, 'na') }} N/A</td>
+            <td class="center">{{ $answer($documentationValues[$key] ?? null) }}</td>
         </tr>
     @endforeach
     <tr><td colspan="2"><span class="label">Dokumen pendukung:</span> {{ $permit->supporting_document ? 'Terlampir' : '-' }}</td></tr>
@@ -108,13 +113,13 @@
 
 <div class="section">3. Persyaratan Kesehatan dan Keselamatan Kerja Listrik</div>
 <table class="small">
-    <thead><tr><th>Pemeriksaan Kondisi Umum Pekerjaan</th><th style="width: 15%;">Butuh?<br>Ya / Tidak</th><th style="width: 15%;">Dipenuhi?<br>Ya / Tidak</th></tr></thead>
+    <thead><tr><th>Pemeriksaan Kondisi Umum Pekerjaan</th><th style="width: 15%;">Butuh?</th><th style="width: 15%;">Dipenuhi?</th></tr></thead>
     <tbody>
         @foreach ($safetyItems as $key => $label)
             <tr>
                 <td>{{ $label }}</td>
-                <td class="center">{{ $mark($safetyValues[$key]['needed'] ?? null, 'ya') }} Ya&nbsp;{{ $mark($safetyValues[$key]['needed'] ?? null, 'tidak') }} Tidak</td>
-                <td class="center">{{ $mark($safetyValues[$key]['fulfilled'] ?? null, 'ya') }} Ya&nbsp;{{ $mark($safetyValues[$key]['fulfilled'] ?? null, 'tidak') }} Tidak</td>
+                <td class="center">{{ $answer($safetyValues[$key]['needed'] ?? null) }}</td>
+                <td class="center">{{ $answer($safetyValues[$key]['fulfilled'] ?? null) }}</td>
             </tr>
         @endforeach
         <tr><td colspan="3"><span class="label">Sertifikat Kerja Isolasi Energi:</span> {{ $permit->energy_isolation_certificate ? 'Terlampir' : '-' }}</td></tr>
@@ -127,9 +132,11 @@
 <table>
     <thead><tr><th>Bahaya</th><th>Kontrol</th><th style="width: 14%;">PIC</th></tr></thead>
     <tbody>
-        @foreach ($hazards as $row)
-            <tr style="height: 25px;"><td>{{ $row['hazard'] ?? '' }}</td><td>{{ $row['control'] ?? '' }}</td><td>{{ $row['pic'] ?? '' }}</td></tr>
-        @endforeach
+        @forelse ($hazards as $row)
+            <tr><td>{{ $row['hazard'] ?? '' }}</td><td>{{ $row['control'] ?? '' }}</td><td>{{ $row['pic'] ?? '' }}</td></tr>
+        @empty
+            <tr><td colspan="3" class="center">-</td></tr>
+        @endforelse
     </tbody>
 </table>
 
@@ -137,7 +144,7 @@
 <table>
     <tr><td colspan="2" class="label">Permit Issuer</td></tr>
     @foreach ($issuerStatements as $key => $statement)
-        <tr><td>{{ $statement }}</td><td class="center" style="width: 10%;">{{ $mark($issuerValues[$key] ?? null, 'ya') }} Ya</td></tr>
+        <tr><td>{{ $statement }}</td><td class="center" style="width: 10%;">{{ $answer($issuerValues[$key] ?? null) }}</td></tr>
     @endforeach
 </table>
 <table>
@@ -150,7 +157,7 @@
 </table>
 <table>
     <tr><td colspan="2" class="label">Permit Receiver</td></tr>
-    <tr><td>Saya telah membaca dan mengerti syarat-syarat pada izin kerja ini dan akan melaksanakan pengendalian bahaya yang tertulis di sini.</td><td class="center" style="width: 10%;">{{ $mark($permit->receiver_confirmation, 'ya') }} Ya</td></tr>
+    <tr><td>Saya telah membaca dan mengerti syarat-syarat pada izin kerja ini dan akan melaksanakan pengendalian bahaya yang tertulis di sini.</td><td class="center" style="width: 10%;">{{ $answer($permit->receiver_confirmation) }}</td></tr>
 </table>
 <table>
     <tr>

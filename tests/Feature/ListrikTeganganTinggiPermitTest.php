@@ -41,7 +41,6 @@ class ListrikTeganganTinggiPermitTest extends TestCase
             route('working-permit.listrik-tegangan-tinggi.store'),
             [
                 'notification_id' => $notification->id,
-                'permit_number' => 'LTT-001',
                 'work_location' => 'Substation A',
                 'documentation_checks' => [
                     'method_statement' => 'ya',
@@ -55,6 +54,7 @@ class ListrikTeganganTinggiPermitTest extends TestCase
                 ],
                 'additional_hazards' => [
                     ['hazard' => 'Arc flash', 'control' => 'Arc-rated PPE', 'pic' => 'Supervisor'],
+                    ['hazard' => 'Sengatan listrik', 'control' => 'Isolasi energi', 'pic' => 'Teknisi'],
                 ],
                 'issuer_confirmations' => [
                     'area_and_equipment_checked' => 'ya',
@@ -66,9 +66,11 @@ class ListrikTeganganTinggiPermitTest extends TestCase
         $response->assertSessionHasNoErrors();
 
         $permit = WorkPermitListrikTeganganTinggi::where('notification_id', $notification->id)->firstOrFail();
-        $this->assertSame('LTT-001', $permit->permit_number);
+        $this->assertNull($permit->permit_number);
         $this->assertSame('ya', $permit->documentation_checks['method_statement']);
         $this->assertSame('Arc flash', $permit->additional_hazards[0]['hazard']);
+        $this->assertSame('Sengatan listrik', $permit->additional_hazards[1]['hazard']);
+        $this->assertCount(2, $permit->additional_hazards);
         $this->assertNotNull($permit->token);
         $this->assertNotNull($permit->token_expires_at);
     }
@@ -86,7 +88,9 @@ class ListrikTeganganTinggiPermitTest extends TestCase
 
         $this->get(route('working-permit.listrik-tegangan-tinggi.token', $permit->token))
             ->assertOk()
-            ->assertSee('Izin Bekerja pada Listrik Tegangan Tinggi');
+            ->assertSee('Izin Bekerja pada Listrik Tegangan Tinggi')
+            ->assertSee('+ Tambah Bahaya')
+            ->assertDontSee('Nomor Permit');
 
         $this->post(route('working-permit.listrik-tegangan-tinggi.token.store', $permit->token), [
             'work_location' => 'Substation Baru',
