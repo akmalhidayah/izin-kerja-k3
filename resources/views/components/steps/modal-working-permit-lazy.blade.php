@@ -1,3 +1,4 @@
+@if ($notification ?? null)
 @php
     $maxWidth = $maxWidth ?? 'max-w-4xl';
 @endphp
@@ -59,3 +60,4 @@
         </div>
     </div>
 </div>
+@endif

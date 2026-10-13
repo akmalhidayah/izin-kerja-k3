@@ -1,3 +1,4 @@
+@if ($notification ?? null)
 <div 
     x-show="activeModal === '{{ $id }}'" 
     x-cloak 
@@ -181,3 +182,4 @@
         </div>
     </div>
 </div>
+@endif

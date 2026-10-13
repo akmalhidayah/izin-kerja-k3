@@ -55,6 +55,26 @@ class WorkingPermitFormTest extends TestCase
             ->assertDontSee('izin_khusus[]', false);
     }
 
+    public function test_user_without_a_notification_can_open_the_dashboard(): void
+    {
+        $user = User::factory()->create(['usertype' => 'user']);
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee('working-permit-form/umum', false);
+    }
+
+    public function test_pgo_without_a_notification_can_open_the_dashboard(): void
+    {
+        $pgo = User::factory()->create(['usertype' => 'pgo']);
+
+        $this->actingAs($pgo)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee('working-permit-form/umum', false);
+    }
+
     private function createNotification(User $user): Notification
     {
         return Notification::create([

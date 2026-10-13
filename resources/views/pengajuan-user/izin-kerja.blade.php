@@ -949,6 +949,7 @@
                                         ])
                                     @endif
     @elseif ($step['code'] === 'working_permit')
+        @if ($notification)
         @if ($renderPermitFormsEagerly)
         {{-- Modal Permit Umum --}}
         @include('components.steps.modal-working-permit', [
@@ -1086,6 +1087,7 @@
                 'permits' => $permits ?? [],
                 'eager' => false,
             ])
+        @endif
         @endif
                                 @else
                                    @include('components.steps.modal-upload', [

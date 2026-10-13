@@ -445,6 +445,7 @@
                                         ])
                                     @endif
                                 @elseif ($step['code'] === 'working_permit')
+                                    @if ($notification)
                                     @if ($renderPermitFormsEagerly)
                                     @include('components.steps.modal-working-permit', [
                                         'id' => 'modal-working_permit',
@@ -579,6 +580,7 @@
                                             'permits' => $permits ?? [],
                                             'eager' => false,
                                         ])
+                                    @endif
                                     @endif
                                 @endif
                             </div>
