@@ -27,10 +27,24 @@
 
     <style>
         [x-cloak]{ display:none !important; }
+
+        /* Header admin: foto pabrik + gradien gelap ke merah brand */
+        .topbar-hero {
+            background-color: #0f172a;
+            background-image:
+                linear-gradient(100deg, rgba(15,23,42,.92) 0%, rgba(15,23,42,.78) 42%, rgba(153,27,27,.78) 100%),
+                url('{{ asset('images/bg-login.jpg') }}');
+            background-size: cover;
+            background-position: center 62%;
+        }
+
+        /* Jangan sampai sticky pecah oleh overflow-x di leluhur header (clip tidak membuat scroll container) */
+        body, body > div[x-data] { overflow-x: clip; }
+        .topbar-hero button:hover { background-color: rgba(255,255,255,.10); }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 overflow-x-hidden">
+<body class="bg-slate-50 text-slate-800 overflow-x-clip">
 <div
     x-data="{
         sidebarOpen: true,
@@ -44,7 +58,7 @@
         closeMobile(){ this.mobileOpen = false; }
     }"
     x-init="$watch('mobileOpen', v => document.body.classList.toggle('overflow-hidden', v))"
-    class="min-h-screen overflow-x-hidden"
+    class="min-h-screen overflow-x-clip"
 >
 
     <!-- MOBILE OVERLAY -->
@@ -289,21 +303,21 @@
          :class="sidebarOpen ? 'lg:pl-72' : 'lg:pl-20'">
 
         <!-- TOPBAR -->
-        <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-slate-200">
+        <header class="topbar-hero sticky top-0 z-20 shadow-md shadow-slate-900/20">
             <div class="px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
                 <!-- Left: mobile menu button -->
                 <div class="flex min-w-0 items-center gap-3">
                     <button
                         @click="toggle()"
-                        class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-700 transition"
+                        class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-white/10 text-white transition"
                         aria-label="Open Menu"
                     >
                         <i data-lucide="menu" class="w-5 h-5"></i>
                     </button>
 
                     <div class="hidden lg:block">
-                        <div class="text-sm text-slate-500">Selamat datang,</div>
-                        <div class="font-semibold text-slate-900">{{ Auth::user()->name ?? 'Admin' }}</div>
+                        <div class="text-sm text-slate-300">Selamat datang,</div>
+                        <div class="font-semibold text-white">{{ Auth::user()->name ?? 'Admin' }}</div>
                     </div>
                 </div>
 
@@ -336,12 +350,12 @@
                         <button
                             type="button"
                             @click="open=!open"
-                            class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-700 transition"
+                            class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-white/10 text-white transition"
                             aria-label="Pemberitahuan"
                         >
                             <i data-lucide="bell" class="w-5 h-5"></i>
                             @if($adminUnreadNotifications > 0)
-                                <span class="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-red-600 text-white text-[9px] leading-none font-bold flex items-center justify-center ring-2 ring-white">
+                                <span class="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-red-600 text-white text-[9px] leading-none font-bold flex items-center justify-center ring-2 ring-slate-900">
                                     {{ $adminUnreadNotifications > 99 ? '99+' : $adminUnreadNotifications }}
                                 </span>
                             @endif
@@ -420,15 +434,15 @@
                     <div class="relative" x-data="{ open:false }">
                         <button
                             @click="open=!open"
-                            class="inline-flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100 transition"
+                            class="inline-flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/10 transition"
                         >
-                            <span class="hidden sm:block text-sm font-medium text-slate-800">
+                            <span class="hidden sm:block text-sm font-medium text-white">
                                 {{ Auth::user()->name ?? 'Admin' }}
                             </span>
-                            <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                            <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/20">
                                 <i data-lucide="user" class="w-5 h-5"></i>
                             </span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-white/70"></i>
                         </button>
 
                         <div
