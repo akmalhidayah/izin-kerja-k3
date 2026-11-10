@@ -118,76 +118,79 @@
     <!-- LEFT (CHART AREA) -->
     <div class="lg:col-span-2 space-y-4">
 
-        <!-- ========================= -->
-        <!-- 🔥 CHART EXISTING -->
-        <!-- ========================= -->
+        {{-- ===== TOP PENGAJUAN (vendor + karyawan, satu grafik garis) ===== --}}
+        @php
+            $topVendorRows = $topVendorUser->map(fn ($i) => ['name' => $i->name, 'total' => (int) $i->total_requests])->values();
+            $topPgoRows = $topVendorPgo->map(fn ($i) => ['name' => $i->name, 'total' => (int) $i->total_requests])->values();
+        @endphp
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-chart-area text-blue-500"></i>
-                    Statistik Pengajuan Vendor & Karyawan
-                </h2>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div>
+                    <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-blue-500"></i>
+                        Top Pengajuan SIK
+                    </h2>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Peringkat 1 adalah pengajuan terbanyak. Arahkan kursor untuk melihat nama.</p>
+                </div>
+                <div class="flex items-center gap-3 text-[11px] text-gray-600">
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-green-600"></span>Vendor (Top {{ $topVendorRows->count() }})</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>Karyawan PGO (Top {{ $topPgoRows->count() }})</span>
+                </div>
             </div>
 
-            <div class="rounded-xl bg-gray-50 px-3 pt-3 pb-3">
-
-                @if ($topVendorPgo->isNotEmpty() || $topVendorUser->isNotEmpty())
-
-                    <!-- 🟢 VENDOR -->
-                    <div class="mb-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                            <h3 class="text-xs font-semibold text-gray-700">Top 10 Pengajuan SIK Vendor</h3>
-                        </div>
-                        <canvas id="chartVendor" height="120"></canvas>
-                    </div>
-
-                    <!-- 🔵 PGO -->
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
-                            <h3 class="text-xs font-semibold text-gray-700">Top 5 Pengajuan SIK Karyawan</h3>
-                        </div>
-                        <canvas id="chartPgo" height="120"></canvas>
-                    </div>
-
-                @else
-                    <div class="py-10 text-center text-sm text-gray-500">
-                        Belum ada data vendor.
-                    </div>
-                @endif
-
-            </div>
+            @if ($topVendorRows->isNotEmpty() || $topPgoRows->isNotEmpty())
+                <div class="relative" style="height: 320px">
+                    <canvas id="chartTop"></canvas>
+                </div>
+            @else
+                <div class="py-10 text-center text-sm text-gray-500">Belum ada data pengajuan.</div>
+            @endif
         </div>
 
-        <!-- ========================= -->
-        <!-- 🔥 NEW: CHART BULANAN -->
-        <!-- ========================= -->
+        {{-- ===== TREN TAHUNAN ===== --}}
+        @php
+            $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            $yearTotal = array_sum($monthlyChart);
+            $peakValue = $monthlyChart ? max($monthlyChart) : 0;
+            $peakMonth = $peakValue > 0 ? $monthNames[array_search($peakValue, $monthlyChart)] : '-';
+            $monthAvg = (int) round($yearTotal / 12);
+        @endphp
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-chart-line text-indigo-500"></i>
-Tren Pengajuan Izin Kerja ({{ $selectedYear }})
+                    Tren Pengajuan Izin Kerja {{ $selectedYear }}
                 </h2>
-                 <!-- 🔥 DROPDOWN TAHUN -->
-    <form method="GET">
-        <select name="year" onchange="this.form.submit()"
-            class="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500">
-
-            @foreach ($years as $year)
-                <option value="{{ $year }}" 
-                    {{ $year == $selectedYear ? 'selected' : '' }}>
-                    {{ $year }}
-                </option>
-            @endforeach
-
-        </select>
-    </form>
-
+                <form method="GET">
+                    <select name="year" onchange="this.form.submit()"
+                            class="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500">
+                        @foreach ($years as $year)
+                            <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>{{ $year }}</option>
+                        @endforeach
+                    </select>
+                </form>
             </div>
 
-            <div class="rounded-xl bg-gray-50 px-3 pt-3 pb-3">
-                <canvas id="monthlyChart" height="100"></canvas>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="rounded-xl bg-blue-50 px-3 py-2">
+                    <p class="text-[10px] text-blue-700/80">Total setahun</p>
+                    <p class="text-lg font-extrabold text-blue-700 leading-tight">{{ number_format($yearTotal, 0, ',', '.') }}</p>
+                </div>
+                <div class="rounded-xl bg-indigo-50 px-3 py-2">
+                    <p class="text-[10px] text-indigo-700/80">Rata-rata / bulan</p>
+                    <p class="text-lg font-extrabold text-indigo-700 leading-tight">{{ number_format($monthAvg, 0, ',', '.') }}</p>
+                </div>
+                <div class="rounded-xl bg-emerald-50 px-3 py-2">
+                    <p class="text-[10px] text-emerald-700/80">Bulan tertinggi</p>
+                    <p class="text-lg font-extrabold text-emerald-700 leading-tight">
+                        {{ $peakMonth }}
+                        @if ($peakValue > 0)<span class="text-xs font-semibold">({{ number_format($peakValue, 0, ',', '.') }})</span>@endif
+                    </p>
+                </div>
+            </div>
+
+            <div class="relative" style="height: 320px">
+                <canvas id="monthlyChart"></canvas>
             </div>
         </div>
 
@@ -396,23 +399,15 @@ const counters = document.querySelectorAll('.counter');
         requestAnimationFrame(animate);
     });
 // ======================
-// 🔥 MONTHLY CHART (TAHUNAN)
+// TREN BULANAN (1 TAHUN)
 // ======================
 const ctxMonthly = document.getElementById('monthlyChart');
 
 if (ctxMonthly) {
-
-    const labels = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-    ];
-
+    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     const data = @json($monthlyChart);
-
-    // 🔥 GRADIENT
-    const gradient = ctxMonthly.getContext('2d').createLinearGradient(0, 0, 0, 200);
-    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.25)');
-gradient.addColorStop(1, 'rgba(37, 99, 235, 0.03)');
+    const year = @json((string) $selectedYear);
+    const line = '#2563eb';
 
     new Chart(ctxMonthly, {
         type: 'line',
@@ -421,83 +416,54 @@ gradient.addColorStop(1, 'rgba(37, 99, 235, 0.03)');
             datasets: [{
                 label: 'Total Pengajuan',
                 data: data,
-                bborderColor: 'rgba(37, 99, 235, 1)',
-                backgroundColor: gradient,
+                borderColor: line,
+                borderWidth: 3,
+                tension: 0.4,
                 fill: true,
-
-                // 🔥 smooth line
-                tension: 0.5,
-                cubicInterpolationMode: 'monotone',
-
-                // 🔥 titik
+                backgroundColor(context) {
+                    const { ctx, chartArea } = context.chart;
+                    if (!chartArea) return 'rgba(37, 99, 235, 0.15)';
+                    const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    g.addColorStop(0, 'rgba(37, 99, 235, 0.28)');
+                    g.addColorStop(1, 'rgba(37, 99, 235, 0.02)');
+                    return g;
+                },
                 pointRadius: 4,
                 pointHoverRadius: 7,
                 pointBackgroundColor: '#fff',
-                pointBorderColor: 'rgba(37, 99, 235, 1)',
-                pointBorderWidth: 2,
-
-                borderWidth: 3
+                pointBorderColor: line,
+                pointBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-
-            // 🔥 animasi naik dari bawah
-            animation: {
-                duration: 1400,
-                easing: 'easeInOutQuart'
-            },
-            animations: {
-                y: {
-                    from: 0
-                }
-            },
-
-            interaction: {
-                intersect: false,
-                mode: 'nearest'
-            },
-
+            animation: { duration: 1200, easing: 'easeOutQuart' },
+            interaction: { intersect: false, mode: 'index' },
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: '#111827',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
                     padding: 10,
                     displayColors: false,
                     callbacks: {
-                        label: function(context) {
-                            return context.raw + ' pengajuan';
-                        }
+                        title: (items) => labels[items[0].dataIndex] + ' ' + year,
+                        label: (context) => context.raw + ' pengajuan'
                     }
                 }
             },
-
-            elements: {
-                line: {
-                    borderJoinStyle: 'round'
-                }
-            },
-
             scales: {
-                x: {
-                    grid: { display: false }
-                },
+                x: { grid: { display: false } },
                 y: {
                     beginAtZero: true,
-                    ticks: {
-                        stepSize: 10 // opsional
-                    },
-                    grid: {
-                        color: 'rgba(0,0,0,0.05)'
-                    }
+                    ticks: { precision: 0 },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
                 }
             }
         }
     });
 }
+
     // ======================
     // 🔵 PIE CHART ADMIN
     // ======================
@@ -559,117 +525,80 @@ gradient.addColorStop(1, 'rgba(37, 99, 235, 0.03)');
 
 
     // ======================
-    // 🔥 FUNCTION LINE CHART (UPGRADE)
+    // TOP PENGAJUAN: dua garis (vendor & PGO) berdasarkan peringkat
     // ======================
-    function createChart(ctx, labels, data, color) {
+    const ctxTop = document.getElementById('chartTop');
+    if (ctxTop) {
+        const vendorRows = @json($topVendorRows);
+        const pgoRows = @json($topPgoRows);
+        const size = Math.max(vendorRows.length, pgoRows.length);
+        const labels = Array.from({ length: size }, (_, i) => '#' + (i + 1));
+        const series = [
+            { label: 'Vendor', rows: vendorRows, color: '#16a34a', fill: '22, 163, 74' },
+            { label: 'Karyawan (PGO)', rows: pgoRows, color: '#2563eb', fill: '37, 99, 235' }
+        ];
 
-        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
-        gradient.addColorStop(0, color.replace('1)', '0.25)'));
-        gradient.addColorStop(1, color.replace('1)', '0.02)'));
-
-        return new Chart(ctx, {
+        new Chart(ctxTop, {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    data: data,
-                    borderColor: color,
-                    backgroundColor: gradient,
-                    borderWidth: 3, // 🔥 lebih tegas
-                    tension: 0.5,   // 🔥 lebih smooth naik turun
+                datasets: series.map((item) => ({
+                    label: item.label,
+                    data: Array.from({ length: size }, (_, i) => item.rows[i] ? item.rows[i].total : null),
+                    borderColor: item.color,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    cubicInterpolationMode: 'monotone',
                     fill: true,
-
-                    // 🔥 titik lebih hidup
+                    backgroundColor(context) {
+                        const { ctx, chartArea } = context.chart;
+                        if (!chartArea) return 'rgba(' + item.fill + ', 0.12)';
+                        const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        g.addColorStop(0, 'rgba(' + item.fill + ', 0.22)');
+                        g.addColorStop(1, 'rgba(' + item.fill + ', 0.02)');
+                        return g;
+                    },
                     pointRadius: 4,
                     pointHoverRadius: 7,
                     pointBackgroundColor: '#fff',
-                    pointBorderColor: color,
-                    pointBorderWidth: 2,
-
-                    cubicInterpolationMode: 'monotone' // 🔥 smooth curve
-                }]
+                    pointBorderColor: item.color,
+                    pointBorderWidth: 2
+                }))
             },
             options: {
                 responsive: true,
-
-                // 🔥 ANIMASI NAIK DARI BAWAH
-                animation: {
-                    duration: 1400,
-                    easing: 'easeInOutQuart'
-                },
-
-                animations: {
-                    y: {
-                        from: 0 // 🔥 efek naik dari bawah
-                    }
-                },
-
-                interaction: {
-                    intersect: false,
-                    mode: 'nearest'
-                },
-
+                maintainAspectRatio: false,
+                animation: { duration: 1200, easing: 'easeOutQuart' },
+                interaction: { intersect: false, mode: 'index' },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
                         backgroundColor: '#111827',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
                         padding: 10,
-                        displayColors: false
+                        boxPadding: 4,
+                        callbacks: {
+                            title: (items) => 'Peringkat ' + (items[0].dataIndex + 1),
+                            label: (context) => {
+                                const row = series[context.datasetIndex].rows[context.dataIndex];
+                                return row ? row.name + ': ' + row.total + ' pengajuan' : '';
+                            }
+                        }
                     }
                 },
-
-                elements: {
-                    line: {
-                        borderJoinStyle: 'round'
-                    }
-                },
-
                 scales: {
                     x: {
-                        ticks: { display: false },
-                        grid: { display: false }
+                        grid: { display: false },
+                        title: { display: true, text: 'Peringkat', color: '#6b7280', font: { size: 11 } }
                     },
                     y: {
-                        ticks: { display: false },
-                        grid: {
-                            color: 'rgba(0,0,0,0.04)'
-                        }
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
                     }
                 }
             }
         });
     }
-
-
-    // ======================
-    // 🔵 PGO (KARYAWAN)
-    // ======================
-    const ctxPgo = document.getElementById('chartPgo');
-    if (ctxPgo) {
-        createChart(
-            ctxPgo,
-            {!! json_encode($topVendorPgo->pluck('name')) !!},
-            {!! json_encode($topVendorPgo->pluck('total_requests')) !!},
-            'rgba(37, 99, 235, 1)'
-        );
-    }
-
-
-    // ======================
-    // 🟢 VENDOR
-    // ======================
-    const ctxVendor = document.getElementById('chartVendor');
-    if (ctxVendor) {
-        createChart(
-            ctxVendor,
-            {!! json_encode($topVendorUser->pluck('name')) !!},
-            {!! json_encode($topVendorUser->pluck('total_requests')) !!},
-            'rgba(22, 163, 74, 1)'
-        );
-    }
-
 });
 </script>
 </x-admin-layout>
