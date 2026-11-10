@@ -120,7 +120,7 @@
     }
     .hero-grid {
       position: relative; display: grid; gap: 20px; align-items: center;
-      padding-block: 28px 56px;
+      padding-block: 28px 96px; /* ruang bawah untuk panel berita yang menimpa hero */
     }
     .hero-copy h1 {
       font-size: clamp(32px, 8.5vw, 56px); line-height: 1.08; letter-spacing: -.035em;
@@ -198,11 +198,19 @@
     .pill { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #f1f4f8; color: var(--muted); }
     .step.final .step-num { background: var(--red); border-color: var(--red); color: #fff; }
 
-    /* ===== Berita (scroll-snap, tanpa JS carousel) ===== */
+    /* ===== Berita: panel putih yang menimpa hero (scroll-snap, tanpa JS carousel) ===== */
+    .news-section { display: flow-root; background: var(--bg-soft); padding-bottom: 64px; position: relative; z-index: 2; }
+    .news-panel {
+      margin-top: -56px; position: relative;
+      background: #fff; border: 1px solid var(--line); border-radius: 26px;
+      padding: 24px 18px 20px;
+      box-shadow: 0 34px 60px -34px rgba(15,23,42,.35), 0 8px 20px -12px rgba(15,23,42,.12);
+    }
+    .news-panel .section-head { margin-bottom: 20px; max-width: none; }
     .news {
       display: grid; grid-auto-flow: column; grid-auto-columns: 84%; gap: 14px;
       overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px;
-      margin-inline: -20px; padding-inline: 20px; scroll-padding-inline: 20px;
+      margin-inline: -18px; padding-inline: 18px; scroll-padding-inline: 18px;
       scrollbar-width: none;
     }
     .news::-webkit-scrollbar { display: none; }
@@ -250,7 +258,10 @@
     }
     @media (min-width: 900px) {
       .section { padding-block: 96px; }
-      .hero-grid { grid-template-columns: 1.05fr 1fr; padding-block: 56px 88px; min-height: calc(100vh - 68px); max-height: 820px; }
+      .hero-grid { grid-template-columns: 1.05fr 1fr; padding-block: 56px 150px; min-height: calc(100vh - 68px); max-height: 860px; }
+      .news-section { padding-bottom: 88px; }
+      .news-panel { margin-top: -96px; padding: 36px 36px 32px; border-radius: 32px; }
+      .news-panel .section-head { margin-bottom: 26px; }
       .scene { order: 0; height: 460px; }
       .disc { width: 360px; height: 360px; margin: -180px 0 0 -180px; }
       .gear-lg { width: 210px; height: 210px; }
@@ -417,8 +428,33 @@
     </div>
   </section>
 
+  {{-- ================= BERITA (panel menimpa bagian bawah hero) ================= --}}
+  <section class="news-section" id="berita">
+    <div class="wrap">
+      <div class="news-panel reveal">
+        <div class="section-head">
+          <span class="eyebrow">Berita K3</span>
+          <h2>Kegiatan dan prestasi K3 terbaru.</h2>
+        </div>
+        <div class="news">
+          @foreach ($news as $item)
+            <a class="news-card" href="{{ $item['url'] }}" target="_blank" rel="noopener noreferrer">
+              <img src="{{ $item['img'] }}" alt="{{ $item['title'] }}" width="640" height="400" loading="lazy" decoding="async">
+              <div class="news-body">
+                <span class="news-src">{{ $item['src'] }}</span>
+                <span class="news-title">{{ $item['title'] }}</span>
+                <span class="news-desc">{{ $item['desc'] }}</span>
+                <span class="news-link">Baca selengkapnya &rarr;</span>
+              </div>
+            </a>
+          @endforeach
+        </div>
+      </div>
+    </div>
+  </section>
+
   {{-- ================= ALUR ================= --}}
-  <section class="section section-soft" id="alur">
+  <section class="section" id="alur">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Alur pengajuan</span>
@@ -439,29 +475,6 @@
         @endforeach
       </ol>
 
-    </div>
-  </section>
-
-  {{-- ================= BERITA ================= --}}
-  <section class="section" id="berita">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">Berita K3</span>
-        <h2>Kegiatan dan prestasi K3 terbaru.</h2>
-      </div>
-      <div class="news">
-        @foreach ($news as $item)
-          <a class="news-card" href="{{ $item['url'] }}" target="_blank" rel="noopener noreferrer">
-            <img src="{{ $item['img'] }}" alt="{{ $item['title'] }}" width="640" height="400" loading="lazy" decoding="async">
-            <div class="news-body">
-              <span class="news-src">{{ $item['src'] }}</span>
-              <span class="news-title">{{ $item['title'] }}</span>
-              <span class="news-desc">{{ $item['desc'] }}</span>
-              <span class="news-link">Baca selengkapnya &rarr;</span>
-            </div>
-          </a>
-        @endforeach
-      </div>
     </div>
   </section>
 
