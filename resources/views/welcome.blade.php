@@ -127,11 +127,7 @@
       margin-top: 18px; font-weight: 800;
     }
     .hero-copy h1 em { font-style: normal; color: var(--green); }
-    .hero-copy .lead { color: var(--muted); font-size: clamp(16px, 2.2vw, 18px); margin-top: 16px; max-width: 520px; }
     .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-    .hero-facts { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 28px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
-    .hero-facts li { display: inline-flex; align-items: center; gap: 8px; }
-    .hero-facts svg { width: 18px; height: 18px; color: var(--green); flex: none; }
 
     /* ===== Visual 3D (CSS 3D + SVG, tanpa library) ===== */
     .scene {
@@ -200,13 +196,7 @@
     .step-title { font-weight: 600; font-size: 15.5px; }
     .step-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .pill { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #f1f4f8; color: var(--muted); }
-    .pill.pgo { background: var(--green-soft); color: var(--green); }
     .step.final .step-num { background: var(--red); border-color: var(--red); color: #fff; }
-    .note {
-      display: flex; gap: 10px; align-items: flex-start; margin-top: 24px; padding: 14px 16px;
-      border-radius: 14px; background: #fff; border: 1px solid var(--line); color: var(--muted); font-size: 14px;
-    }
-    .note svg { width: 20px; height: 20px; color: var(--green); flex: none; margin-top: 1px; }
 
     /* ===== Berita (scroll-snap, tanpa JS carousel) ===== */
     .news {
@@ -371,19 +361,10 @@
       <div class="hero-copy">
         <span class="eyebrow">Sistem Izin Kerja Digital</span>
         <h1>Izin kerja yang <em>aman</em>, cepat, dan tertelusur.</h1>
-        <p class="lead">
-          Unit K3 PT. Semen Tonasa. Ajukan Notifikasi/OP/SPK, JSA, working permit,
-          dan dokumen K3 dalam satu tempat, lalu pantau persetujuannya langkah demi langkah.
-        </p>
         <div class="hero-actions">
           <a href="{{ route('login') }}" class="btn btn-primary">Masuk ke Sistem</a>
           <a href="#alur" class="btn btn-ghost">Lihat Alur</a>
         </div>
-        <ul class="hero-facts">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>13 langkah terstruktur</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Tanda tangan digital</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Dokumen PDF otomatis</li>
-        </ul>
       </div>
 
       {{-- Visual 3D: bisa digeser dengan jari/mouse, berhenti saat tidak terlihat --}}
@@ -442,28 +423,22 @@
       <div class="section-head reveal">
         <span class="eyebrow">Alur pengajuan</span>
         <h2>Dari notifikasi sampai Surat Izin Kerja.</h2>
-        <p>Langkah yang ditandai PGO juga berlaku untuk karyawan internal.</p>
       </div>
 
       <ol class="steps">
-        @foreach ($steps as $i => [$title, $type, $pgo])
+        @foreach ($steps as $i => [$title, $type])
           <li class="step reveal {{ $loop->last ? 'final' : '' }}">
             <span class="step-num">{{ $i + 1 }}</span>
             <div class="step-body">
               <div class="step-title">{{ $title }}</div>
               <div class="step-meta">
                 <span class="pill">{{ $type }}</span>
-                @if ($pgo)<span class="pill pgo">PGO</span>@endif
               </div>
             </div>
           </li>
         @endforeach
       </ol>
 
-      <div class="note reveal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
-        <span>Langkah berikutnya terbuka setelah langkah sebelumnya disetujui Admin K3. Jika ada revisi, catatan admin tampil langsung di dashboard Anda.</span>
-      </div>
     </div>
   </section>
 
