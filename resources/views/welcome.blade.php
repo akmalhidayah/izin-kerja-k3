@@ -37,7 +37,7 @@
       --bg: #ffffff;
       --bg-soft: #f6f8f7;
       --radius: 18px;
-      --wrap: 1120px;
+      --wrap: 1280px;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -198,28 +198,28 @@
     .pill { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #f1f4f8; color: var(--muted); }
     .step.final .step-num { background: var(--red); border-color: var(--red); color: #fff; }
 
-    /* ===== Berita: panel putih yang menimpa hero (scroll-snap, tanpa JS carousel) ===== */
-    .news-section { display: flow-root; background: var(--bg-soft); padding-bottom: 64px; position: relative; z-index: 2; }
-    .news-panel {
-      margin-top: -56px; position: relative;
-      background: #fff; border: 1px solid var(--line); border-radius: 26px;
-      padding: 24px 18px 20px;
-      box-shadow: 0 34px 60px -34px rgba(15,23,42,.35), 0 8px 20px -12px rgba(15,23,42,.12);
+    /* ===== Berita: kartu menimpa tepi hero (tanpa kontainer pembungkus) ===== */
+    .news-section {
+      --cut: 210px; /* tinggi dari atas section sampai garis pergantian latar (memotong kartu) */
+      display: flow-root; position: relative; z-index: 2;
+      margin-top: -56px; padding-bottom: 64px;
+      background: linear-gradient(180deg, transparent 0, transparent var(--cut), var(--bg-soft) var(--cut), var(--bg-soft) 100%);
     }
-    .news-panel .section-head { margin-bottom: 20px; max-width: none; }
+    .news-section .section-head { margin-bottom: 22px; max-width: none; }
     .news {
       display: grid; grid-auto-flow: column; grid-auto-columns: 84%; gap: 14px;
-      overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px;
-      margin-inline: -18px; padding-inline: 18px; scroll-padding-inline: 18px;
+      overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 20px 24px;
+      margin-inline: -20px; scroll-padding-inline: 20px;
       scrollbar-width: none;
     }
     .news::-webkit-scrollbar { display: none; }
     .news-card {
-      scroll-snap-align: start; background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+      scroll-snap-align: start; background: #fff; border: 1px solid var(--line); border-radius: 20px;
       overflow: hidden; display: flex; flex-direction: column;
-      transition: transform .2s ease, box-shadow .2s ease;
+      box-shadow: 0 26px 40px -28px rgba(15,23,42,.38), 0 6px 14px -8px rgba(15,23,42,.10);
+      transition: transform .25s ease, box-shadow .25s ease;
     }
-    .news-card:hover { transform: translateY(-3px); box-shadow: 0 16px 30px -18px rgba(15,23,42,.3); }
+    .news-card:hover { transform: translateY(-6px); box-shadow: 0 34px 50px -28px rgba(15,23,42,.45), 0 8px 18px -8px rgba(15,23,42,.12); }
     .news-card img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: #eef1f4; }
     .news-body { padding: 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
     .news-src { font-size: 12px; font-weight: 700; color: var(--red); }
@@ -259,9 +259,8 @@
     @media (min-width: 900px) {
       .section { padding-block: 96px; }
       .hero-grid { grid-template-columns: 1.05fr 1fr; padding-block: 56px 150px; min-height: calc(100vh - 68px); max-height: 860px; }
-      .news-section { padding-bottom: 88px; }
-      .news-panel { margin-top: -96px; padding: 36px 36px 32px; border-radius: 32px; }
-      .news-panel .section-head { margin-bottom: 26px; }
+      .news-section { --cut: 190px; margin-top: -100px; padding-bottom: 88px; }
+      .news-section .section-head { margin-bottom: 28px; }
       .scene { order: 0; height: 460px; }
       .disc { width: 360px; height: 360px; margin: -180px 0 0 -180px; }
       .gear-lg { width: 210px; height: 210px; }
@@ -274,7 +273,7 @@
       .step { flex-direction: column; gap: 12px; padding: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
       .step::before { display: none; }
       .step-body { padding-top: 0; }
-      .news { grid-auto-columns: calc((100% - 28px) / 3); margin-inline: 0; padding-inline: 0; overflow: visible; }
+      .news { grid-auto-columns: calc((100% - 56px) / 3); gap: 28px; margin-inline: 0; padding: 4px 0 24px; overflow: visible; }
     }
     @media (max-width: 479px) {
       .brand img + img { display: none; }
@@ -431,24 +430,22 @@
   {{-- ================= BERITA (panel menimpa bagian bawah hero) ================= --}}
   <section class="news-section" id="berita">
     <div class="wrap">
-      <div class="news-panel reveal">
-        <div class="section-head">
-          <span class="eyebrow">Berita K3</span>
-          <h2>Kegiatan dan prestasi K3 terbaru.</h2>
-        </div>
-        <div class="news">
-          @foreach ($news as $item)
-            <a class="news-card" href="{{ $item['url'] }}" target="_blank" rel="noopener noreferrer">
-              <img src="{{ $item['img'] }}" alt="{{ $item['title'] }}" width="640" height="400" loading="lazy" decoding="async">
-              <div class="news-body">
-                <span class="news-src">{{ $item['src'] }}</span>
-                <span class="news-title">{{ $item['title'] }}</span>
-                <span class="news-desc">{{ $item['desc'] }}</span>
-                <span class="news-link">Baca selengkapnya &rarr;</span>
-              </div>
-            </a>
-          @endforeach
-        </div>
+      <div class="section-head reveal">
+        <span class="eyebrow">Berita K3</span>
+        <h2>Kegiatan dan prestasi K3 terbaru.</h2>
+      </div>
+      <div class="news">
+        @foreach ($news as $item)
+          <a class="news-card" href="{{ $item['url'] }}" target="_blank" rel="noopener noreferrer">
+            <img src="{{ $item['img'] }}" alt="{{ $item['title'] }}" width="640" height="400" loading="lazy" decoding="async">
+            <div class="news-body">
+              <span class="news-src">{{ $item['src'] }}</span>
+              <span class="news-title">{{ $item['title'] }}</span>
+              <span class="news-desc">{{ $item['desc'] }}</span>
+              <span class="news-link">Baca selengkapnya &rarr;</span>
+            </div>
+          </a>
+        @endforeach
       </div>
     </div>
   </section>
