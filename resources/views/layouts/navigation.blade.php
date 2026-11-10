@@ -1,7 +1,6 @@
 <nav x-data="{ open: false }"
 class="sticky top-0 z-50 
-bg-green-600 via-emerald-600 to-green-700
-backdrop-blur-md
+bg-green-600
 border-b border-white/20 
 shadow-md">
 
@@ -13,10 +12,10 @@ shadow-md">
 
                 <!-- LOGO -->
                 <div class="flex items-center gap-2">
-                    <img src="{{ asset('images/logo-k3.png') }}"
+                    <img src="{{ asset('images/logo-k3-128.png') }}" width="40" height="40" alt="Logo K3"
                         class="w-10 h-10 rounded-xl bg-white p-1 shadow-md hover:scale-105 transition">
 
-                    <img src="{{ asset('images/logo-st.png') }}"
+                    <img src="{{ asset('images/logo-st-128.png') }}" width="40" height="40" alt="Logo Semen Tonasa"
                         class="w-10 h-10 rounded-xl bg-white p-1 shadow-md hover:scale-105 transition">
                 </div>
 
@@ -58,7 +57,7 @@ shadow-md">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="flex items-center gap-2 px-3 py-1.5 rounded-full 
-                            bg-white/90 backdrop-blur 
+                            bg-white 
                             border border-white/30 
                             shadow-md 
                             hover:shadow-lg hover:bg-white transition">
@@ -96,7 +95,7 @@ shadow-md">
             <!-- MOBILE BUTTON -->
             <div class="sm:hidden">
                 <button @click="open = !open"
-                    class="p-2 rounded-full bg-white/90 backdrop-blur border border-white/30 shadow-md hover:bg-white transition">
+                    class="p-2 rounded-full bg-white border border-white/30 shadow-md hover:bg-white transition">
 
                     <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

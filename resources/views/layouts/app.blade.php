@@ -13,23 +13,15 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <!-- PANGGIL SEKALI DI APP BLADE -->
+        {{-- Ikon: fa-lite.css (SVG inline), tidak lagi memuat Font Awesome dari CDN --}}
 
         <!-- Styles & Vite -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/css/fa-lite.css', 'resources/js/app.js'])
 
     </head>
     <body class="font-sans antialiased">
-        <!-- Preload bg image -->
-        <img src="/images/bg-login.jpg" alt="" loading="lazy" class="hidden">
-
-       <div class="min-h-screen relative">
-    <!-- Background -->
-    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/images/bg-login.jpg');"></div>
-
-    <!-- Overlay -->
-    <div class="absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
+       {{-- Latar polos (gradien statis). Foto + backdrop-blur seluruh layar dihapus karena memberatkan scroll. --}}
+       <div class="min-h-screen relative" style="background: linear-gradient(180deg, #f1f5f9 0%, #ecfdf5 100%);">
 
 <!-- Content -->
 <div class="relative z-10">
@@ -50,8 +42,8 @@
         </div>
 </div>
 
-        <!-- Move signature_pad to bottom & defer -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        {{-- SignaturePad sudah ikut di bundel app.js (window.SignaturePad), tidak perlu CDN lagi --}}
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
         @if (session('token_pdf_url'))
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
@@ -74,6 +66,5 @@
                 });
             </script>
         @endif
-        <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js" defer></script>
     </body>
 </html>

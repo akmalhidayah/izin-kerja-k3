@@ -228,3 +228,12 @@ Tanda tangan uji: gunakan PNG 1x1 base64 yang valid (lihat `JsaSignatureTest` un
 ## 8. Area yang sengaja belum dirapikan
 
 Lihat "Sharp edges" di AGENTS.md. Saat mengerjakan tugas yang menyentuh area tersebut, perbaiki secara eksplisit dengan tes; jangan memperbaikinya sambil lalu dalam tugas lain.
+
+## 9. Ikon di halaman user/PGO (fa-lite)
+
+Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. Kelas lama `fas fa-xxx` dipetakan ke SVG inline oleh `resources/css/fa-lite.css`, jadi markup tidak perlu diubah.
+
+- Hanya ikon yang tercantum di file itu yang tampil. Ikon yang belum terdaftar tampil kosong.
+- Menambah ikon: unduh SVG solid-nya dari paket `@fortawesome/fontawesome-free@6.4.0` (folder `svgs/solid`), lalu tambahkan satu baris `.fa-nama { --fa: url("data:image/svg+xml,..."); }` dengan SVG yang sudah di-URL-encode dan tanpa komentar lisensi.
+- Layout admin masih memakai Font Awesome CDN sendiri dan tidak terpengaruh.
+- File CSS ini masuk build Vite, jadi setelah mengubahnya jalankan `./deploy.sh` (dengan build).
