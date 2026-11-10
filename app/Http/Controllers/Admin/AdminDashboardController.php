@@ -70,12 +70,12 @@ public function index()
         });
 
     // =========================
-    // 🔵 TOP 5 PGO (KARYAWAN INTERNAL)
+    // 🔵 TOP 10 PGO (KARYAWAN INTERNAL)
     // =========================
     $topVendorPgo = $grouped
         ->filter(fn ($item) => $item->usertype === 'pgo')
         ->sortByDesc('total_requests')
-        ->take(5)
+        ->take(10)
         ->values();
 
     // =========================
@@ -91,7 +91,7 @@ public function index()
     // 🔥 FALLBACK BIAR GAK KOSONG
     // =========================
     if ($topVendorPgo->isEmpty()) {
-        $topVendorPgo = $grouped->sortByDesc('total_requests')->take(5)->values();
+        $topVendorPgo = $grouped->sortByDesc('total_requests')->take(10)->values();
     }
 
     if ($topVendorUser->isEmpty()) {

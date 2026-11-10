@@ -124,18 +124,11 @@
             $topPgoRows = $topVendorPgo->map(fn ($i) => ['name' => $i->name, 'total' => (int) $i->total_requests])->values();
         @endphp
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                <div>
-                    <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
-                        <i class="fas fa-chart-line text-blue-500"></i>
-                        Top Pengajuan SIK
-                    </h2>
-                    <p class="text-[11px] text-gray-500 mt-0.5">Peringkat 1 adalah pengajuan terbanyak. Arahkan kursor untuk melihat nama.</p>
-                </div>
-                <div class="flex items-center gap-3 text-[11px] text-gray-600">
-                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-green-600"></span>Vendor (Top {{ $topVendorRows->count() }})</span>
-                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>Karyawan PGO (Top {{ $topPgoRows->count() }})</span>
-                </div>
+            <div class="mb-3">
+                <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-blue-500"></i>
+                    Top Pengajuan SIK
+                </h2>
             </div>
 
             @if ($topVendorRows->isNotEmpty() || $topPgoRows->isNotEmpty())
