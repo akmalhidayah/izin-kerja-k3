@@ -87,19 +87,6 @@
                     <i data-lucide="panel-left" class="w-5 h-5"></i>
                 </button>
             </div>
-
-            <!-- Search -->
-            <div class="px-4 pb-4" x-show="sidebarOpen" x-transition>
-                <div class="relative">
-                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input
-                        type="text"
-                        placeholder="Cari menu..."
-                        class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 bg-slate-50
-                               focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300"
-                    >
-                </div>
-            </div>
         </div>
 
         <!-- MENU -->
@@ -160,6 +147,9 @@
                     </a>
                 @endif
 
+                {{-- # MASIH PENGEMBANGAN: grup menu "Modul" disembunyikan sementara.
+                     # Isi: Checklist Inspeksi, Inspeksi Rambu, Arsip Inventaris, Upload IK & SOP, Peminjaman & Jadwal APD.
+                     # Hapus pembungkus komentar ini untuk mengaktifkan kembali.
                 <!-- Divider -->
                 <div class="pt-2 pb-1" x-show="sidebarOpen" x-transition>
                     <div class="text-[11px] uppercase tracking-wider text-slate-400 px-3">Modul</div>
@@ -249,6 +239,7 @@
                         <a href="#" class="block rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">APD Ahli Daya</a>
                     </div>
                 </div>
+                --}}
 
                 @if($isSuperAdmin)
                     <!-- Dropdown: User Panel -->
