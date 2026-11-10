@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout plain>
     @php
         $topVendorRequests = $topVendorRequests ?? collect();
         $totalRequests = $summaryRequests->count();
@@ -11,37 +11,32 @@
         $maxVendorRequest = max((int) ($topVendorRequests->max('total_requests') ?? 0), 1);
     @endphp
 
-    <div class="relative w-full rounded-2xl overflow-hidden shadow mb-6">
+    {{-- Banner: gradien kiri sama dengan header (biru gelap ke merah), foto banner tetap terlihat di kanan --}}
+    <div class="relative w-full rounded-2xl overflow-hidden shadow-sm mb-4 min-h-[9.5rem] md:min-h-[11rem]">
         <img src="{{ asset('images/banner-k3.png') }}" alt="Banner K3"
-             class="w-full h-56 object-cover object-center opacity-80">
-        <div class="absolute inset-0 bg-gradient-to-r from-gray-900/60 via-gray-900/30 to-transparent"></div>
-        <div class="absolute inset-0 flex flex-col justify-center gap-3 px-6">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-wide">Dashboard Admin K3</h1>
-                <p class="text-xs text-gray-100 mt-1">Ringkasan status pengajuan dan performa penanganan.</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <div class="relative">
-                    <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
-                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <circle cx="11" cy="11" r="7" />
-                            <path d="M20 20l-3.5-3.5" />
-                        </svg>
-                    </span>
-                    <input type="text" id="searchInput"
-                           placeholder="Cari nama vendor/user..."
-                           class="pl-9 pr-3 py-2 rounded-lg border border-white bg-white/90 backdrop-blur text-xs w-72 focus:ring-2 focus:ring-red-400 shadow">
-                </div>
+             class="absolute inset-0 w-full h-full object-cover object-center">
+        <div class="absolute inset-0"
+             style="background: linear-gradient(100deg, rgba(15,23,42,.94) 0%, rgba(15,23,42,.84) 34%, rgba(153,27,27,.64) 58%, rgba(153,27,27,0) 86%);"></div>
+        <div class="relative flex h-full flex-col justify-center gap-3 px-5 py-5 md:px-6">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-wide">Dashboard Admin K3</h1>
+            <div class="relative w-full max-w-xs sm:w-72">
+                <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-3.5-3.5" />
+                    </svg>
+                </span>
+                <input type="text" id="searchInput"
+                       placeholder="Cari nama vendor/user..."
+                       class="w-full pl-9 pr-3 py-2 rounded-lg border border-white bg-white/90 backdrop-blur text-xs focus:ring-2 focus:ring-red-400 shadow">
             </div>
         </div>
     </div>
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
 
     <!-- 🔶 PROSES -->
-    <div class="group bg-gradient-to-br from-yellow-500 to-orange-500 text-white p-5 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition duration-300 flex items-center justify-between">
+    <div class="group bg-gradient-to-br from-yellow-500 to-orange-500 text-white p-4 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 flex items-center justify-between">
 
         <div class="flex items-center gap-4">
             <div class="bg-white/20 p-3 rounded-xl backdrop-blur">
@@ -61,7 +56,7 @@
     </div>
 
     <!-- 🟢 SELESAI -->
-    <div class="group bg-gradient-to-br from-emerald-500 to-green-600 text-white p-5 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition duration-300 flex items-center justify-between">
+    <div class="group bg-gradient-to-br from-emerald-500 to-green-600 text-white p-4 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 flex items-center justify-between">
 
         <div class="flex items-center gap-4">
             <div class="bg-white/20 p-3 rounded-xl">
@@ -80,7 +75,7 @@
     </div>
 
     <!-- 🔴 REVISI -->
-    <div class="group bg-gradient-to-br from-red-600 to-rose-500 text-white p-5 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition duration-300 flex items-center justify-between">
+    <div class="group bg-gradient-to-br from-red-600 to-rose-500 text-white p-4 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 flex items-center justify-between">
 
         <div class="flex items-center gap-4">
             <div class="bg-white/20 p-3 rounded-xl">
@@ -99,7 +94,7 @@
     </div>
 
     <!-- 🔵 PROGRESS -->
-    <div class="group bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-5 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition duration-300 flex items-center justify-between">
+    <div class="group bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-4 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 flex items-center justify-between">
 
         <div class="flex items-center gap-4">
             <div class="bg-white/20 p-3 rounded-xl">
@@ -118,15 +113,15 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
 
     <!-- LEFT (CHART AREA) -->
-    <div class="lg:col-span-2 space-y-6">
+    <div class="lg:col-span-2 space-y-4">
 
         <!-- ========================= -->
         <!-- 🔥 CHART EXISTING -->
         <!-- ========================= -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-chart-area text-blue-500"></i>
@@ -134,12 +129,12 @@
                 </h2>
             </div>
 
-            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 pt-6 pb-8">
+            <div class="rounded-xl bg-gray-50 px-3 pt-3 pb-3">
 
                 @if ($topVendorPgo->isNotEmpty() || $topVendorUser->isNotEmpty())
 
                     <!-- 🟢 VENDOR -->
-                    <div class="mb-6">
+                    <div class="mb-4">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="w-3 h-3 bg-green-500 rounded-full"></span>
                             <h3 class="text-xs font-semibold text-gray-700">Top 10 Pengajuan SIK Vendor</h3>
@@ -168,7 +163,7 @@
         <!-- ========================= -->
         <!-- 🔥 NEW: CHART BULANAN -->
         <!-- ========================= -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-chart-line text-indigo-500"></i>
@@ -191,7 +186,7 @@ Tren Pengajuan Izin Kerja ({{ $selectedYear }})
 
             </div>
 
-            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 pt-6 pb-8">
+            <div class="rounded-xl bg-gray-50 px-3 pt-3 pb-3">
                 <canvas id="monthlyChart" height="100"></canvas>
             </div>
         </div>
@@ -199,7 +194,7 @@ Tren Pengajuan Izin Kerja ({{ $selectedYear }})
     </div>
 
     <!-- RIGHT SIDEBAR -->
-    <div class="space-y-6">
+    <div class="space-y-4">
 <!-- AKTIVITAS -->
 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
 
@@ -333,7 +328,7 @@ Tren Pengajuan Izin Kerja ({{ $selectedYear }})
     </div>
 </div>
 <!-- SIK -->
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
     <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
         <i class="fas fa-chart-pie text-blue-500"></i>
         SIK Yang Ditangani

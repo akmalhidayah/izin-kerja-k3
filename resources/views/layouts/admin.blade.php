@@ -1,3 +1,4 @@
+@props(['plain' => false])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -473,11 +474,18 @@
         </header>
 
         <!-- CONTENT -->
-        <main class="min-w-0 overflow-x-hidden p-3 sm:p-4 lg:p-6">
-            <div class="min-w-0 overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm p-3 sm:p-4 lg:p-6">
+        @if ($plain)
+            {{-- plain: tanpa kartu pembungkus, isi halaman langsung di atas latar --}}
+            <main class="min-w-0 overflow-x-hidden p-3 sm:p-4">
                 {{ $slot }}
-            </div>
-        </main>
+            </main>
+        @else
+            <main class="min-w-0 overflow-x-hidden p-3 sm:p-4 lg:p-6">
+                <div class="min-w-0 overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm p-3 sm:p-4 lg:p-6">
+                    {{ $slot }}
+                </div>
+            </main>
+        @endif
     </div>
 </div>
 
