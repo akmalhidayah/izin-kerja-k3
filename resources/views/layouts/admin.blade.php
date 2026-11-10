@@ -115,7 +115,7 @@
 
                     $isChecklist = request()->routeIs('admin.checklist.*');
                     $isApd       = request()->routeIs('admin.apd.*');
-                    $isUserPanel = request()->routeIs('admin.userpanel.*') || request()->routeIs('admin.role_permission.*');
+                    $isUserPanel = request()->routeIs('admin.userpanel.*') || request()->routeIs('admin.role_permission.*') || request()->routeIs('admin.news.*');
                 @endphp
 
                 <!-- Reusable classes via tailwind (inline) -->
@@ -257,7 +257,7 @@
                 --}}
 
                 @if($isSuperAdmin)
-                    <!-- Dropdown: User Panel -->
+                    <!-- Dropdown: Master Data -->
                     <div x-data="{ open: {{ $isUserPanel ? 'true' : 'false' }} }" class="rounded-xl">
                         <button
                             @click="open=!open"
@@ -266,9 +266,9 @@
                         >
                             <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
                                          {{ $isUserPanel ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
-                                <i data-lucide="users" class="w-5 h-5"></i>
+                                <i data-lucide="database" class="w-5 h-5"></i>
                             </span>
-                            <span x-show="sidebarOpen" x-transition class="flex-1 text-left font-medium">User Panel</span>
+                            <span x-show="sidebarOpen" x-transition class="flex-1 text-left font-medium">Master Data</span>
                             <i data-lucide="chevron-down"
                                class="w-4 h-4 text-slate-400 transition"
                                :class="open ? 'rotate-180' : ''"
@@ -283,6 +283,10 @@
                             <a href="{{ route('admin.role_permission.index') }}"
                                class="block rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
                                 Role & Permission
+                            </a>
+                            <a href="{{ route('admin.news.index') }}"
+                               class="block rounded-lg px-3 py-2 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('admin.news.*') ? 'bg-red-50 text-red-700 font-medium' : 'text-slate-600' }}">
+                                Upload Berita
                             </a>
                         </div>
                     </div>

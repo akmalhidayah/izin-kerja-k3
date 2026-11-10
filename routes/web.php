@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPermintaanController;
 use App\Http\Controllers\Admin\UserController;
@@ -30,9 +32,7 @@ use App\Http\Controllers\User\WorkingPermit\PengangkatanPermitController;
 use App\Http\Controllers\User\WorkingPermit\ListrikTeganganTinggiPermitController;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', LandingController::class);
 
 
 // ✅ USER & PGO SIDE (step 1, 4, 5 saja untuk PGO)
@@ -141,6 +141,9 @@ Route::middleware(['auth', 'verified', 'usertype:admin', 'role:Super Admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // Master Data: Upload Berita (tampil di landing page)
+        Route::resource('news', NewsController::class)->except('show');
+
         // Role Permission
         Route::get('/role-permission', [RolePermissionController::class, 'index'])->name('role_permission.index');
         Route::get('/role-permission/{notification}/edit', [RolePermissionController::class, 'edit'])->name('role_permission.edit');

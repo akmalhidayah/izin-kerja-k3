@@ -28,6 +28,8 @@ app/
       AdminNotificationController.php  # tandai notifikasi admin terbaca
       RolePermissionController.php     # Super Admin: daftar/edit/hapus Notification (nama historis)
       UserPanelController.php          # Super Admin: CRUD user (password default 'password')
+      NewsController.php               # Super Admin: Master Data > Upload Berita (CRUD berita landing page)
+    LandingController.php              # route '/': landing page + 6 berita aktif terbaru
   Http/Middleware/
     UsertypeMiddleware.php    # alias 'usertype:a,b'
     CheckRole.php             # alias 'role:X'; Super Admin selalu lolos
@@ -103,6 +105,7 @@ Redirect ada di `app/Http/Controllers/Auth/AuthenticatedSessionController.php`. 
 |---|---|
 | `admin.userpanel.{index,create,store,edit,update,destroy}` | `UserPanelController` |
 | `admin.role_permission.{index,edit,update,destroy}` (parameter `{notification}`) | `RolePermissionController` |
+| `admin.news.{index,create,store,edit,update,destroy}` (URI `/admin/news`) | `NewsController` |
 | `admin.approvesik.index` | `ApproveSikController@index` |
 | `admin.approvesik.signature` (POST `/approvesik/{id}/ttd`) | `storeSignature` → `signature_senior_manager` |
 | `admin.approvesik.signature_manager` (POST `/approvesik/{id}/ttd-manager`) | `storeManagerSignature` → `signature_manager` |
@@ -129,6 +132,7 @@ Redirect ada di `app/Http/Controllers/Auth/AuthenticatedSessionController.php`. 
 | `Notification` | `notifications` | `user_id`, `type` enum(po,spk,notif), `number`, `description`, `file`, `status` (default menunggu), `assigned_admin_id` | `uploads()`, `stepApprovals()`, `kontraktor()`, `umumWorkPermit()`, `workPermit*()`, `detail()`, `closure()`, `user()`, `assignedAdmin()`, `sikStep()`; hook `deleting` menghapus anak |
 | `StepApproval` | `step_approvals` | `step` string, `status` enum(menunggu,perlu_disetujui,disetujui,revisi), `catatan`, `file_path`, `approved_by`, `signature_senior_manager`, `signature_manager` | `notification()`, `approvedBy()` |
 | `Upload` | `uploads` | `step` enum(bpjs,fakta_integritas,sertifikasi_ak3,ktp,surat_kesehatan,struktur_organisasi,post_test,bukti_serah_terima), `file_path`, `status` (default pending), `uploaded_at` | `notification()` |
+| `News` | `news` | `title`, `description`, `link`, `image_path` (disk public, folder `news/`), `is_active` | scope `active()`, accessor `image_url`, `source_label` (domain dari link) |
 | `AdminNotification` | `admin_notifications` | `recipient_id`, `notification_id`, `title`, `body`, `url`, `read_at` | `recipient()`, `notification()`, scope `unread()` |
 | `DataKontraktor` | `data_kontraktors` | `nama_perusahaan` (required), tanggal, `tenaga_kerja`/`peralatan_kerja`/`apd` json, `ttd_manager`, `ttd_perusahaan`, `diverifikasi_signature`, `token`, `token_expires_at` | `notification()` |
 | `Jsa` | `jsas` | `no_jsa` unique (`{seq}/JSA/ST/{mmyyyy}`), `langkah_kerja` json, 3 pasang nama+signature, `token`, `token_expires_at` | `notification()` |

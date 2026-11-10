@@ -229,6 +229,13 @@ Tanda tangan uji: gunakan PNG 1x1 base64 yang valid (lihat `JsaSignatureTest` un
 
 Lihat "Sharp edges" di AGENTS.md. Saat mengerjakan tugas yang menyentuh area tersebut, perbaiki secara eksplisit dengan tes; jangan memperbaikinya sambil lalu dalam tugas lain.
 
+## 10. Berita landing page (Master Data > Upload Berita)
+
+- Super Admin mengelola berita di menu Master Data > Upload Berita (`/admin/news`): judul, deskripsi (maks 400 karakter), link http/https, foto (JPG/PNG/WebP, maks 2 MB), dan saklar tampil/sembunyi. Foto lama dihapus saat diganti atau berita dihapus.
+- Landing page (`LandingController`) menampilkan 6 berita aktif terbaru. Bila belum ada berita atau tabel belum dimigrasi, bagian berita tidak ditampilkan dan halaman tetap terbuka.
+- Kartu bergeser otomatis ke kanan bila lebih dari 3 (desktop) atau saat digeser jari (HP). Jeda diatur lewat atribut `data-interval` (ms, default 5000) pada elemen `.news` di `welcome.blade.php`. Geser berhenti saat disorot/disentuh dan saat bagian itu tidak terlihat.
+- Deploy pertama kali: jalankan `./deploy.sh --migrate`. Foto tampil lewat `storage/news/...`, jadi `php artisan storage:link` harus sudah ada di server.
+
 ## 9. Ikon di halaman user/PGO (fa-lite)
 
 Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. Kelas lama `fas fa-xxx` dipetakan ke SVG inline oleh `resources/css/fa-lite.css`, jadi markup tidak perlu diubah.

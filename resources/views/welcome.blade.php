@@ -271,7 +271,7 @@
       .step { flex-direction: column; gap: 12px; padding: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
       .step::before { display: none; }
       .step-body { padding-top: 0; }
-      .news { grid-auto-columns: calc((100% - 56px) / 3); gap: 28px; margin-inline: 0; padding: 4px 0 24px; overflow: visible; }
+      .news { grid-auto-columns: calc((100% - 56px) / 3); gap: 28px; margin-inline: 0; padding: 12px 0 28px; scroll-padding-inline: 0; }
     }
     @media (max-width: 479px) {
       .brand img + img { display: none; }
@@ -318,30 +318,6 @@
       ['Dokumen Safety Induction', 'Upload', false],
       ['Berita Acara Serah Terima', 'Upload', false],
       ['Surat Izin Kerja terbit', 'Tanda tangan digital', false],
-  ];
-
-  $news = [
-      [
-          'src' => 'Semen Tonasa',
-          'title' => 'Upacara Bulan K3 Tingkat Provinsi Sulsel Digelar di Semen Tonasa',
-          'desc' => 'Kegiatan Bulan K3 digelar untuk meningkatkan budaya keselamatan kerja di lingkungan industri.',
-          'img' => 'https://www.sementonasa.co.id/wp-content/uploads/2025/03/WhatsApp-Image-2025-03-03-at-07.49.16_7c0b11a0.jpg',
-          'url' => 'https://www.sementonasa.co.id/upacara-bulan-k3-tingkat-provinsi-sulsel-digelar-di-semen-tonasa/',
-      ],
-      [
-          'src' => 'Simpul Rakyat',
-          'title' => 'PT Semen Tonasa Raih Tujuh Penghargaan K3 di Sulawesi Selatan',
-          'desc' => 'Prestasi K3 ini mencerminkan konsistensi penerapan standar keselamatan dan kesehatan kerja.',
-          'img' => 'https://www.sementonasa.co.id/wp-content/uploads/2025/12/WhatsApp-Image-2025-12-31-at-15.12.42.jpeg',
-          'url' => 'https://www.simpulrakyat.co.id/2025/02/pt-semen-tonasa-raih-tujuh-penghargaan-k3-di-sulawesi-selatan.html',
-      ],
-      [
-          'src' => 'Semen Tonasa',
-          'title' => 'Tingkatkan Sadar Keselamatan, PT Semen Tonasa Gelar Pelatihan Dasar K3',
-          'desc' => 'Pelatihan ini fokus pada peningkatan pemahaman dasar keselamatan dan kesehatan kerja.',
-          'img' => 'https://www.sementonasa.co.id/wp-content/uploads/2022/11/WhatsApp-Image-2022-11-30-at-12.12.17.jpeg',
-          'url' => 'https://www.sementonasa.co.id/tingkatkan-sadar-keselamatan-pt-semen-tonasa-gelar-pelatihan-dasar-dasar-keselamatan-dan-kesehatan-kerja/',
-      ],
   ];
 @endphp
 
@@ -425,17 +401,19 @@
     </div>
   </section>
 
-  {{-- ================= BERITA (panel menimpa bagian bawah hero) ================= --}}
+  {{-- ================= BERITA (dinamis dari Master Data > Upload Berita; hilang bila belum ada) ================= --}}
+  @if ($news->isNotEmpty())
   <section class="news-section" id="berita">
     <div class="wrap">
-      <div class="news">
+      {{-- Geser otomatis tiap data-interval milidetik bila kartu lebih banyak dari yang terlihat --}}
+      <div class="news" data-interval="5000">
         @foreach ($news as $item)
-          <a class="news-card" href="{{ $item['url'] }}" target="_blank" rel="noopener noreferrer">
-            <img src="{{ $item['img'] }}" alt="{{ $item['title'] }}" width="640" height="400" loading="lazy" decoding="async">
+          <a class="news-card" href="{{ $item->link }}" target="_blank" rel="noopener noreferrer">
+            <img src="{{ $item->image_url }}" alt="{{ $item->title }}" width="640" height="400" loading="lazy" decoding="async">
             <div class="news-body">
-              <span class="news-src">{{ $item['src'] }}</span>
-              <span class="news-title">{{ $item['title'] }}</span>
-              <span class="news-desc">{{ $item['desc'] }}</span>
+              @if ($item->source_label)<span class="news-src">{{ $item->source_label }}</span>@endif
+              <span class="news-title">{{ $item->title }}</span>
+              <span class="news-desc">{{ $item->description }}</span>
               <span class="news-link">Baca selengkapnya &rarr;</span>
             </div>
           </a>
@@ -443,6 +421,7 @@
       </div>
     </div>
   </section>
+  @endif
 
   {{-- ================= ALUR ================= --}}
   <section class="section" id="alur">
@@ -523,6 +502,40 @@
       });
     }, { rootMargin: '0px 0px -8% 0px' });
     items.forEach((el) => io.observe(el));
+  }
+
+  // Berita: geser otomatis ke kanan bila kartu lebih banyak dari yang terlihat.
+  // Jeda diatur lewat atribut data-interval (ms). Berhenti saat disorot/disentuh, tidak terlihat, atau tab disembunyikan.
+  const news = document.querySelector('.news');
+  if (news) {
+    const interval = Math.max(2000, parseInt(news.dataset.interval, 10) || 5000);
+    let timer = null, hovering = false, visible = true;
+
+    const step = () => {
+      const cards = news.querySelectorAll('.news-card');
+      const max = news.scrollWidth - news.clientWidth;
+      if (cards.length < 2 || max <= 2) return;              // semua kartu sudah terlihat
+      const advance = cards[1].offsetLeft - cards[0].offsetLeft; // lebar kartu + jarak
+      // Pengguna dengan "Reduce motion" tetap melihat kartu berganti, tetapi tanpa animasi gulir.
+      const behavior = reduce ? 'auto' : 'smooth';
+      if (news.scrollLeft >= max - 2) news.scrollTo({ left: 0, behavior });
+      else news.scrollBy({ left: advance, behavior });
+    };
+    const stop = () => { clearInterval(timer); timer = null; };
+    const start = () => {
+      stop();
+      if (!hovering && visible && !document.hidden) timer = setInterval(step, interval);
+    };
+
+    news.addEventListener('pointerenter', () => { hovering = true; stop(); });
+    news.addEventListener('pointerleave', () => { hovering = false; start(); });
+    news.addEventListener('touchstart', stop, { passive: true });
+    news.addEventListener('touchend', start, { passive: true });
+    document.addEventListener('visibilitychange', start);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; start(); }).observe(news);
+    }
+    start();
   }
 
   // Tilt 3D: mengikuti mouse/jari, dihaluskan dengan rAF, berhenti saat tidak terlihat
