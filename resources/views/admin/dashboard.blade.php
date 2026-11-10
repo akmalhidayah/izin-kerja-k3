@@ -11,7 +11,9 @@
         $maxVendorRequest = max((int) ($topVendorRequests->max('total_requests') ?? 0), 1);
     @endphp
 
-    {{-- Banner: gradien kiri sama dengan header (biru gelap ke merah), foto banner tetap terlihat di kanan --}}
+    {{-- # DISEMBUNYIKAN SEMENTARA: banner "Dashboard Admin K3" (gradien + gambar + kotak cari).
+         # Kotak cari di banner belum terhubung ke skrip apa pun.
+         # Hapus pembungkus komentar ini untuk menampilkannya lagi.
     <div class="relative w-full rounded-2xl overflow-hidden shadow-sm mb-4 min-h-[9.5rem] md:min-h-[11rem]">
         <img src="{{ asset('images/banner-k3.png') }}" alt="Banner K3"
              class="absolute inset-0 w-full h-full object-cover object-center">
@@ -32,6 +34,7 @@
             </div>
         </div>
     </div>
+    --}}
 
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
 
