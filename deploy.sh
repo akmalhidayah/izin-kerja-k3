@@ -6,13 +6,15 @@
 #   ./deploy.sh --ci         sama, tetapi pasang ulang dependensi npm dulu
 #   ./deploy.sh --migrate    sama, plus php artisan migrate --force
 #   ./deploy.sh --no-build   hanya tarik kode (perubahan PHP saja)
-# Opsi boleh digabung. Ganti folder web lewat: WEB_ROOT=/path ./deploy.sh
+# Opsi boleh digabung. Ganti folder web: WEB_ROOT=/path ./deploy.sh  |  ganti PHP: PHP_BIN=/path/php ./deploy.sh
 
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WEB_ROOT="${WEB_ROOT:-$HOME/public_html}"
 NODE_BIN="${NODE_BIN:-/opt/alt/alt-nodejs20/root/usr/bin}"
+# PHP versi terminal (CLI). Di cPanel, "php" biasa sering berupa CGI dan tidak bisa menjalankan artisan.
+PHP_BIN="${PHP_BIN:-}"
 
 DO_CI=0; DO_MIGRATE=0; DO_BUILD=1
 for arg in "$@"; do
@@ -26,6 +28,19 @@ for arg in "$@"; do
 done
 
 step() { printf '\n==> %s\n' "$1"; }
+
+find_php() {
+  local c
+  for c in "$PHP_BIN" /opt/cpanel/ea-php84/root/usr/bin/php /opt/cpanel/ea-php83/root/usr/bin/php \
+           /opt/cpanel/ea-php82/root/usr/bin/php php; do
+    [ -n "$c" ] || continue
+    command -v "$c" >/dev/null 2>&1 || continue
+    if [ "$("$c" -r 'echo PHP_SAPI;' 2>/dev/null)" = "cli" ]; then
+      echo "$c"; return 0
+    fi
+  done
+  return 1
+}
 
 # Dibungkus fungsi agar bash membaca seluruh skrip sebelum git pull bisa menggantinya.
 main() {
@@ -54,14 +69,20 @@ main() {
     cp -r public/build/. "$WEB_ROOT/build/"
   fi
 
+  local php
+  php="$(find_php || true)"
+
   if [ "$DO_MIGRATE" -eq 1 ]; then
+    [ -n "$php" ] || { echo "PHP CLI tidak ditemukan. Atur PHP_BIN=/path/ke/php lalu ulangi."; exit 1; }
     step "Menjalankan migrasi"
-    php artisan migrate --force
+    "$php" artisan migrate --force
   fi
 
-  if command -v php >/dev/null 2>&1; then
+  if [ -n "$php" ]; then
     step "Membersihkan cache view"
-    php artisan view:clear
+    "$php" artisan view:clear
+  else
+    echo "PHP CLI tidak ditemukan, cache view dilewati (tidak masalah)."
   fi
 
   printf '\nSelesai. Muat ulang browser dengan Cmd+Shift+R.\n'
