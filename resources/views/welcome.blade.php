@@ -106,7 +106,7 @@
       position: relative; overflow: hidden;
       background:
         radial-gradient(60% 60% at 85% 30%, rgba(21,128,61,.10), transparent 70%),
-        radial-gradient(40% 40% at 10% 90%, rgba(200,16,46,.06), transparent 70%),
+        radial-gradient(40% 35% at 10% 72%, rgba(200,16,46,.06), transparent 70%),
         var(--bg);
     }
     .hero::before {
@@ -200,12 +200,11 @@
 
     /* ===== Berita: kartu menimpa tepi hero (tanpa kontainer pembungkus) ===== */
     .news-section {
-      --cut: 210px; /* tinggi dari atas section sampai garis pergantian latar (memotong kartu) */
+      --cut: 112px; /* tinggi dari atas section sampai garis pergantian latar (memotong kartu) */
       display: flow-root; position: relative; z-index: 2;
-      margin-top: -56px; padding-bottom: 64px;
+      margin-top: -48px; padding-bottom: 64px;
       background: linear-gradient(180deg, transparent 0, transparent var(--cut), var(--bg-soft) var(--cut), var(--bg-soft) 100%);
     }
-    .news-section .section-head { margin-bottom: 22px; max-width: none; }
     .news {
       display: grid; grid-auto-flow: column; grid-auto-columns: 84%; gap: 14px;
       overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 20px 24px;
@@ -259,8 +258,7 @@
     @media (min-width: 900px) {
       .section { padding-block: 96px; }
       .hero-grid { grid-template-columns: 1.05fr 1fr; padding-block: 56px 150px; min-height: calc(100vh - 68px); max-height: 860px; }
-      .news-section { --cut: 190px; margin-top: -100px; padding-bottom: 88px; }
-      .news-section .section-head { margin-bottom: 28px; }
+      .news-section { --cut: 140px; margin-top: -80px; padding-bottom: 88px; }
       .scene { order: 0; height: 460px; }
       .disc { width: 360px; height: 360px; margin: -180px 0 0 -180px; }
       .gear-lg { width: 210px; height: 210px; }
@@ -430,10 +428,6 @@
   {{-- ================= BERITA (panel menimpa bagian bawah hero) ================= --}}
   <section class="news-section" id="berita">
     <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">Berita K3</span>
-        <h2>Kegiatan dan prestasi K3 terbaru.</h2>
-      </div>
       <div class="news">
         @foreach ($news as $item)
           <a class="news-card" href="{{ $item['url'] }}" target="_blank" rel="noopener noreferrer">
