@@ -184,23 +184,6 @@
     @keyframes sway { 0%,100% { transform: rotateY(-6deg) rotateX(4deg); } 50% { transform: rotateY(6deg) rotateX(-2deg); } }
     .is-paused .spin, .is-paused .helmet, .is-paused .shadow, .is-paused .sway { animation-play-state: paused; }
 
-    /* ===== Pengguna ===== */
-    .cards { display: grid; gap: 14px; }
-    .card {
-      background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
-      padding: 22px;
-    }
-    .card h3 { font-size: 17px; margin-top: 14px; }
-    .card p { color: var(--muted); font-size: 14.5px; margin-top: 6px; }
-    .card .tag { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 14px; }
-    .icon-box {
-      width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
-      background: var(--green-soft); color: var(--green);
-    }
-    .icon-box.red { background: #fdecef; color: var(--red); }
-    .icon-box.amber { background: #fdf6e3; color: #b45309; }
-    .icon-box svg { width: 22px; height: 22px; }
-
     /* ===== Alur ===== */
     .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; position: relative; }
     .step { position: relative; display: flex; gap: 14px; padding: 0 0 18px; }
@@ -272,7 +255,6 @@
 
     /* ===== Breakpoint ===== */
     @media (min-width: 640px) {
-      .cards { grid-template-columns: repeat(3, 1fr); }
       .news { grid-auto-columns: calc((100% - 28px) / 2.2); }
       .cta { padding: 48px; }
     }
@@ -454,44 +436,8 @@
     </div>
   </section>
 
-  {{-- ================= PENGGUNA ================= --}}
-  <section class="section section-soft">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">Untuk siapa</span>
-        <h2>Satu sistem untuk semua pihak yang terlibat.</h2>
-      </div>
-      <div class="cards">
-        <article class="card reveal">
-          <div class="icon-box red">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>
-          </div>
-          <h3>Vendor / Kontraktor</h3>
-          <p>Lengkapi data kontraktor, JSA, working permit, dan dokumen pendukung hingga Surat Izin Kerja terbit.</p>
-          <div class="tag">13 langkah</div>
-        </article>
-        <article class="card reveal">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-          </div>
-          <h3>Karyawan Internal (PGO)</h3>
-          <p>Ajukan notifikasi, JSA, dan working permit untuk pekerjaan internal tanpa dokumen vendor.</p>
-          <div class="tag">3 langkah</div>
-        </article>
-        <article class="card reveal">
-          <div class="icon-box amber">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
-          </div>
-          <h3>Admin K3</h3>
-          <p>Tinjau setiap langkah, beri catatan revisi, dan tandatangani Surat Izin Kerja secara digital.</p>
-          <div class="tag">Review &amp; persetujuan</div>
-        </article>
-      </div>
-    </div>
-  </section>
-
   {{-- ================= ALUR ================= --}}
-  <section class="section" id="alur">
+  <section class="section section-soft" id="alur">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Alur pengajuan</span>
@@ -522,7 +468,7 @@
   </section>
 
   {{-- ================= BERITA ================= --}}
-  <section class="section section-soft" id="berita">
+  <section class="section" id="berita">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Berita K3</span>
@@ -545,7 +491,7 @@
   </section>
 
   {{-- ================= POSTER ================= --}}
-  <section class="section">
+  <section class="section section-soft">
     <div class="wrap">
       <figure class="reveal" style="margin:0">
         <div class="poster">
