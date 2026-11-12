@@ -150,13 +150,21 @@
                     $umumCount = collect($permitTypes['rows'])->firstWhere('key', 'umum')['count'] ?? 0;
                     $khususCount = $permitTypes['total'] - $umumCount;
                 @endphp
-                <div class="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div id="permit-jenis" class="flex scroll-mt-24 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="mb-3 flex items-center gap-2">
-                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-rose-600 text-white">
+                        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-600 text-white">
                             <i class="fas fa-layer-group text-xs"></i>
                         </span>
                         <h2 class="text-xs font-bold uppercase tracking-wide text-slate-800">Permit per Jenis</h2>
-                        <span class="ml-auto rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 ring-1 ring-slate-100">Tahun {{ $selectedYear }}</span>
+                        <form method="GET" action="{{ route('admin.dashboard') }}#permit-jenis" class="ml-auto shrink-0">
+                            @if (request()->filled('year'))<input type="hidden" name="year" value="{{ $selectedYear }}">@endif
+                            <select name="permit_year" onchange="this.form.submit()" aria-label="Tahun permit"
+                                    class="rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[11px] font-semibold text-slate-700 focus:border-rose-400 focus:ring-2 focus:ring-rose-200">
+                                @foreach ($years->concat([$permitYear])->unique()->sortDesc() as $year)
+                                    <option value="{{ $year }}" {{ $year == $permitYear ? 'selected' : '' }}>{{ $year }}</option>
+                                @endforeach
+                            </select>
+                        </form>
                     </div>
 
                     @if ($permitTypes['total'] > 0)
@@ -206,7 +214,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="py-10 text-center text-[11px] text-gray-500">Belum ada permit pada tahun {{ $selectedYear }}.</div>
+                        <div class="py-10 text-center text-[11px] text-gray-500">Belum ada permit pada tahun {{ $permitYear }}.</div>
                     @endif
                 </div>
 
@@ -289,7 +297,7 @@
             </div>
 
             {{-- Tren tahunan --}}
-            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div id="tren" class="scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                         <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
@@ -297,7 +305,8 @@
                         </span>
                         <h2 class="text-xs font-bold uppercase tracking-wide text-slate-800">Tren Pengajuan Izin Kerja {{ $selectedYear }}</h2>
                     </div>
-                    <form method="GET">
+                    <form method="GET" action="{{ route('admin.dashboard') }}#tren">
+                        @if (request()->filled('permit_year'))<input type="hidden" name="permit_year" value="{{ $permitYear }}">@endif
                         <select name="year" onchange="this.form.submit()"
                                 class="rounded-lg border border-gray-300 px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-400">
                             @foreach ($years as $year)

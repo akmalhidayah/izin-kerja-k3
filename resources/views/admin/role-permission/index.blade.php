@@ -15,49 +15,23 @@
         </div>
 
         {{-- FILTER + SEARCH --}}
-        <form action="{{ route('admin.role_permission.index') }}" method="GET"
-            class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-
-            {{-- SEARCH --}}
-            <div class="flex gap-2 w-full md:w-auto">
-                <input type="text" name="search"
-                    placeholder="Cari nomor, vendor, deskripsi..."
-                    value="{{ request('search') }}"
-                    class="border px-3 py-2 rounded-xl text-sm w-full md:w-72 focus:ring focus:ring-blue-200">
-
-                <button class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-blue-700">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-
-            {{-- FILTER --}}
-            <div class="flex flex-wrap gap-2">
-
-                {{-- STATUS --}}
-                <select name="status_filter" class="border px-3 py-2 rounded-xl text-sm">
-                    <option value="">Semua Status</option>
-                    <option value="selesai" {{ request('status_filter') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                    <option value="belum" {{ request('status_filter') == 'belum' ? 'selected' : '' }}>Belum</option>
-                </select>
-
-                {{-- USERTYPE --}}
-                <select name="usertype" class="border px-3 py-2 rounded-xl text-sm">
-                    <option value="">Semua User</option>
-                    <option value="user" {{ request('usertype') == 'user' ? 'selected' : '' }}>Vendor</option>
-                    <option value="pgo" {{ request('usertype') == 'pgo' ? 'selected' : '' }}>Karyawan</option>
-                    <option value="admin" {{ request('usertype') == 'admin' ? 'selected' : '' }}>Admin K3</option>
-                </select>
-
-                {{-- RESET --}}
-                @if(request()->hasAny(['search','status_filter','usertype']))
-                    <a href="{{ route('admin.role_permission.index') }}"
-                        class="text-sm text-red-500 px-2 py-2">
-                        Reset
-                    </a>
-                @endif
-
-            </div>
-        </form>
+        <x-admin.filter-modal :action="route('admin.role_permission.index')" :reset-url="route('admin.role_permission.index')"
+            :active-keys="['search','status_filter','usertype']" title="Filter Pengajuan">
+            <input type="text" name="search" placeholder="Cari nomor, vendor, deskripsi..."
+                value="{{ request('search') }}"
+                class="w-full rounded-xl border px-3 py-2 text-sm">
+            <select name="status_filter" class="w-full rounded-xl border px-3 py-2 text-sm">
+                <option value="">Semua Status</option>
+                <option value="selesai" {{ request('status_filter') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                <option value="belum" {{ request('status_filter') == 'belum' ? 'selected' : '' }}>Belum</option>
+            </select>
+            <select name="usertype" class="w-full rounded-xl border px-3 py-2 text-sm">
+                <option value="">Semua User</option>
+                <option value="user" {{ request('usertype') == 'user' ? 'selected' : '' }}>Vendor</option>
+                <option value="pgo" {{ request('usertype') == 'pgo' ? 'selected' : '' }}>Karyawan</option>
+                <option value="admin" {{ request('usertype') == 'admin' ? 'selected' : '' }}>Admin K3</option>
+            </select>
+        </x-admin.filter-modal>
 
         {{-- RESULT INFO --}}
         @if(request('search'))

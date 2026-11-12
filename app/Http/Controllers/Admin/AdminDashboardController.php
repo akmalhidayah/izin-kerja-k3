@@ -290,6 +290,8 @@ class AdminDashboardController extends Controller
         // ===== Tren bulanan. Ekstraksi tahun/bulan berbeda antara MySQL dan SQLite (tes) =====
         [$yearExpr, $monthExpr] = $this->dateParts();
         $currentYear = (int) $request->input('year', now()->year);
+        // Tahun panel Permit per Jenis terpisah dari grafik Tren.
+        $permitYear = (int) $request->input('permit_year', now()->year);
 
         $years = Notification::query()
             ->selectRaw("{$yearExpr} as year")
@@ -330,7 +332,8 @@ class AdminDashboardController extends Controller
             'lastMonth' => $lastMonth,
             'years' => $years,
             'selectedYear' => $currentYear,
-            'permitTypes' => $this->permitTypeCounts($currentYear),
+            'permitYear' => $permitYear,
+            'permitTypes' => $this->permitTypeCounts($permitYear),
             'ongoing' => $this->ongoingToday(),
         ]);
     }

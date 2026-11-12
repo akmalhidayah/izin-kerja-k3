@@ -410,6 +410,13 @@ class AdminDashboardTest extends TestCase
         $this->assertTrue($rows['ketinggian']['risk']);
         $this->assertSame(1, $types['risk_total']);
         $this->assertSame('umum', $types['rows'][0]['key'], 'Urut dari yang terbanyak');
+
+        // Dropdown tahun panel ini terpisah dari grafik Tren.
+        $last = $this->actingAs($admin)->get(route('admin.dashboard', ['permit_year' => now()->year - 1]));
+        $lastTypes = $last->viewData('permitTypes');
+        $this->assertSame(1, $lastTypes['total']);
+        $this->assertSame(now()->year - 1, $last->viewData('permitYear'));
+        $this->assertSame((int) now()->year, $last->viewData('selectedYear'), 'Tahun Tren tidak ikut berubah');
     }
 
     public function test_ongoing_today_reads_contractor_range_permit_date_and_jsa(): void
@@ -487,5 +494,26 @@ class AdminDashboardTest extends TestCase
         $this->assertStringContainsString("x-data=\"{ who: 'vendor' }\"", $html);
         $this->assertMatchesRegularExpression('/data-ongoing-set="pgo"/', $html);
         $this->assertMatchesRegularExpression('/x-show="who === \'pgo\'"\s+x-cloak/', $html);
+    }
+
+    public function test_list_filters_live_in_floating_modal_with_active_badge(): void
+    {
+        $admin = $this->admin();
+
+        foreach (['admin.permintaansik', 'admin.permintaansikpgo'] as $route) {
+            $plain = $this->actingAs($admin)->get(route($route));
+            $plain->assertOk();
+            $plain->assertSee('data-filter-modal', false);
+            $plain->assertSee('aria-label="Buka filter"', false);
+            $plain->assertSee('name="search"', false);
+            $plain->assertDontSee('filter aktif');
+
+            $filtered = $this->actingAs($admin)->get(route($route, ['search' => 'abc', 'bulan_dari' => 3, 'kondisi' => 'revisi']));
+            $filtered->assertOk();
+            $filtered->assertSee('<b>2</b> filter aktif', false);
+            $filtered->assertSee('Hapus filter');
+            // kondisi (tab) ikut terkirim saat filter diterapkan
+            $filtered->assertSee('name="kondisi" value="revisi"', false);
+        }
     }
 }
