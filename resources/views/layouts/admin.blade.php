@@ -43,7 +43,7 @@
         body, body > div[x-data] { overflow-x: clip; }
         .topbar-hero button:hover { background-color: rgba(255,255,255,.10); }
 
-        /* Menu aktif sidebar: tab menyambung ke latar konten (#f8fafc = bg-slate-50) dengan lekukan atas/bawah */
+        /* Menu aktif sidebar: tab menyambung ke latar konten (#ffffff = bg-white pada body) dengan lekukan atas/bawah */
         .sidebar-rail .nav-active::before,
         .sidebar-rail .nav-active::after {
             content: '';
@@ -57,17 +57,17 @@
         .sidebar-rail .nav-active::before {
             top: -16px;
             border-bottom-right-radius: 16px;
-            box-shadow: 6px 6px 0 6px #f8fafc;
+            box-shadow: 6px 6px 0 6px #ffffff;
         }
         .sidebar-rail .nav-active::after {
             bottom: -16px;
             border-top-right-radius: 16px;
-            box-shadow: 6px -6px 0 6px #f8fafc;
+            box-shadow: 6px -6px 0 6px #ffffff;
         }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 overflow-x-clip">
+<body class="bg-white text-slate-800 overflow-x-clip">
 <div
     x-data="{
         sidebarOpen: true,
@@ -170,12 +170,12 @@
                             <a href="{{ $item['href'] }}"
                                :title="sidebarOpen ? '' : @js($item['text'])"
                                class="group relative flex items-center gap-3 py-2 pl-3 pr-3 transition
-                                      {{ $item['active'] ? 'nav-active -mr-3 rounded-l-2xl bg-slate-50 text-red-700' : 'rounded-xl text-white/85 hover:bg-white/10 hover:text-white' }}">
+                                      {{ $item['active'] ? 'nav-active -mr-3 rounded-l-2xl bg-white text-red-700' : 'rounded-xl text-white/85 hover:bg-white/10 hover:text-white' }}">
                                 <span class="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
                                              {{ $item['active'] ? 'bg-red-600 text-white shadow-md shadow-red-600/30' : 'bg-white/10 text-white group-hover:bg-white/20' }}">
                                     <i data-lucide="{{ $item['icon'] }}" class="h-5 w-5"></i>
                                     @if ($item['badge'])
-                                        <span x-show="!sidebarOpen" class="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 {{ $item['active'] ? 'ring-slate-50' : 'ring-red-700' }}"></span>
+                                        <span x-show="!sidebarOpen" class="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 {{ $item['active'] ? 'ring-white' : 'ring-red-700' }}"></span>
                                     @endif
                                 </span>
                                 <span x-show="sidebarOpen" x-transition class="min-w-0 flex-1 truncate font-medium">{{ $item['text'] }}</span>
