@@ -101,12 +101,12 @@
         <div class="flex flex-col gap-4 lg:col-span-2">
 
             {{-- Top pengajuan --}}
-            <div class="overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-sky-100/60 p-4 shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white">
                         <i class="fas fa-chart-line text-xs"></i>
                     </span>
-                    <h2 class="text-xs font-bold uppercase tracking-wide text-blue-900">Top Pengajuan SIK</h2>
+                    <h2 class="text-xs font-bold uppercase tracking-wide text-slate-800">Top Pengajuan SIK</h2>
                     <span class="ml-auto flex items-center gap-3 text-[10px] text-gray-500">
                         <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-green-600"></span>Vendor</span>
                         <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-blue-600"></span>Karyawan</span>
@@ -120,7 +120,7 @@
                         </div>
                         <div class="grid grid-cols-2 gap-3 md:grid-cols-1">
                             @foreach ([['Vendor', $topVendorRows, 'green'], ['Karyawan', $topPgoRows, 'blue']] as [$label, $rows, $color])
-                                <div class="rounded-xl bg-white/70 p-2.5 ring-1 ring-blue-100">
+                                <div class="rounded-xl bg-slate-50 p-2.5 ring-1 ring-slate-100">
                                     <p class="mb-1.5 text-[10px] font-semibold uppercase tracking-wide {{ $color === 'green' ? 'text-green-700' : 'text-blue-700' }}">3 teratas {{ $label }}</p>
                                     <ol class="space-y-1.5">
                                         @forelse ($rows->take(3) as $row)
@@ -150,13 +150,13 @@
                     $umumCount = collect($permitTypes['rows'])->firstWhere('key', 'umum')['count'] ?? 0;
                     $khususCount = $permitTypes['total'] - $umumCount;
                 @endphp
-                <div class="flex flex-col overflow-hidden rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-pink-100/60 p-4 shadow-sm">
+                <div class="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="mb-3 flex items-center gap-2">
                         <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-rose-600 text-white">
                             <i class="fas fa-layer-group text-xs"></i>
                         </span>
-                        <h2 class="text-xs font-bold uppercase tracking-wide text-rose-900">Permit per Jenis</h2>
-                        <span class="ml-auto rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-rose-700 ring-1 ring-rose-100">Tahun {{ $selectedYear }}</span>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-slate-800">Permit per Jenis</h2>
+                        <span class="ml-auto rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 ring-1 ring-slate-100">Tahun {{ $selectedYear }}</span>
                     </div>
 
                     @if ($permitTypes['total'] > 0)
@@ -169,14 +169,14 @@
                                 </div>
                             </div>
                             <div class="grid min-w-0 flex-1 gap-2">
-                                <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-rose-100">
+                                <div class="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
                                     <p class="text-[10px] font-medium text-rose-700/80">Risiko tinggi</p>
                                     <p class="flex items-baseline gap-1.5">
                                         <span class="text-xl font-extrabold leading-tight text-rose-600">{{ number_format($permitTypes['risk_total'], 0, ',', '.') }}</span>
                                         <span class="text-[11px] font-semibold text-rose-400">{{ round($permitTypes['risk_total'] / $permitTypes['total'] * 100) }}%</span>
                                     </p>
                                 </div>
-                                <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-rose-100">
+                                <div class="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
                                     <p class="text-[10px] font-medium text-gray-500">Permit khusus</p>
                                     <p class="flex items-baseline gap-1.5">
                                         <span class="text-xl font-extrabold leading-tight text-gray-800">{{ number_format($khususCount, 0, ',', '.') }}</span>
@@ -199,7 +199,7 @@
                                         <span class="ml-auto shrink-0 font-bold tabular-nums text-gray-800">{{ number_format($row['count'], 0, ',', '.') }}</span>
                                         <span class="w-9 shrink-0 text-right text-[11px] font-semibold tabular-nums text-gray-400">{{ $pct }}%</span>
                                     </div>
-                                    <div class="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/80">
+                                    <div class="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                                         <div class="h-full rounded-full" style="width: {{ max($pct, $row['count'] > 0 ? 1 : 0) }}%; background: {{ $row['color'] }}"></div>
                                     </div>
                                 </div>
@@ -211,29 +211,29 @@
                 </div>
 
                 {{-- Pekerjaan berlangsung hari ini --}}
-                <div class="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-100/60 p-4 shadow-sm">
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="mb-3 flex items-center gap-2">
                         <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white">
                             <i class="fas fa-helmet-safety text-xs"></i>
                         </span>
-                        <h2 class="text-xs font-bold uppercase tracking-wide text-emerald-900">Pekerjaan Berlangsung Hari Ini</h2>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-slate-800">Pekerjaan Berlangsung Hari Ini</h2>
                         @if ($ongoing['total'] > $ongoing['rows']->count())
-                            <span class="ml-auto shrink-0 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-100">
+                            <span class="ml-auto shrink-0 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-slate-100">
                                 +{{ $ongoing['total'] - $ongoing['rows']->count() }} lainnya
                             </span>
                         @endif
                     </div>
 
                     <div class="mb-3 grid grid-cols-3 gap-2">
-                        <div class="rounded-xl bg-white/70 px-2.5 py-2 ring-1 ring-emerald-100">
+                        <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
                             <p class="text-[10px] text-emerald-700/80">Pekerjaan</p>
                             <p class="text-lg font-extrabold leading-tight text-emerald-700">{{ $ongoing['total'] }}</p>
                         </div>
-                        <div class="rounded-xl bg-white/70 px-2.5 py-2 ring-1 ring-emerald-100">
+                        <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
                             <p class="text-[10px] text-emerald-700/80">Pekerja</p>
                             <p class="text-lg font-extrabold leading-tight text-emerald-700">{{ number_format($ongoing['workers'], 0, ',', '.') }}</p>
                         </div>
-                        <div class="rounded-xl bg-white/70 px-2.5 py-2 ring-1 ring-emerald-100">
+                        <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
                             <p class="text-[10px] text-rose-700/80">Risiko tinggi</p>
                             <p class="text-lg font-extrabold leading-tight text-rose-600">{{ $ongoing['risk'] }}</p>
                         </div>
@@ -242,7 +242,7 @@
                     <div class="space-y-1.5">
                         @forelse ($ongoing['rows'] as $job)
                             <a href="{{ route('admin.permintaansik.show', $job->notification_id) }}"
-                               class="block rounded-xl bg-white/70 px-2.5 py-2 ring-1 ring-emerald-100 transition hover:bg-white">
+                               class="block rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100 transition hover:bg-slate-100">
                                 <div class="flex items-center justify-between gap-2">
                                     <p class="min-w-0 truncate text-[11px] font-semibold text-gray-800">
                                         {{ $job->name }}
@@ -278,13 +278,13 @@
             </div>
 
             {{-- Tren tahunan --}}
-            <div class="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-100/60 p-4 shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                         <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
                             <i class="fas fa-chart-area text-xs"></i>
                         </span>
-                        <h2 class="text-xs font-bold uppercase tracking-wide text-indigo-900">Tren Pengajuan Izin Kerja {{ $selectedYear }}</h2>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-slate-800">Tren Pengajuan Izin Kerja {{ $selectedYear }}</h2>
                     </div>
                     <form method="GET">
                         <select name="year" onchange="this.form.submit()"
@@ -297,15 +297,15 @@
                 </div>
 
                 <div class="mb-3 grid grid-cols-3 gap-2">
-                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
+                    <div class="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
                         <p class="text-[10px] text-indigo-700/80">Total setahun</p>
                         <p class="text-lg font-extrabold leading-tight text-indigo-700">{{ number_format($yearTotal, 0, ',', '.') }}</p>
                     </div>
-                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
+                    <div class="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
                         <p class="text-[10px] text-indigo-700/80">Rata-rata / bulan</p>
                         <p class="text-lg font-extrabold leading-tight text-indigo-700">{{ number_format($monthAvg, 0, ',', '.') }}</p>
                     </div>
-                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
+                    <div class="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
                         <p class="text-[10px] text-indigo-700/80">Bulan tertinggi</p>
                         <p class="text-lg font-extrabold leading-tight text-indigo-700">
                             {{ $peakMonth }}
@@ -325,12 +325,12 @@
         <div class="flex flex-col gap-4">
 
             {{-- Aktivitas terbaru --}}
-            <div class="overflow-hidden rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-100/60 p-4 shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white">
                         <i class="fas fa-bolt text-xs"></i>
                     </span>
-                    <h3 class="text-xs font-bold uppercase tracking-wide text-teal-900">Aktivitas Terbaru</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wide text-slate-800">Aktivitas Terbaru</h3>
                 </div>
 
                 <div class="space-y-1">
@@ -353,10 +353,10 @@
                         @endphp
 
                         <a href="{{ route('admin.permintaansik.show', $item->notification_id) }}"
-                           class="flex items-start gap-3 rounded-lg p-2 transition hover:bg-white/70">
+                           class="flex items-start gap-3 rounded-lg p-2 transition hover:bg-slate-50">
                             <div class="mt-1 flex flex-col items-center">
                                 <div class="h-2.5 w-2.5 rounded-full {{ $dotClass }}"></div>
-                                <div class="mt-1 w-[1px] flex-1 bg-teal-200"></div>
+                                <div class="mt-1 w-[1px] flex-1 bg-slate-200"></div>
                             </div>
 
                             <div class="min-w-0 flex-1">
@@ -397,12 +397,12 @@
             </div>
 
             {{-- SIK yang ditangani --}}
-            <div class="flex flex-1 flex-col overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-100/50 p-4 shadow-sm">
+            <div class="flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500 text-white">
                         <i class="fas fa-chart-pie text-xs"></i>
                     </span>
-                    <h3 class="text-xs font-bold uppercase tracking-wide text-amber-900">SIK Yang Ditangani</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wide text-slate-800">SIK Yang Ditangani</h3>
                     <span class="ml-auto text-[10px] text-amber-700/70">5 admin teratas</span>
                 </div>
 
@@ -430,7 +430,7 @@
                                     {{ $count }} <span class="font-semibold text-gray-400">({{ $percent }}%)</span>
                                 </span>
                             </div>
-                            <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/80">
+                            <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                                 <div class="h-full rounded-full" style="width: {{ $percent }}%; background: {{ $color }}"></div>
                             </div>
                         </div>
@@ -439,12 +439,12 @@
             </div>
 
             {{-- Perlu tindakan saya --}}
-            <div class="overflow-hidden rounded-2xl border border-blue-700 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-4 text-white shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-slate-900">
                         <i class="fas fa-list-check text-xs"></i>
                     </span>
-                    <h3 class="text-xs font-bold uppercase tracking-wide text-white">Perlu Tindakan Saya</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wide text-slate-800">Perlu Tindakan Saya</h3>
                     <span class="ml-auto rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-slate-900">{{ $myQueueTotal }}</span>
                 </div>
 
@@ -452,20 +452,20 @@
                     @forelse ($myQueue as $item)
                         @php
                             $isPgo = $item->usertype === 'pgo';
-                            $dayClass = $item->waiting_days >= $stale['days'] ? 'bg-red-500/25 text-red-200' : ($item->waiting_days >= 3 ? 'bg-amber-400/25 text-amber-200' : 'bg-white/20 text-white');
+                            $dayClass = $item->waiting_days >= $stale['days'] ? 'bg-red-100 text-red-700' : ($item->waiting_days >= 3 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600');
                         @endphp
                         <a href="{{ route('admin.permintaansik.show', $item->id) }}"
-                           class="flex items-start gap-3 rounded-xl border border-white/10 bg-white/10 p-2.5 transition hover:bg-white/20">
-                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold {{ $isPgo ? 'bg-white/20 text-white' : 'bg-emerald-300/30 text-emerald-100' }}">
+                           class="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-2.5 transition hover:border-amber-200 hover:bg-amber-50/60">
+                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold {{ $isPgo ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700' }}">
                                 {{ $isPgo ? 'K' : 'V' }}
                             </span>
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-xs font-semibold text-white">{{ $item->user_name }}</p>
-                                <p class="truncate text-[11px] text-blue-100">
+                                <p class="truncate text-xs font-semibold text-slate-800">{{ $item->user_name }}</p>
+                                <p class="truncate text-[11px] text-slate-600">
                                     Step {{ $item->current_step }}/{{ $item->total_steps }} · {{ $item->current_step_title }}
                                 </p>
                                 @if ($item->number)
-                                    <p class="truncate text-[10px] text-blue-200">No: {{ $item->number }}</p>
+                                    <p class="truncate text-[10px] text-slate-400">No: {{ $item->number }}</p>
                                 @endif
                             </div>
                             <div class="flex shrink-0 flex-col items-end gap-1">
@@ -478,7 +478,7 @@
                             </div>
                         </a>
                     @empty
-                        <div class="py-5 text-center text-[11px] text-blue-100">
+                        <div class="py-5 text-center text-[11px] text-slate-500">
                             Tidak ada pengajuan yang menunggu tindakan Anda.
                         </div>
                     @endforelse
@@ -486,7 +486,7 @@
 
                 @if ($myQueueTotal > $myQueue->count())
                     <a href="{{ route('admin.permintaansik', ['kondisi' => 'perlu_tindakan']) }}"
-                       class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white/10 py-1.5 text-[11px] font-semibold text-white hover:bg-white/20">
+                       class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-slate-50 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-100">
                         Lihat semua ({{ $myQueueTotal }})
                         <i class="fas fa-arrow-right text-[9px]"></i>
                     </a>
