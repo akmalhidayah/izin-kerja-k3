@@ -210,7 +210,7 @@ class AdminDashboardController extends Controller
             ->withCount(['stepApprovals as approved_steps' => fn ($q) => $q->where('status', 'disetujui')])
             ->withMax('stepApprovals as last_activity_at', 'updated_at')
             ->orderByRaw('COALESCE(last_activity_at, created_at) asc')
-            ->limit(6)
+            ->limit(3)
             ->get()
             ->map(function (Notification $notif) {
                 $isPgo = ($notif->user->usertype ?? 'user') === 'pgo';
