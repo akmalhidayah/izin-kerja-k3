@@ -270,3 +270,11 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 - "Aktivitas Terbaru" menyembunyikan baris `backfill`. Tren bulanan berhenti di bulan berjalan lewat `$lastMonth`.
 - Tab kondisi di daftar vendor/PGO: partial `admin/partials/kondisi-tabs.blade.php` dengan data `$kondisiTabs` (label, jumlah, aktif). Form filter menyimpan `kondisi` di hidden input supaya tab tidak hilang saat tombol Filter ditekan.
 - Pencarian cepat di dashboard mengarah ke daftar vendor atau karyawan (`?search=`), bukan endpoint baru.
+
+## 14. Daftar persyaratan kerja aman permit
+
+- Teks butir "Persyaratan Kerja Aman" permit ketinggian hanya ada di `App\Support\PermitChecklists::ketinggian()` (18 butir resmi, sama dengan PDF). Form modal, form token, dan PDF memanggil fungsi itu; jangan menyalin daftar ke Blade lagi.
+- Jawaban tersimpan sebagai array per nomor urut (`kerja_aman_ketinggian[0..17]` bernilai `ya`/`na`). Karena itu butir tidak boleh disisipkan atau diurutkan ulang. Butir baru ditambahkan di akhir.
+- Sebelum perbaikan (12 Nov 2026) kedua form memakai 10 butir yang berbeda, jadi permit ketinggian lama punya jawaban yang indeksnya tidak sesuai butir resmi. Periksa atau isi ulang bagian 3 pada permit lama yang masih berjalan.
+- Permit lain (umum, gaspanas, air, risiko panas, ruang tertutup, perancah, beban, penggalian) belum diperiksa untuk kasus serupa; bandingkan daftar di komponen form dengan PDF-nya.
+

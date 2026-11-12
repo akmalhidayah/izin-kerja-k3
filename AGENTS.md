@@ -36,6 +36,7 @@ Kunci permit: `umum`, `gaspanas`, `air`, `ketinggian`, `pengangkatan`, `penggali
 - `listrik-tegangan-tinggi` adalah permit khusus: `umum` harus sudah ada sebelum dibuat.
 - Jangan asumsikan dua permit berperilaku sama. Field, JSON, tanda tangan, detail/closure, dan layout PDF-nya berbeda.
 - Perubahan form permit belum selesai sampai Blade komponen modal, Blade token, validasi/penyimpanan controller, `$fillable`/`$casts` model, migration, preview, dan Blade PDF memakai nama field yang sama.
+- Daftar butir checklist permit (saat ini ketinggian) hidup di `App\Support\PermitChecklists` dan dipakai form, form token, dan PDF. Jawaban tersimpan per indeks, jadi jangan menyisipkan/mengurutkan ulang butir.
 
 ## Otorisasi dan token
 

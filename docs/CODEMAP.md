@@ -30,6 +30,8 @@ app/
       UserPanelController.php          # Super Admin: CRUD user (password default 'password')
       NewsController.php               # Super Admin: Master Data > Upload Berita (CRUD berita landing page)
     LandingController.php              # route '/': landing page + 6 berita aktif terbaru
+  Support/
+    PermitChecklists.php             # daftar "Persyaratan Kerja Aman" per permit (saat ini ketinggian), satu sumber untuk form + token + PDF
   Services/
     StepApprovalLogger.php           # satu-satunya penulis riwayat persetujuan (statusChanged, reset)
   Http/Middleware/
@@ -244,6 +246,7 @@ Komponen bersama: `components/permits/form-signature.blade.php`, `components/sig
 | `DataKontraktorTokenFormTest` | render/simpan JSON rows, legacy double-encoded, PDF token |
 | `JsaNumberingTest` | algoritma nomor JSA, bulan berjalan, unique index |
 | `JsaSignatureTest` | PNG lengkap vs terpotong di form token |
+| `KetinggianChecklistTest` | 18 butir persyaratan ketinggian identik di form modal, form token, dan PDF; jawaban per indeks |
 | `AdminDashboardTest` | angka dashboard dan kartu (vendor/PGO), antrean "Perlu Tindakan Saya", pengajuan mandek, filter `kondisi` di daftar, aktivitas tanpa backfill, batas bulan grafik, jumlah query tetap kecil saat data bertambah |
 | `ApprovalHistoryTest` | log saat ubah status, tanpa log bila tidak berubah, admin lain ditolak, reset saat hapus JSA, riwayat tampil di detail, aktivitas dashboard, log ikut terhapus |
 | `NewsTest` | CRUD berita Super Admin, admin biasa ditolak, landing menampilkan berita aktif |

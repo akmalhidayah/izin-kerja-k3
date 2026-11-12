@@ -189,18 +189,7 @@ $daftarPekerja = old('daftar_pekerja', $permit?->nama_pekerja ?? []);
 
 <!-- BAGIAN 3: Persyaratan Kerja Aman -->
 @php
-    $persyaratanKetinggian = [
-        'Pekerja memiliki sertifikasi bekerja di ketinggian',
-        'Telah dilakukan inspeksi peralatan keselamatan',
-        'Lifeline atau fall arrest system tersedia dan sesuai',
-        'Area kerja telah diberi pagar pengaman',
-        'Perlengkapan APD lengkap (helm, sabuk pengaman, dll)',
-        'Cuaca dalam kondisi aman untuk bekerja di ketinggian',
-        'Supervisor melakukan briefing sebelum mulai kerja',
-        'Sudah dilakukan uji coba tangga/scaffolding',
-        'Komunikasi antar pekerja terjamin selama pekerjaan',
-        'Area di bawah pekerjaan aman dan diberi tanda peringatan',
-    ];
+    $persyaratanKetinggian = \App\Support\PermitChecklists::ketinggian();
 
     // 👇 Tambahkan baris ini untuk mengambil nilai lama atau dari DB
     $kerjaAman = old('kerja_aman_ketinggian', $permit->kerja_aman_ketinggian ?? []);
