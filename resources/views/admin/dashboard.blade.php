@@ -186,9 +186,11 @@
 
             <div class="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
 
-                {{-- Permit per jenis (lingkaran berlapis) --}}
+                {{-- Permit per jenis --}}
                 @php
-                    $ringRows = collect($permitTypes['rows'])->filter(fn ($r) => $r['count'] > 0)->take(5)->values();
+                    $ringRows = collect($permitTypes['rows'])->filter(fn ($r) => $r['count'] > 0)->values();
+                    $umumCount = collect($permitTypes['rows'])->firstWhere('key', 'umum')['count'] ?? 0;
+                    $khususCount = $permitTypes['total'] - $umumCount;
                 @endphp
                 <div class="flex flex-col overflow-hidden rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-pink-100/60 p-4 shadow-sm">
                     <div class="mb-3 flex items-center gap-2">
@@ -196,36 +198,52 @@
                             <i class="fas fa-layer-group text-xs"></i>
                         </span>
                         <h2 class="text-xs font-bold uppercase tracking-wide text-rose-900">Permit per Jenis</h2>
-                        <span class="ml-auto text-[10px] text-rose-700/70">Tahun {{ $selectedYear }}</span>
+                        <span class="ml-auto rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-rose-700 ring-1 ring-rose-100">Tahun {{ $selectedYear }}</span>
                     </div>
 
                     @if ($permitTypes['total'] > 0)
                         <div class="flex items-center gap-4">
-                            <div class="relative h-36 w-36 shrink-0">
+                            <div class="relative h-32 w-32 shrink-0">
                                 <canvas id="permitTypeChart"></canvas>
                                 <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                                    <span class="text-lg font-extrabold leading-none text-gray-800">{{ number_format($permitTypes['total'], 0, ',', '.') }}</span>
+                                    <span class="text-xl font-extrabold leading-none text-gray-800">{{ number_format($permitTypes['total'], 0, ',', '.') }}</span>
                                     <span class="mt-0.5 text-[9px] uppercase tracking-wide text-gray-400">permit</span>
                                 </div>
                             </div>
-                            <div class="min-w-0 flex-1 rounded-xl bg-white/70 p-2.5 ring-1 ring-rose-100">
-                                <p class="text-[10px] text-rose-700/80">Risiko tinggi</p>
-                                <p class="text-xl font-extrabold leading-tight text-rose-700">{{ number_format($permitTypes['risk_total'], 0, ',', '.') }}</p>
-                                <p class="text-[10px] text-gray-500">
-                                    {{ round($permitTypes['risk_total'] / $permitTypes['total'] * 100) }}% dari semua permit
-                                </p>
+                            <div class="grid min-w-0 flex-1 gap-2">
+                                <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-rose-100">
+                                    <p class="text-[10px] font-medium text-rose-700/80">Risiko tinggi</p>
+                                    <p class="flex items-baseline gap-1.5">
+                                        <span class="text-xl font-extrabold leading-tight text-rose-600">{{ number_format($permitTypes['risk_total'], 0, ',', '.') }}</span>
+                                        <span class="text-[11px] font-semibold text-rose-400">{{ round($permitTypes['risk_total'] / $permitTypes['total'] * 100) }}%</span>
+                                    </p>
+                                </div>
+                                <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-rose-100">
+                                    <p class="text-[10px] font-medium text-gray-500">Permit khusus</p>
+                                    <p class="flex items-baseline gap-1.5">
+                                        <span class="text-xl font-extrabold leading-tight text-gray-800">{{ number_format($khususCount, 0, ',', '.') }}</span>
+                                        <span class="text-[11px] font-semibold text-gray-400">selain Umum</span>
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mt-4 grid flex-1 grid-cols-2 content-evenly gap-x-4 gap-y-3 text-sm">
+                        <div class="mt-4 flex flex-1 flex-col justify-evenly gap-2.5">
                             @foreach ($permitTypes['rows'] as $row)
-                                <div class="flex items-center gap-2 {{ $row['count'] === 0 ? 'opacity-40' : '' }}">
-                                    <span class="h-3 w-3 shrink-0 rounded-full" style="background: {{ $row['color'] }}"></span>
-                                    <span class="min-w-0 flex-1 truncate text-gray-700">
-                                        {{ $row['label'] }}
-                                        @if ($row['risk'])<i class="fas fa-triangle-exclamation text-[10px] text-rose-500" title="Risiko tinggi"></i>@endif
-                                    </span>
-                                    <span class="shrink-0 font-bold text-gray-800">{{ $row['count'] }}</span>
+                                @php $pct = $permitTypes['total'] > 0 ? round($row['count'] / $permitTypes['total'] * 100) : 0; @endphp
+                                <div class="{{ $row['count'] === 0 ? 'opacity-40' : '' }}">
+                                    <div class="flex items-center gap-2 text-[13px]">
+                                        <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background: {{ $row['color'] }}"></span>
+                                        <span class="min-w-0 truncate font-medium text-gray-700">{{ $row['label'] }}</span>
+                                        @if ($row['risk'])
+                                            <span class="shrink-0 rounded-full bg-rose-100 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-rose-600">Risiko</span>
+                                        @endif
+                                        <span class="ml-auto shrink-0 font-bold tabular-nums text-gray-800">{{ number_format($row['count'], 0, ',', '.') }}</span>
+                                        <span class="w-9 shrink-0 text-right text-[11px] font-semibold tabular-nums text-gray-400">{{ $pct }}%</span>
+                                    </div>
+                                    <div class="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/80">
+                                        <div class="h-full rounded-full" style="width: {{ max($pct, $row['count'] > 0 ? 1 : 0) }}%; background: {{ $row['color'] }}"></div>
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
@@ -303,61 +321,6 @@
 
         {{-- ===================== KOLOM KANAN ===================== --}}
         <div class="flex flex-col gap-4">
-
-            {{-- Perlu tindakan saya --}}
-            <div class="overflow-hidden rounded-2xl border border-blue-700 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-4 text-white shadow-sm">
-                <div class="mb-3 flex items-center gap-2">
-                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-slate-900">
-                        <i class="fas fa-list-check text-xs"></i>
-                    </span>
-                    <h3 class="text-xs font-bold uppercase tracking-wide text-white">Perlu Tindakan Saya</h3>
-                    <span class="ml-auto rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-slate-900">{{ $myQueueTotal }}</span>
-                </div>
-
-                <div class="space-y-2">
-                    @forelse ($myQueue as $item)
-                        @php
-                            $isPgo = $item->usertype === 'pgo';
-                            $dayClass = $item->waiting_days >= $stale['days'] ? 'bg-red-500/25 text-red-200' : ($item->waiting_days >= 3 ? 'bg-amber-400/25 text-amber-200' : 'bg-white/20 text-white');
-                        @endphp
-                        <a href="{{ route('admin.permintaansik.show', $item->id) }}"
-                           class="flex items-start gap-3 rounded-xl border border-white/10 bg-white/10 p-2.5 transition hover:bg-white/20">
-                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold {{ $isPgo ? 'bg-white/20 text-white' : 'bg-emerald-300/30 text-emerald-100' }}">
-                                {{ $isPgo ? 'K' : 'V' }}
-                            </span>
-                            <div class="min-w-0 flex-1">
-                                <p class="truncate text-xs font-semibold text-white">{{ $item->user_name }}</p>
-                                <p class="truncate text-[11px] text-blue-100">
-                                    Step {{ $item->current_step }}/{{ $item->total_steps }} · {{ $item->current_step_title }}
-                                </p>
-                                @if ($item->number)
-                                    <p class="truncate text-[10px] text-blue-200">No: {{ $item->number }}</p>
-                                @endif
-                            </div>
-                            <div class="flex shrink-0 flex-col items-end gap-1">
-                                <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold {{ $dayClass }}">
-                                    {{ $item->waiting_days }} hari
-                                </span>
-                                @if ($item->is_unassigned)
-                                    <span class="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold text-white">Ambil</span>
-                                @endif
-                            </div>
-                        </a>
-                    @empty
-                        <div class="py-5 text-center text-[11px] text-blue-100">
-                            Tidak ada pengajuan yang menunggu tindakan Anda.
-                        </div>
-                    @endforelse
-                </div>
-
-                @if ($myQueueTotal > $myQueue->count())
-                    <a href="{{ route('admin.permintaansik', ['kondisi' => 'perlu_tindakan']) }}"
-                       class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white/10 py-1.5 text-[11px] font-semibold text-white hover:bg-white/20">
-                        Lihat semua ({{ $myQueueTotal }})
-                        <i class="fas fa-arrow-right text-[9px]"></i>
-                    </a>
-                @endif
-            </div>
 
             {{-- Aktivitas terbaru --}}
             <div class="overflow-hidden rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-100/60 p-4 shadow-sm">
@@ -471,6 +434,61 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
+
+            {{-- Perlu tindakan saya --}}
+            <div class="overflow-hidden rounded-2xl border border-blue-700 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-4 text-white shadow-sm">
+                <div class="mb-3 flex items-center gap-2">
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-slate-900">
+                        <i class="fas fa-list-check text-xs"></i>
+                    </span>
+                    <h3 class="text-xs font-bold uppercase tracking-wide text-white">Perlu Tindakan Saya</h3>
+                    <span class="ml-auto rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-slate-900">{{ $myQueueTotal }}</span>
+                </div>
+
+                <div class="space-y-2">
+                    @forelse ($myQueue as $item)
+                        @php
+                            $isPgo = $item->usertype === 'pgo';
+                            $dayClass = $item->waiting_days >= $stale['days'] ? 'bg-red-500/25 text-red-200' : ($item->waiting_days >= 3 ? 'bg-amber-400/25 text-amber-200' : 'bg-white/20 text-white');
+                        @endphp
+                        <a href="{{ route('admin.permintaansik.show', $item->id) }}"
+                           class="flex items-start gap-3 rounded-xl border border-white/10 bg-white/10 p-2.5 transition hover:bg-white/20">
+                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold {{ $isPgo ? 'bg-white/20 text-white' : 'bg-emerald-300/30 text-emerald-100' }}">
+                                {{ $isPgo ? 'K' : 'V' }}
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-xs font-semibold text-white">{{ $item->user_name }}</p>
+                                <p class="truncate text-[11px] text-blue-100">
+                                    Step {{ $item->current_step }}/{{ $item->total_steps }} · {{ $item->current_step_title }}
+                                </p>
+                                @if ($item->number)
+                                    <p class="truncate text-[10px] text-blue-200">No: {{ $item->number }}</p>
+                                @endif
+                            </div>
+                            <div class="flex shrink-0 flex-col items-end gap-1">
+                                <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold {{ $dayClass }}">
+                                    {{ $item->waiting_days }} hari
+                                </span>
+                                @if ($item->is_unassigned)
+                                    <span class="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold text-white">Ambil</span>
+                                @endif
+                            </div>
+                        </a>
+                    @empty
+                        <div class="py-5 text-center text-[11px] text-blue-100">
+                            Tidak ada pengajuan yang menunggu tindakan Anda.
+                        </div>
+                    @endforelse
+                </div>
+
+                @if ($myQueueTotal > $myQueue->count())
+                    <a href="{{ route('admin.permintaansik', ['kondisi' => 'perlu_tindakan']) }}"
+                       class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white/10 py-1.5 text-[11px] font-semibold text-white hover:bg-white/20">
+                        Lihat semua ({{ $myQueueTotal }})
+                        <i class="fas fa-arrow-right text-[9px]"></i>
+                    </a>
+                @endif
             </div>
 
         </div>
@@ -623,38 +641,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ======================
-    // PERMIT PER JENIS: lingkaran berlapis, 5 jenis terbanyak (terluar = terbanyak)
+    // PERMIT PER JENIS: donat satu cincin, warna sama dengan legenda
     // ======================
     const ctxTypes = document.getElementById('permitTypeChart');
     if (ctxTypes) {
-        const rings = @json($ringRows);
-        const total = @json($permitTypes['total']);
+        const rows = @json($ringRows);
         new Chart(ctxTypes, {
             type: 'doughnut',
             data: {
-                labels: ['jumlah', 'sisa'],
-                datasets: rings.map((r) => ({
-                    label: r.label,
-                    data: [r.count, Math.max(total - r.count, 0)],
-                    backgroundColor: [r.color, 'rgba(255,255,255,0.65)'],
-                    borderWidth: 0,
-                    borderRadius: 6,
-                    weight: 1
-                }))
+                labels: rows.map((r) => r.label),
+                datasets: [{
+                    data: rows.map((r) => r.count),
+                    backgroundColor: rows.map((r) => r.color),
+                    borderWidth: 2,
+                    borderColor: 'transparent',
+                    hoverOffset: 6
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '38%',
+                cutout: '70%',
                 animation: { animateRotate: true, duration: 1200, easing: 'easeOutQuart' },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
                         backgroundColor: '#111827',
                         padding: 8,
-                        filter: (item) => item.dataIndex === 0,
                         callbacks: {
-                            label: (c) => ` ${c.dataset.label}: ${c.raw} (${Math.round(c.raw / (total || 1) * 100)}%)`
+                            label: (c) => {
+                                const total = c.dataset.data.reduce((a, b) => a + b, 0) || 1;
+                                return ` ${c.label}: ${c.raw} (${Math.round(c.raw / total * 100)}%)`;
+                            }
                         }
                     }
                 }
