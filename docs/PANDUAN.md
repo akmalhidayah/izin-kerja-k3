@@ -244,3 +244,20 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 - Menambah ikon: unduh SVG solid-nya dari paket `@fortawesome/fontawesome-free@6.4.0` (folder `svgs/solid`), lalu tambahkan satu baris `.fa-nama { --fa: url("data:image/svg+xml,..."); }` dengan SVG yang sudah di-URL-encode dan tanpa komentar lisensi.
 - Layout admin masih memakai Font Awesome CDN sendiri dan tidak terpengaruh.
 - File CSS ini masuk build Vite, jadi setelah mengubahnya jalankan `./deploy.sh` (dengan build).
+
+## 11. Riwayat persetujuan (halaman admin)
+
+- Tabel `step_approval_logs` mencatat setiap perubahan status step: waktu, admin (`actor_id`; kosong berarti "Sistem"), status asal, status tujuan, catatan, dan jenis aksi (`status_changed`, `reset`, `backfill`). Baris tidak pernah diubah atau dihapus kecuali pengajuannya dihapus.
+- Penulis tunggal: `App\Services\StepApprovalLogger`. `statusChanged()` dipanggil dari `AdminPermintaanController@updateStatus` dan tidak menulis bila status dan catatan sama. `reset()` dipanggil lewat `resetStepApproval()` saat admin menghapus file, data kontraktor, JSA, atau permit terakhir.
+- Tampilan: di detail pengajuan (vendor dan PGO) ada ikon info kecil di samping badge status tiap step, dan tombol "Riwayat" di kanan atas untuk semua step. Keduanya membuka modal Alpine dari `admin/partials/step-history-modal.blade.php`; tombolnya komponen `<x-admin.history-button :title :rows :show-step>`. Data riwayat dikirim dari controller (`step_data[].history`, `data->history`), bukan query di Blade.
+- Dashboard "Aktivitas Terbaru" membaca 6 log terakhir (`recentActivities`), bukan lagi perkiraan dari pengajuan terbaru.
+- Migrasi mengisi satu baris `backfill` per step yang sudah punya status, memakai `updated_at` approval sebagai waktunya, supaya pengajuan lama tetap punya riwayat.
+- Deploy: `./deploy.sh --migrate` (ada tabel baru dan kelas Tailwind baru di view).
+- Menambah aksi baru yang mengubah status step: ubah status di dalam `DB::transaction`, lalu panggil logger dengan status sebelum dan sesudah. Tambahkan tes di `ApprovalHistoryTest`.
+
+## 12. Performa halaman admin
+
+- `AdminDashboardController@index` menghitung ringkasan per pengajuan di DB (`withCount` disetujui/revisi, `withExists('sikStep')`) dan hanya memuat kolom yang dipakai. Jangan kembalikan ke pola memuat `StepApproval` per baris.
+- Daftar vendor/PGO memakai `withRowSummaries()`: eager load `stepApprovals` plus `withExists` untuk JSA dan 11 permit, lalu `summarizeRow()` yang sama untuk keduanya.
+- Ekspresi tahun/bulan untuk grafik dipilih per driver di `dateParts()` (MySQL `YEAR()/MONTH()`, SQLite `strftime`), jadi tes di SQLite tetap jalan.
+- `AdminDashboardTest` menjaga batas jumlah query. Bila tes itu gagal setelah perubahan, cari query baru di dalam loop/`map()`.

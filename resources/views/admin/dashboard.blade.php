@@ -6,7 +6,6 @@
         $needRevision = $summaryRequests->where('status', 'Perlu Revisi')->count();
    $completed = $summaryRequests->where('is_sik_approved', true)->count();
         $avgProgress = round($summaryRequests->avg('progress') ?? 0);
-        $recentRequests = $summaryRequests->sortByDesc('created_at')->take(5);
         $adminLoads = $summaryRequests->groupBy('handled_by')->map->count()->sortDesc()->take(5);
         $maxVendorRequest = max((int) ($topVendorRequests->max('total_requests') ?? 0), 1);
     @endphp
@@ -208,116 +207,64 @@
     </div>
 
     <div class="space-y-3">
-        @forelse ($recentRequests as $item)
-
+        @forelse ($recentActivities as $item)
             @php
-                // =========================
-                // STATUS STYLE
-                // =========================
-                $badgeClass = match($item->status) {
-                    'Perlu Revisi' => 'bg-yellow-100 text-yellow-700',
-                    'Terbit SIK' => 'bg-green-100 text-green-700',
-                    'Perlu Disetujui' => 'bg-blue-100 text-blue-700',
+                $toStatus = $item->ke_status;
+                $badgeClass = match($toStatus) {
+                    'disetujui' => 'bg-green-100 text-green-700',
+                    'revisi' => 'bg-yellow-100 text-yellow-700',
+                    'perlu_disetujui' => 'bg-amber-100 text-amber-700',
                     default => 'bg-gray-100 text-gray-700',
                 };
-
-                // =========================
-                // ICON STATUS
-                // =========================
-                $icon = match($item->status) {
-                    'Perlu Revisi' => 'fa-rotate-left text-yellow-500',
-                    'Terbit SIK' => 'fa-check-circle text-green-500',
-                    'Perlu Disetujui' => 'fa-hourglass-half text-blue-500',
-                    default => 'fa-circle text-gray-400',
+                $dotClass = match($toStatus) {
+                    'disetujui' => 'bg-green-500',
+                    'revisi' => 'bg-yellow-500',
+                    'perlu_disetujui' => 'bg-amber-500',
+                    default => 'bg-gray-400',
                 };
-
-                // =========================
-                // STEP HUMAN READABLE
-                // =========================
-                $stepLabel = match($item->current_step_title) {
-                    'op_spk' => 'Pengajuan dibuat',
-                    'data_kontraktor' => 'Data kontraktor',
-                    'bpjs' => 'Upload BPJS',
-                    'jsa' => 'Analisis pekerjaan (JSA)',
-                    'working_permit' => 'Izin kerja',
-                    'sik' => 'Penerbitan SIK',
-                    default => 'Proses berjalan'
-                };
-
-                // =========================
-                // ACTIVITY MESSAGE (🔥 BARU)
-                // =========================
-                if ($item->status === 'Terbit SIK') {
-                    $activityText = "SIK sudah terbit & selesai";
-                } elseif ($item->status === 'Perlu Revisi') {
-                    $activityText = "Perlu revisi pada tahap " . $stepLabel;
-                } elseif ($item->status === 'Perlu Disetujui') {
-                    $activityText = "Menunggu approval admin";
-                } else {
-                    $activityText = "Sedang di tahap " . $stepLabel;
-                }
+                $typeLabel = $item->usertype === 'pgo' ? 'Karyawan' : 'Vendor';
             @endphp
 
-            <div class="flex gap-3 items-start p-2 rounded-lg hover:bg-gray-50 transition">
+            <a href="{{ route('admin.permintaansik.show', $item->notification_id) }}"
+               class="flex gap-3 items-start p-2 rounded-lg hover:bg-gray-50 transition">
 
                 <!-- TIMELINE DOT -->
                 <div class="flex flex-col items-center mt-1">
-                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></div>
+                    <div class="w-2.5 h-2.5 rounded-full {{ $dotClass }}"></div>
                     <div class="w-[1px] flex-1 bg-gray-200 mt-1"></div>
                 </div>
 
                 <!-- CONTENT -->
                 <div class="flex-1 min-w-0">
-
-                    <!-- USER -->
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-2">
                         <p class="text-xs font-semibold text-gray-800 truncate">
                             {{ $item->user_name }}
+                            <span class="font-normal text-gray-400">• {{ $typeLabel }}</span>
                         </p>
-
-                        <span class="text-[9px] text-gray-400">
-                            {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
+                        <span class="shrink-0 text-[9px] text-gray-400">
+                            {{ $item->created_at?->diffForHumans() }}
                         </span>
                     </div>
 
-                    <!-- ACTIVITY TEXT (🔥 UTAMA) -->
-                    <p class="text-[11px] text-gray-600 mt-0.5">
-                        {{ $activityText }}
+                    <p class="text-[11px] text-gray-600 mt-0.5 truncate">
+                        {{ $item->step_title }}
                     </p>
 
-                    <!-- DETAIL MINI -->
-                    <div class="flex items-center gap-2 mt-1 flex-wrap">
-
-                        <!-- STEP -->
-                        <span class="text-[9px] text-gray-400">
-                            Step: {{ $stepLabel }}
-                        </span>
-
-                        <!-- ADMIN -->
-                        @if($item->handled_by && $item->handled_by !== '-')
-                        <span class="text-[9px] text-gray-400">
-                            • Admin: {{ $item->handled_by }}
-                        </span>
-                        @endif
-
+                    <div class="flex items-center gap-2 mt-1 flex-wrap text-[9px] text-gray-400">
+                        <span>{{ $item->aksi }}</span>
+                        <span>• {{ $item->dari }} → {{ $item->ke }}</span>
+                        <span>• {{ $item->aktor }}</span>
                     </div>
-
+                    @if ($item->catatan)
+                        <p class="mt-1 text-[10px] text-gray-500 truncate" title="{{ $item->catatan }}">"{{ $item->catatan }}"</p>
+                    @endif
                 </div>
 
                 <!-- RIGHT -->
-                <div class="flex flex-col items-end gap-1">
-
-                    <!-- ICON -->
-                    <i class="fas {{ $icon }} text-xs"></i>
-
-                    <!-- STATUS -->
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold {{ $badgeClass }}">
-                        {{ $item->status }}
-                    </span>
-
-                </div>
-
-            </div>
+                <span class="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-semibold {{ $badgeClass }}">
+                    {{ $item->ke }}
+                </span>
+            </a>
 
         @empty
             <div class="text-[11px] text-gray-500 text-center py-4">

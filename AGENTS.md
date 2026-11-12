@@ -25,6 +25,7 @@ Kunci step vendor, berurutan: `op_spk`, `data_kontraktor`, `bpjs`, `jsa`, `worki
 - Total step dihitung dari daftar step per usertype (PGO = 3), bukan asumsi 13.
 - Tanda tangan akhir disimpan di baris `StepApproval` step `sik` (`signature_senior_manager`, `signature_manager`) dan hanya boleh disimpan setelah status `sik` = `disetujui`.
 - Admin: detail pengajuan yang belum ter-assign otomatis di-assign ke admin pertama yang membukanya. Hanya `assigned_admin_id` yang boleh ubah status atau hapus data pengajuan itu.
+- Riwayat persetujuan (`step_approval_logs`) hanya ditambah, tidak diubah. Setiap kode yang mengubah `StepApproval.status` wajib mencatat lewat `App\Services\StepApprovalLogger` (`statusChanged()` untuk aksi admin, `reset()` saat data/file dihapus). Jangan tulis `StepApproval::...->update(['status' => ...])` tanpa log. Riwayat hanya tampil di halaman admin.
 
 ## Working permit
 
@@ -67,6 +68,7 @@ Kunci permit: `umum`, `gaspanas`, `air`, `ketinggian`, `pengangkatan`, `penggali
 - Form permit dimuat lazy lewat `components/steps/modal-working-permit-lazy.blade.php` + route `working-permit.form`; hanya `umum` yang di-include langsung.
 - State Alpine lokal (`activeModal`, `selectedPermit`); nama field form harus sama persis dengan validasi controller.
 - Jangan tambah query Eloquent di Blade; muat data di controller.
+- Halaman daftar/dashboard admin memuat ringkasan per baris lewat `withCount`/`withExists` (lihat `AdminDashboardController::withRowSummaries()`); jangan tambahkan query per baris di dalam `map()`.
 - Enforcement workflow tidak boleh hanya di UI (tombol disabled); ulangi di controller.
 - Setelah ubah Blade/Tailwind, jalankan build produksi.
 
@@ -107,7 +109,7 @@ Jika PHP atau Node tidak tersedia, sebutkan perintah mana yang tidak bisa dijala
 
 - `viewSik()` dipakai route user dan admin tanpa cek kepemilikan/status final untuk non-admin.
 - Beberapa `store()` permit melewati cek kepemilikan saat `_token_access` truthy.
-- Definisi step, peta permit, dan perhitungan progres terduplikasi dengan alias/urutan yang kadang berbeda (urutan `sik` vs `bukti_serah_terima` di `AdminDashboardController::index`).
+- Definisi step, peta permit, dan perhitungan progres terduplikasi dengan alias/urutan yang kadang berbeda antar controller.
 - `JsaController::edit()` merujuk view `pengajuan-user.jsa.edit` yang tidak ada; edit JSA nyata lewat modal `modal-jsa-edit`.
 - Cascade model tidak konsisten membersihkan file upload/tanda tangan.
 - Model/tabel `WorkPermitLifeSaving`, `WorkPermitProsedurKhusus`, `LiftingPermit` dan komponen `permits/lifesaving`, `permits/procedures` tidak punya controller/route (legacy).

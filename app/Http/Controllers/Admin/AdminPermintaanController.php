@@ -22,11 +22,52 @@ use App\Models\WorkPermitPengangkatan;
 use App\Models\WorkPermitListrikTeganganTinggi;
 
 use App\Models\StepApproval;
+use App\Models\StepApprovalLog;
 use App\Models\User;
+use App\Services\StepApprovalLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class AdminPermintaanController extends Controller
 {
+    public function __construct(private StepApprovalLogger $approvalLogger)
+    {
+    }
+
+    /**
+     * Kembalikan step ke "menunggu" karena data/file-nya dihapus, dan catat di riwayat.
+     * $extra: kolom lain yang ikut diubah (mis. file_path atau catatan => null).
+     */
+    private function resetStepApproval(int $notificationId, string $step, string $reason, array $extra = []): void
+    {
+        $approval = StepApproval::where('notification_id', $notificationId)
+            ->where('step', $step)
+            ->first();
+
+        if (!$approval) {
+            return;
+        }
+
+        DB::transaction(function () use ($approval, $notificationId, $step, $reason, $extra) {
+            $fromStatus = $approval->status;
+
+            $approval->fill(array_merge(['status' => 'menunggu'], $extra))->save();
+
+            $this->approvalLogger->reset($notificationId, $step, $fromStatus, $reason, auth()->id());
+        });
+    }
+
+    /** Riwayat persetujuan satu pengajuan, terbaru di atas, dalam bentuk baris siap tampil. */
+    private function historyRows(int $notificationId, array $stepTitles): \Illuminate\Support\Collection
+    {
+        return StepApprovalLog::query()
+            ->where('notification_id', $notificationId)
+            ->with('actor:id,name')
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (StepApprovalLog $log) => $log->toHistoryRow($stepTitles));
+    }
+
     /**
      * Judul step (13 step, SIK final).
      * NOTE: status di StepApproval kamu simpan lowercase: disetujui|revisi|menunggu
@@ -259,6 +300,9 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
             ->get()
             ->keyBy('step');
 
+        $historyAll = $this->historyRows((int) $id, $this->stepTitles());
+        $historyByStep = $historyAll->groupBy('step');
+
         // Inject file dari approvals kalau upload kosong (kompatibilitas legacy)
         foreach ($approvals as $key => $approval) {
             if (!isset($uploadsSingle[$key]) && $approval->file_path) {
@@ -327,6 +371,7 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
                 'upload' => $upload,
                 'status_class' => $statusClass,
                 'catatan' => $approvals[$step]->catatan ?? '',
+                'history' => ($historyByStep[$step] ?? collect())->values()->all(),
             ];
         }
 
@@ -350,6 +395,7 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
             'description' => $notification->description ?? '-',
             'step_data' => $stepData,
             'step_summary' => $stepSummary,
+            'history' => $historyAll->values()->all(),
             'data_kontraktor' => $dataKontraktor,
             'jsa' => $jsa,
             'permits' => $permits,
@@ -403,14 +449,25 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
             return redirect()->back()->with('error', 'Hanya admin yang pertama kali menangani yang dapat mengubah status!');
         }
 
-        StepApproval::updateOrCreate(
-            ['notification_id' => $id, 'step' => $step],
-            [
-                'status' => strtolower($request->status),
-                'catatan' => $request->catatan,
-                'approved_by' => $adminId,
-            ]
-        );
+        $toStatus = strtolower($request->status);
+        $toCatatan = $request->catatan;
+
+        DB::transaction(function () use ($id, $step, $toStatus, $toCatatan, $adminId) {
+            $existing = StepApproval::where('notification_id', $id)->where('step', $step)->first();
+
+            StepApproval::updateOrCreate(
+                ['notification_id' => $id, 'step' => $step],
+                [
+                    'status' => $toStatus,
+                    'catatan' => $toCatatan,
+                    'approved_by' => $adminId,
+                ]
+            );
+
+            $this->approvalLogger->statusChanged(
+                (int) $id, $step, $existing?->status, $toStatus, $existing?->catatan, $toCatatan, $adminId
+            );
+        });
 
         Log::info('[ADMIN][UPDATE] step status updated', [
             'notification_id' => $id,
@@ -483,12 +540,7 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
             ->exists();
 
         if (!$hasRemaining) {
-            StepApproval::where('notification_id', $id)
-                ->where('step', $step)
-                ->update([
-                    'file_path' => null,
-                    'status' => 'menunggu',
-                ]);
+            $this->resetStepApproval((int) $id, $step, 'File dokumen dihapus oleh admin', ['file_path' => null]);
 
             Log::info('[ADMIN][DELETE FILE] approval reset (no remaining files)', [
                 'notification_id' => $id,
@@ -550,12 +602,7 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
         $this->deleteModelFiles($dataKontraktor);
         $dataKontraktor->delete();
 
-        StepApproval::where('notification_id', $id)
-            ->where('step', 'data_kontraktor')
-            ->update([
-                'status' => 'menunggu',
-                'catatan' => null,
-            ]);
+        $this->resetStepApproval((int) $id, 'data_kontraktor', 'Data kontraktor dihapus oleh admin', ['catatan' => null]);
 
         return redirect()->back()->with('success', 'Data kontraktor berhasil dihapus.');
     }
@@ -575,12 +622,7 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
         $this->deleteModelFiles($jsa);
         $jsa->delete();
 
-        StepApproval::where('notification_id', $id)
-            ->where('step', 'jsa')
-            ->update([
-                'status' => 'menunggu',
-                'catatan' => null,
-            ]);
+        $this->resetStepApproval((int) $id, 'jsa', 'Data JSA dihapus oleh admin', ['catatan' => null]);
 
         return redirect()->back()->with('success', 'Data JSA berhasil dihapus.');
     }
@@ -616,12 +658,7 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
         $permit->delete();
 
         if (!$this->hasAnyPermit($id, $models)) {
-            StepApproval::where('notification_id', $id)
-                ->where('step', 'working_permit')
-                ->update([
-                    'status' => 'menunggu',
-                    'catatan' => null,
-                ]);
+            $this->resetStepApproval((int) $id, 'working_permit', 'Semua working permit dihapus oleh admin (terakhir: '.$type.')', ['catatan' => null]);
         }
 
         return redirect()->back()->with('success', 'Data working permit berhasil dihapus.');

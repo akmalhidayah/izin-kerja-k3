@@ -22,14 +22,16 @@ app/
       TokenPdfController.php           # PDF publik via token -> set attribute token_pdf_access
       WorkingPermit/*PermitController.php  # 11 controller permit (store, showByToken, storeByToken, preview)
     Admin/
-      AdminDashboardController.php     # dashboard admin, daftar permintaan vendor & PGO
-      AdminPermintaanController.php    # detail permintaan, auto-assign, update status, hapus data, viewSik
+      AdminDashboardController.php     # dashboard admin (agregat via subquery), daftar vendor & PGO (satu query per halaman), aktivitas terbaru dari log
+      AdminPermintaanController.php    # detail permintaan + riwayat, auto-assign, update status (dicatat), hapus data (reset dicatat), viewSik
       ApproveSikController.php         # daftar SIK + tanda tangan senior manager/manager
       AdminNotificationController.php  # tandai notifikasi admin terbaca
       RolePermissionController.php     # Super Admin: daftar/edit/hapus Notification (nama historis)
       UserPanelController.php          # Super Admin: CRUD user (password default 'password')
       NewsController.php               # Super Admin: Master Data > Upload Berita (CRUD berita landing page)
     LandingController.php              # route '/': landing page + 6 berita aktif terbaru
+  Services/
+    StepApprovalLogger.php           # satu-satunya penulis riwayat persetujuan (statusChanged, reset)
   Http/Middleware/
     UsertypeMiddleware.php    # alias 'usertype:a,b'
     CheckRole.php             # alias 'role:X'; Super Admin selalu lolos
@@ -129,8 +131,9 @@ Redirect ada di `app/Http/Controllers/Auth/AuthenticatedSessionController.php`. 
 |---|---|---|---|
 | `User` | `users` | `usertype` enum(admin,user,pgo), `jabatan`, `role_id` | `role()`, `handledNotifications()` |
 | `Role` | `roles` | `name` unique | |
-| `Notification` | `notifications` | `user_id`, `type` enum(po,spk,notif), `number`, `description`, `file`, `status` (default menunggu), `assigned_admin_id` | `uploads()`, `stepApprovals()`, `kontraktor()`, `umumWorkPermit()`, `workPermit*()`, `detail()`, `closure()`, `user()`, `assignedAdmin()`, `sikStep()`; hook `deleting` menghapus anak |
+| `Notification` | `notifications` | `user_id`, `type` enum(po,spk,notif), `number`, `description`, `file`, `status` (default menunggu), `assigned_admin_id` | `uploads()`, `stepApprovals()`, `kontraktor()`, `umumWorkPermit()`, `workPermit*()`, `detail()`, `closure()`, `user()`, `assignedAdmin()`, `sikStep()`, `jsa()`, `stepApprovalLogs()`; hook `deleting` menghapus anak |
 | `StepApproval` | `step_approvals` | `step` string, `status` enum(menunggu,perlu_disetujui,disetujui,revisi), `catatan`, `file_path`, `approved_by`, `signature_senior_manager`, `signature_manager` | `notification()`, `approvedBy()` |
+| `StepApprovalLog` | `step_approval_logs` | `step`, `action` (status_changed, reset, backfill), `from_status`, `to_status`, `catatan`, `actor_id` (null = Sistem), `created_at` saja; baris hanya ditambah | `notification()`, `actor()`; `toHistoryRow()`, `statusLabel()`, accessor `action_label`, `actor_name` |
 | `Upload` | `uploads` | `step` enum(bpjs,fakta_integritas,sertifikasi_ak3,ktp,surat_kesehatan,struktur_organisasi,post_test,bukti_serah_terima), `file_path`, `status` (default pending), `uploaded_at` | `notification()` |
 | `News` | `news` | `title`, `description`, `link`, `image_path` (disk public, folder `news/`), `is_active` | scope `active()`, accessor `image_url`, `source_label` (domain dari link) |
 | `AdminNotification` | `admin_notifications` | `recipient_id`, `notification_id`, `title`, `body`, `url`, `read_at` | `recipient()`, `notification()`, scope `unread()` |
@@ -215,7 +218,7 @@ Komponen bersama: `components/permits/form-signature.blade.php`, `components/sig
 |---|---|
 | `dashboard` | `AdminDashboardController@index` |
 | `permintaansik`, `permintaansikpgo` | `AdminDashboardController@permintaanSIK` / `permintaanSIKPgo` |
-| `detailpermintaan`, `detailpermintaanpgo` | `AdminPermintaanController@show` (dipilih berdasarkan usertype pemohon) |
+| `detailpermintaan`, `detailpermintaanpgo` | `AdminPermintaanController@show` (dipilih berdasarkan usertype pemohon); ikon info per step + "Riwayat" di kanan atas membuka `partials/step-history-modal` lewat komponen `components/admin/history-button` |
 | `approvesik` | `ApproveSikController@index` |
 | `pdfsik` | `AdminPermintaanController@viewSik` (DomPDF) |
 | `user-panel/{index,create,edit}` | `UserPanelController` |
@@ -225,9 +228,9 @@ Komponen bersama: `components/permits/form-signature.blade.php`, `components/sig
 
 | Definisi | Lokasi |
 |---|---|
-| Daftar 13 step vendor + judul | `IzinKerjaController@index` (2x, alias `surat_izin_kerja`), `AdminPermintaanController::stepTitles()`, `AdminDashboardController@index` (urutan `sik` sebelum `bukti_serah_terima`), `AdminDashboardController@permintaanSIK` |
-| Daftar 3 step PGO | `IzinKerjaPgoController@index`, `AdminPermintaanController::stepTitlesForUser()`, `AdminDashboardController@permintaanSIKPgo`, `ApproveSikController@index` |
-| Peta kunci permit → model | `IzinKerjaController` + `IzinKerjaPgoController` (`$permits`), `WorkingPermitFormController::PERMITS`, `TokenLinkController::$types`, `TokenPdfController::$types`, `AdminPermintaanController::permitModels()` + `show()`, `AdminDashboardController` (array model), `ApproveSikController@index` |
+| Daftar 13 step vendor + judul | `IzinKerjaController@index` (2x, alias `surat_izin_kerja`), `AdminPermintaanController::stepTitles()`, `AdminDashboardController::VENDOR_STEP_TITLES` |
+| Daftar 3 step PGO | `IzinKerjaPgoController@index`, `AdminPermintaanController::stepTitlesForUser()`, `AdminDashboardController::PGO_STEP_TITLES`, `ApproveSikController@index` |
+| Peta kunci permit → model | `IzinKerjaController` + `IzinKerjaPgoController` (`$permits`), `WorkingPermitFormController::PERMITS`, `TokenLinkController::$types`, `TokenPdfController::$types`, `AdminPermintaanController::permitModels()` + `show()`, `AdminDashboardController::PERMIT_RELATIONS` (nama relasi di `Notification`), `ApproveSikController@index` |
 | Peta kunci → `permit_type` detail | `IzinKerjaController` (`$detailTypeMap`), `WorkingPermitFormController::PERMITS`, relasi `detail()` tiap model permit |
 | Status UI (pending/done/revisi) | `IzinKerjaController`, `IzinKerjaPgoController`, Blade dashboard |
 | Folder tanda tangan | `saveSignature()` di tiap controller permit/JSA/kontraktor/ApproveSik |
@@ -241,6 +244,9 @@ Komponen bersama: `components/permits/form-signature.blade.php`, `components/sig
 | `DataKontraktorTokenFormTest` | render/simpan JSON rows, legacy double-encoded, PDF token |
 | `JsaNumberingTest` | algoritma nomor JSA, bulan berjalan, unique index |
 | `JsaSignatureTest` | PNG lengkap vs terpotong di form token |
+| `AdminDashboardTest` | angka dashboard, status baris daftar vendor/PGO, jumlah query tetap kecil saat data bertambah |
+| `ApprovalHistoryTest` | log saat ubah status, tanpa log bila tidak berubah, admin lain ditolak, reset saat hapus JSA, riwayat tampil di detail, aktivitas dashboard, log ikut terhapus |
+| `NewsTest` | CRUD berita Super Admin, admin biasa ditolak, landing menampilkan berita aktif |
 | `Auth/*`, `ProfileTest`, `ExampleTest` | bawaan Breeze |
 
 Pola setup: `User::factory()->create(['usertype' => 'user'])`, `Notification::create([...user_id...])`, `actingAs()`, `RefreshDatabase`, `Storage::fake('public')`. Konfigurasi di `phpunit.xml` (SQLite in-memory).

@@ -31,6 +31,16 @@ class Notification extends Model
         return $this->hasMany(StepApproval::class);
     }
 
+    public function stepApprovalLogs()
+    {
+        return $this->hasMany(StepApprovalLog::class);
+    }
+
+    public function jsa()
+    {
+        return $this->hasOne(Jsa::class, 'notification_id');
+    }
+
     public function kontraktor()
     {
         return $this->hasOne(DataKontraktor::class, 'notification_id');
@@ -125,6 +135,7 @@ class Notification extends Model
     static::deleting(function ($notification) {
         $notification->uploads->each(fn ($upload) => $upload->delete());
         $notification->stepApprovals->each(fn ($approval) => $approval->delete());
+        $notification->stepApprovalLogs()->delete();
         $notification->kontraktor?->delete();
 
         $notification->umumWorkPermit()?->delete();
