@@ -210,69 +210,80 @@
                     @endif
                 </div>
 
-                {{-- Pekerjaan berlangsung hari ini --}}
-                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                {{-- Pekerjaan berlangsung hari ini: dropdown Vendor / Karyawan (default Vendor) --}}
+                @php
+                    $ongoingSets = ['vendor' => $ongoing['vendor'], 'pgo' => $ongoing['pgo']];
+                @endphp
+                <div x-data="{ who: 'vendor' }" class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="mb-3 flex items-center gap-2">
-                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
                             <i class="fas fa-helmet-safety text-xs"></i>
                         </span>
-                        <h2 class="text-xs font-bold uppercase tracking-wide text-slate-800">Pekerjaan Berlangsung Hari Ini</h2>
-                        @if ($ongoing['total'] > $ongoing['rows']->count())
-                            <span class="ml-auto shrink-0 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-slate-100">
-                                +{{ $ongoing['total'] - $ongoing['rows']->count() }} lainnya
-                            </span>
-                        @endif
+                        <h2 class="min-w-0 text-xs font-bold uppercase tracking-wide text-slate-800">Pekerjaan Berlangsung Hari Ini</h2>
+                        <select x-model="who" aria-label="Jenis pemohon"
+                                class="ml-auto shrink-0 rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[11px] font-semibold text-slate-700 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200">
+                            <option value="vendor">Vendor</option>
+                            <option value="pgo">Karyawan</option>
+                        </select>
                     </div>
 
-                    <div class="mb-3 grid grid-cols-3 gap-2">
-                        <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
-                            <p class="text-[10px] text-emerald-700/80">Pekerjaan</p>
-                            <p class="text-lg font-extrabold leading-tight text-emerald-700">{{ $ongoing['total'] }}</p>
-                        </div>
-                        <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
-                            <p class="text-[10px] text-emerald-700/80">Pekerja</p>
-                            <p class="text-lg font-extrabold leading-tight text-emerald-700">{{ number_format($ongoing['workers'], 0, ',', '.') }}</p>
-                        </div>
-                        <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
-                            <p class="text-[10px] text-rose-700/80">Risiko tinggi</p>
-                            <p class="text-lg font-extrabold leading-tight text-rose-600">{{ $ongoing['risk'] }}</p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        @forelse ($ongoing['rows'] as $job)
-                            <a href="{{ route('admin.permintaansik.show', $job->notification_id) }}"
-                               class="block rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100 transition hover:bg-slate-100">
-                                <div class="flex items-center justify-between gap-2">
-                                    <p class="min-w-0 truncate text-[11px] font-semibold text-gray-800">
-                                        {{ $job->name }}
-                                        <span class="font-normal text-gray-400">· {{ $job->usertype === 'pgo' ? 'Karyawan' : 'Vendor' }}</span>
-                                    </p>
-                                    <span class="shrink-0 text-[10px] font-semibold text-emerald-700">
-                                        {{ $job->workers !== null ? $job->workers.' org' : '-' }}
-                                    </span>
+                    @foreach ($ongoingSets as $setKey => $set)
+                        <div x-show="who === '{{ $setKey }}'" @if ($setKey !== 'vendor') x-cloak @endif data-ongoing-set="{{ $setKey }}">
+                            <div class="mb-3 grid grid-cols-3 gap-2">
+                                <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
+                                    <p class="text-[10px] text-emerald-700/80">Pekerjaan</p>
+                                    <p class="text-lg font-extrabold leading-tight text-emerald-700">{{ $set['total'] }}</p>
                                 </div>
-                                <p class="mt-0.5 truncate text-[10px] text-gray-500">
-                                    <i class="fas fa-location-dot text-[9px] text-gray-400"></i>
-                                    {{ $job->location ?: 'Lokasi belum diisi' }}
-                                    @if ($job->until)<span class="text-gray-400"> · s.d. {{ $job->until }}</span>@endif
-                                </p>
-                                @if ($job->types)
-                                    <div class="mt-1 flex flex-wrap gap-1">
-                                        @foreach (array_slice($job->types, 0, 3) as $type)
-                                            <span class="rounded-full px-1.5 py-0.5 text-[9px] font-semibold text-white" style="background: {{ $type['color'] }}">{{ $type['label'] }}</span>
-                                        @endforeach
-                                        @if (count($job->types) > 3)
-                                            <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">+{{ count($job->types) - 3 }}</span>
-                                        @endif
-                                    </div>
-                                @endif
-                            </a>
-                        @empty
-                            <div class="py-6 text-center text-[11px] text-gray-500">Tidak ada pekerjaan yang dijadwalkan hari ini.</div>
-                        @endforelse
-                    </div>
+                                <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
+                                    <p class="text-[10px] text-emerald-700/80">Pekerja</p>
+                                    <p class="text-lg font-extrabold leading-tight text-emerald-700">{{ number_format($set['workers'], 0, ',', '.') }}</p>
+                                </div>
+                                <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
+                                    <p class="text-[10px] text-rose-700/80">Risiko tinggi</p>
+                                    <p class="text-lg font-extrabold leading-tight text-rose-600">{{ $set['risk'] }}</p>
+                                </div>
+                            </div>
 
+                            <div class="space-y-1.5">
+                                @forelse ($set['rows'] as $job)
+                                    <a href="{{ route('admin.permintaansik.show', $job->notification_id) }}"
+                                       class="block rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100 transition hover:bg-slate-100">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <p class="min-w-0 truncate text-[11px] font-semibold text-gray-800">{{ $job->name }}</p>
+                                            <span class="shrink-0 text-[10px] font-semibold text-emerald-700">
+                                                {{ $job->workers !== null ? $job->workers.' org' : '-' }}
+                                            </span>
+                                        </div>
+                                        <p class="mt-0.5 truncate text-[10px] text-gray-500">
+                                            <i class="fas fa-location-dot text-[9px] text-gray-400"></i>
+                                            {{ $job->location ?: 'Lokasi belum diisi' }}
+                                            @if ($job->until)<span class="text-gray-400"> · s.d. {{ $job->until }}</span>@endif
+                                        </p>
+                                        @if ($job->types)
+                                            <div class="mt-1 flex flex-wrap gap-1">
+                                                @foreach (array_slice($job->types, 0, 3) as $type)
+                                                    <span class="rounded-full px-1.5 py-0.5 text-[9px] font-semibold text-white" style="background: {{ $type['color'] }}">{{ $type['label'] }}</span>
+                                                @endforeach
+                                                @if (count($job->types) > 3)
+                                                    <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">+{{ count($job->types) - 3 }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </a>
+                                @empty
+                                    <div class="py-6 text-center text-[11px] text-gray-500">
+                                        Tidak ada pekerjaan {{ $setKey === 'pgo' ? 'karyawan' : 'vendor' }} yang dijadwalkan hari ini.
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            @if ($set['total'] > $set['rows']->count())
+                                <p class="mt-2 text-right text-[10px] font-semibold text-emerald-700/80">
+                                    +{{ $set['total'] - $set['rows']->count() }} lainnya
+                                </p>
+                            @endif
+                        </div>
+                    @endforeach
                 </div>
 
             </div>

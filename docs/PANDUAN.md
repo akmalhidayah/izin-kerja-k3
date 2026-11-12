@@ -272,7 +272,7 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 - Pencarian cepat di dashboard mengarah ke daftar vendor atau karyawan (`?search=`), bukan endpoint baru.
 - Panel di bawah grafik Tren:
   - **Permit per Jenis** (`permitTypeCounts()`): jumlah permit per jenis yang dibuat pada tahun terpilih, donat satu cincin plus daftar satu kolom (angka, persen, batang). Kotak "Permit khusus" = total dikurangi Umum. Jenis risiko tinggi (ketinggian, gas panas, risiko panas, ruang tertutup, listrik TT) diatur di `AdminDashboardController::PERMIT_TYPES`.
-  - **Pekerjaan Berlangsung Hari Ini** (`ongoingToday()`): vendor bila hari ini di antara `tanggal_mulai` dan `tanggal_selesai` Data Kontraktor (lokasi dan jumlah pekerja dari sana; `tenaga_kerja` format lama yang ter-encode dua kali ikut didecode); karyawan bila `work_date` detail permit hari ini, atau tanggal JSA hari ini bila tidak ada tanggal kerja. Status persetujuan sengaja tidak dibedakan. Risiko tinggi diurutkan paling atas.
+  - **Pekerjaan Berlangsung Hari Ini** (`ongoingToday()`): vendor bila hari ini di antara `tanggal_mulai` dan `tanggal_selesai` Data Kontraktor (lokasi dan jumlah pekerja dari sana; `tenaga_kerja` format lama yang ter-encode dua kali ikut didecode); karyawan bila `work_date` detail permit hari ini, atau tanggal JSA hari ini bila tidak ada tanggal kerja. Status persetujuan sengaja tidak dibedakan. Risiko tinggi diurutkan paling atas. Data dipisah `ongoing['vendor']` dan `ongoing['pgo']` (masing-masing `rows` maks 7, `total`, `workers`, `risk`); panel punya dropdown Alpine `who` dengan default Vendor, tanpa memuat ulang halaman.
 - Kolom kiri dan kanan dashboard memakai `flex flex-col`; panel terakhir tiap kolom (`flex-1`) mengisi sisa tinggi supaya bawahnya rata.
 
 ## 14. Daftar persyaratan kerja aman permit
@@ -284,7 +284,7 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 
 ## 15. Sidebar admin
 
-- Sidebar di `layouts/admin.blade.php` berupa panel merah melayang (desktop: jarak 12px dari tepi, `lg:pl-[19.5rem]` saat terbuka dan `lg:pl-[6.5rem]` saat diciutkan pada pembungkus konten). Tombol buka-tutup tetap sama; saat diciutkan, nama menu muncul sebagai tooltip.
+- Sidebar di `layouts/admin.blade.php` berupa panel merah solid (`bg-red-700`) melayang (desktop: jarak 12px dari tepi, `lg:pl-[19.5rem]` saat terbuka dan `lg:pl-[6.5rem]` saat diciutkan pada pembungkus konten). Tombol buka-tutup tetap sama; saat diciutkan, nama menu muncul sebagai tooltip.
 - Menu utama didefinisikan di array `$navGroups` (grup Utama, Pengajuan, Penerbitan) dan sub-menu Master Data di `$subMenu`. Menambah menu cukup menambah satu baris array: `href`, `active`, `icon` (nama ikon Lucide), `text`, `badge`, `key`.
 - Menu aktif memakai kelas `.nav-active`: tab putih yang menyambung ke latar konten dengan lekukan dari pseudo-element. Warna lekukan `#ffffff` harus sama dengan latar `body` (`bg-white`) dan latar tab aktif; ubah ketiganya bersamaan.
 - Badge: view composer di `AppServiceProvider` mengisi `$sidebarBadges` (`vendor`, `pgo` = scope `perluTindakan`; `sik` = step `sik` disetujui dengan tanda tangan belum lengkap). Hasil di-cache 60 detik dengan kunci `admin.sidebar_badges`, jadi angka bisa terlambat hingga satu menit. Badge `sik` hanya tampil untuk Super Admin karena menu Approve SIK khusus Super Admin. Tes yang menghitung query wajib `Cache::flush()` dulu.

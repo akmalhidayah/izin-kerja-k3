@@ -469,11 +469,21 @@ class AdminDashboardController extends Controller
             ->sortBy([['risk', 'desc'], fn ($a, $b) => ($b->workers ?? 0) <=> ($a->workers ?? 0)])
             ->values();
 
+        // Dipisah per jenis pemohon untuk dropdown Vendor/Karyawan di panel (default Vendor).
+        $summary = function ($subset) {
+            $subset = $subset->values();
+
+            return [
+                'rows' => $subset->take(7)->values(),
+                'total' => $subset->count(),
+                'workers' => (int) $subset->sum(fn ($r) => $r->workers ?? 0),
+                'risk' => $subset->where('risk', true)->count(),
+            ];
+        };
+
         return [
-            'rows' => $rows->take(7)->values(),
-            'total' => $rows->count(),
-            'workers' => (int) $rows->sum(fn ($r) => $r->workers ?? 0),
-            'risk' => $rows->where('risk', true)->count(),
+            'vendor' => $summary($rows->where('usertype', 'user')),
+            'pgo' => $summary($rows->where('usertype', 'pgo')),
         ];
     }
 

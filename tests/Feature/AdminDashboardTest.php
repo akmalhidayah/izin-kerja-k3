@@ -454,24 +454,38 @@ class AdminDashboardTest extends TestCase
         $jsaNotif = $this->notification($pgoJsa);
         $this->jsa($jsaNotif)->update(['tanggal' => now()->toDateString(), 'area_kerja' => 'Gudang Klinker']);
 
-        $ongoing = $this->actingAs($admin)->get(route('admin.dashboard'))->viewData('ongoing');
-        $rows = $ongoing['rows']->keyBy('notification_id');
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $ongoing = $response->viewData('ongoing');
+        $vendorSet = $ongoing['vendor'];
+        $pgoSet = $ongoing['pgo'];
+        $vendorRows = $vendorSet['rows']->keyBy('notification_id');
+        $pgoRows = $pgoSet['rows']->keyBy('notification_id');
 
-        $this->assertSame(3, $ongoing['total']);
-        $this->assertSame(15, $ongoing['workers']);
-        $this->assertSame(1, $ongoing['risk']);
-        $this->assertArrayNotHasKey($finished->id, $rows->all());
+        // Vendor: hanya yang masih dalam rentang tanggal.
+        $this->assertSame(1, $vendorSet['total']);
+        $this->assertSame(10, $vendorSet['workers']);
+        $this->assertSame(1, $vendorSet['risk']);
+        $this->assertArrayNotHasKey($finished->id, $vendorRows->all());
+        $this->assertSame('PT Sedang Kerja', $vendorRows[$running->id]->name);
+        $this->assertSame(10, $vendorRows[$running->id]->workers);
+        $this->assertSame('Kiln 4', $vendorRows[$running->id]->location);
+        $this->assertTrue($vendorRows[$running->id]->risk);
+        $this->assertSame('Ketinggian', $vendorRows[$running->id]->types[0]['label']);
 
-        $this->assertSame('PT Sedang Kerja', $rows[$running->id]->name);
-        $this->assertSame(10, $rows[$running->id]->workers);
-        $this->assertSame('Kiln 4', $rows[$running->id]->location);
-        $this->assertTrue($rows[$running->id]->risk);
-        $this->assertSame('Ketinggian', $rows[$running->id]->types[0]['label']);
-        $this->assertSame($running->id, $ongoing['rows'][0]->notification_id, 'Risiko tinggi tampil paling atas');
+        // Karyawan: tanggal kerja permit atau tanggal JSA.
+        $this->assertSame(2, $pgoSet['total']);
+        $this->assertSame(5, $pgoSet['workers']);
+        $this->assertSame(0, $pgoSet['risk']);
+        $this->assertSame('Karyawan Lapangan', $pgoRows[$pgoNotif->id]->name);
+        $this->assertSame(5, $pgoRows[$pgoNotif->id]->workers);
+        $this->assertSame('Gudang Klinker', $pgoRows[$jsaNotif->id]->location);
+        $this->assertNull($pgoRows[$jsaNotif->id]->workers);
+        $this->assertSame($pgoNotif->id, $pgoSet['rows'][0]->notification_id, 'Yang punya jumlah pekerja lebih banyak di atas');
 
-        $this->assertSame('Karyawan Lapangan', $rows[$pgoNotif->id]->name);
-        $this->assertSame(5, $rows[$pgoNotif->id]->workers);
-        $this->assertSame('Gudang Klinker', $rows[$jsaNotif->id]->location);
-        $this->assertNull($rows[$jsaNotif->id]->workers);
+        // Dropdown default Vendor: set karyawan tersembunyi saat halaman dibuka.
+        $html = $response->getContent();
+        $this->assertStringContainsString("x-data=\"{ who: 'vendor' }\"", $html);
+        $this->assertMatchesRegularExpression('/data-ongoing-set="pgo"/', $html);
+        $this->assertMatchesRegularExpression('/x-show="who === \'pgo\'"\s+x-cloak/', $html);
     }
 }
