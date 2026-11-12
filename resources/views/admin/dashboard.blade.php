@@ -101,12 +101,12 @@
         <div class="space-y-4 lg:col-span-2">
 
             {{-- Top pengajuan --}}
-            <div class="overflow-hidden rounded-2xl border border-gray-200 border-t-4 border-t-blue-500 bg-white p-4 shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-sky-100/60 p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
-                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white">
                         <i class="fas fa-chart-line text-xs"></i>
                     </span>
-                    <h2 class="text-sm font-semibold text-gray-800">Top Pengajuan SIK</h2>
+                    <h2 class="text-xs font-bold uppercase tracking-wide text-blue-900">Top Pengajuan SIK</h2>
                     <span class="ml-auto flex items-center gap-3 text-[10px] text-gray-500">
                         <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-green-600"></span>Vendor</span>
                         <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-blue-600"></span>Karyawan</span>
@@ -120,7 +120,7 @@
                         </div>
                         <div class="grid grid-cols-2 gap-3 md:grid-cols-1">
                             @foreach ([['Vendor', $topVendorRows, 'green'], ['Karyawan', $topPgoRows, 'blue']] as [$label, $rows, $color])
-                                <div class="rounded-xl bg-gray-50 p-2.5">
+                                <div class="rounded-xl bg-white/70 p-2.5 ring-1 ring-blue-100">
                                     <p class="mb-1.5 text-[10px] font-semibold uppercase tracking-wide {{ $color === 'green' ? 'text-green-700' : 'text-blue-700' }}">3 teratas {{ $label }}</p>
                                     <ol class="space-y-1.5">
                                         @forelse ($rows->take(3) as $row)
@@ -143,13 +143,13 @@
             </div>
 
             {{-- Tren tahunan --}}
-            <div class="overflow-hidden rounded-2xl border border-gray-200 border-t-4 border-t-indigo-500 bg-white p-4 shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-100/60 p-4 shadow-sm">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
-                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
                             <i class="fas fa-chart-area text-xs"></i>
                         </span>
-                        <h2 class="text-sm font-semibold text-gray-800">Tren Pengajuan Izin Kerja {{ $selectedYear }}</h2>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-indigo-900">Tren Pengajuan Izin Kerja {{ $selectedYear }}</h2>
                     </div>
                     <form method="GET">
                         <select name="year" onchange="this.form.submit()"
@@ -162,15 +162,15 @@
                 </div>
 
                 <div class="mb-3 grid grid-cols-3 gap-2">
-                    <div class="rounded-xl bg-indigo-50 px-3 py-2">
+                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
                         <p class="text-[10px] text-indigo-700/80">Total setahun</p>
                         <p class="text-lg font-extrabold leading-tight text-indigo-700">{{ number_format($yearTotal, 0, ',', '.') }}</p>
                     </div>
-                    <div class="rounded-xl bg-indigo-50 px-3 py-2">
+                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
                         <p class="text-[10px] text-indigo-700/80">Rata-rata / bulan</p>
                         <p class="text-lg font-extrabold leading-tight text-indigo-700">{{ number_format($monthAvg, 0, ',', '.') }}</p>
                     </div>
-                    <div class="rounded-xl bg-indigo-50 px-3 py-2">
+                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
                         <p class="text-[10px] text-indigo-700/80">Bulan tertinggi</p>
                         <p class="text-lg font-extrabold leading-tight text-indigo-700">
                             {{ $peakMonth }}
@@ -190,33 +190,33 @@
         <div class="space-y-4">
 
             {{-- Perlu tindakan saya --}}
-            <div class="overflow-hidden rounded-2xl border border-gray-200 border-t-4 border-t-amber-500 bg-white p-4 shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-4 text-white shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
-                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-slate-900">
                         <i class="fas fa-list-check text-xs"></i>
                     </span>
-                    <h3 class="text-sm font-semibold text-gray-800">Perlu Tindakan Saya</h3>
-                    <span class="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">{{ $myQueueTotal }}</span>
+                    <h3 class="text-xs font-bold uppercase tracking-wide text-white">Perlu Tindakan Saya</h3>
+                    <span class="ml-auto rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-slate-900">{{ $myQueueTotal }}</span>
                 </div>
 
                 <div class="space-y-2">
                     @forelse ($myQueue as $item)
                         @php
                             $isPgo = $item->usertype === 'pgo';
-                            $dayClass = $item->waiting_days >= $stale['days'] ? 'bg-red-100 text-red-700' : ($item->waiting_days >= 3 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600');
+                            $dayClass = $item->waiting_days >= $stale['days'] ? 'bg-red-500/25 text-red-200' : ($item->waiting_days >= 3 ? 'bg-amber-400/25 text-amber-200' : 'bg-white/15 text-slate-200');
                         @endphp
                         <a href="{{ route('admin.permintaansik.show', $item->id) }}"
-                           class="flex items-start gap-3 rounded-xl border border-gray-100 p-2.5 transition hover:border-amber-200 hover:bg-amber-50/40">
-                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold {{ $isPgo ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700' }}">
+                           class="flex items-start gap-3 rounded-xl border border-white/10 bg-white/10 p-2.5 transition hover:bg-white/20">
+                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold {{ $isPgo ? 'bg-blue-400/25 text-blue-200' : 'bg-emerald-400/25 text-emerald-200' }}">
                                 {{ $isPgo ? 'K' : 'V' }}
                             </span>
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-xs font-semibold text-gray-800">{{ $item->user_name }}</p>
-                                <p class="truncate text-[11px] text-gray-600">
+                                <p class="truncate text-xs font-semibold text-white">{{ $item->user_name }}</p>
+                                <p class="truncate text-[11px] text-slate-200">
                                     Step {{ $item->current_step }}/{{ $item->total_steps }} · {{ $item->current_step_title }}
                                 </p>
                                 @if ($item->number)
-                                    <p class="truncate text-[10px] text-gray-400">No: {{ $item->number }}</p>
+                                    <p class="truncate text-[10px] text-slate-400">No: {{ $item->number }}</p>
                                 @endif
                             </div>
                             <div class="flex shrink-0 flex-col items-end gap-1">
@@ -229,7 +229,7 @@
                             </div>
                         </a>
                     @empty
-                        <div class="py-5 text-center text-[11px] text-gray-500">
+                        <div class="py-5 text-center text-[11px] text-slate-300">
                             Tidak ada pengajuan yang menunggu tindakan Anda.
                         </div>
                     @endforelse
@@ -237,7 +237,7 @@
 
                 @if ($myQueueTotal > $myQueue->count())
                     <a href="{{ route('admin.permintaansik', ['kondisi' => 'menunggu']) }}"
-                       class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-gray-50 py-1.5 text-[11px] font-semibold text-gray-600 hover:bg-gray-100">
+                       class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white/10 py-1.5 text-[11px] font-semibold text-white hover:bg-white/20">
                         Lihat semua ({{ $myQueueTotal }})
                         <i class="fas fa-arrow-right text-[9px]"></i>
                     </a>
@@ -245,12 +245,12 @@
             </div>
 
             {{-- Aktivitas terbaru --}}
-            <div class="overflow-hidden rounded-2xl border border-gray-200 border-t-4 border-t-sky-500 bg-white p-4 shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-100/60 p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
-                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white">
                         <i class="fas fa-bolt text-xs"></i>
                     </span>
-                    <h3 class="text-sm font-semibold text-gray-800">Aktivitas Terbaru</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wide text-teal-900">Aktivitas Terbaru</h3>
                 </div>
 
                 <div class="space-y-1">
@@ -273,10 +273,10 @@
                         @endphp
 
                         <a href="{{ route('admin.permintaansik.show', $item->notification_id) }}"
-                           class="flex items-start gap-3 rounded-lg p-2 transition hover:bg-gray-50">
+                           class="flex items-start gap-3 rounded-lg p-2 transition hover:bg-white/70">
                             <div class="mt-1 flex flex-col items-center">
                                 <div class="h-2.5 w-2.5 rounded-full {{ $dotClass }}"></div>
-                                <div class="mt-1 w-[1px] flex-1 bg-gray-200"></div>
+                                <div class="mt-1 w-[1px] flex-1 bg-teal-200"></div>
                             </div>
 
                             <div class="min-w-0 flex-1">
@@ -317,13 +317,13 @@
             </div>
 
             {{-- SIK yang ditangani --}}
-            <div class="overflow-hidden rounded-2xl border border-gray-200 border-t-4 border-t-violet-500 bg-white p-4 shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-100/50 p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
-                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500 text-white">
                         <i class="fas fa-chart-pie text-xs"></i>
                     </span>
-                    <h3 class="text-sm font-semibold text-gray-800">SIK Yang Ditangani</h3>
-                    <span class="ml-auto text-[10px] text-gray-400">5 admin teratas</span>
+                    <h3 class="text-xs font-bold uppercase tracking-wide text-amber-900">SIK Yang Ditangani</h3>
+                    <span class="ml-auto text-[10px] text-amber-700/70">5 admin teratas</span>
                 </div>
 
                 <div class="relative mx-auto h-44 w-44">
@@ -350,7 +350,7 @@
                                     {{ $count }} <span class="text-gray-400">({{ $percent }}%)</span>
                                 </span>
                             </div>
-                            <div class="mt-1 h-1 w-full overflow-hidden rounded-full bg-gray-100">
+                            <div class="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/80">
                                 <div class="h-full rounded-full" style="width: {{ $percent }}%; background: {{ $color }}"></div>
                             </div>
                         </div>
@@ -479,8 +479,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     data: dataValues,
                     backgroundColor: colors,
-                    borderWidth: 2,
-                    borderColor: '#fff',
+                    borderWidth: 3,
+                    borderColor: 'transparent',
                     hoverOffset: 8
                 }]
             },
