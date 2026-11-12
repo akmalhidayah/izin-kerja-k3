@@ -20,6 +20,7 @@ app/
       WorkingPermitFormController.php  # route working-permit.form: muat form permit secara lazy
       TokenLinkController.php          # regenerate token (owner/admin)
       TokenPdfController.php           # PDF publik via token -> set attribute token_pdf_access
+      PermitRenewalController.php      # 'Buat Permit Baru' setelah permit kedaluwarsa (arsip + reset)
       WorkingPermit/*PermitController.php  # 11 controller permit (store, showByToken, storeByToken, preview)
     Admin/
       AdminDashboardController.php     # dashboard admin, daftar permintaan vendor & PGO
@@ -34,6 +35,9 @@ app/
     UsertypeMiddleware.php    # alias 'usertype:a,b'
     CheckRole.php             # alias 'role:X'; Super Admin selalu lolos
     PreventBackHistory.php    # header no-cache, dipasang ke semua route web
+    EnsurePermitNotExpired.php # alias 'permit.active': tolak simpan/form token permit yang kedaluwarsa
+  Services/PermitValidityService.php # aturan masa berlaku permit, kunci step, renew + arsip
+  Support/PermitRegistry.php         # daftar jenis permit (model, controller preview, detail_type) untuk fitur masa berlaku
   Models/                     # lihat bagian 4
   Providers/AppServiceProvider.php  # alias <x-admin-layout>, directive @carbon, defaultStringLength(191)
 bootstrap/app.php             # registrasi middleware alias + handler TokenMismatchException (419 -> login)
@@ -69,6 +73,7 @@ Redirect ada di `app/Http/Controllers/Auth/AuthenticatedSessionController.php`. 
 |---|---|---|
 | `dashboard` | GET `pengajuan-user/izin-kerja` | `IzinKerjaController@index` |
 | `working-permit.form` | GET `pengajuan-user/izin-kerja/{notification}/working-permit-form/{type}` | `WorkingPermitFormController@show` |
+| `working-permit.renew` | POST `pengajuan-user/izin-kerja/{notification}/working-permit/renew` | `PermitRenewalController@store` (pemilik saja) |
 | `token-links.regenerate` | POST `pengajuan-user/token-link/{type}/{id}/regenerate` | `TokenLinkController@regenerate` |
 | `notification.store` | POST `pengajuan-user/izin-kerja/notification` | `UserNotificationController@store` |
 | `jsa.store` / `jsa.edit` / `jsa.update` | POST `user/jsa/store`, GET `user/jsa/{id}/edit`, PATCH `user/jsa/{id}` | `JsaController` |
@@ -96,6 +101,7 @@ Redirect ada di `app/Http/Controllers/Auth/AuthenticatedSessionController.php`. 
 | `admin.permintaansik.viewSik` | GET `/permintaansik/{id}/view-sik` | `viewSik` |
 | `admin.permintaansik.deleteFile` | DELETE `/permintaansik/{id}/delete-file/{step}` | `deleteFile` |
 | `admin.permintaansik.deleteDataKontraktor` / `deleteJsa` / `deleteWorkingPermit` | DELETE | masing-masing |
+| `admin.permintaansik.permitArchivePdf` | GET `/permintaansik/{id}/permit-archive/{archive}` | `permitArchivePdf` (PDF arsip, inline) |
 | `admin.notifications.read` / `readAll` | POST | `AdminNotificationController` |
 | `permintaansik.downloadSik` (tanpa prefix nama) | GET `/permintaansik/{id}/download-sik` | `viewSik` |
 
@@ -133,6 +139,7 @@ Redirect ada di `app/Http/Controllers/Auth/AuthenticatedSessionController.php`. 
 | `StepApproval` | `step_approvals` | `step` string, `status` enum(menunggu,perlu_disetujui,disetujui,revisi), `catatan`, `file_path`, `approved_by`, `signature_senior_manager`, `signature_manager` | `notification()`, `approvedBy()` |
 | `Upload` | `uploads` | `step` enum(bpjs,fakta_integritas,sertifikasi_ak3,ktp,surat_kesehatan,struktur_organisasi,post_test,bukti_serah_terima), `file_path`, `status` (default pending), `uploaded_at` | `notification()` |
 | `News` | `news` | `title`, `description`, `link`, `image_path` (disk public, folder `news/`), `is_active` | scope `active()`, accessor `image_url`, `source_label` (domain dari link) |
+| `PermitArchive` | `permit_archives` | `notification_id`, `cycle`, `permit_type`, `valid_from`, `expires_at`, `snapshot` json, `pdf_path` (disk `local`) | `notification()`; hapus file PDF saat dihapus |
 | `AdminNotification` | `admin_notifications` | `recipient_id`, `notification_id`, `title`, `body`, `url`, `read_at` | `recipient()`, `notification()`, scope `unread()` |
 | `DataKontraktor` | `data_kontraktors` | `nama_perusahaan` (required), tanggal, `tenaga_kerja`/`peralatan_kerja`/`apd` json, `ttd_manager`, `ttd_perusahaan`, `diverifikasi_signature`, `token`, `token_expires_at` | `notification()` |
 | `Jsa` | `jsas` | `no_jsa` unique (`{seq}/JSA/ST/{mmyyyy}`), `langkah_kerja` json, 3 pasang nama+signature, `token`, `token_expires_at` | `notification()` |

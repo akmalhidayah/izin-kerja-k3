@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\StartsPermitValidityClock;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class UmumWorkPermit extends Model
 {
+    use StartsPermitValidityClock;
+
     use HasFactory;
 
     protected $table = 'umum_work_permits';

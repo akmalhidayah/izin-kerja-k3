@@ -10,6 +10,17 @@
         </script>
     @endif
 
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Tidak dapat disimpan',
+                text: {!! json_encode(session('error')) !!},
+                confirmButtonColor: '#3085d6'
+            });
+        </script>
+    @endif
+
     @if ($showAlert)
         <script>
             Swal.fire({
@@ -333,6 +344,14 @@
                                         Hapus Data
                                     </button>
                                 </form>
+                            @endif
+
+                            @if ($stepKey === 'working_permit')
+                                @include('admin.partials.permit-validity', [
+                                    'validity' => $data->permit_validity ?? null,
+                                    'archives' => $data->permit_archives ?? collect(),
+                                    'notificationId' => $data->id,
+                                ])
                             @endif
 
                             @if ($stepKey === 'working_permit' && $data->permits)

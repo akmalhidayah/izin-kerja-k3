@@ -20,6 +20,7 @@ use App\Models\WorkPermitBeban;
 use App\Models\WorkPermitListrikTeganganTinggi;
 use App\Models\WorkPermitDetail;
 use App\Models\StepApproval;
+use App\Services\PermitValidityService;
 
 class IzinKerjaPgoController extends Controller
 {
@@ -66,6 +67,7 @@ class IzinKerjaPgoController extends Controller
                 'stepGateStatuses' => [],
                 'stepNotes' => [],
                 'renderPermitFormsEagerly' => false,
+                'permitValidity' => null,
             ]);
         }
 
@@ -157,6 +159,17 @@ class IzinKerjaPgoController extends Controller
             }
         }
 
+        // PGO: permit kedaluwarsa bila belum disetujui admin dalam batas hari (label tampilan saja).
+        $permitValidity = app(PermitValidityService::class)->state($notification, $stepApprovals);
+
+        if ($permitValidity['expired']) {
+            foreach ($steps as $i => $step) {
+                if ($step['code'] === 'working_permit') {
+                    $steps[$i]['status'] = PermitValidityService::UI_EXPIRED;
+                }
+            }
+        }
+
         return view('pengajuan-user.izin-kerja-pgo', [
             'notifications' => $allNotifications,
             'selectedId' => $selectedId,
@@ -172,6 +185,7 @@ class IzinKerjaPgoController extends Controller
             'stepApprovals' => $stepApprovals,
             'stepGateStatuses' => $stepApprovals,
             'renderPermitFormsEagerly' => $renderPermitFormsEagerly,
+            'permitValidity' => $permitValidity,
         ]);
     }
 }

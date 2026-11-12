@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\User\IzinKerjaController;
 use App\Http\Controllers\User\WorkingPermitFormController;
 use App\Http\Controllers\User\TokenLinkController;
+use App\Http\Controllers\User\PermitRenewalController;
 use App\Http\Controllers\User\TokenPdfController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UploadController;
@@ -43,6 +44,9 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin,pgo'])->group(functi
     Route::get('pengajuan-user/izin-kerja/{notification}/working-permit-form/{type}', [WorkingPermitFormController::class, 'show'])
         ->name('working-permit.form');
     Route::post('/pengajuan-user/token-link/{type}/{id}/regenerate', [TokenLinkController::class, 'regenerate'])->name('token-links.regenerate');
+    Route::post('/pengajuan-user/izin-kerja/{notification}/working-permit/renew', [PermitRenewalController::class, 'store'])
+        ->whereNumber('notification')
+        ->name('working-permit.renew');
 
     // ✅ Step 1: Create Notification
     Route::post('/pengajuan-user/izin-kerja/notification', [UserNotificationController::class, 'store'])->name('notification.store');
@@ -55,37 +59,37 @@ Route::middleware(['auth', 'verified', 'usertype:user,admin,pgo'])->group(functi
     Route::get('/user/jsa/pdf/view/{notification_id}', [JsaController::class, 'showPdf'])->name('jsa.pdf.view');
 
     // ✅ Step 5: Working Permit (semua jenis)
-    Route::post('/user/working-permit/umum/store', [UmumPermitController::class, 'store'])->name('working-permit.umum.store');
+    Route::post('/user/working-permit/umum/store', [UmumPermitController::class, 'store'])->name('working-permit.umum.store')->middleware('permit.active');
     Route::get('/user/permit/umum/preview/{id}', [UmumPermitController::class, 'preview'])->name('working-permit.umum.preview');
 
-    Route::post('/user/working-permit/gaspanas/store', [GasPanasPermitController::class, 'store'])->name('working-permit.gaspanas.store');
+    Route::post('/user/working-permit/gaspanas/store', [GasPanasPermitController::class, 'store'])->name('working-permit.gaspanas.store')->middleware('permit.active');
     Route::get('/user/permit/gaspanas/preview/{id}', [GasPanasPermitController::class, 'preview'])->name('working-permit.gaspanas.preview');
 
-    Route::post('/working-permit/air/store', [AirPermitController::class, 'store'])->name('working-permit.air.store');
+    Route::post('/working-permit/air/store', [AirPermitController::class, 'store'])->name('working-permit.air.store')->middleware('permit.active');
     Route::get('/working-permit/air/preview/{id}', [AirPermitController::class, 'preview'])->name('working-permit.air.preview');
 
-    Route::post('/working-permit/ketinggian/store', [KetinggianPermitController::class, 'store'])->name('working-permit.ketinggian.store');
+    Route::post('/working-permit/ketinggian/store', [KetinggianPermitController::class, 'store'])->name('working-permit.ketinggian.store')->middleware('permit.active');
     Route::get('/user/permit/ketinggian/preview/{id}', [KetinggianPermitController::class, 'preview'])->name('working-permit.ketinggian.preview');
 
-    Route::post('/user/working-permit/ruang-tertutup/store', [RuangTertutupPermitController::class, 'store'])->name('working-permit.ruangtertutup.store');
+    Route::post('/user/working-permit/ruang-tertutup/store', [RuangTertutupPermitController::class, 'store'])->name('working-permit.ruangtertutup.store')->middleware('permit.active');
     Route::get('/user/permit/ruang-tertutup/preview/{id}', [RuangTertutupPermitController::class, 'preview'])->name('working-permit.ruangtertutup.preview');
 
-    Route::post('/user/working-permit/perancah/store', [PerancahPermitController::class, 'store'])->name('working-permit.perancah.store');
+    Route::post('/user/working-permit/perancah/store', [PerancahPermitController::class, 'store'])->name('working-permit.perancah.store')->middleware('permit.active');
     Route::get('/user/permit/perancah/preview/{id}', [PerancahPermitController::class, 'preview'])->name('working-permit.perancah.preview');
 
-    Route::post('/user/working-permit/risiko-panas/store', [PanasRisikoPermitController::class, 'store'])->name('working-permit.risiko-panas.store');
+    Route::post('/user/working-permit/risiko-panas/store', [PanasRisikoPermitController::class, 'store'])->name('working-permit.risiko-panas.store')->middleware('permit.active');
     Route::get('/user/permit/risiko-panas/preview/{id}', [PanasRisikoPermitController::class, 'preview'])->name('working-permit.risiko-panas.preview');
 
-    Route::post('/user/working-permit/beban/store', [BebanPermitController::class, 'store'])->name('working-permit.beban.store');
+    Route::post('/user/working-permit/beban/store', [BebanPermitController::class, 'store'])->name('working-permit.beban.store')->middleware('permit.active');
     Route::get('/user/permit/beban/preview/{id}', [BebanPermitController::class, 'preview'])->name('working-permit.beban.preview');
 
-    Route::post('/user/working-permit/penggalian/store', [PenggalianPermitController::class, 'store'])->name('working-permit.penggalian.store');
+    Route::post('/user/working-permit/penggalian/store', [PenggalianPermitController::class, 'store'])->name('working-permit.penggalian.store')->middleware('permit.active');
     Route::get('/user/permit/penggalian/preview/{id}', [PenggalianPermitController::class, 'preview'])->name('working-permit.penggalian.preview');
 
-    Route::post('/user/working-permit/pengangkatan/store', [PengangkatanPermitController::class, 'store'])->name('working-permit.pengangkatan.store');
+    Route::post('/user/working-permit/pengangkatan/store', [PengangkatanPermitController::class, 'store'])->name('working-permit.pengangkatan.store')->middleware('permit.active');
     Route::get('/user/permit/pengangkatan/preview/{id}', [PengangkatanPermitController::class, 'preview'])->name('working-permit.pengangkatan.preview');
 
-    Route::post('/user/working-permit/listrik-tegangan-tinggi/store', [ListrikTeganganTinggiPermitController::class, 'store'])->name('working-permit.listrik-tegangan-tinggi.store');
+    Route::post('/user/working-permit/listrik-tegangan-tinggi/store', [ListrikTeganganTinggiPermitController::class, 'store'])->name('working-permit.listrik-tegangan-tinggi.store')->middleware('permit.active');
     Route::get('/user/permit/listrik-tegangan-tinggi/preview/{id}', [ListrikTeganganTinggiPermitController::class, 'preview'])->name('working-permit.listrik-tegangan-tinggi.preview');
 
     // ✅ View PDF SIK
@@ -119,6 +123,7 @@ Route::get('/permintaansik/{id}/view-sik', [AdminPermintaanController::class, 'v
     Route::delete('/permintaansik/{id}/data-kontraktor', [AdminPermintaanController::class, 'deleteDataKontraktor'])->name('permintaansik.deleteDataKontraktor');
     Route::delete('/permintaansik/{id}/jsa', [AdminPermintaanController::class, 'deleteJsa'])->name('permintaansik.deleteJsa');
     Route::delete('/permintaansik/{id}/working-permit/{type}', [AdminPermintaanController::class, 'deleteWorkingPermit'])->name('permintaansik.deleteWorkingPermit');
+    Route::get('/permintaansik/{id}/permit-archive/{archive}', [AdminPermintaanController::class, 'permitArchivePdf'])->name('permintaansik.permitArchivePdf');
     Route::post('/notifications/{notification}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
 });
@@ -181,44 +186,44 @@ Route::get('/izin-kerja/token-pdf/{type}/{token}', [TokenPdfController::class, '
 Route::get('/izin-kerja/jsa/form/{token}', [JsaController::class, 'showByToken'])->name('jsa.form.token');
 Route::post('/izin-kerja/jsa/form/{token}', [JsaController::class, 'storeByToken'])->name('jsa.form.token.store');
 
-Route::get('/izin-kerja/working-permit/umum/{token}', [UmumPermitController::class, 'showByToken'])->name('working-permit.umum.token');
-Route::post('/izin-kerja/working-permit/umum/{token}', [UmumPermitController::class, 'storeByToken'])->name('working-permit.umum.token.store');
+Route::get('/izin-kerja/working-permit/umum/{token}', [UmumPermitController::class, 'showByToken'])->name('working-permit.umum.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/umum/{token}', [UmumPermitController::class, 'storeByToken'])->name('working-permit.umum.token.store')->middleware('permit.active');
 
 // ✅ Route Form Token untuk Permit Gas
-Route::get('/izin-kerja/working-permit/gaspanas/{token}', [GasPanasPermitController::class, 'showByToken'])->name('working-permit.gaspanas.token');
-Route::post('/izin-kerja/working-permit/gaspanas/{token}', [GasPanasPermitController::class, 'storeByToken'])->name('working-permit.gaspanas.token.store');
+Route::get('/izin-kerja/working-permit/gaspanas/{token}', [GasPanasPermitController::class, 'showByToken'])->name('working-permit.gaspanas.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/gaspanas/{token}', [GasPanasPermitController::class, 'storeByToken'])->name('working-permit.gaspanas.token.store')->middleware('permit.active');
 
 // ✅ Route Form Token untuk Permit Air
-Route::get('/izin-kerja/working-permit/air/{token}', [AirPermitController::class, 'showByToken'])->name('working-permit.air.token');
-Route::post('/izin-kerja/working-permit/air/{token}', [AirPermitController::class, 'storeByToken'])->name('working-permit.air.token.store');
+Route::get('/izin-kerja/working-permit/air/{token}', [AirPermitController::class, 'showByToken'])->name('working-permit.air.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/air/{token}', [AirPermitController::class, 'storeByToken'])->name('working-permit.air.token.store')->middleware('permit.active');
 
 // ✅ Route Form Token untuk Permit Ketinggian
-Route::get('/izin-kerja/working-permit/ketinggian/{token}', [KetinggianPermitController::class, 'showByToken'])->name('working-permit.ketinggian.token');
-Route::post('/izin-kerja/working-permit/ketinggian/{token}', [KetinggianPermitController::class, 'storeByToken'])->name('working-permit.ketinggian.token.store');
+Route::get('/izin-kerja/working-permit/ketinggian/{token}', [KetinggianPermitController::class, 'showByToken'])->name('working-permit.ketinggian.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/ketinggian/{token}', [KetinggianPermitController::class, 'storeByToken'])->name('working-permit.ketinggian.token.store')->middleware('permit.active');
 
 // ✅ Route Form Token untuk Permit Ruang Tertutup
-Route::get('/izin-kerja/working-permit/ruang-tertutup/{token}', [RuangTertutupPermitController::class, 'showByToken'])->name('working-permit.ruangtertutup.token');
-Route::post('/izin-kerja/working-permit/ruang-tertutup/{token}', [RuangTertutupPermitController::class, 'storeByToken'])->name('working-permit.ruangtertutup.token.store');
+Route::get('/izin-kerja/working-permit/ruang-tertutup/{token}', [RuangTertutupPermitController::class, 'showByToken'])->name('working-permit.ruangtertutup.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/ruang-tertutup/{token}', [RuangTertutupPermitController::class, 'storeByToken'])->name('working-permit.ruangtertutup.token.store')->middleware('permit.active');
 
 // ✅ Route Form Token untuk Permit Perancah
-Route::get('/izin-kerja/working-permit/perancah/{token}', [PerancahPermitController::class, 'showByToken'])->name('working-permit.perancah.token');
-Route::post('/izin-kerja/working-permit/perancah/{token}', [PerancahPermitController::class, 'storeByToken'])->name('working-permit.perancah.token.store');
+Route::get('/izin-kerja/working-permit/perancah/{token}', [PerancahPermitController::class, 'showByToken'])->name('working-permit.perancah.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/perancah/{token}', [PerancahPermitController::class, 'storeByToken'])->name('working-permit.perancah.token.store')->middleware('permit.active');
 
 // ✅ Route Form Token untuk Permit Risiko Panas
-Route::get('/izin-kerja/working-permit/risiko-panas/{token}', [PanasRisikoPermitController::class, 'showByToken'])->name('working-permit.risiko-panas.token');
-Route::post('/izin-kerja/working-permit/risiko-panas/{token}', [PanasRisikoPermitController::class, 'storeByToken'])->name('working-permit.risiko-panas.token.store');
+Route::get('/izin-kerja/working-permit/risiko-panas/{token}', [PanasRisikoPermitController::class, 'showByToken'])->name('working-permit.risiko-panas.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/risiko-panas/{token}', [PanasRisikoPermitController::class, 'storeByToken'])->name('working-permit.risiko-panas.token.store')->middleware('permit.active');
 
 // ✅ Route Form Token untuk Permit Beban
-Route::get('/izin-kerja/working-permit/beban/{token}', [BebanPermitController::class, 'showByToken'])->name('working-permit.beban.token');
-Route::post('/izin-kerja/working-permit/beban/{token}', [BebanPermitController::class, 'storeByToken'])->name('working-permit.beban.token.store');
+Route::get('/izin-kerja/working-permit/beban/{token}', [BebanPermitController::class, 'showByToken'])->name('working-permit.beban.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/beban/{token}', [BebanPermitController::class, 'storeByToken'])->name('working-permit.beban.token.store')->middleware('permit.active');
 
-Route::get('/izin-kerja/working-permit/penggalian/{token}', [PenggalianPermitController::class, 'showByToken'])->name('working-permit.penggalian.token');
-Route::post('/izin-kerja/working-permit/penggalian/{token}', [PenggalianPermitController::class, 'storeByToken'])->name('working-permit.penggalian.token.store');
+Route::get('/izin-kerja/working-permit/penggalian/{token}', [PenggalianPermitController::class, 'showByToken'])->name('working-permit.penggalian.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/penggalian/{token}', [PenggalianPermitController::class, 'storeByToken'])->name('working-permit.penggalian.token.store')->middleware('permit.active');
 
-Route::get('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'showByToken'])->name('working-permit.pengangkatan.token');
-Route::post('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'storeByToken'])->name('working-permit.pengangkatan.token.store');
+Route::get('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'showByToken'])->name('working-permit.pengangkatan.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/pengangkatan/{token}', [PengangkatanPermitController::class, 'storeByToken'])->name('working-permit.pengangkatan.token.store')->middleware('permit.active');
 
-Route::get('/izin-kerja/working-permit/listrik-tegangan-tinggi/{token}', [ListrikTeganganTinggiPermitController::class, 'showByToken'])->name('working-permit.listrik-tegangan-tinggi.token');
-Route::post('/izin-kerja/working-permit/listrik-tegangan-tinggi/{token}', [ListrikTeganganTinggiPermitController::class, 'storeByToken'])->name('working-permit.listrik-tegangan-tinggi.token.store');
+Route::get('/izin-kerja/working-permit/listrik-tegangan-tinggi/{token}', [ListrikTeganganTinggiPermitController::class, 'showByToken'])->name('working-permit.listrik-tegangan-tinggi.token')->middleware('permit.active');
+Route::post('/izin-kerja/working-permit/listrik-tegangan-tinggi/{token}', [ListrikTeganganTinggiPermitController::class, 'storeByToken'])->name('working-permit.listrik-tegangan-tinggi.token.store')->middleware('permit.active');
 });
 require __DIR__.'/auth.php';

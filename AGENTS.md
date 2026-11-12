@@ -34,6 +34,8 @@ Kunci permit: `umum`, `gaspanas`, `air`, `ketinggian`, `pengangkatan`, `penggali
 - Alias legacy yang harus dijaga: `ruang-tertutup` (URL user/token) vs `ruangtertutup` (nama route, `permit_type`, peta admin); `risiko-panas` (route) vs `panas-risiko` (alias form lazy dan dropdown "tambah lainnya"); controller risiko panas bernama `PanasRisikoPermitController`.
 - `listrik-tegangan-tinggi` adalah permit khusus: `umum` harus sudah ada sebelum dibuat.
 - Jangan asumsikan dua permit berperilaku sama. Field, JSON, tanda tangan, detail/closure, dan layout PDF-nya berbeda.
+- Masa berlaku permit (`App\Services\PermitValidityService`, `config/permit_validity.php`, default 7 hari) berlaku untuk semua permit satu pengajuan. Vendor: jam mulai saat admin menyetujui `working_permit`, berlaku sampai `sik` disetujui. PGO: jam mulai saat permit pertama dibuat, kedaluwarsa bila belum disetujui. Pengajuan dengan `permit_expires_at` NULL (data lama) tidak pernah kedaluwarsa.
+- Saat kedaluwarsa, step setelah `working_permit` hanya dikunci di tampilan (label `kedaluwarsa`/`terkunci`, tidak disimpan) dan dicek ulang di server: middleware `permit.active` pada route simpan/form token permit, `UploadController`, dan `updateStatus` admin. Pemohon memakai "Buat Permit Baru" (`working-permit.renew`): data + PDF diarsipkan ke `permit_archives` (disk `local`, khusus admin), tanda tangan dan tanggal dikosongkan, token diputar, `working_permit` kembali `menunggu`.
 - Perubahan form permit belum selesai sampai Blade komponen modal, Blade token, validasi/penyimpanan controller, `$fillable`/`$casts` model, migration, preview, dan Blade PDF memakai nama field yang sama.
 
 ## Otorisasi dan token

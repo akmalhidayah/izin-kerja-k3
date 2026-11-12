@@ -19,6 +19,12 @@ class Notification extends Model
         'assigned_admin_id',
     ];
 
+    protected $casts = [
+        'permit_cycle' => 'integer',
+        'permit_valid_from' => 'datetime',
+        'permit_expires_at' => 'datetime',
+    ];
+
     // === RELASI ===
 
     public function uploads()
@@ -113,6 +119,11 @@ class Notification extends Model
         return $this->belongsTo(User::class, 'assigned_admin_id');
     }
 
+    public function permitArchives()
+    {
+        return $this->hasMany(PermitArchive::class, 'notification_id');
+    }
+
     public function sikStep()
     {
         return $this->hasOne(StepApproval::class, 'notification_id')
@@ -125,6 +136,8 @@ class Notification extends Model
     static::deleting(function ($notification) {
         $notification->uploads->each(fn ($upload) => $upload->delete());
         $notification->stepApprovals->each(fn ($approval) => $approval->delete());
+        // Hapus arsip satu per satu agar file PDF arsip ikut terhapus.
+        $notification->permitArchives->each(fn ($archive) => $archive->delete());
         $notification->kontraktor?->delete();
 
         $notification->umumWorkPermit()?->delete();

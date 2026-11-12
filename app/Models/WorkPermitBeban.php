@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\StartsPermitValidityClock;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class WorkPermitBeban extends Model
 {
+    use StartsPermitValidityClock;
+
     use HasFactory;
 
     protected $table = 'work_permit_beban';

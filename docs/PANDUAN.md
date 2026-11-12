@@ -229,6 +229,16 @@ Tanda tangan uji: gunakan PNG 1x1 base64 yang valid (lihat `JsaSignatureTest` un
 
 Lihat "Sharp edges" di AGENTS.md. Saat mengerjakan tugas yang menyentuh area tersebut, perbaiki secara eksplisit dengan tes; jangan memperbaikinya sambil lalu dalam tugas lain.
 
+## 11. Masa berlaku Working Permit
+
+- Lama berlaku diatur `PERMIT_VALID_DAYS` (default 7) di `config/permit_validity.php`.
+- Vendor: dihitung sejak admin menyetujui step Input Working Permit, sampai step SIK disetujui. PGO: dihitung sejak permit dibuat, berhenti saat admin menyetujui.
+- Saat kedaluwarsa: dashboard menampilkan banner dan tombol "Buat Permit Baru"; step setelah working permit terkunci; upload step 6-12, simpan permit, link token permit, dan persetujuan admin ditolak di server.
+- "Buat Permit Baru" menyalin data lama ke arsip (data + PDF), mengosongkan tanda tangan, tanggal, jam, dan periode berlaku, memutar token, lalu step working permit kembali menunggu persetujuan admin. Admin melihat arsip lewat tombol "Arsip" di kartu step working permit.
+- Hanya pengajuan yang disetujui setelah fitur aktif yang punya masa berlaku; data lama tidak terpengaruh.
+- Deploy pertama: `./deploy.sh --migrate` (tabel `permit_archives` + kolom baru di `notifications`). PDF arsip tersimpan di `storage/app/permit-archives` (privat).
+- Menambah jenis permit baru: daftarkan juga di `App\Support\PermitRegistry`, dan tambahkan trait `StartsPermitValidityClock` di modelnya.
+
 ## 10. Berita landing page (Master Data > Upload Berita)
 
 - Super Admin mengelola berita di menu Master Data > Upload Berita (`/admin/news`): judul, deskripsi (maks 400 karakter), link http/https, foto (JPG/PNG/WebP, maks 2 MB), dan saklar tampil/sembunyi. Foto lama dihapus saat diganti atau berita dihapus.

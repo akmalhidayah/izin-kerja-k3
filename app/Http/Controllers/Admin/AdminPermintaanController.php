@@ -23,6 +23,8 @@ use App\Models\WorkPermitListrikTeganganTinggi;
 
 use App\Models\StepApproval;
 use App\Models\User;
+use App\Models\PermitArchive;
+use App\Services\PermitValidityService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminPermintaanController extends Controller
@@ -354,6 +356,13 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
             'jsa' => $jsa,
             'permits' => $permits,
 
+            // Masa berlaku Working Permit + arsip periode sebelumnya (khusus admin)
+            'permit_validity' => app(PermitValidityService::class)->state($notification, $approvals->map(fn ($a) => strtolower((string) $a->status))->all()),
+            'permit_archives' => PermitArchive::where('notification_id', $notification->id)
+                ->orderByDesc('cycle')
+                ->orderBy('id')
+                ->get()
+                ->groupBy('cycle'),
             // optional: kirim uploadsByStep untuk dipakai blade jika mau rapihin query di view
             'uploads_by_step' => $uploadsByStep,
         ];
@@ -403,6 +412,18 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
             return redirect()->back()->with('error', 'Hanya admin yang pertama kali menangani yang dapat mengubah status!');
         }
 
+        $validity = app(PermitValidityService::class);
+        $newStatus = strtolower($request->status);
+
+        if ($blocked = $validity->guardStatusChange($notification, $step, $newStatus)) {
+            return redirect()->back()->with('error', $blocked);
+        }
+
+        $oldStatus = StepApproval::where('notification_id', $id)
+            ->where('step', $step)
+            ->orderBy('id')
+            ->value('status');
+
         StepApproval::updateOrCreate(
             ['notification_id' => $id, 'step' => $step],
             [
@@ -418,6 +439,8 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
             'status' => $request->status,
             'admin_id' => $adminId,
         ]);
+
+        $validity->onStepStatusChanged($notification, $step, $oldStatus ? strtolower($oldStatus) : null, $newStatus);
 
         return redirect()->back()->with('success', 'Status langkah berhasil diperbarui');
     }
@@ -532,6 +555,24 @@ $showAlert = $assignedAdminId && $assignedAdminId !== $currentAdminId;
 
         return response($pdf->stream('Surat-Penyelesaian-Pekerjaan.pdf'), 200, [
             'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    /** Tampilkan PDF permit dari periode yang sudah diarsipkan (disk privat). */
+    public function permitArchivePdf($id, PermitArchive $archive)
+    {
+        abort_unless((int) $archive->notification_id === (int) $id, 404);
+        abort_unless(
+            $archive->pdf_path && Storage::disk(PermitArchive::DISK)->exists($archive->pdf_path),
+            404,
+            'PDF arsip tidak tersedia.'
+        );
+
+        $filename = sprintf('arsip-permit-%s-periode-%d.pdf', $archive->permit_type, $archive->cycle);
+
+        return response(Storage::disk(PermitArchive::DISK)->get($archive->pdf_path), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
     }
 

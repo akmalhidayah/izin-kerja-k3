@@ -24,6 +24,7 @@ use App\Models\WorkPermitListrikTeganganTinggi;
 use App\Models\WorkPermitDetail;
 use App\Models\StepApproval;
 use App\Models\Upload;
+use App\Services\PermitValidityService;
 use App\Http\Controllers\User\IzinKerjaPgoController;
 
 class IzinKerjaController extends Controller
@@ -88,6 +89,7 @@ public function index(Request $request)
             'stepNotes' => [],
             'uploadsByStep' => collect(),
             'renderPermitFormsEagerly' => false,
+            'permitValidity' => null,
         ]);
     }
 
@@ -194,6 +196,15 @@ public function index(Request $request)
         }
     }
 
+    // Masa berlaku Working Permit: bila kedaluwarsa, step setelah working_permit dikunci
+    // (label tampilan saja; status di step_approvals tidak diubah).
+    $validityService = app(PermitValidityService::class);
+    $permitValidity = $validityService->state($notification, $stepGateStatuses);
+
+    if ($permitValidity['expired']) {
+        [$steps, $stepGateStatuses] = $validityService->lockStepsAfterPermit($steps, $stepGateStatuses);
+    }
+
     return view('pengajuan-user.izin-kerja', [
         'notifications' => $allNotifications,
         'selectedId' => $selectedId,
@@ -210,6 +221,7 @@ public function index(Request $request)
         'stepNotes' => $stepNotes,
         'uploadsByStep' => $uploadsByStep,
         'renderPermitFormsEagerly' => $renderPermitFormsEagerly,
+        'permitValidity' => $permitValidity,
     ]);
 }
 }

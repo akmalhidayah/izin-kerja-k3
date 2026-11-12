@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\StartsPermitValidityClock;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\WorkPermitDetail;
@@ -9,6 +11,8 @@ use App\Models\WorkPermitClosure;
 
 class WorkPermitPenggalian extends Model
 {
+    use StartsPermitValidityClock;
+
     use HasFactory;
 
     protected $table = 'work_permit_penggalian';

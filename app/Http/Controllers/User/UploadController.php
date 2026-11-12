@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Upload;
+use App\Services\PermitValidityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,6 +28,10 @@ class UploadController extends Controller
 
             if (!$notification) {
                 return back()->with('error', 'Notifikasi tidak valid atau tidak dapat diakses.');
+            }
+
+            if (app(PermitValidityService::class)->locksStep($notification, $request->step_name)) {
+                return back()->with('error', 'Working Permit sudah kedaluwarsa. Buat permit baru dan tunggu persetujuan admin sebelum melanjutkan upload.');
             }
 
             $filePath = $request->file('file')->store('uploads', 'public');

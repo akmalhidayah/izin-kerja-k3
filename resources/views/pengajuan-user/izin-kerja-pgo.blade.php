@@ -44,6 +44,8 @@
                     </div>
                 @endif
 
+                @include('components.steps.permit-validity', ['mode' => 'banner'])
+
             <div class="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-700 mb-4">
 
     <!-- LEFT -->
@@ -97,6 +99,7 @@
                                 'done' => 'bg-green-500 text-white',
                                 'pending' => 'bg-gray-300 text-gray-800',
                                 'revisi' => 'bg-red-500 text-white',
+                                'kedaluwarsa' => 'bg-orange-500 text-white',
                             );
                         @endphp
 
@@ -121,11 +124,11 @@
 
                                 <p class="text-[10px] mt-1 {{
                                     $step['status'] === 'done' ? 'text-green-600' :
-                                    ($step['status'] === 'revisi' ? 'text-red-600' : 'text-gray-500')
+                                    ($step['status'] === 'revisi' ? 'text-red-600' : ($step['status'] === 'kedaluwarsa' ? 'text-orange-600 font-semibold' : 'text-gray-500'))
                                 }}">
                                     {{
                                         $step['status'] === 'done' ? 'Selesai' :
-                                        ($step['status'] === 'revisi' ? 'Revisi' : 'Pending')
+                                        ($step['status'] === 'revisi' ? 'Revisi' : ($step['status'] === 'kedaluwarsa' ? 'Kedaluwarsa' : 'Pending'))
                                     }}
                                 </p>
 
@@ -221,9 +224,12 @@
     $permitListrikTeganganTinggi = $permits['listrik-tegangan-tinggi'] ?? null;
 @endphp
 
-                                    @if (!$step['enabled'])
+                                    @if ($permitValidity['expired'] ?? false)
+                                        @include('components.steps.permit-validity', ['mode' => 'step'])
+                                    @elseif (!$step['enabled'])
                                         <span class="text-[10px] text-gray-400 italic mt-1">Langkah perizinan harus dilakukan secara bertahap.</span>
                                     @else
+                                        @include('components.steps.permit-validity', ['mode' => 'step'])
                                         <div class="flex flex-col items-center gap-2 mt-1">
                                             @if ($permitUmum)
                                                 <div class="flex flex-col items-center">

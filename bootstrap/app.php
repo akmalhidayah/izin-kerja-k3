@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\EnsurePermitNotExpired;
 use App\Http\Middleware\PreventBackHistory;
 use App\Http\Middleware\UsertypeMiddleware;
 use Illuminate\Foundation\Application;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => CheckRole::class,
             'usertype' => UsertypeMiddleware::class,
+            'permit.active' => EnsurePermitNotExpired::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
