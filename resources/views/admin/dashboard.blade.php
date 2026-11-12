@@ -190,7 +190,7 @@
                 @php
                     $ringRows = collect($permitTypes['rows'])->filter(fn ($r) => $r['count'] > 0)->take(5)->values();
                 @endphp
-                <div class="overflow-hidden rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-pink-100/60 p-4 shadow-sm">
+                <div class="flex flex-col overflow-hidden rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-pink-100/60 p-4 shadow-sm">
                     <div class="mb-3 flex items-center gap-2">
                         <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-rose-600 text-white">
                             <i class="fas fa-layer-group text-xs"></i>
@@ -217,15 +217,15 @@
                             </div>
                         </div>
 
-                        <div class="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
+                        <div class="mt-4 grid flex-1 grid-cols-2 content-evenly gap-x-4 gap-y-3 text-sm">
                             @foreach ($permitTypes['rows'] as $row)
-                                <div class="flex items-center gap-1.5 {{ $row['count'] === 0 ? 'opacity-40' : '' }}">
-                                    <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background: {{ $row['color'] }}"></span>
+                                <div class="flex items-center gap-2 {{ $row['count'] === 0 ? 'opacity-40' : '' }}">
+                                    <span class="h-3 w-3 shrink-0 rounded-full" style="background: {{ $row['color'] }}"></span>
                                     <span class="min-w-0 flex-1 truncate text-gray-700">
                                         {{ $row['label'] }}
-                                        @if ($row['risk'])<i class="fas fa-triangle-exclamation text-[8px] text-rose-500" title="Risiko tinggi"></i>@endif
+                                        @if ($row['risk'])<i class="fas fa-triangle-exclamation text-[10px] text-rose-500" title="Risiko tinggi"></i>@endif
                                     </span>
-                                    <span class="shrink-0 font-semibold text-gray-800">{{ $row['count'] }}</span>
+                                    <span class="shrink-0 font-bold text-gray-800">{{ $row['count'] }}</span>
                                 </div>
                             @endforeach
                         </div>
@@ -432,7 +432,7 @@
             </div>
 
             {{-- SIK yang ditangani --}}
-            <div class="flex-1 overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-100/50 p-4 shadow-sm">
+            <div class="flex flex-1 flex-col overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-100/50 p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500 text-white">
                         <i class="fas fa-chart-pie text-xs"></i>
@@ -441,15 +441,15 @@
                     <span class="ml-auto text-[10px] text-amber-700/70">5 admin teratas</span>
                 </div>
 
-                <div class="relative mx-auto h-44 w-44">
+                <div class="relative mx-auto h-52 w-52">
                     <canvas id="adminChart"></canvas>
                     <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-xl font-extrabold leading-none text-gray-800">{{ number_format($pieTotal, 0, ',', '.') }}</span>
+                        <span class="text-2xl font-extrabold leading-none text-gray-800">{{ number_format($pieTotal, 0, ',', '.') }}</span>
                         <span class="mt-0.5 text-[9px] uppercase tracking-wide text-gray-400">pengajuan</span>
                     </div>
                 </div>
 
-                <div class="mt-4 space-y-2.5 text-xs">
+                <div class="mt-5 flex flex-1 flex-col justify-evenly gap-4 text-sm">
                     @foreach ($adminLoads as $name => $count)
                         @php
                             $percent = $pieTotal > 0 ? round(($count / $pieTotal) * 100) : 0;
@@ -458,14 +458,14 @@
                         <div>
                             <div class="flex items-center justify-between gap-2">
                                 <div class="flex min-w-0 items-center gap-2">
-                                    <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background: {{ $color }}"></span>
+                                    <span class="h-3 w-3 shrink-0 rounded-full" style="background: {{ $color }}"></span>
                                     <span class="truncate text-gray-700">{{ ($name && $name !== '-') ? $name : 'Belum ditangani' }}</span>
                                 </div>
-                                <span class="shrink-0 text-[11px] font-semibold text-gray-600">
-                                    {{ $count }} <span class="text-gray-400">({{ $percent }}%)</span>
+                                <span class="shrink-0 text-sm font-bold text-gray-700">
+                                    {{ $count }} <span class="font-semibold text-gray-400">({{ $percent }}%)</span>
                                 </span>
                             </div>
-                            <div class="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/80">
+                            <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/80">
                                 <div class="h-full rounded-full" style="width: {{ $percent }}%; background: {{ $color }}"></div>
                             </div>
                         </div>
