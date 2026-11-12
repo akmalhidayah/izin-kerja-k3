@@ -335,7 +335,7 @@
          :class="sidebarOpen ? 'lg:pl-[19.5rem]' : 'lg:pl-[6.5rem]'">
 
         <!-- TOPBAR -->
-        <header class="topbar-hero sticky top-0 z-20 shadow-md shadow-slate-900/20">
+        <header class="topbar-hero sticky top-0 z-20 lg:rounded-bl-3xl">
             <div class="px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
                 <!-- Left: mobile menu button -->
                 <div class="flex min-w-0 items-center gap-3">
