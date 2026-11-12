@@ -29,13 +29,14 @@ done
 
 step() { printf '\n==> %s\n' "$1"; }
 
+# Syarat: SAPI cli dan punya driver pdo_mysql (ea-php84/85 di server ini tidak punya).
 find_php() {
   local c
-  for c in "$PHP_BIN" /opt/cpanel/ea-php84/root/usr/bin/php /opt/cpanel/ea-php83/root/usr/bin/php \
-           /opt/cpanel/ea-php82/root/usr/bin/php php; do
+  for c in "$PHP_BIN" /opt/cpanel/ea-php82/root/usr/bin/php /usr/local/bin/php \
+           /opt/cpanel/ea-php83/root/usr/bin/php /opt/alt/php82/usr/bin/php php; do
     [ -n "$c" ] || continue
     command -v "$c" >/dev/null 2>&1 || continue
-    if [ "$("$c" -r 'echo PHP_SAPI;' 2>/dev/null)" = "cli" ]; then
+    if [ "$("$c" -r 'echo PHP_SAPI, extension_loaded("pdo_mysql") ? "+mysql" : "";' 2>/dev/null)" = "cli+mysql" ]; then
       echo "$c"; return 0
     fi
   done
