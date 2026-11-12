@@ -273,8 +273,7 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 - Panel di bawah grafik Tren:
   - **Permit per Jenis** (`permitTypeCounts()`): jumlah permit per jenis yang dibuat pada tahun terpilih, lingkaran berlapis untuk 5 terbanyak. Jenis risiko tinggi (ketinggian, gas panas, risiko panas, ruang tertutup, listrik TT) diatur di `AdminDashboardController::PERMIT_TYPES`.
   - **Pekerjaan Berlangsung Hari Ini** (`ongoingToday()`): vendor bila hari ini di antara `tanggal_mulai` dan `tanggal_selesai` Data Kontraktor (lokasi dan jumlah pekerja dari sana; `tenaga_kerja` format lama yang ter-encode dua kali ikut didecode); karyawan bila `work_date` detail permit hari ini, atau tanggal JSA hari ini bila tidak ada tanggal kerja. Status persetujuan sengaja tidak dibedakan. Risiko tinggi diurutkan paling atas.
-  - **Tingkat Penyelesaian** (`completionRate()`): persen pengajuan tahun terpilih yang masuk scope `selesai`.
-  - **SIK Menunggu Tanda Tangan** (`sikSignaturePending()`): step `sik` disetujui tetapi tanda tangan Senior Manager atau Manager kosong. Tautan ke Approve SIK hanya untuk Super Admin.
+- Kolom kiri dan kanan dashboard memakai `flex flex-col`; panel terakhir tiap kolom (`flex-1`) mengisi sisa tinggi supaya bawahnya rata.
 
 ## 14. Daftar persyaratan kerja aman permit
 

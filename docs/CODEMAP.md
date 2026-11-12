@@ -247,7 +247,7 @@ Komponen bersama: `components/permits/form-signature.blade.php`, `components/sig
 | `JsaNumberingTest` | algoritma nomor JSA, bulan berjalan, unique index |
 | `JsaSignatureTest` | PNG lengkap vs terpotong di form token |
 | `KetinggianChecklistTest` | 18 butir persyaratan ketinggian identik di form modal, form token, dan PDF; jawaban per indeks |
-| `AdminDashboardTest` | angka dashboard dan kartu (vendor/PGO), antrean "Perlu Tindakan Saya", pengajuan mandek, filter `kondisi` di daftar, aktivitas tanpa backfill, batas bulan grafik, permit per jenis, pekerjaan berlangsung hari ini, tingkat penyelesaian, SIK menunggu TTD, jumlah query sama saat data bertambah |
+| `AdminDashboardTest` | angka dashboard dan kartu (vendor/PGO), antrean "Perlu Tindakan Saya", pengajuan mandek, filter `kondisi` di daftar, aktivitas tanpa backfill, batas bulan grafik, permit per jenis, pekerjaan berlangsung hari ini, jumlah query sama saat data bertambah |
 | `ApprovalHistoryTest` | log saat ubah status, tanpa log bila tidak berubah, admin lain ditolak, reset saat hapus JSA, riwayat tampil di detail, aktivitas dashboard, log ikut terhapus |
 | `NewsTest` | CRUD berita Super Admin, admin biasa ditolak, landing menampilkan berita aktif |
 | `Auth/*`, `ProfileTest`, `ExampleTest` | bawaan Breeze |

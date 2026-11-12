@@ -332,8 +332,6 @@ class AdminDashboardController extends Controller
             'selectedYear' => $currentYear,
             'permitTypes' => $this->permitTypeCounts($currentYear),
             'ongoing' => $this->ongoingToday(),
-            'completion' => $this->completionRate($currentYear),
-            'sikSignature' => $this->sikSignaturePending(),
         ]);
     }
 
@@ -497,32 +495,6 @@ class AdminDashboardController extends Controller
         }
 
         return $sum > 0 ? $sum : null;
-    }
-
-    /** Persentase pengajuan tahun terpilih yang sudah selesai. */
-    private function completionRate(int $year): array
-    {
-        $base = Notification::query()->whereYear('created_at', $year);
-        $total = (clone $base)->count();
-        $done = (clone $base)->selesai()->count();
-
-        return [
-            'total' => $total,
-            'done' => $done,
-            'percent' => $total > 0 ? (int) round($done / $total * 100) : 0,
-        ];
-    }
-
-    /** SIK yang sudah disetujui tetapi tanda tangan Senior Manager atau Manager belum lengkap. */
-    private function sikSignaturePending(): array
-    {
-        $base = StepApproval::query()->where('step', 'sik')->where('status', 'disetujui');
-
-        return [
-            'total' => (clone $base)->where(fn ($q) => $q->whereNull('signature_senior_manager')->orWhereNull('signature_manager'))->count(),
-            'senior_manager' => (clone $base)->whereNull('signature_senior_manager')->count(),
-            'manager' => (clone $base)->whereNull('signature_manager')->count(),
-        ];
     }
 
     public function permintaanSIK(Request $request)

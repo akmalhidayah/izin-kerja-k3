@@ -98,7 +98,7 @@
     <div class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
 
         {{-- ===================== KOLOM KIRI: GRAFIK ===================== --}}
-        <div class="space-y-4 lg:col-span-2">
+        <div class="flex flex-col gap-4 lg:col-span-2">
 
             {{-- Top pengajuan --}}
             <div class="overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-sky-100/60 p-4 shadow-sm">
@@ -184,7 +184,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
 
                 {{-- Permit per jenis (lingkaran berlapis) --}}
                 @php
@@ -297,56 +297,12 @@
                     @endif
                 </div>
 
-                {{-- Tingkat penyelesaian --}}
-                <div class="overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-sky-100/60 p-4 shadow-sm">
-                    <div class="mb-2 flex items-center gap-2">
-                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-600 text-white">
-                            <i class="fas fa-gauge-high text-xs"></i>
-                        </span>
-                        <h2 class="text-xs font-bold uppercase tracking-wide text-cyan-900">Tingkat Penyelesaian {{ $selectedYear }}</h2>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="relative h-20 w-36 shrink-0">
-                            <canvas id="completionGauge"></canvas>
-                            <div class="pointer-events-none absolute inset-x-0 bottom-0 text-center">
-                                <span class="text-xl font-extrabold leading-none text-cyan-800">{{ $completion['percent'] }}%</span>
-                            </div>
-                        </div>
-                        <div class="min-w-0 text-[11px] text-gray-600">
-                            <p><b class="text-cyan-800">{{ number_format($completion['done'], 0, ',', '.') }}</b> selesai</p>
-                            <p>dari <b class="text-gray-800">{{ number_format($completion['total'], 0, ',', '.') }}</b> pengajuan tahun ini</p>
-                            <a href="{{ route('admin.permintaansik', ['kondisi' => 'riwayat']) }}" class="mt-1 inline-block font-semibold text-cyan-700 hover:underline">Lihat riwayat →</a>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- SIK menunggu tanda tangan --}}
-                @php $isSuperAdmin = (auth()->user()?->role?->name ?? '') === 'Super Admin'; @endphp
-                <div class="overflow-hidden rounded-2xl border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-purple-100/60 p-4 shadow-sm">
-                    <div class="mb-2 flex items-center gap-2">
-                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-fuchsia-600 text-white">
-                            <i class="fas fa-file-signature text-xs"></i>
-                        </span>
-                        <h2 class="text-xs font-bold uppercase tracking-wide text-fuchsia-900">SIK Menunggu Tanda Tangan</h2>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <p class="text-4xl font-extrabold leading-none text-fuchsia-700">{{ $sikSignature['total'] }}</p>
-                        <div class="min-w-0 space-y-1 text-[11px] text-gray-600">
-                            <p>Belum TTD Senior Manager: <b class="text-gray-800">{{ $sikSignature['senior_manager'] }}</b></p>
-                            <p>Belum TTD Manager: <b class="text-gray-800">{{ $sikSignature['manager'] }}</b></p>
-                            @if ($isSuperAdmin)
-                                <a href="{{ route('admin.approvesik.index') }}" class="inline-block font-semibold text-fuchsia-700 hover:underline">Buka Approve SIK →</a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
         </div>
 
         {{-- ===================== KOLOM KANAN ===================== --}}
-        <div class="space-y-4">
+        <div class="flex flex-col gap-4">
 
             {{-- Perlu tindakan saya --}}
             <div class="overflow-hidden rounded-2xl border border-blue-700 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-4 text-white shadow-sm">
@@ -476,7 +432,7 @@
             </div>
 
             {{-- SIK yang ditangani --}}
-            <div class="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-100/50 p-4 shadow-sm">
+            <div class="flex-1 overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-100/50 p-4 shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500 text-white">
                         <i class="fas fa-chart-pie text-xs"></i>
@@ -702,34 +658,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     }
                 }
-            }
-        });
-    }
-
-    // ======================
-    // TINGKAT PENYELESAIAN: meteran setengah lingkaran
-    // ======================
-    const ctxGauge = document.getElementById('completionGauge');
-    if (ctxGauge) {
-        const pct = @json($completion['percent']);
-        new Chart(ctxGauge, {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: [pct, 100 - pct],
-                    backgroundColor: ['#0891b2', 'rgba(8,145,178,0.15)'],
-                    borderWidth: 0,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                rotation: -90,
-                circumference: 180,
-                cutout: '75%',
-                animation: { duration: 1200, easing: 'easeOutQuart' },
-                plugins: { legend: { display: false }, tooltip: { enabled: false } }
             }
         });
     }

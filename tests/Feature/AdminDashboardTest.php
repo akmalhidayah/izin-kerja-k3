@@ -471,25 +471,4 @@ class AdminDashboardTest extends TestCase
         $this->assertSame('Gudang Klinker', $rows[$jsaNotif->id]->location);
         $this->assertNull($rows[$jsaNotif->id]->workers);
     }
-
-    public function test_completion_rate_and_sik_signature_pending(): void
-    {
-        $admin = $this->admin();
-        $vendor = User::factory()->create(['usertype' => 'user']);
-
-        $this->notification($vendor, ['sik' => 'disetujui']);
-        $this->notification($vendor);
-        $this->notification($vendor);
-        $signed = $this->notification($vendor, ['sik' => 'disetujui']);
-        StepApproval::where('notification_id', $signed->id)->where('step', 'sik')
-            ->update(['signature_senior_manager' => 'storage/x.png', 'signature_manager' => 'storage/y.png']);
-
-        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
-
-        $this->assertSame(['total' => 4, 'done' => 2, 'percent' => 50], $response->viewData('completion'));
-        $this->assertSame(['total' => 1, 'senior_manager' => 1, 'manager' => 1], $response->viewData('sikSignature'));
-        $response->assertSee('Pekerjaan Berlangsung Hari Ini');
-        $response->assertSee('SIK Menunggu Tanda Tangan');
-        $response->assertDontSee('Buka Approve SIK', false);
-    }
 }
