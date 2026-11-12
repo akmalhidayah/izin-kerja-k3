@@ -323,6 +323,7 @@ class AdminDashboardController extends Controller
             'tahunList' => range(date('Y'), date('Y') - 5),
             'totalSteps' => $totalSteps,
             'kondisiTabs' => $this->kondisiTabs($base, $request->input('kondisi')),
+            'kondisiSub' => $this->kondisiSub($base, $request->input('kondisi')),
         ]);
     }
 
@@ -366,6 +367,7 @@ class AdminDashboardController extends Controller
             'tahunList' => range(date('Y'), date('Y') - 5),
             'totalSteps' => $totalSteps,
             'kondisiTabs' => $this->kondisiTabs($base, $request->input('kondisi')),
+            'kondisiSub' => $this->kondisiSub($base, $request->input('kondisi')),
         ]);
     }
 
@@ -398,29 +400,69 @@ class AdminDashboardController extends Controller
         }
     }
 
-    /** Tab kondisi di atas daftar beserta jumlahnya (hanya dibatasi jenis pemohon, bukan filter lain). */
+    /** Kelompok kondisi yang termasuk tab "Perlu Tindakan". */
+    private const TINDAKAN_GROUP = ['perlu_tindakan', 'menunggu', 'belum_ditangani', 'mandek'];
+
+    /**
+     * Empat tab di atas daftar beserta jumlahnya (hanya dibatasi jenis pemohon, bukan filter lain):
+     * Semua, Perlu Tindakan, Perlu Revisi, Riwayat. Nilai lama (menunggu, belum_ditangani, mandek, selesai)
+     * tetap dikenali supaya tautan dari dashboard menyorot tab yang tepat.
+     */
     private function kondisiTabs(Builder $base, ?string $active): array
     {
-        $labels = [
-            '' => 'Semua',
-            'menunggu' => 'Menunggu',
-            'belum_ditangani' => 'Belum Ditangani',
-            'revisi' => 'Perlu Revisi',
-            'mandek' => 'Mandek > '.self::STALE_DAYS.' hari',
-            'selesai' => 'Selesai',
+        $active = $active ?? '';
+
+        $defs = [
+            ['key' => '', 'label' => 'Semua', 'members' => ['']],
+            ['key' => 'perlu_tindakan', 'label' => 'Perlu Tindakan', 'members' => self::TINDAKAN_GROUP],
+            ['key' => 'revisi', 'label' => 'Perlu Revisi', 'members' => ['revisi']],
+            ['key' => 'riwayat', 'label' => 'Riwayat', 'members' => ['riwayat', 'selesai']],
         ];
 
         $tabs = [];
-        foreach ($labels as $key => $label) {
+        foreach ($defs as $def) {
             $tabs[] = [
-                'key' => $key,
-                'label' => $label,
-                'count' => (clone $base)->kondisi($key ?: null, self::STALE_DAYS)->count(),
-                'active' => ($active ?? '') === $key,
+                'key' => $def['key'],
+                'label' => $def['label'],
+                'count' => (clone $base)->kondisi($def['key'] ?: null, self::STALE_DAYS)->count(),
+                'active' => in_array($active, $def['members'], true) || ($def['key'] === '' && ! in_array($active, Notification::KONDISI, true)),
             ];
         }
 
         return $tabs;
+    }
+
+    /**
+     * Penyaring kecil yang hanya tampil di tab Perlu Tindakan: Semua, Belum ditangani, Mandek.
+     * Kosong bila tab lain yang aktif.
+     */
+    private function kondisiSub(Builder $base, ?string $active): array
+    {
+        $active = $active ?? '';
+
+        if (! in_array($active, self::TINDAKAN_GROUP, true)) {
+            return [];
+        }
+
+        $current = in_array($active, ['belum_ditangani', 'mandek'], true) ? $active : 'perlu_tindakan';
+
+        $defs = [
+            'perlu_tindakan' => 'Semua',
+            'belum_ditangani' => 'Belum ditangani',
+            'mandek' => 'Mandek > '.self::STALE_DAYS.' hari',
+        ];
+
+        $sub = [];
+        foreach ($defs as $key => $label) {
+            $sub[] = [
+                'key' => $key,
+                'label' => $label,
+                'count' => (clone $base)->kondisi($key, self::STALE_DAYS)->count(),
+                'active' => $current === $key,
+            ];
+        }
+
+        return $sub;
     }
 
     /**

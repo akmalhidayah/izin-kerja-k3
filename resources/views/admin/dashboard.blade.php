@@ -17,10 +17,10 @@
 
         // Kartu ringkas: satu warna per makna, dipakai juga oleh tab di halaman daftar.
         $cardDefs = [
-            'menunggu' => ['label' => 'Menunggu Persetujuan', 'grad' => 'from-amber-500 to-orange-500', 'icon' => 'fa-hourglass-half'],
-            'belum_ditangani' => ['label' => 'Belum Ditangani', 'grad' => 'from-slate-700 to-slate-900', 'icon' => 'fa-user-clock'],
-            'revisi' => ['label' => 'Perlu Revisi', 'grad' => 'from-red-600 to-rose-500', 'icon' => 'fa-triangle-exclamation'],
-            'selesai' => ['label' => 'Selesai Bulan Ini', 'grad' => 'from-emerald-500 to-green-600', 'icon' => 'fa-circle-check'],
+            'menunggu' => ['label' => 'Menunggu Persetujuan', 'grad' => 'from-amber-500 to-orange-500', 'icon' => 'fa-hourglass-half', 'kondisi' => 'perlu_tindakan'],
+            'belum_ditangani' => ['label' => 'Belum Ditangani', 'grad' => 'from-slate-700 to-slate-900', 'icon' => 'fa-user-clock', 'kondisi' => 'belum_ditangani'],
+            'revisi' => ['label' => 'Perlu Revisi', 'grad' => 'from-red-600 to-rose-500', 'icon' => 'fa-triangle-exclamation', 'kondisi' => 'revisi'],
+            'selesai' => ['label' => 'Selesai Bulan Ini', 'grad' => 'from-emerald-500 to-green-600', 'icon' => 'fa-circle-check', 'kondisi' => 'riwayat'],
         ];
     @endphp
 
@@ -75,7 +75,7 @@
         @foreach ($cardDefs as $key => $def)
             @php $card = $cards[$key]; @endphp
             <div class="min-w-[78%] snap-start rounded-2xl bg-gradient-to-br {{ $def['grad'] }} p-4 text-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-w-[46%] md:min-w-0">
-                <a href="{{ route('admin.permintaansik', ['kondisi' => $key]) }}" class="flex items-center gap-4">
+                <a href="{{ route('admin.permintaansik', ['kondisi' => $def['kondisi']]) }}" class="flex items-center gap-4">
                     <div class="rounded-xl bg-white/20 p-3 backdrop-blur">
                         <i class="fas {{ $def['icon'] }} text-lg"></i>
                     </div>
@@ -86,9 +86,9 @@
                     </div>
                 </a>
                 <div class="mt-3 flex items-center gap-1.5 text-[10px]">
-                    <a href="{{ route('admin.permintaansik', ['kondisi' => $key]) }}"
+                    <a href="{{ route('admin.permintaansik', ['kondisi' => $def['kondisi']]) }}"
                        class="rounded-full bg-white/15 px-2 py-0.5 font-semibold hover:bg-white/30">Vendor <span class="font-extrabold">{{ $card['vendor'] }}</span></a>
-                    <a href="{{ route('admin.permintaansikpgo', ['kondisi' => $key]) }}"
+                    <a href="{{ route('admin.permintaansikpgo', ['kondisi' => $def['kondisi']]) }}"
                        class="rounded-full bg-white/15 px-2 py-0.5 font-semibold hover:bg-white/30">Karyawan <span class="font-extrabold">{{ $card['pgo'] }}</span></a>
                 </div>
             </div>
@@ -236,7 +236,7 @@
                 </div>
 
                 @if ($myQueueTotal > $myQueue->count())
-                    <a href="{{ route('admin.permintaansik', ['kondisi' => 'menunggu']) }}"
+                    <a href="{{ route('admin.permintaansik', ['kondisi' => 'perlu_tindakan']) }}"
                        class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white/10 py-1.5 text-[11px] font-semibold text-white hover:bg-white/20">
                         Lihat semua ({{ $myQueueTotal }})
                         <i class="fas fa-arrow-right text-[9px]"></i>

@@ -191,15 +191,29 @@ class Notification extends Model
             ->whereDoesntHave('stepApprovals', fn ($a) => $a->where('updated_at', '>=', $since));
     }
 
-    public const KONDISI = ['menunggu', 'belum_ditangani', 'revisi', 'selesai', 'mandek'];
+    /** Perlu tindakan admin: menunggu persetujuan atau belum punya penanggung jawab (mandek termasuk menunggu). */
+    public function scopePerluTindakan($query)
+    {
+        return $query->where(function ($q) {
+            $q->where(fn ($a) => $a->menunggu())
+                ->orWhere(fn ($b) => $b->belumDitangani());
+        });
+    }
+
+    /**
+     * Nilai ?kondisi= yang dikenal. Empat tab: perlu_tindakan, revisi, riwayat (selesai).
+     * menunggu, belum_ditangani, mandek adalah penyaring di dalam perlu_tindakan; selesai alias riwayat.
+     */
+    public const KONDISI = ['perlu_tindakan', 'revisi', 'riwayat', 'menunggu', 'belum_ditangani', 'mandek', 'selesai'];
 
     public function scopeKondisi($query, ?string $kondisi, int $staleDays = 7)
     {
         return match ($kondisi) {
+            'perlu_tindakan' => $query->perluTindakan(),
             'menunggu' => $query->menunggu(),
             'belum_ditangani' => $query->belumDitangani(),
             'revisi' => $query->perluRevisi(),
-            'selesai' => $query->selesai(),
+            'riwayat', 'selesai' => $query->selesai(),
             'mandek' => $query->mandek($staleDays),
             default => $query,
         };

@@ -268,7 +268,7 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 - Kartu dashboard (`$cards`) dan peringatan mandek (`$stale`) dihitung dari scope yang sama, dipisah vendor/karyawan, dan setiap angka menaut ke daftar dengan `?kondisi=`. "Selesai Bulan Ini" memakai `updated_at` approval, bukan tanggal pengajuan.
 - Panel "Perlu Tindakan Saya" (`$myQueue`) berisi pengajuan menunggu milik admin yang login atau yang belum punya penanggung jawab (label "Ambil"), diurutkan dari aktivitas approval terakhir yang paling lama. Membuka detail otomatis meng-assign admin (perilaku lama).
 - "Aktivitas Terbaru" menyembunyikan baris `backfill`. Tren bulanan berhenti di bulan berjalan lewat `$lastMonth`.
-- Tab kondisi di daftar vendor/PGO: partial `admin/partials/kondisi-tabs.blade.php` dengan data `$kondisiTabs` (label, jumlah, aktif). Form filter menyimpan `kondisi` di hidden input supaya tab tidak hilang saat tombol Filter ditekan.
+- Daftar vendor/PGO punya empat tab (`$kondisiTabs`): Semua, Perlu Tindakan (`perlu_tindakan` = menunggu + belum ditangani, mandek ikut di dalamnya), Perlu Revisi, Riwayat (`riwayat`, alias lama `selesai`). Di tab Perlu Tindakan muncul penyaring kecil `$kondisiSub`: Semua, Belum ditangani, Mandek. Nilai `?kondisi=menunggu|belum_ditangani|mandek|selesai` tetap dikenali sehingga tautan lama menyorot tab yang tepat. Partial: `admin/partials/kondisi-tabs.blade.php`. Form filter menyimpan `kondisi` di hidden input supaya tab tidak hilang saat tombol Filter ditekan.
 - Pencarian cepat di dashboard mengarah ke daftar vendor atau karyawan (`?search=`), bukan endpoint baru.
 
 ## 14. Daftar persyaratan kerja aman permit

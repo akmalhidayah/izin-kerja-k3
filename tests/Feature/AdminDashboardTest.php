@@ -259,10 +259,16 @@ class AdminDashboardTest extends TestCase
         $this->assertSame([$stale->id], $list->viewData('requests')->getCollection()->pluck('id')->all());
 
         $tabs = collect($list->viewData('kondisiTabs'))->keyBy('key');
-        $this->assertSame(1, $tabs['mandek']['count']);
+        $this->assertSame(['', 'perlu_tindakan', 'revisi', 'riwayat'], $tabs->keys()->all());
         $this->assertSame(3, $tabs['']['count']);
-        $this->assertSame(3, $tabs['menunggu']['count']);
-        $this->assertTrue($tabs['mandek']['active']);
+        $this->assertSame(3, $tabs['perlu_tindakan']['count']);
+        $this->assertTrue($tabs['perlu_tindakan']['active'], 'Mandek disorot di tab Perlu Tindakan');
+        $this->assertFalse($tabs['']['active']);
+
+        $sub = collect($list->viewData('kondisiSub'))->keyBy('key');
+        $this->assertSame(1, $sub['mandek']['count']);
+        $this->assertTrue($sub['mandek']['active']);
+        $this->assertSame(3, $sub['perlu_tindakan']['count']);
     }
 
     public function test_kondisi_filter_on_lists(): void
@@ -287,6 +293,12 @@ class AdminDashboardTest extends TestCase
         $this->assertSame([$unassigned->id], $ids('admin.permintaansik', 'menunggu'));
         $this->assertSame([$pgoDone->id], $ids('admin.permintaansikpgo', 'selesai'));
         $this->assertSame([$pgoOpen->id], $ids('admin.permintaansikpgo', 'menunggu'));
+
+        // tab baru: perlu_tindakan = menunggu + belum ditangani, riwayat = selesai
+        $this->assertSame([$unassigned->id], $ids('admin.permintaansik', 'perlu_tindakan'));
+        $this->assertSame([$done->id], $ids('admin.permintaansik', 'riwayat'));
+        $this->assertSame([$pgoOpen->id], $ids('admin.permintaansikpgo', 'perlu_tindakan'));
+        $this->assertSame([$pgoDone->id], $ids('admin.permintaansikpgo', 'riwayat'));
 
         // kondisi tak dikenal diabaikan
         $this->assertCount(3, $ids('admin.permintaansik', 'apa-saja'));
@@ -321,5 +333,43 @@ class AdminDashboardTest extends TestCase
 
         $past = $this->actingAs($admin)->get(route('admin.dashboard', ['year' => now()->year - 1]));
         $this->assertSame(12, $past->viewData('lastMonth'));
+    }
+
+    public function test_four_tabs_with_highlight_and_sub_filters(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user']);
+
+        $this->notification($vendor);
+        $this->notification($vendor, ['op_spk' => 'revisi'], ['assigned_admin_id' => $admin->id]);
+        $this->notification($vendor, ['sik' => 'disetujui'], ['assigned_admin_id' => $admin->id]);
+
+        $tabsFor = fn (?string $kondisi) => collect(
+            $this->actingAs($admin)->get(route('admin.permintaansik', $kondisi ? ['kondisi' => $kondisi] : []))
+                ->viewData('kondisiTabs')
+        )->keyBy('key');
+
+        $this->assertTrue($tabsFor(null)['']['active']);
+        $this->assertTrue($tabsFor('perlu_tindakan')['perlu_tindakan']['active']);
+        $this->assertTrue($tabsFor('menunggu')['perlu_tindakan']['active']);
+        $this->assertTrue($tabsFor('belum_ditangani')['perlu_tindakan']['active']);
+        $this->assertTrue($tabsFor('revisi')['revisi']['active']);
+        $this->assertTrue($tabsFor('riwayat')['riwayat']['active']);
+        $this->assertTrue($tabsFor('selesai')['riwayat']['active']);
+
+        $this->assertSame(3, $tabsFor(null)['']['count']);
+        $this->assertSame(1, $tabsFor(null)['perlu_tindakan']['count']);
+        $this->assertSame(1, $tabsFor(null)['revisi']['count']);
+        $this->assertSame(1, $tabsFor(null)['riwayat']['count']);
+
+        // penyaring kecil hanya muncul di tab Perlu Tindakan
+        $this->assertSame([], $this->actingAs($admin)->get(route('admin.permintaansik', ['kondisi' => 'revisi']))->viewData('kondisiSub'));
+        $this->assertCount(3, $this->actingAs($admin)->get(route('admin.permintaansik', ['kondisi' => 'perlu_tindakan']))->viewData('kondisiSub'));
+
+        $html = $this->actingAs($admin)->get(route('admin.permintaansik', ['kondisi' => 'perlu_tindakan']))->getContent();
+        $this->assertStringContainsString('Perlu Tindakan', $html);
+        $this->assertStringContainsString('Riwayat', $html);
+        $this->assertStringContainsString('Belum ditangani', $html);
+        $this->assertStringContainsString('Mandek', $html);
     }
 }
