@@ -282,3 +282,10 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 - Sebelum perbaikan (12 Nov 2026) kedua form memakai 10 butir yang berbeda, jadi permit ketinggian lama punya jawaban yang indeksnya tidak sesuai butir resmi. Periksa atau isi ulang bagian 3 pada permit lama yang masih berjalan.
 - Permit lain (umum, gaspanas, air, risiko panas, ruang tertutup, perancah, beban, penggalian) belum diperiksa untuk kasus serupa; bandingkan daftar di komponen form dengan PDF-nya.
 
+## 15. Sidebar admin
+
+- Sidebar di `layouts/admin.blade.php` berupa panel merah melayang (desktop: jarak 12px dari tepi, `lg:pl-[19.5rem]` saat terbuka dan `lg:pl-[6.5rem]` saat diciutkan pada pembungkus konten). Tombol buka-tutup tetap sama; saat diciutkan, nama menu muncul sebagai tooltip.
+- Menu utama didefinisikan di array `$navGroups` (grup Utama, Pengajuan, Penerbitan) dan sub-menu Master Data di `$subMenu`. Menambah menu cukup menambah satu baris array: `href`, `active`, `icon` (nama ikon Lucide), `text`, `badge`, `key`.
+- Menu aktif memakai kelas `.nav-active`: tab putih yang menyambung ke latar konten dengan lekukan dari pseudo-element. Warna lekukan `#f8fafc` harus sama dengan latar `body` (`bg-slate-50`); ubah keduanya bersamaan.
+- Badge: view composer di `AppServiceProvider` mengisi `$sidebarBadges` (`vendor`, `pgo` = scope `perluTindakan`; `sik` = step `sik` disetujui dengan tanda tangan belum lengkap). Hasil di-cache 60 detik dengan kunci `admin.sidebar_badges`, jadi angka bisa terlambat hingga satu menit. Badge `sik` hanya tampil untuk Super Admin karena menu Approve SIK khusus Super Admin. Tes yang menghitung query wajib `Cache::flush()` dulu.
+

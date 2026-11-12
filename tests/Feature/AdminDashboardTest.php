@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\WorkPermitDetail;
 use App\Models\WorkPermitKetinggian;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -76,6 +77,8 @@ class AdminDashboardTest extends TestCase
 
     private function countQueries(callable $fn): int
     {
+        // Badge sidebar di-cache 60 detik; kosongkan supaya setiap pengukuran setara.
+        Cache::flush();
         DB::flushQueryLog();
         DB::enableQueryLog();
         $fn();
@@ -160,7 +163,7 @@ class AdminDashboardTest extends TestCase
         });
 
         $this->assertCount(10, $rows);
-        $this->assertLessThan(24, $queries, "Daftar vendor menjalankan {$queries} query untuk 10 baris.");
+        $this->assertLessThan(28, $queries, "Daftar vendor menjalankan {$queries} query untuk 10 baris.");
 
         $this->assertSame('Perlu Disetujui', $rows[$withJsa->id]->status, 'JSA tersimpan harus terbaca sebagai perlu disetujui');
         $this->assertSame(2, $rows[$withJsa->id]->current_step);
