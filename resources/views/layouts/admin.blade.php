@@ -126,7 +126,7 @@
         ];
     @endphp
     <aside
-        class="sidebar-rail fixed inset-y-0 left-0 z-40 flex flex-col rounded-r-3xl bg-gradient-to-b from-red-700 via-red-700 to-rose-900 text-white shadow-xl shadow-red-900/20
+        class="sidebar-rail fixed inset-y-0 left-0 z-40 flex flex-col rounded-r-3xl bg-gradient-to-b from-red-700 via-red-700 to-rose-900 text-white
                transition-all duration-300 lg:inset-y-3 lg:left-3 lg:rounded-3xl"
         :class="[
             (mobileOpen ? 'translate-x-0' : '-translate-x-full') + ' lg:translate-x-0',
