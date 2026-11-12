@@ -470,7 +470,7 @@ class AdminDashboardController extends Controller
             ->values();
 
         return [
-            'rows' => $rows->take(5)->values(),
+            'rows' => $rows->take(7)->values(),
             'total' => $rows->count(),
             'workers' => (int) $rows->sum(fn ($r) => $r->workers ?? 0),
             'risk' => $rows->where('risk', true)->count(),

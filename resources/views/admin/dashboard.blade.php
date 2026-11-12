@@ -142,48 +142,6 @@
                 @endif
             </div>
 
-            {{-- Tren tahunan --}}
-            <div class="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-100/60 p-4 shadow-sm">
-                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                            <i class="fas fa-chart-area text-xs"></i>
-                        </span>
-                        <h2 class="text-xs font-bold uppercase tracking-wide text-indigo-900">Tren Pengajuan Izin Kerja {{ $selectedYear }}</h2>
-                    </div>
-                    <form method="GET">
-                        <select name="year" onchange="this.form.submit()"
-                                class="rounded-lg border border-gray-300 px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-400">
-                            @foreach ($years as $year)
-                                <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>{{ $year }}</option>
-                            @endforeach
-                        </select>
-                    </form>
-                </div>
-
-                <div class="mb-3 grid grid-cols-3 gap-2">
-                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
-                        <p class="text-[10px] text-indigo-700/80">Total setahun</p>
-                        <p class="text-lg font-extrabold leading-tight text-indigo-700">{{ number_format($yearTotal, 0, ',', '.') }}</p>
-                    </div>
-                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
-                        <p class="text-[10px] text-indigo-700/80">Rata-rata / bulan</p>
-                        <p class="text-lg font-extrabold leading-tight text-indigo-700">{{ number_format($monthAvg, 0, ',', '.') }}</p>
-                    </div>
-                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
-                        <p class="text-[10px] text-indigo-700/80">Bulan tertinggi</p>
-                        <p class="text-lg font-extrabold leading-tight text-indigo-700">
-                            {{ $peakMonth }}
-                            @if ($peakValue > 0)<span class="text-xs font-semibold">({{ number_format($peakValue, 0, ',', '.') }})</span>@endif
-                        </p>
-                    </div>
-                </div>
-
-                <div class="relative h-56 md:h-80">
-                    <canvas id="monthlyChart"></canvas>
-                </div>
-            </div>
-
             <div class="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
 
                 {{-- Permit per jenis --}}
@@ -259,6 +217,11 @@
                             <i class="fas fa-helmet-safety text-xs"></i>
                         </span>
                         <h2 class="text-xs font-bold uppercase tracking-wide text-emerald-900">Pekerjaan Berlangsung Hari Ini</h2>
+                        @if ($ongoing['total'] > $ongoing['rows']->count())
+                            <span class="ml-auto shrink-0 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-100">
+                                +{{ $ongoing['total'] - $ongoing['rows']->count() }} lainnya
+                            </span>
+                        @endif
                     </div>
 
                     <div class="mb-3 grid grid-cols-3 gap-2">
@@ -310,11 +273,50 @@
                         @endforelse
                     </div>
 
-                    @if ($ongoing['total'] > $ongoing['rows']->count())
-                        <p class="mt-2 text-center text-[10px] text-emerald-700/80">+{{ $ongoing['total'] - $ongoing['rows']->count() }} pekerjaan lainnya</p>
-                    @endif
                 </div>
 
+            </div>
+
+            {{-- Tren tahunan --}}
+            <div class="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-100/60 p-4 shadow-sm">
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                            <i class="fas fa-chart-area text-xs"></i>
+                        </span>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-indigo-900">Tren Pengajuan Izin Kerja {{ $selectedYear }}</h2>
+                    </div>
+                    <form method="GET">
+                        <select name="year" onchange="this.form.submit()"
+                                class="rounded-lg border border-gray-300 px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-400">
+                            @foreach ($years as $year)
+                                <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>{{ $year }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+
+                <div class="mb-3 grid grid-cols-3 gap-2">
+                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
+                        <p class="text-[10px] text-indigo-700/80">Total setahun</p>
+                        <p class="text-lg font-extrabold leading-tight text-indigo-700">{{ number_format($yearTotal, 0, ',', '.') }}</p>
+                    </div>
+                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
+                        <p class="text-[10px] text-indigo-700/80">Rata-rata / bulan</p>
+                        <p class="text-lg font-extrabold leading-tight text-indigo-700">{{ number_format($monthAvg, 0, ',', '.') }}</p>
+                    </div>
+                    <div class="rounded-xl bg-white/70 px-3 py-2 ring-1 ring-indigo-100">
+                        <p class="text-[10px] text-indigo-700/80">Bulan tertinggi</p>
+                        <p class="text-lg font-extrabold leading-tight text-indigo-700">
+                            {{ $peakMonth }}
+                            @if ($peakValue > 0)<span class="text-xs font-semibold">({{ number_format($peakValue, 0, ',', '.') }})</span>@endif
+                        </p>
+                    </div>
+                </div>
+
+                <div class="relative h-56 md:h-80">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
             </div>
 
         </div>
