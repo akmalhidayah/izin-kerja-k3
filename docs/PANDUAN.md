@@ -270,6 +270,11 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 - "Aktivitas Terbaru" menyembunyikan baris `backfill`. Tren bulanan berhenti di bulan berjalan lewat `$lastMonth`.
 - Daftar vendor/PGO punya empat tab (`$kondisiTabs`): Semua, Perlu Tindakan (`perlu_tindakan` = menunggu + belum ditangani, mandek ikut di dalamnya), Perlu Revisi, Riwayat (`riwayat`, alias lama `selesai`). Di tab Perlu Tindakan muncul penyaring kecil `$kondisiSub`: Semua, Belum ditangani, Mandek. Nilai `?kondisi=menunggu|belum_ditangani|mandek|selesai` tetap dikenali sehingga tautan lama menyorot tab yang tepat. Partial: `admin/partials/kondisi-tabs.blade.php`. Form filter menyimpan `kondisi` di hidden input supaya tab tidak hilang saat tombol Filter ditekan.
 - Pencarian cepat di dashboard mengarah ke daftar vendor atau karyawan (`?search=`), bukan endpoint baru.
+- Panel di bawah grafik Tren:
+  - **Permit per Jenis** (`permitTypeCounts()`): jumlah permit per jenis yang dibuat pada tahun terpilih, lingkaran berlapis untuk 5 terbanyak. Jenis risiko tinggi (ketinggian, gas panas, risiko panas, ruang tertutup, listrik TT) diatur di `AdminDashboardController::PERMIT_TYPES`.
+  - **Pekerjaan Berlangsung Hari Ini** (`ongoingToday()`): vendor bila hari ini di antara `tanggal_mulai` dan `tanggal_selesai` Data Kontraktor (lokasi dan jumlah pekerja dari sana; `tenaga_kerja` format lama yang ter-encode dua kali ikut didecode); karyawan bila `work_date` detail permit hari ini, atau tanggal JSA hari ini bila tidak ada tanggal kerja. Status persetujuan sengaja tidak dibedakan. Risiko tinggi diurutkan paling atas.
+  - **Tingkat Penyelesaian** (`completionRate()`): persen pengajuan tahun terpilih yang masuk scope `selesai`.
+  - **SIK Menunggu Tanda Tangan** (`sikSignaturePending()`): step `sik` disetujui tetapi tanda tangan Senior Manager atau Manager kosong. Tautan ke Approve SIK hanya untuk Super Admin.
 
 ## 14. Daftar persyaratan kerja aman permit
 

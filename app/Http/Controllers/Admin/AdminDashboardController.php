@@ -3,10 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\DataKontraktor;
+use App\Models\Jsa;
 use App\Models\Notification;
 use App\Models\StepApproval;
 use App\Models\StepApprovalLog;
+use App\Models\UmumWorkPermit;
 use App\Models\User;
+use App\Models\WorkPermitAir;
+use App\Models\WorkPermitBeban;
+use App\Models\WorkPermitDetail;
+use App\Models\WorkPermitGasPanas;
+use App\Models\WorkPermitKetinggian;
+use App\Models\WorkPermitListrikTeganganTinggi;
+use App\Models\WorkPermitPengangkatan;
+use App\Models\WorkPermitPenggalian;
+use App\Models\WorkPermitPerancah;
+use App\Models\WorkPermitRisikoPanas;
+use App\Models\WorkPermitRuangTertutup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +38,24 @@ class AdminDashboardController extends Controller
         'umumWorkPermit', 'workPermitGasPanas', 'workPermitAir', 'workPermitKetinggian',
         'workPermitPengangkatan', 'workPermitPenggalian', 'workPermitPerancah', 'workPermitRisikoPanas',
         'workPermitRuangTertutup', 'workPermitBeban', 'workPermitListrikTeganganTinggi',
+    ];
+
+    /**
+     * Jenis permit untuk panel "Permit per Jenis" dan label di "Pekerjaan Berlangsung".
+     * relation = nama relasi di Notification; risk = ditandai risiko tinggi.
+     */
+    private const PERMIT_TYPES = [
+        'umum' => ['model' => UmumWorkPermit::class, 'relation' => 'umumWorkPermit', 'label' => 'Umum', 'color' => '#64748b', 'risk' => false],
+        'ketinggian' => ['model' => WorkPermitKetinggian::class, 'relation' => 'workPermitKetinggian', 'label' => 'Ketinggian', 'color' => '#ef4444', 'risk' => true],
+        'gaspanas' => ['model' => WorkPermitGasPanas::class, 'relation' => 'workPermitGasPanas', 'label' => 'Gas Panas', 'color' => '#f97316', 'risk' => true],
+        'risiko-panas' => ['model' => WorkPermitRisikoPanas::class, 'relation' => 'workPermitRisikoPanas', 'label' => 'Risiko Panas', 'color' => '#f59e0b', 'risk' => true],
+        'ruang-tertutup' => ['model' => WorkPermitRuangTertutup::class, 'relation' => 'workPermitRuangTertutup', 'label' => 'Ruang Tertutup', 'color' => '#a855f7', 'risk' => true],
+        'listrik-tegangan-tinggi' => ['model' => WorkPermitListrikTeganganTinggi::class, 'relation' => 'workPermitListrikTeganganTinggi', 'label' => 'Listrik TT', 'color' => '#e11d48', 'risk' => true],
+        'pengangkatan' => ['model' => WorkPermitPengangkatan::class, 'relation' => 'workPermitPengangkatan', 'label' => 'Pengangkatan', 'color' => '#2563eb', 'risk' => false],
+        'penggalian' => ['model' => WorkPermitPenggalian::class, 'relation' => 'workPermitPenggalian', 'label' => 'Penggalian', 'color' => '#a16207', 'risk' => false],
+        'perancah' => ['model' => WorkPermitPerancah::class, 'relation' => 'workPermitPerancah', 'label' => 'Perancah', 'color' => '#0d9488', 'risk' => false],
+        'beban' => ['model' => WorkPermitBeban::class, 'relation' => 'workPermitBeban', 'label' => 'Beban Berat', 'color' => '#4f46e5', 'risk' => false],
+        'air' => ['model' => WorkPermitAir::class, 'relation' => 'workPermitAir', 'label' => 'Di Air', 'color' => '#0ea5e9', 'risk' => false],
     ];
 
     private const VENDOR_STEP_TITLES = [
@@ -298,7 +330,199 @@ class AdminDashboardController extends Controller
             'lastMonth' => $lastMonth,
             'years' => $years,
             'selectedYear' => $currentYear,
+            'permitTypes' => $this->permitTypeCounts($currentYear),
+            'ongoing' => $this->ongoingToday(),
+            'completion' => $this->completionRate($currentYear),
+            'sikSignature' => $this->sikSignaturePending(),
         ]);
+    }
+
+    /** Jumlah permit per jenis yang dibuat pada tahun terpilih, terbanyak dulu. */
+    private function permitTypeCounts(int $year): array
+    {
+        $rows = [];
+        foreach (self::PERMIT_TYPES as $key => $type) {
+            $rows[] = [
+                'key' => $key,
+                'label' => $type['label'],
+                'color' => $type['color'],
+                'risk' => $type['risk'],
+                'count' => $type['model']::query()->whereYear('created_at', $year)->count(),
+            ];
+        }
+
+        usort($rows, fn ($a, $b) => $b['count'] <=> $a['count']);
+        $total = array_sum(array_column($rows, 'count'));
+
+        return [
+            'rows' => $rows,
+            'total' => $total,
+            'risk_total' => array_sum(array_map(fn ($r) => $r['risk'] ? $r['count'] : 0, $rows)),
+        ];
+    }
+
+    /**
+     * Pekerjaan yang berlangsung hari ini, tanpa membedakan status persetujuan:
+     * vendor = hari ini di antara tanggal mulai dan selesai Data Kontraktor;
+     * karyawan = tanggal kerja di detail permit hari ini, atau tanggal JSA hari ini bila tanggal kerja kosong.
+     */
+    private function ongoingToday(): array
+    {
+        $today = now()->toDateString();
+        $rows = collect();
+
+        $vendorRows = DataKontraktor::query()
+            ->select(['id', 'notification_id', 'nama_perusahaan', 'lokasi_kerja', 'tanggal_mulai', 'tanggal_selesai', 'tenaga_kerja'])
+            ->with(['notification:id,user_id,number', 'notification.user:id,name,usertype'])
+            ->whereHas('notification')
+            ->whereDate('tanggal_mulai', '<=', $today)
+            ->where(function ($q) use ($today) {
+                $q->whereDate('tanggal_selesai', '>=', $today)
+                    ->orWhere(fn ($q) => $q->whereNull('tanggal_selesai')->whereDate('tanggal_mulai', $today));
+            })
+            ->get();
+
+        foreach ($vendorRows as $dk) {
+            $rows->push([
+                'notification_id' => $dk->notification_id,
+                'name' => $dk->nama_perusahaan ?: ($dk->notification?->user?->name ?? '-'),
+                'usertype' => 'user',
+                'location' => $dk->lokasi_kerja,
+                'workers' => $this->sumWorkers($dk->tenaga_kerja),
+                'until' => $dk->tanggal_selesai ? \Carbon\Carbon::parse($dk->tanggal_selesai)->format('d M') : null,
+            ]);
+        }
+
+        // Karyawan: tanggal kerja di detail permit.
+        $details = WorkPermitDetail::query()
+            ->select(['notification_id', 'location', 'worker_count'])
+            ->whereDate('work_date', $today)
+            ->whereHas('notification', fn ($q) => $q->ofPgo())
+            ->get()
+            ->groupBy('notification_id');
+
+        // Karyawan tanpa tanggal kerja sama sekali: pakai tanggal JSA.
+        $jsaRows = Jsa::query()
+            ->select(['notification_id', 'area_kerja'])
+            ->whereDate('tanggal', $today)
+            ->whereHas('notification', fn ($q) => $q->ofPgo())
+            ->whereNotIn('notification_id', WorkPermitDetail::query()->whereNotNull('work_date')->select('notification_id'))
+            ->get();
+
+        $pgoIds = $details->keys()->merge($jsaRows->pluck('notification_id'))->unique()->values();
+        $pgoUsers = Notification::query()
+            ->with('user:id,name')
+            ->whereIn('id', $pgoIds)
+            ->get(['id', 'user_id'])
+            ->keyBy('id');
+
+        foreach ($details as $notificationId => $group) {
+            $workers = $group->max('worker_count');
+            $rows->push([
+                'notification_id' => (int) $notificationId,
+                'name' => $pgoUsers->get($notificationId)?->user?->name ?? '-',
+                'usertype' => 'pgo',
+                'location' => $group->pluck('location')->filter()->first(),
+                'workers' => $workers !== null ? (int) $workers : null,
+                'until' => null,
+            ]);
+        }
+
+        foreach ($jsaRows as $jsa) {
+            $rows->push([
+                'notification_id' => (int) $jsa->notification_id,
+                'name' => $pgoUsers->get($jsa->notification_id)?->user?->name ?? '-',
+                'usertype' => 'pgo',
+                'location' => $jsa->area_kerja,
+                'workers' => null,
+                'until' => null,
+            ]);
+        }
+
+        $rows = $rows->unique('notification_id')->values();
+
+        // Jenis permit tiap pengajuan: satu query EXISTS untuk semua baris.
+        $exists = [];
+        foreach (self::PERMIT_TYPES as $key => $type) {
+            $exists[] = $type['relation'].' as has_'.$type['relation'];
+        }
+        $flags = Notification::query()
+            ->whereIn('id', $rows->pluck('notification_id'))
+            ->select('id')
+            ->withExists($exists)
+            ->get()
+            ->keyBy('id');
+
+        $rows = $rows->map(function (array $row) use ($flags) {
+            $flag = $flags[$row['notification_id']] ?? null;
+            $types = [];
+            $risk = false;
+            foreach (self::PERMIT_TYPES as $type) {
+                if ($flag && $flag->{'has_'.$type['relation']}) {
+                    $types[] = ['label' => $type['label'], 'color' => $type['color'], 'risk' => $type['risk']];
+                    $risk = $risk || $type['risk'];
+                }
+            }
+            $row['types'] = $types;
+            $row['risk'] = $risk;
+
+            return (object) $row;
+        })
+            ->sortBy([['risk', 'desc'], fn ($a, $b) => ($b->workers ?? 0) <=> ($a->workers ?? 0)])
+            ->values();
+
+        return [
+            'rows' => $rows->take(5)->values(),
+            'total' => $rows->count(),
+            'workers' => (int) $rows->sum(fn ($r) => $r->workers ?? 0),
+            'risk' => $rows->where('risk', true)->count(),
+        ];
+    }
+
+    /** Jumlahkan kolom "jumlah" daftar tenaga kerja; dukung data lama yang ter-encode dua kali. */
+    private function sumWorkers(mixed $value): ?int
+    {
+        if (is_string($value)) {
+            $value = json_decode($value, true);
+        }
+        if (! is_array($value) || $value === []) {
+            return null;
+        }
+
+        $sum = 0;
+        foreach ($value as $row) {
+            if (is_array($row) && isset($row['jumlah']) && is_numeric($row['jumlah'])) {
+                $sum += (int) $row['jumlah'];
+            }
+        }
+
+        return $sum > 0 ? $sum : null;
+    }
+
+    /** Persentase pengajuan tahun terpilih yang sudah selesai. */
+    private function completionRate(int $year): array
+    {
+        $base = Notification::query()->whereYear('created_at', $year);
+        $total = (clone $base)->count();
+        $done = (clone $base)->selesai()->count();
+
+        return [
+            'total' => $total,
+            'done' => $done,
+            'percent' => $total > 0 ? (int) round($done / $total * 100) : 0,
+        ];
+    }
+
+    /** SIK yang sudah disetujui tetapi tanda tangan Senior Manager atau Manager belum lengkap. */
+    private function sikSignaturePending(): array
+    {
+        $base = StepApproval::query()->where('step', 'sik')->where('status', 'disetujui');
+
+        return [
+            'total' => (clone $base)->where(fn ($q) => $q->whereNull('signature_senior_manager')->orWhereNull('signature_manager'))->count(),
+            'senior_manager' => (clone $base)->whereNull('signature_senior_manager')->count(),
+            'manager' => (clone $base)->whereNull('signature_manager')->count(),
+        ];
     }
 
     public function permintaanSIK(Request $request)

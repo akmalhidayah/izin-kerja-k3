@@ -2,12 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Models\DataKontraktor;
 use App\Models\Jsa;
 use App\Models\Notification;
 use App\Models\Role;
 use App\Models\StepApproval;
 use App\Models\StepApprovalLog;
+use App\Models\UmumWorkPermit;
 use App\Models\User;
+use App\Models\WorkPermitDetail;
+use App\Models\WorkPermitKetinggian;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -118,13 +122,20 @@ class AdminDashboardTest extends TestCase
         $admin = $this->admin();
         $vendor = User::factory()->create(['usertype' => 'user']);
 
-        for ($i = 0; $i < 40; $i++) {
-            $this->notification($vendor, ['op_spk' => 'disetujui', 'jsa' => $i % 3 === 0 ? 'revisi' : 'menunggu']);
-        }
+        $make = function (int $n) use ($vendor) {
+            for ($i = 0; $i < $n; $i++) {
+                $this->notification($vendor, ['op_spk' => 'disetujui', 'jsa' => $i % 3 === 0 ? 'revisi' : 'menunggu']);
+            }
+        };
 
-        $queries = $this->countQueries(fn () => $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk());
+        $make(5);
+        $small = $this->countQueries(fn () => $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk());
 
-        $this->assertLessThan(45, $queries, "Dashboard menjalankan {$queries} query untuk 40 pengajuan.");
+        $make(35);
+        $large = $this->countQueries(fn () => $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk());
+
+        $this->assertSame($small, $large, "Query dashboard bertambah dari {$small} menjadi {$large} saat pengajuan bertambah.");
+        $this->assertLessThan(80, $large, "Dashboard menjalankan {$large} query.");
     }
 
     public function test_vendor_list_rows_keep_status_and_query_count_bounded(): void
@@ -371,5 +382,114 @@ class AdminDashboardTest extends TestCase
         $this->assertStringContainsString('Riwayat', $html);
         $this->assertStringContainsString('Belum ditangani', $html);
         $this->assertStringContainsString('Mandek', $html);
+    }
+
+    public function test_permit_type_counts_for_selected_year(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user']);
+
+        $a = $this->notification($vendor);
+        $b = $this->notification($vendor);
+        UmumWorkPermit::create(['notification_id' => $a->id]);
+        UmumWorkPermit::create(['notification_id' => $b->id]);
+        WorkPermitKetinggian::create(['notification_id' => $a->id]);
+
+        $old = WorkPermitKetinggian::create(['notification_id' => $b->id]);
+        $old->forceFill(['created_at' => now()->subYear()])->save();
+
+        $types = $this->actingAs($admin)->get(route('admin.dashboard'))->viewData('permitTypes');
+        $rows = collect($types['rows'])->keyBy('key');
+
+        $this->assertSame(3, $types['total']);
+        $this->assertSame(2, $rows['umum']['count']);
+        $this->assertSame(1, $rows['ketinggian']['count']);
+        $this->assertTrue($rows['ketinggian']['risk']);
+        $this->assertSame(1, $types['risk_total']);
+        $this->assertSame('umum', $types['rows'][0]['key'], 'Urut dari yang terbanyak');
+    }
+
+    public function test_ongoing_today_reads_contractor_range_permit_date_and_jsa(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user']);
+        $pgo = User::factory()->create(['usertype' => 'pgo', 'name' => 'Karyawan Lapangan']);
+        $pgoJsa = User::factory()->create(['usertype' => 'pgo', 'name' => 'Karyawan JSA']);
+
+        // Vendor: hari ini di dalam rentang, tenaga kerja format lama (ter-encode dua kali).
+        $running = $this->notification($vendor);
+        DataKontraktor::create([
+            'notification_id' => $running->id,
+            'nama_perusahaan' => 'PT Sedang Kerja',
+            'lokasi_kerja' => 'Kiln 4',
+            'tanggal_mulai' => now()->subDays(2)->toDateString(),
+            'tanggal_selesai' => now()->addDays(3)->toDateString(),
+            'tenaga_kerja' => json_encode([['nama' => 'Welder', 'jumlah' => '4'], ['nama' => 'Helper', 'jumlah' => 6]]),
+        ]);
+        WorkPermitKetinggian::create(['notification_id' => $running->id]);
+
+        // Vendor: sudah lewat, tidak ikut.
+        $finished = $this->notification($vendor);
+        DataKontraktor::create([
+            'notification_id' => $finished->id,
+            'nama_perusahaan' => 'PT Sudah Selesai',
+            'tanggal_mulai' => now()->subDays(10)->toDateString(),
+            'tanggal_selesai' => now()->subDay()->toDateString(),
+        ]);
+
+        // Karyawan: tanggal kerja di detail permit hari ini.
+        $pgoNotif = $this->notification($pgo);
+        WorkPermitDetail::create([
+            'notification_id' => $pgoNotif->id,
+            'permit_type' => 'umum',
+            'location' => 'Packer 3',
+            'work_date' => now()->toDateString(),
+            'worker_count' => 5,
+        ]);
+
+        // Karyawan: tanpa tanggal kerja, JSA hari ini.
+        $jsaNotif = $this->notification($pgoJsa);
+        $this->jsa($jsaNotif)->update(['tanggal' => now()->toDateString(), 'area_kerja' => 'Gudang Klinker']);
+
+        $ongoing = $this->actingAs($admin)->get(route('admin.dashboard'))->viewData('ongoing');
+        $rows = $ongoing['rows']->keyBy('notification_id');
+
+        $this->assertSame(3, $ongoing['total']);
+        $this->assertSame(15, $ongoing['workers']);
+        $this->assertSame(1, $ongoing['risk']);
+        $this->assertArrayNotHasKey($finished->id, $rows->all());
+
+        $this->assertSame('PT Sedang Kerja', $rows[$running->id]->name);
+        $this->assertSame(10, $rows[$running->id]->workers);
+        $this->assertSame('Kiln 4', $rows[$running->id]->location);
+        $this->assertTrue($rows[$running->id]->risk);
+        $this->assertSame('Ketinggian', $rows[$running->id]->types[0]['label']);
+        $this->assertSame($running->id, $ongoing['rows'][0]->notification_id, 'Risiko tinggi tampil paling atas');
+
+        $this->assertSame('Karyawan Lapangan', $rows[$pgoNotif->id]->name);
+        $this->assertSame(5, $rows[$pgoNotif->id]->workers);
+        $this->assertSame('Gudang Klinker', $rows[$jsaNotif->id]->location);
+        $this->assertNull($rows[$jsaNotif->id]->workers);
+    }
+
+    public function test_completion_rate_and_sik_signature_pending(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user']);
+
+        $this->notification($vendor, ['sik' => 'disetujui']);
+        $this->notification($vendor);
+        $this->notification($vendor);
+        $signed = $this->notification($vendor, ['sik' => 'disetujui']);
+        StepApproval::where('notification_id', $signed->id)->where('step', 'sik')
+            ->update(['signature_senior_manager' => 'storage/x.png', 'signature_manager' => 'storage/y.png']);
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $this->assertSame(['total' => 4, 'done' => 2, 'percent' => 50], $response->viewData('completion'));
+        $this->assertSame(['total' => 1, 'senior_manager' => 1, 'manager' => 1], $response->viewData('sikSignature'));
+        $response->assertSee('Pekerjaan Berlangsung Hari Ini');
+        $response->assertSee('SIK Menunggu Tanda Tangan');
+        $response->assertDontSee('Buka Approve SIK', false);
     }
 }

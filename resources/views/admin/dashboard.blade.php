@@ -18,7 +18,7 @@
         // Kartu ringkas: satu warna per makna, dipakai juga oleh tab di halaman daftar.
         $cardDefs = [
             'menunggu' => ['label' => 'Menunggu Persetujuan', 'grad' => 'from-amber-500 to-orange-500', 'icon' => 'fa-hourglass-half', 'kondisi' => 'perlu_tindakan'],
-            'belum_ditangani' => ['label' => 'Belum Ditangani', 'grad' => 'from-slate-700 to-slate-900', 'icon' => 'fa-user-clock', 'kondisi' => 'belum_ditangani'],
+            'belum_ditangani' => ['label' => 'Belum Ditangani', 'grad' => 'from-violet-600 to-purple-600', 'icon' => 'fa-user-clock', 'kondisi' => 'belum_ditangani'],
             'revisi' => ['label' => 'Perlu Revisi', 'grad' => 'from-red-600 to-rose-500', 'icon' => 'fa-triangle-exclamation', 'kondisi' => 'revisi'],
             'selesai' => ['label' => 'Selesai Bulan Ini', 'grad' => 'from-emerald-500 to-green-600', 'icon' => 'fa-circle-check', 'kondisi' => 'riwayat'],
         ];
@@ -184,13 +184,172 @@
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+                {{-- Permit per jenis (lingkaran berlapis) --}}
+                @php
+                    $ringRows = collect($permitTypes['rows'])->filter(fn ($r) => $r['count'] > 0)->take(5)->values();
+                @endphp
+                <div class="overflow-hidden rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-pink-100/60 p-4 shadow-sm">
+                    <div class="mb-3 flex items-center gap-2">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-rose-600 text-white">
+                            <i class="fas fa-layer-group text-xs"></i>
+                        </span>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-rose-900">Permit per Jenis</h2>
+                        <span class="ml-auto text-[10px] text-rose-700/70">Tahun {{ $selectedYear }}</span>
+                    </div>
+
+                    @if ($permitTypes['total'] > 0)
+                        <div class="flex items-center gap-4">
+                            <div class="relative h-36 w-36 shrink-0">
+                                <canvas id="permitTypeChart"></canvas>
+                                <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                                    <span class="text-lg font-extrabold leading-none text-gray-800">{{ number_format($permitTypes['total'], 0, ',', '.') }}</span>
+                                    <span class="mt-0.5 text-[9px] uppercase tracking-wide text-gray-400">permit</span>
+                                </div>
+                            </div>
+                            <div class="min-w-0 flex-1 rounded-xl bg-white/70 p-2.5 ring-1 ring-rose-100">
+                                <p class="text-[10px] text-rose-700/80">Risiko tinggi</p>
+                                <p class="text-xl font-extrabold leading-tight text-rose-700">{{ number_format($permitTypes['risk_total'], 0, ',', '.') }}</p>
+                                <p class="text-[10px] text-gray-500">
+                                    {{ round($permitTypes['risk_total'] / $permitTypes['total'] * 100) }}% dari semua permit
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
+                            @foreach ($permitTypes['rows'] as $row)
+                                <div class="flex items-center gap-1.5 {{ $row['count'] === 0 ? 'opacity-40' : '' }}">
+                                    <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background: {{ $row['color'] }}"></span>
+                                    <span class="min-w-0 flex-1 truncate text-gray-700">
+                                        {{ $row['label'] }}
+                                        @if ($row['risk'])<i class="fas fa-triangle-exclamation text-[8px] text-rose-500" title="Risiko tinggi"></i>@endif
+                                    </span>
+                                    <span class="shrink-0 font-semibold text-gray-800">{{ $row['count'] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="py-10 text-center text-[11px] text-gray-500">Belum ada permit pada tahun {{ $selectedYear }}.</div>
+                    @endif
+                </div>
+
+                {{-- Pekerjaan berlangsung hari ini --}}
+                <div class="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-100/60 p-4 shadow-sm">
+                    <div class="mb-3 flex items-center gap-2">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                            <i class="fas fa-helmet-safety text-xs"></i>
+                        </span>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-emerald-900">Pekerjaan Berlangsung Hari Ini</h2>
+                    </div>
+
+                    <div class="mb-3 grid grid-cols-3 gap-2">
+                        <div class="rounded-xl bg-white/70 px-2.5 py-2 ring-1 ring-emerald-100">
+                            <p class="text-[10px] text-emerald-700/80">Pekerjaan</p>
+                            <p class="text-lg font-extrabold leading-tight text-emerald-700">{{ $ongoing['total'] }}</p>
+                        </div>
+                        <div class="rounded-xl bg-white/70 px-2.5 py-2 ring-1 ring-emerald-100">
+                            <p class="text-[10px] text-emerald-700/80">Pekerja</p>
+                            <p class="text-lg font-extrabold leading-tight text-emerald-700">{{ number_format($ongoing['workers'], 0, ',', '.') }}</p>
+                        </div>
+                        <div class="rounded-xl bg-white/70 px-2.5 py-2 ring-1 ring-emerald-100">
+                            <p class="text-[10px] text-rose-700/80">Risiko tinggi</p>
+                            <p class="text-lg font-extrabold leading-tight text-rose-600">{{ $ongoing['risk'] }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        @forelse ($ongoing['rows'] as $job)
+                            <a href="{{ route('admin.permintaansik.show', $job->notification_id) }}"
+                               class="block rounded-xl bg-white/70 px-2.5 py-2 ring-1 ring-emerald-100 transition hover:bg-white">
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="min-w-0 truncate text-[11px] font-semibold text-gray-800">
+                                        {{ $job->name }}
+                                        <span class="font-normal text-gray-400">· {{ $job->usertype === 'pgo' ? 'Karyawan' : 'Vendor' }}</span>
+                                    </p>
+                                    <span class="shrink-0 text-[10px] font-semibold text-emerald-700">
+                                        {{ $job->workers !== null ? $job->workers.' org' : '-' }}
+                                    </span>
+                                </div>
+                                <p class="mt-0.5 truncate text-[10px] text-gray-500">
+                                    <i class="fas fa-location-dot text-[9px] text-gray-400"></i>
+                                    {{ $job->location ?: 'Lokasi belum diisi' }}
+                                    @if ($job->until)<span class="text-gray-400"> · s.d. {{ $job->until }}</span>@endif
+                                </p>
+                                @if ($job->types)
+                                    <div class="mt-1 flex flex-wrap gap-1">
+                                        @foreach (array_slice($job->types, 0, 3) as $type)
+                                            <span class="rounded-full px-1.5 py-0.5 text-[9px] font-semibold text-white" style="background: {{ $type['color'] }}">{{ $type['label'] }}</span>
+                                        @endforeach
+                                        @if (count($job->types) > 3)
+                                            <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">+{{ count($job->types) - 3 }}</span>
+                                        @endif
+                                    </div>
+                                @endif
+                            </a>
+                        @empty
+                            <div class="py-6 text-center text-[11px] text-gray-500">Tidak ada pekerjaan yang dijadwalkan hari ini.</div>
+                        @endforelse
+                    </div>
+
+                    @if ($ongoing['total'] > $ongoing['rows']->count())
+                        <p class="mt-2 text-center text-[10px] text-emerald-700/80">+{{ $ongoing['total'] - $ongoing['rows']->count() }} pekerjaan lainnya</p>
+                    @endif
+                </div>
+
+                {{-- Tingkat penyelesaian --}}
+                <div class="overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-sky-100/60 p-4 shadow-sm">
+                    <div class="mb-2 flex items-center gap-2">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-600 text-white">
+                            <i class="fas fa-gauge-high text-xs"></i>
+                        </span>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-cyan-900">Tingkat Penyelesaian {{ $selectedYear }}</h2>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="relative h-20 w-36 shrink-0">
+                            <canvas id="completionGauge"></canvas>
+                            <div class="pointer-events-none absolute inset-x-0 bottom-0 text-center">
+                                <span class="text-xl font-extrabold leading-none text-cyan-800">{{ $completion['percent'] }}%</span>
+                            </div>
+                        </div>
+                        <div class="min-w-0 text-[11px] text-gray-600">
+                            <p><b class="text-cyan-800">{{ number_format($completion['done'], 0, ',', '.') }}</b> selesai</p>
+                            <p>dari <b class="text-gray-800">{{ number_format($completion['total'], 0, ',', '.') }}</b> pengajuan tahun ini</p>
+                            <a href="{{ route('admin.permintaansik', ['kondisi' => 'riwayat']) }}" class="mt-1 inline-block font-semibold text-cyan-700 hover:underline">Lihat riwayat →</a>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- SIK menunggu tanda tangan --}}
+                @php $isSuperAdmin = (auth()->user()?->role?->name ?? '') === 'Super Admin'; @endphp
+                <div class="overflow-hidden rounded-2xl border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-purple-100/60 p-4 shadow-sm">
+                    <div class="mb-2 flex items-center gap-2">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-fuchsia-600 text-white">
+                            <i class="fas fa-file-signature text-xs"></i>
+                        </span>
+                        <h2 class="text-xs font-bold uppercase tracking-wide text-fuchsia-900">SIK Menunggu Tanda Tangan</h2>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <p class="text-4xl font-extrabold leading-none text-fuchsia-700">{{ $sikSignature['total'] }}</p>
+                        <div class="min-w-0 space-y-1 text-[11px] text-gray-600">
+                            <p>Belum TTD Senior Manager: <b class="text-gray-800">{{ $sikSignature['senior_manager'] }}</b></p>
+                            <p>Belum TTD Manager: <b class="text-gray-800">{{ $sikSignature['manager'] }}</b></p>
+                            @if ($isSuperAdmin)
+                                <a href="{{ route('admin.approvesik.index') }}" class="inline-block font-semibold text-fuchsia-700 hover:underline">Buka Approve SIK →</a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
 
         {{-- ===================== KOLOM KANAN ===================== --}}
         <div class="space-y-4">
 
             {{-- Perlu tindakan saya --}}
-            <div class="overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-4 text-white shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-blue-700 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-4 text-white shadow-sm">
                 <div class="mb-3 flex items-center gap-2">
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-slate-900">
                         <i class="fas fa-list-check text-xs"></i>
@@ -203,20 +362,20 @@
                     @forelse ($myQueue as $item)
                         @php
                             $isPgo = $item->usertype === 'pgo';
-                            $dayClass = $item->waiting_days >= $stale['days'] ? 'bg-red-500/25 text-red-200' : ($item->waiting_days >= 3 ? 'bg-amber-400/25 text-amber-200' : 'bg-white/15 text-slate-200');
+                            $dayClass = $item->waiting_days >= $stale['days'] ? 'bg-red-500/25 text-red-200' : ($item->waiting_days >= 3 ? 'bg-amber-400/25 text-amber-200' : 'bg-white/20 text-white');
                         @endphp
                         <a href="{{ route('admin.permintaansik.show', $item->id) }}"
                            class="flex items-start gap-3 rounded-xl border border-white/10 bg-white/10 p-2.5 transition hover:bg-white/20">
-                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold {{ $isPgo ? 'bg-blue-400/25 text-blue-200' : 'bg-emerald-400/25 text-emerald-200' }}">
+                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold {{ $isPgo ? 'bg-white/20 text-white' : 'bg-emerald-300/30 text-emerald-100' }}">
                                 {{ $isPgo ? 'K' : 'V' }}
                             </span>
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-xs font-semibold text-white">{{ $item->user_name }}</p>
-                                <p class="truncate text-[11px] text-slate-200">
+                                <p class="truncate text-[11px] text-blue-100">
                                     Step {{ $item->current_step }}/{{ $item->total_steps }} · {{ $item->current_step_title }}
                                 </p>
                                 @if ($item->number)
-                                    <p class="truncate text-[10px] text-slate-400">No: {{ $item->number }}</p>
+                                    <p class="truncate text-[10px] text-blue-200">No: {{ $item->number }}</p>
                                 @endif
                             </div>
                             <div class="flex shrink-0 flex-col items-end gap-1">
@@ -229,7 +388,7 @@
                             </div>
                         </a>
                     @empty
-                        <div class="py-5 text-center text-[11px] text-slate-300">
+                        <div class="py-5 text-center text-[11px] text-blue-100">
                             Tidak ada pengajuan yang menunggu tindakan Anda.
                         </div>
                     @endforelse
@@ -503,6 +662,74 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     }
                 }
+            }
+        });
+    }
+
+    // ======================
+    // PERMIT PER JENIS: lingkaran berlapis, 5 jenis terbanyak (terluar = terbanyak)
+    // ======================
+    const ctxTypes = document.getElementById('permitTypeChart');
+    if (ctxTypes) {
+        const rings = @json($ringRows);
+        const total = @json($permitTypes['total']);
+        new Chart(ctxTypes, {
+            type: 'doughnut',
+            data: {
+                labels: ['jumlah', 'sisa'],
+                datasets: rings.map((r) => ({
+                    label: r.label,
+                    data: [r.count, Math.max(total - r.count, 0)],
+                    backgroundColor: [r.color, 'rgba(255,255,255,0.65)'],
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    weight: 1
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '38%',
+                animation: { animateRotate: true, duration: 1200, easing: 'easeOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#111827',
+                        padding: 8,
+                        filter: (item) => item.dataIndex === 0,
+                        callbacks: {
+                            label: (c) => ` ${c.dataset.label}: ${c.raw} (${Math.round(c.raw / (total || 1) * 100)}%)`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ======================
+    // TINGKAT PENYELESAIAN: meteran setengah lingkaran
+    // ======================
+    const ctxGauge = document.getElementById('completionGauge');
+    if (ctxGauge) {
+        const pct = @json($completion['percent']);
+        new Chart(ctxGauge, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [pct, 100 - pct],
+                    backgroundColor: ['#0891b2', 'rgba(8,145,178,0.15)'],
+                    borderWidth: 0,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                rotation: -90,
+                circumference: 180,
+                cutout: '75%',
+                animation: { duration: 1200, easing: 'easeOutQuart' },
+                plugins: { legend: { display: false }, tooltip: { enabled: false } }
             }
         });
     }
