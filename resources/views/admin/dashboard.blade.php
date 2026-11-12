@@ -70,26 +70,26 @@
         </form>
     </div>
 
-    {{-- ===== KARTU RINGKAS (di HP bisa digeser ke samping) ===== --}}
-    <div class="-mx-3 mb-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-3 pb-1 sm:mx-0 sm:px-0 md:grid md:grid-cols-4 md:overflow-visible">
+    {{-- ===== KARTU RINGKAS: HP 2x2 ringkas, desktop 4 sejajar ===== --}}
+    <div class="mb-4 grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4">
         @foreach ($cardDefs as $key => $def)
             @php $card = $cards[$key]; @endphp
-            <div class="min-w-[78%] snap-start rounded-2xl bg-gradient-to-br {{ $def['grad'] }} p-4 text-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-w-[46%] md:min-w-0">
-                <a href="{{ route('admin.permintaansik', ['kondisi' => $def['kondisi']]) }}" class="flex items-center gap-4">
-                    <div class="rounded-xl bg-white/20 p-3 backdrop-blur">
-                        <i class="fas {{ $def['icon'] }} text-lg"></i>
+            <div class="min-w-0 rounded-2xl bg-gradient-to-br {{ $def['grad'] }} p-3 text-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-4">
+                <a href="{{ route('admin.permintaansik', ['kondisi' => $def['kondisi']]) }}" class="flex items-center gap-2.5 sm:gap-4">
+                    <div class="shrink-0 rounded-lg bg-white/20 p-2 backdrop-blur sm:rounded-xl sm:p-3">
+                        <i class="fas {{ $def['icon'] }} text-sm sm:text-lg"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-[11px] text-white/85">{{ $def['label'] }}</p>
-                        <p class="text-2xl font-extrabold leading-tight counter" data-value="{{ $card['total'] }}">0</p>
-                        <p class="truncate text-[10px] text-white/75">{{ $card['note'] }}</p>
+                        <p class="truncate text-[10px] leading-tight text-white/85 sm:text-[11px]">{{ $def['label'] }}</p>
+                        <p class="text-xl font-extrabold leading-tight counter sm:text-2xl" data-value="{{ $card['total'] }}">0</p>
+                        <p class="truncate text-[9px] text-white/75 sm:text-[10px]">{{ $card['note'] }}</p>
                     </div>
                 </a>
-                <div class="mt-3 flex items-center gap-1.5 text-[10px]">
+                <div class="mt-2 flex flex-wrap items-center gap-1 text-[9px] sm:mt-3 sm:gap-1.5 sm:text-[10px]">
                     <a href="{{ route('admin.permintaansik', ['kondisi' => $def['kondisi']]) }}"
-                       class="rounded-full bg-white/15 px-2 py-0.5 font-semibold hover:bg-white/30">Vendor <span class="font-extrabold">{{ $card['vendor'] }}</span></a>
+                       class="rounded-full bg-white/15 px-1.5 py-0.5 font-semibold hover:bg-white/30 sm:px-2">Vendor <span class="font-extrabold">{{ $card['vendor'] }}</span></a>
                     <a href="{{ route('admin.permintaansikpgo', ['kondisi' => $def['kondisi']]) }}"
-                       class="rounded-full bg-white/15 px-2 py-0.5 font-semibold hover:bg-white/30">Karyawan <span class="font-extrabold">{{ $card['pgo'] }}</span></a>
+                       class="rounded-full bg-white/15 px-1.5 py-0.5 font-semibold hover:bg-white/30 sm:px-2">Karyawan <span class="font-extrabold">{{ $card['pgo'] }}</span></a>
                 </div>
             </div>
         @endforeach
