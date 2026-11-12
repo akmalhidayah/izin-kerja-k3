@@ -261,3 +261,12 @@ Layout user (`layouts/app.blade.php`) tidak lagi memuat Font Awesome dari CDN. K
 - Daftar vendor/PGO memakai `withRowSummaries()`: eager load `stepApprovals` plus `withExists` untuk JSA dan 11 permit, lalu `summarizeRow()` yang sama untuk keduanya.
 - Ekspresi tahun/bulan untuk grafik dipilih per driver di `dateParts()` (MySQL `YEAR()/MONTH()`, SQLite `strftime`), jadi tes di SQLite tetap jalan.
 - `AdminDashboardTest` menjaga batas jumlah query. Bila tes itu gagal setelah perubahan, cari query baru di dalam loop/`map()`.
+
+## 13. Dashboard admin dan tab kondisi
+
+- Kondisi pengajuan didefinisikan sekali sebagai scope di `Notification`: `menunggu` (belum selesai, tidak revisi), `belumDitangani`, `perluRevisi`, `selesai` (step `sik` disetujui untuk vendor, `working_permit` disetujui untuk PGO), `mandek($days)` (menunggu, dibuat lebih dari N hari lalu, tanpa perubahan approval N hari terakhir). `scopeKondisi()` memetakan nilai query `?kondisi=` ke scope itu; batas hari ada di `AdminDashboardController::STALE_DAYS` (7).
+- Kartu dashboard (`$cards`) dan peringatan mandek (`$stale`) dihitung dari scope yang sama, dipisah vendor/karyawan, dan setiap angka menaut ke daftar dengan `?kondisi=`. "Selesai Bulan Ini" memakai `updated_at` approval, bukan tanggal pengajuan.
+- Panel "Perlu Tindakan Saya" (`$myQueue`) berisi pengajuan menunggu milik admin yang login atau yang belum punya penanggung jawab (label "Ambil"), diurutkan dari aktivitas approval terakhir yang paling lama. Membuka detail otomatis meng-assign admin (perilaku lama).
+- "Aktivitas Terbaru" menyembunyikan baris `backfill`. Tren bulanan berhenti di bulan berjalan lewat `$lastMonth`.
+- Tab kondisi di daftar vendor/PGO: partial `admin/partials/kondisi-tabs.blade.php` dengan data `$kondisiTabs` (label, jumlah, aktif). Form filter menyimpan `kondisi` di hidden input supaya tab tidak hilang saat tombol Filter ditekan.
+- Pencarian cepat di dashboard mengarah ke daftar vendor atau karyawan (`?search=`), bukan endpoint baru.

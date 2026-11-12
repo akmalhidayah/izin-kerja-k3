@@ -130,6 +130,81 @@ class Notification extends Model
             ->where('status', 'disetujui');
     }
 
+    // === SCOPE KONDISI PENGAJUAN (dipakai dashboard admin dan daftar permintaan) ===
+    // "Selesai" = step sik disetujui (vendor) atau step working_permit disetujui (PGO).
+
+    public function scopeOfPgo($query)
+    {
+        return $query->whereHas('user', fn ($u) => $u->where('usertype', 'pgo'));
+    }
+
+    public function scopeOfVendor($query)
+    {
+        return $query->whereHas('user', fn ($u) => $u->where('usertype', '!=', 'pgo'));
+    }
+
+    public function scopeSelesai($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereHas('stepApprovals', fn ($a) => $a->where('step', 'sik')->where('status', 'disetujui'))
+                ->orWhere(function ($q) {
+                    $q->ofPgo()
+                        ->whereHas('stepApprovals', fn ($a) => $a->where('step', 'working_permit')->where('status', 'disetujui'));
+                });
+        });
+    }
+
+    public function scopeBelumSelesai($query)
+    {
+        return $query
+            ->whereDoesntHave('stepApprovals', fn ($a) => $a->where('step', 'sik')->where('status', 'disetujui'))
+            ->where(function ($q) {
+                $q->ofVendor()
+                    ->orWhereDoesntHave('stepApprovals', fn ($a) => $a->where('step', 'working_permit')->where('status', 'disetujui'));
+            });
+    }
+
+    public function scopePerluRevisi($query)
+    {
+        return $query->whereHas('stepApprovals', fn ($a) => $a->where('status', 'revisi'));
+    }
+
+    /** Belum selesai dan tidak sedang revisi: menunggu tindakan admin. */
+    public function scopeMenunggu($query)
+    {
+        return $query->belumSelesai()
+            ->whereDoesntHave('stepApprovals', fn ($a) => $a->where('status', 'revisi'));
+    }
+
+    public function scopeBelumDitangani($query)
+    {
+        return $query->belumSelesai()->whereNull('assigned_admin_id');
+    }
+
+    /** Menunggu dan tidak ada perubahan approval dalam $days hari terakhir (dibuat lebih dari $days hari lalu). */
+    public function scopeMandek($query, int $days = 7)
+    {
+        $since = now()->subDays($days);
+
+        return $query->menunggu()
+            ->where('created_at', '<', $since)
+            ->whereDoesntHave('stepApprovals', fn ($a) => $a->where('updated_at', '>=', $since));
+    }
+
+    public const KONDISI = ['menunggu', 'belum_ditangani', 'revisi', 'selesai', 'mandek'];
+
+    public function scopeKondisi($query, ?string $kondisi, int $staleDays = 7)
+    {
+        return match ($kondisi) {
+            'menunggu' => $query->menunggu(),
+            'belum_ditangani' => $query->belumDitangani(),
+            'revisi' => $query->perluRevisi(),
+            'selesai' => $query->selesai(),
+            'mandek' => $query->mandek($staleDays),
+            default => $query,
+        };
+    }
+
     protected static function booted()
 {
     static::deleting(function ($notification) {

@@ -6,6 +6,7 @@ use App\Models\Jsa;
 use App\Models\Notification;
 use App\Models\Role;
 use App\Models\StepApproval;
+use App\Models\StepApprovalLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -123,7 +124,7 @@ class AdminDashboardTest extends TestCase
 
         $queries = $this->countQueries(fn () => $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk());
 
-        $this->assertLessThan(20, $queries, "Dashboard menjalankan {$queries} query untuk 40 pengajuan.");
+        $this->assertLessThan(45, $queries, "Dashboard menjalankan {$queries} query untuk 40 pengajuan.");
     }
 
     public function test_vendor_list_rows_keep_status_and_query_count_bounded(): void
@@ -148,7 +149,7 @@ class AdminDashboardTest extends TestCase
         });
 
         $this->assertCount(10, $rows);
-        $this->assertLessThan(16, $queries, "Daftar vendor menjalankan {$queries} query untuk 10 baris.");
+        $this->assertLessThan(24, $queries, "Daftar vendor menjalankan {$queries} query untuk 10 baris.");
 
         $this->assertSame('Perlu Disetujui', $rows[$withJsa->id]->status, 'JSA tersimpan harus terbaca sebagai perlu disetujui');
         $this->assertSame(2, $rows[$withJsa->id]->current_step);
@@ -172,5 +173,153 @@ class AdminDashboardTest extends TestCase
         $this->assertSame(100.0, (float) $row->progress);
         $this->assertSame('Staf', $row->user_jabatan);
         $this->assertSame(3, $response->viewData('totalSteps'));
+    }
+
+    public function test_cards_split_counts_by_vendor_and_pgo(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user']);
+        $pgo = User::factory()->create(['usertype' => 'pgo']);
+
+        // menunggu (vendor), belum ditangani
+        $this->notification($vendor, ['op_spk' => 'disetujui']);
+        // menunggu (pgo), sudah ditangani
+        $this->notification($pgo, ['op_spk' => 'disetujui'], ['assigned_admin_id' => $admin->id]);
+        // revisi (vendor)
+        $this->notification($vendor, ['op_spk' => 'disetujui', 'bpjs' => 'revisi'], ['assigned_admin_id' => $admin->id]);
+        // selesai vendor bulan ini
+        $this->notification($vendor, ['sik' => 'disetujui'], ['assigned_admin_id' => $admin->id]);
+        // selesai pgo bulan ini
+        $this->notification($pgo, ['op_spk' => 'disetujui', 'jsa' => 'disetujui', 'working_permit' => 'disetujui'], ['assigned_admin_id' => $admin->id]);
+        // vendor dengan working_permit disetujui tetap belum selesai (bukan PGO)
+        $this->notification($vendor, ['working_permit' => 'disetujui'], ['assigned_admin_id' => $admin->id]);
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $response->assertOk();
+
+        $cards = $response->viewData('cards');
+
+        $this->assertSame(['total' => 3, 'vendor' => 2, 'pgo' => 1], array_intersect_key($cards['menunggu'], ['total' => 1, 'vendor' => 1, 'pgo' => 1]));
+        $this->assertSame(['total' => 1, 'vendor' => 1, 'pgo' => 0], array_intersect_key($cards['belum_ditangani'], ['total' => 1, 'vendor' => 1, 'pgo' => 1]));
+        $this->assertSame(['total' => 1, 'vendor' => 1, 'pgo' => 0], array_intersect_key($cards['revisi'], ['total' => 1, 'vendor' => 1, 'pgo' => 1]));
+        $this->assertSame(['total' => 2, 'vendor' => 1, 'pgo' => 1], array_intersect_key($cards['selesai'], ['total' => 1, 'vendor' => 1, 'pgo' => 1]));
+        $this->assertSame('+2 dari bulan lalu', $cards['selesai']['note']);
+        $this->assertSame(0, $response->viewData('stale')['total']);
+    }
+
+    public function test_my_queue_lists_own_and_unassigned_requests_oldest_first(): void
+    {
+        $me = $this->admin();
+        $other = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user', 'name' => 'PT Antre']);
+
+        $mine = $this->notification($vendor, ['op_spk' => 'disetujui'], ['assigned_admin_id' => $me->id]);
+        $unassigned = $this->notification($vendor, [], []);
+        $others = $this->notification($vendor, [], ['assigned_admin_id' => $other->id]);
+        $finished = $this->notification($vendor, ['sik' => 'disetujui'], ['assigned_admin_id' => $me->id]);
+
+        $unassigned->forceFill(['created_at' => now()->subDays(10)])->save();
+
+        $response = $this->actingAs($me)->get(route('admin.dashboard'));
+        $response->assertOk();
+
+        $queue = $response->viewData('myQueue');
+        $ids = $queue->pluck('id')->all();
+
+        $this->assertSame([$unassigned->id, $mine->id], $ids, 'Yang paling lama menunggu tampil lebih dulu');
+        $this->assertNotContains($others->id, $ids);
+        $this->assertNotContains($finished->id, $ids);
+        $this->assertTrue($queue[0]->is_unassigned);
+        $this->assertSame(10, $queue[0]->waiting_days);
+        $this->assertSame(2, $queue[1]->current_step);
+        $this->assertSame('Input Data Kontraktor', $queue[1]->current_step_title);
+        $this->assertSame(2, $response->viewData('myQueueTotal'));
+        $response->assertSee('Ambil');
+    }
+
+    public function test_stale_requests_are_counted_and_filterable(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user']);
+
+        $stale = $this->notification($vendor, ['op_spk' => 'disetujui']);
+        $stale->forceFill(['created_at' => now()->subDays(12)])->save();
+        StepApproval::where('notification_id', $stale->id)->update(['updated_at' => now()->subDays(9)]);
+
+        $recentlyTouched = $this->notification($vendor, ['op_spk' => 'disetujui']);
+        $recentlyTouched->forceFill(['created_at' => now()->subDays(12)])->save();
+
+        $fresh = $this->notification($vendor);
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $this->assertSame(['total' => 1, 'vendor' => 1, 'pgo' => 0], array_intersect_key($response->viewData('stale'), ['total' => 1, 'vendor' => 1, 'pgo' => 1]));
+
+        $list = $this->actingAs($admin)->get(route('admin.permintaansik', ['kondisi' => 'mandek']));
+        $list->assertOk();
+        $this->assertSame([$stale->id], $list->viewData('requests')->getCollection()->pluck('id')->all());
+
+        $tabs = collect($list->viewData('kondisiTabs'))->keyBy('key');
+        $this->assertSame(1, $tabs['mandek']['count']);
+        $this->assertSame(3, $tabs['']['count']);
+        $this->assertSame(3, $tabs['menunggu']['count']);
+        $this->assertTrue($tabs['mandek']['active']);
+    }
+
+    public function test_kondisi_filter_on_lists(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user']);
+        $pgo = User::factory()->create(['usertype' => 'pgo']);
+
+        $unassigned = $this->notification($vendor);
+        $revisi = $this->notification($vendor, ['op_spk' => 'revisi'], ['assigned_admin_id' => $admin->id]);
+        $done = $this->notification($vendor, ['sik' => 'disetujui'], ['assigned_admin_id' => $admin->id]);
+        $pgoDone = $this->notification($pgo, ['working_permit' => 'disetujui'], ['assigned_admin_id' => $admin->id]);
+        $pgoOpen = $this->notification($pgo, ['op_spk' => 'disetujui'], ['assigned_admin_id' => $admin->id]);
+
+        $ids = fn ($route, $kondisi) => $this->actingAs($admin)
+            ->get(route($route, ['kondisi' => $kondisi]))
+            ->viewData('requests')->getCollection()->pluck('id')->sort()->values()->all();
+
+        $this->assertSame([$unassigned->id], $ids('admin.permintaansik', 'belum_ditangani'));
+        $this->assertSame([$revisi->id], $ids('admin.permintaansik', 'revisi'));
+        $this->assertSame([$done->id], $ids('admin.permintaansik', 'selesai'));
+        $this->assertSame([$unassigned->id], $ids('admin.permintaansik', 'menunggu'));
+        $this->assertSame([$pgoDone->id], $ids('admin.permintaansikpgo', 'selesai'));
+        $this->assertSame([$pgoOpen->id], $ids('admin.permintaansikpgo', 'menunggu'));
+
+        // kondisi tak dikenal diabaikan
+        $this->assertCount(3, $ids('admin.permintaansik', 'apa-saja'));
+    }
+
+    public function test_recent_activity_hides_backfill_rows(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user', 'name' => 'PT Lama']);
+        $notification = $this->notification($vendor, ['op_spk' => 'disetujui']);
+
+        StepApprovalLog::create([
+            'notification_id' => $notification->id,
+            'step' => 'op_spk',
+            'action' => StepApprovalLog::ACTION_BACKFILL,
+            'to_status' => 'disetujui',
+            'created_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $this->assertCount(0, $response->viewData('recentActivities'));
+        $response->assertDontSee('Data awal');
+    }
+
+    public function test_monthly_chart_stops_at_current_month(): void
+    {
+        $admin = $this->admin();
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $this->assertSame((int) now()->month, $response->viewData('lastMonth'));
+
+        $past = $this->actingAs($admin)->get(route('admin.dashboard', ['year' => now()->year - 1]));
+        $this->assertSame(12, $past->viewData('lastMonth'));
     }
 }

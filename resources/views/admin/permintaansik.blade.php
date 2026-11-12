@@ -20,6 +20,7 @@
 
     <form method="GET" action="{{ route('admin.permintaansik') }}"
         class="grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur mb-6 sm:p-4 md:grid-cols-2 xl:grid-cols-3">
+        @if (request('kondisi'))<input type="hidden" name="kondisi" value="{{ request('kondisi') }}">@endif
 
         {{-- Pencarian --}}
         <div class="relative">
@@ -130,6 +131,8 @@
             </a>
         </div>
     </form>
+
+    @include('admin.partials.kondisi-tabs', ['routeName' => 'admin.permintaansik'])
 
     <div class="min-w-0 rounded-2xl bg-white p-3 shadow-md sm:p-6">
         <div class="mb-4 flex items-center justify-between gap-3">

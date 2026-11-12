@@ -131,7 +131,7 @@ Redirect ada di `app/Http/Controllers/Auth/AuthenticatedSessionController.php`. 
 |---|---|---|---|
 | `User` | `users` | `usertype` enum(admin,user,pgo), `jabatan`, `role_id` | `role()`, `handledNotifications()` |
 | `Role` | `roles` | `name` unique | |
-| `Notification` | `notifications` | `user_id`, `type` enum(po,spk,notif), `number`, `description`, `file`, `status` (default menunggu), `assigned_admin_id` | `uploads()`, `stepApprovals()`, `kontraktor()`, `umumWorkPermit()`, `workPermit*()`, `detail()`, `closure()`, `user()`, `assignedAdmin()`, `sikStep()`, `jsa()`, `stepApprovalLogs()`; hook `deleting` menghapus anak |
+| `Notification` | `notifications` | `user_id`, `type` enum(po,spk,notif), `number`, `description`, `file`, `status` (default menunggu), `assigned_admin_id` | `uploads()`, `stepApprovals()`, `kontraktor()`, `umumWorkPermit()`, `workPermit*()`, `detail()`, `closure()`, `user()`, `assignedAdmin()`, `sikStep()`, `jsa()`, `stepApprovalLogs()`; scope `ofVendor`, `ofPgo`, `menunggu`, `belumDitangani`, `perluRevisi`, `selesai`, `mandek`, `kondisi`; hook `deleting` menghapus anak |
 | `StepApproval` | `step_approvals` | `step` string, `status` enum(menunggu,perlu_disetujui,disetujui,revisi), `catatan`, `file_path`, `approved_by`, `signature_senior_manager`, `signature_manager` | `notification()`, `approvedBy()` |
 | `StepApprovalLog` | `step_approval_logs` | `step`, `action` (status_changed, reset, backfill), `from_status`, `to_status`, `catatan`, `actor_id` (null = Sistem), `created_at` saja; baris hanya ditambah | `notification()`, `actor()`; `toHistoryRow()`, `statusLabel()`, accessor `action_label`, `actor_name` |
 | `Upload` | `uploads` | `step` enum(bpjs,fakta_integritas,sertifikasi_ak3,ktp,surat_kesehatan,struktur_organisasi,post_test,bukti_serah_terima), `file_path`, `status` (default pending), `uploaded_at` | `notification()` |
@@ -217,7 +217,7 @@ Komponen bersama: `components/permits/form-signature.blade.php`, `components/sig
 | View | Controller |
 |---|---|
 | `dashboard` | `AdminDashboardController@index` |
-| `permintaansik`, `permintaansikpgo` | `AdminDashboardController@permintaanSIK` / `permintaanSIKPgo` |
+| `permintaansik`, `permintaansikpgo` | `AdminDashboardController@permintaanSIK` / `permintaanSIKPgo`; tab kondisi dari `partials/kondisi-tabs` |
 | `detailpermintaan`, `detailpermintaanpgo` | `AdminPermintaanController@show` (dipilih berdasarkan usertype pemohon); ikon info per step + "Riwayat" di kanan atas membuka `partials/step-history-modal` lewat komponen `components/admin/history-button` |
 | `approvesik` | `ApproveSikController@index` |
 | `pdfsik` | `AdminPermintaanController@viewSik` (DomPDF) |
@@ -244,7 +244,7 @@ Komponen bersama: `components/permits/form-signature.blade.php`, `components/sig
 | `DataKontraktorTokenFormTest` | render/simpan JSON rows, legacy double-encoded, PDF token |
 | `JsaNumberingTest` | algoritma nomor JSA, bulan berjalan, unique index |
 | `JsaSignatureTest` | PNG lengkap vs terpotong di form token |
-| `AdminDashboardTest` | angka dashboard, status baris daftar vendor/PGO, jumlah query tetap kecil saat data bertambah |
+| `AdminDashboardTest` | angka dashboard dan kartu (vendor/PGO), antrean "Perlu Tindakan Saya", pengajuan mandek, filter `kondisi` di daftar, aktivitas tanpa backfill, batas bulan grafik, jumlah query tetap kecil saat data bertambah |
 | `ApprovalHistoryTest` | log saat ubah status, tanpa log bila tidak berubah, admin lain ditolak, reset saat hapus JSA, riwayat tampil di detail, aktivitas dashboard, log ikut terhapus |
 | `NewsTest` | CRUD berita Super Admin, admin biasa ditolak, landing menampilkan berita aktif |
 | `Auth/*`, `ProfileTest`, `ExampleTest` | bawaan Breeze |

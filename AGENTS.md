@@ -69,6 +69,7 @@ Kunci permit: `umum`, `gaspanas`, `air`, `ketinggian`, `pengangkatan`, `penggali
 - State Alpine lokal (`activeModal`, `selectedPermit`); nama field form harus sama persis dengan validasi controller.
 - Jangan tambah query Eloquent di Blade; muat data di controller.
 - Halaman daftar/dashboard admin memuat ringkasan per baris lewat `withCount`/`withExists` (lihat `AdminDashboardController::withRowSummaries()`); jangan tambahkan query per baris di dalam `map()`.
+- Kondisi pengajuan (menunggu, belum ditangani, revisi, selesai, mandek) hanya didefinisikan lewat scope di `Notification`; dashboard, kartu, dan tab daftar harus memakai scope itu, bukan menulis ulang kriterianya.
 - Enforcement workflow tidak boleh hanya di UI (tombol disabled); ulangi di controller.
 - Setelah ubah Blade/Tailwind, jalankan build produksi.
 
