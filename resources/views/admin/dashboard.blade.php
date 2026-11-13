@@ -24,52 +24,6 @@
         ];
     @endphp
 
-    {{-- ===== BARIS ATAS: peringatan mandek + pencarian cepat ===== --}}
-    <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        @if ($stale['total'] > 0)
-            <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
-                    <i class="fas fa-bell text-[11px]"></i>
-                </span>
-                <span>
-                    <b>{{ $stale['total'] }}</b> pengajuan menunggu lebih dari {{ $stale['days'] }} hari tanpa perubahan.
-                </span>
-                <span class="flex items-center gap-1.5">
-                    @if ($stale['vendor'] > 0)
-                        <a href="{{ route('admin.permintaansik', ['kondisi' => 'mandek']) }}"
-                           class="rounded-full bg-white px-2 py-0.5 font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100">Vendor {{ $stale['vendor'] }}</a>
-                    @endif
-                    @if ($stale['pgo'] > 0)
-                        <a href="{{ route('admin.permintaansikpgo', ['kondisi' => 'mandek']) }}"
-                           class="rounded-full bg-white px-2 py-0.5 font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100">Karyawan {{ $stale['pgo'] }}</a>
-                    @endif
-                </span>
-            </div>
-        @else
-            <div class="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-                <i class="fas fa-circle-check text-emerald-500"></i>
-                Tidak ada pengajuan yang mandek lebih dari {{ $stale['days'] }} hari.
-            </div>
-        @endif
-
-        <form method="GET" action="{{ route('admin.permintaansik') }}" id="quickSearch"
-              data-vendor="{{ route('admin.permintaansik') }}" data-pgo="{{ route('admin.permintaansikpgo') }}"
-              class="flex w-full shrink-0 items-stretch gap-2 lg:w-auto">
-            <select name="target" class="rounded-lg border border-gray-300 bg-white px-2 py-2 text-xs focus:ring-2 focus:ring-red-300">
-                <option value="vendor">Vendor</option>
-                <option value="pgo">Karyawan</option>
-            </select>
-            <div class="relative min-w-0 flex-1 lg:w-72">
-                <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
-                    <i class="fas fa-magnifying-glass text-xs"></i>
-                </span>
-                <input type="text" name="search" placeholder="Cari nomor SPK/PO atau nama..."
-                       class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-8 pr-3 text-xs focus:ring-2 focus:ring-red-300">
-            </div>
-            <button type="submit" class="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700">Cari</button>
-        </form>
-    </div>
-
     {{-- ===== KARTU RINGKAS: HP 2x2 ringkas, desktop 4 sejajar ===== --}}
     <div class="mb-4 grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4">
         @foreach ($cardDefs as $key => $def)
@@ -518,16 +472,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Pencarian cepat: arahkan ke daftar vendor atau karyawan.
-    const quickSearch = document.getElementById('quickSearch');
-    if (quickSearch) {
-        quickSearch.addEventListener('submit', function () {
-            const target = quickSearch.querySelector('select[name="target"]');
-            quickSearch.action = target && target.value === 'pgo' ? quickSearch.dataset.pgo : quickSearch.dataset.vendor;
-            if (target) target.disabled = true; // jangan ikut terkirim sebagai parameter
-        });
-    }
-
     // Angka kartu beranimasi naik.
     document.querySelectorAll('.counter').forEach(counter => {
         const target = parseFloat(counter.getAttribute('data-value')) || 0;
