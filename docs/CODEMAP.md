@@ -178,7 +178,7 @@ Legacy tanpa controller/route: `WorkPermitLifeSaving` (`work_permit_life_saving`
 | File | Dipakai oleh |
 |---|---|
 | `layouts/app.blade.php` + `layouts/navigation.blade.php` | `<x-app-layout>` dashboard user/PGO, profil |
-| `layouts/admin.blade.php` | `<x-admin-layout>` semua halaman admin (navbar + dropdown notifikasi admin). Sidebar merah melayang (`.sidebar-rail`, menu aktif `.nav-active` berlekuk), grup menu dari `$navGroups`, badge dari view composer `sidebarBadges` di `AppServiceProvider` |
+| `layouts/admin.blade.php` | `<x-admin-layout>` semua halaman admin (navbar + dropdown notifikasi admin) |
 | `layouts/guest.blade.php` | auth Breeze |
 | `layouts/sign.blade.php` | form token publik |
 
@@ -249,7 +249,6 @@ Komponen bersama: `components/permits/form-signature.blade.php`, `components/sig
 | `KetinggianChecklistTest` | 18 butir persyaratan ketinggian identik di form modal, form token, dan PDF; jawaban per indeks |
 | `AdminDashboardTest` | angka dashboard dan kartu (vendor/PGO), antrean "Perlu Tindakan Saya", pengajuan mandek, filter `kondisi` di daftar, aktivitas tanpa backfill, batas bulan grafik, permit per jenis, pekerjaan berlangsung hari ini, jumlah query sama saat data bertambah |
 | `ApprovalHistoryTest` | log saat ubah status, tanpa log bila tidak berubah, admin lain ditolak, reset saat hapus JSA, riwayat tampil di detail, aktivitas dashboard, log ikut terhapus |
-| `AdminSidebarTest` | badge Perlu Tindakan vendor/karyawan, badge SIK belum TTD hanya Super Admin, tanpa badge saat nol, penanda menu aktif |
 | `NewsTest` | CRUD berita Super Admin, admin biasa ditolak, landing menampilkan berita aktif |
 | `Auth/*`, `ProfileTest`, `ExampleTest` | bawaan Breeze |
 

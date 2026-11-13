@@ -42,32 +42,10 @@
         /* Jangan sampai sticky pecah oleh overflow-x di leluhur header (clip tidak membuat scroll container) */
         body, body > div[x-data] { overflow-x: clip; }
         .topbar-hero button:hover { background-color: rgba(255,255,255,.10); }
-
-        /* Menu aktif sidebar: tab menyambung ke latar konten (#ffffff = bg-white pada body) dengan lekukan atas/bawah */
-        .sidebar-rail .nav-active::before,
-        .sidebar-rail .nav-active::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            width: 16px;
-            height: 16px;
-            background: transparent;
-            pointer-events: none;
-        }
-        .sidebar-rail .nav-active::before {
-            top: -16px;
-            border-bottom-right-radius: 16px;
-            box-shadow: 6px 6px 0 6px #ffffff;
-        }
-        .sidebar-rail .nav-active::after {
-            bottom: -16px;
-            border-top-right-radius: 16px;
-            box-shadow: 6px -6px 0 6px #ffffff;
-        }
     </style>
 </head>
 
-<body class="bg-white text-slate-800 overflow-x-clip">
+<body class="bg-slate-50 text-slate-800 overflow-x-clip">
 <div
     x-data="{
         sidebarOpen: true,
@@ -93,41 +71,10 @@
         x-cloak
     ></div>
 
-    <!-- SIDEBAR: panel merah melayang; menu aktif menyambung ke konten lewat lekukan (.nav-active) -->
-    @php
-        $isSuperAdmin = Auth::user()
-            && Auth::user()?->isAdmin()
-            && in_array(Auth::user()->role->name ?? '', ['Super Admin']);
-
-        $isChecklist = request()->routeIs('admin.checklist.*');
-        $isApd       = request()->routeIs('admin.apd.*');
-        $isUserPanel = request()->routeIs('admin.userpanel.*') || request()->routeIs('admin.role_permission.*') || request()->routeIs('admin.news.*');
-
-        $badges = $sidebarBadges ?? [];
-        $fmtBadge = fn ($n) => $n > 999 ? '999+' : (string) $n;
-
-        $navGroups = [
-            ['label' => 'Utama', 'show' => true, 'items' => [
-                ['href' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard'), 'icon' => 'home', 'text' => 'Dashboard', 'badge' => null, 'key' => 'dashboard'],
-            ]],
-            ['label' => 'Pengajuan', 'show' => true, 'items' => [
-                ['href' => route('admin.permintaansik'), 'active' => request()->routeIs('admin.permintaansik'), 'icon' => 'clipboard-list', 'text' => 'Permintaan SIK Vendor', 'badge' => $badges['vendor'] ?? 0, 'key' => 'vendor'],
-                ['href' => route('admin.permintaansikpgo'), 'active' => request()->is('admin/permintaansikpgo*'), 'icon' => 'clipboard-check', 'text' => 'Permintaan SIK Karyawan', 'badge' => $badges['pgo'] ?? 0, 'key' => 'pgo'],
-            ]],
-            ['label' => 'Penerbitan', 'show' => $isSuperAdmin, 'items' => [
-                ['href' => $isSuperAdmin ? route('admin.approvesik.index') : '#', 'active' => request()->routeIs('admin.approvesik.index'), 'icon' => 'file-signature', 'text' => 'Approve SIK', 'badge' => $badges['sik'] ?? 0, 'key' => 'sik'],
-            ]],
-        ];
-
-        $subMenu = [
-            ['route' => 'admin.userpanel.index', 'active' => request()->routeIs('admin.userpanel.*'), 'icon' => 'users', 'text' => 'Manajemen User'],
-            ['route' => 'admin.role_permission.index', 'active' => request()->routeIs('admin.role_permission.*'), 'icon' => 'shield-check', 'text' => 'Role & Permission'],
-            ['route' => 'admin.news.index', 'active' => request()->routeIs('admin.news.*'), 'icon' => 'newspaper', 'text' => 'Upload Berita'],
-        ];
-    @endphp
+    <!-- SIDEBAR -->
     <aside
-        class="sidebar-rail fixed inset-y-0 left-0 z-40 flex flex-col rounded-r-3xl bg-red-700 text-white
-               transition-all duration-300 lg:inset-y-3 lg:left-3 lg:rounded-3xl"
+        class="fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200 shadow-sm flex flex-col
+               transition-all duration-300"
         :class="[
             (mobileOpen ? 'translate-x-0' : '-translate-x-full') + ' lg:translate-x-0',
             (sidebarOpen ? 'lg:w-72' : 'lg:w-20'),
@@ -135,59 +82,85 @@
         ]"
     >
         <!-- TOP: Brand -->
-        <div class="border-b border-white/10">
-            <div class="flex items-center gap-3 px-4 py-4" :class="sidebarOpen ? 'justify-between' : 'lg:flex-col lg:px-2'">
-                <div class="flex min-w-0 items-center gap-3">
-                    <img src="{{ asset('images/logo-st.png') }}" class="h-10 w-10 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow" alt="Logo">
+        <div class="sticky top-0 z-10 bg-white border-b border-slate-200">
+            <div class="flex items-center justify-between gap-3 px-4 py-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img src="{{ asset('images/logo-st.png') }}" class="w-10 h-10 rounded-xl object-contain bg-white" alt="Logo">
                     <div class="min-w-0" x-show="sidebarOpen" x-transition>
-                        <div class="font-extrabold leading-none tracking-tight text-white">K3 Admin</div>
-                        <div class="truncate text-xs text-white/70">PT. Semen Tonasa</div>
+                        <div class="font-extrabold tracking-tight text-slate-900 leading-none">K3 Admin</div>
+                        <div class="text-xs text-slate-500 truncate">PT. Semen Tonasa</div>
                     </div>
                 </div>
 
+                <!-- toggle button -->
                 <button
                     @click="toggle()"
-                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white/80 transition hover:bg-white/10 hover:text-white active:scale-[0.98]"
-                    :title="sidebarOpen ? 'Ciutkan menu' : 'Buka menu'"
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-xl
+                           hover:bg-slate-100 text-slate-600 active:scale-[0.98] transition"
                     aria-label="Toggle Sidebar"
                 >
-                    <i data-lucide="panel-left" class="h-5 w-5"></i>
+                    <i data-lucide="panel-left" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
 
         <!-- MENU -->
-        <div class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-3">
-            <nav class="text-sm">
-                @foreach ($navGroups as $group)
-                    @continue(! $group['show'])
+        <div class="flex-1 overflow-y-auto px-3 py-4">
+            <nav class="space-y-1 text-sm">
 
-                    <div x-show="sidebarOpen" class="px-3 pb-1.5 pt-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">{{ $group['label'] }}</div>
-                    <div x-show="!sidebarOpen" class="mx-auto my-3 h-px w-8 bg-white/20"></div>
+                @php
+                    $isSuperAdmin = Auth::user()
+                        && Auth::user()?->isAdmin()
+                        && in_array(Auth::user()->role->name ?? '', ['Super Admin']);
 
-                    <div class="space-y-1">
-                        @foreach ($group['items'] as $item)
-                            <a href="{{ $item['href'] }}"
-                               :title="sidebarOpen ? '' : @js($item['text'])"
-                               class="group relative flex items-center gap-3 py-2 pl-3 pr-3 transition
-                                      {{ $item['active'] ? 'nav-active -mr-3 rounded-l-2xl bg-white text-red-700' : 'rounded-xl text-white/85 hover:bg-white/10 hover:text-white' }}">
-                                <span class="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
-                                             {{ $item['active'] ? 'bg-red-600 text-white shadow-md shadow-red-600/30' : 'bg-white/10 text-white group-hover:bg-white/20' }}">
-                                    <i data-lucide="{{ $item['icon'] }}" class="h-5 w-5"></i>
-                                    @if ($item['badge'])
-                                        <span x-show="!sidebarOpen" class="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 {{ $item['active'] ? 'ring-white' : 'ring-red-700' }}"></span>
-                                    @endif
-                                </span>
-                                <span x-show="sidebarOpen" x-transition class="min-w-0 flex-1 truncate font-medium">{{ $item['text'] }}</span>
-                                @if ($item['badge'])
-                                    <span x-show="sidebarOpen" data-sidebar-badge="{{ $item['key'] }}" data-count="{{ $item['badge'] }}"
-                                          class="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-slate-900"
-                                          title="Perlu tindakan">{{ $fmtBadge($item['badge']) }}</span>
-                                @endif
-                            </a>
-                        @endforeach
-                    </div>
-                @endforeach
+                    $isChecklist = request()->routeIs('admin.checklist.*');
+                    $isApd       = request()->routeIs('admin.apd.*');
+                    $isUserPanel = request()->routeIs('admin.userpanel.*') || request()->routeIs('admin.role_permission.*') || request()->routeIs('admin.news.*');
+                @endphp
+
+                <!-- Reusable classes via tailwind (inline) -->
+                <!-- Item -->
+                <a href="{{ route('admin.dashboard') }}"
+                   class="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition
+                          {{ request()->routeIs('admin.dashboard') ? 'bg-red-50 text-red-700 ring-1 ring-red-100' : 'text-slate-700 hover:bg-slate-100' }}">
+                    <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
+                                 {{ request()->routeIs('admin.dashboard') ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                        <i data-lucide="home" class="w-5 h-5"></i>
+                    </span>
+                    <span x-show="sidebarOpen" x-transition class="font-medium">Dashboard</span>
+                </a>
+
+                <a href="{{ route('admin.permintaansik') }}"
+                   class="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition
+                          {{ request()->routeIs('admin.permintaansik') ? 'bg-red-50 text-red-700 ring-1 ring-red-100' : 'text-slate-700 hover:bg-slate-100' }}">
+                    <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
+                                 {{ request()->routeIs('admin.permintaansik') ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                        <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                    </span>
+                    <span x-show="sidebarOpen" x-transition class="font-medium">Permintaan SIK Vendor</span>
+                </a>
+
+                <a href="{{ url('admin/permintaansikpgo') }}"
+                   class="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition
+                          {{ request()->is('admin/permintaansikpgo*') ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-100' : 'text-slate-700 hover:bg-slate-100' }}">
+                    <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
+                                 {{ request()->is('admin/permintaansikpgo*') ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                        <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                    </span>
+                    <span x-show="sidebarOpen" x-transition class="font-medium">Permintaan SIK Karyawan</span>
+                </a>
+
+                @if($isSuperAdmin)
+                    <a href="{{ route('admin.approvesik.index') }}"
+                       class="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition
+                              {{ request()->routeIs('admin.approvesik.index') ? 'bg-red-50 text-red-700 ring-1 ring-red-100' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
+                                     {{ request()->routeIs('admin.approvesik.index') ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                            <i data-lucide="file-signature" class="w-5 h-5"></i>
+                        </span>
+                        <span x-show="sidebarOpen" x-transition class="font-medium">Approve SIK</span>
+                    </a>
+                @endif
 
                 {{-- # MASIH PENGEMBANGAN: grup menu "Modul" disembunyikan sementara.
                      # Isi: Checklist Inspeksi, Inspeksi Rambu, Arsip Inventaris, Upload IK & SOP, Peminjaman & Jadwal APD.
@@ -284,47 +257,47 @@
                 --}}
 
                 @if($isSuperAdmin)
-                    <div x-show="sidebarOpen" class="px-3 pb-1.5 pt-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Pengaturan</div>
-                    <div x-show="!sidebarOpen" class="mx-auto my-3 h-px w-8 bg-white/20"></div>
-
                     <!-- Dropdown: Master Data -->
-                    <div x-data="{ open: {{ $isUserPanel ? 'true' : 'false' }} }">
+                    <div x-data="{ open: {{ $isUserPanel ? 'true' : 'false' }} }" class="rounded-xl">
                         <button
-                            @click="if (!sidebarOpen) { sidebarOpen = true; open = true } else { open = !open }"
-                            :title="sidebarOpen ? '' : 'Master Data'"
-                            class="group flex w-full items-center gap-3 rounded-xl py-2 pl-3 pr-3 transition
-                                   {{ $isUserPanel ? 'bg-white/15 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white' }}"
+                            @click="open=!open"
+                            class="w-full group flex items-center gap-3 rounded-xl px-3 py-2.5 transition
+                                   {{ $isUserPanel ? 'bg-red-50 text-red-700 ring-1 ring-red-100' : 'text-slate-700 hover:bg-slate-100' }}"
                         >
-                            <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
-                                         {{ $isUserPanel ? 'bg-white text-red-700' : 'bg-white/10 text-white group-hover:bg-white/20' }}">
-                                <i data-lucide="database" class="h-5 w-5"></i>
+                            <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
+                                         {{ $isUserPanel ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                                <i data-lucide="database" class="w-5 h-5"></i>
                             </span>
                             <span x-show="sidebarOpen" x-transition class="flex-1 text-left font-medium">Master Data</span>
                             <i data-lucide="chevron-down"
-                               class="h-4 w-4 text-white/60 transition"
+                               class="w-4 h-4 text-slate-400 transition"
                                :class="open ? 'rotate-180' : ''"
                                x-show="sidebarOpen" x-transition></i>
                         </button>
 
-                        <div x-show="open && sidebarOpen" x-collapse x-cloak class="mt-1 space-y-1 border-l border-white/15 pl-3 ml-7">
-                            @foreach ($subMenu as $sub)
-                                <a href="{{ route($sub['route']) }}"
-                                   class="flex items-center gap-2 rounded-lg px-3 py-2 transition
-                                          {{ $sub['active'] ? 'bg-white font-semibold text-red-700 shadow-sm' : 'text-white/80 hover:bg-white/10 hover:text-white' }}">
-                                    <i data-lucide="{{ $sub['icon'] }}" class="h-4 w-4 shrink-0"></i>
-                                    <span class="truncate">{{ $sub['text'] }}</span>
-                                </a>
-                            @endforeach
+                        <div x-show="open" x-collapse x-cloak class="mt-1 pl-12 space-y-1">
+                            <a href="{{ route('admin.userpanel.index') }}"
+                               class="block rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                                Manajemen User
+                            </a>
+                            <a href="{{ route('admin.role_permission.index') }}"
+                               class="block rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                                Role & Permission
+                            </a>
+                            <a href="{{ route('admin.news.index') }}"
+                               class="block rounded-lg px-3 py-2 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('admin.news.*') ? 'bg-red-50 text-red-700 font-medium' : 'text-slate-600' }}">
+                                Upload Berita
+                            </a>
                         </div>
                     </div>
                 @endif
             </nav>
         </div>
 
-        <!-- FOOTER -->
-        <div class="border-t border-white/10 p-3">
-            <div class="flex items-center gap-3 rounded-xl px-3 py-2 text-xs text-white/70" :class="sidebarOpen ? '' : 'justify-center px-0'">
-                <i data-lucide="shield" class="h-4 w-4 shrink-0"></i>
+        <!-- FOOTER (optional) -->
+        <div class="border-t border-slate-200 p-3">
+            <div class="flex items-center gap-3 rounded-xl px-3 py-2 text-xs text-slate-500">
+                <i data-lucide="shield" class="w-4 h-4"></i>
                 <span x-show="sidebarOpen" x-transition>Safety First</span>
             </div>
         </div>
@@ -332,10 +305,10 @@
 
     <!-- MAIN WRAPPER -->
     <div class="min-h-screen min-w-0 transition-all duration-300"
-         :class="sidebarOpen ? 'lg:pl-[19.5rem]' : 'lg:pl-[6.5rem]'">
+         :class="sidebarOpen ? 'lg:pl-72' : 'lg:pl-20'">
 
         <!-- TOPBAR -->
-        <header class="topbar-hero sticky top-0 z-20 lg:rounded-bl-3xl">
+        <header class="topbar-hero sticky top-0 z-20 shadow-md shadow-slate-900/20">
             <div class="px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
                 <!-- Left: mobile menu button -->
                 <div class="flex min-w-0 items-center gap-3">
