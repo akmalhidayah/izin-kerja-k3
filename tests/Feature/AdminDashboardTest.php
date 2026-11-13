@@ -495,25 +495,4 @@ class AdminDashboardTest extends TestCase
         $this->assertMatchesRegularExpression('/data-ongoing-set="pgo"/', $html);
         $this->assertMatchesRegularExpression('/x-show="who === \'pgo\'"\s+x-cloak/', $html);
     }
-
-    public function test_list_filters_live_in_floating_modal_with_active_badge(): void
-    {
-        $admin = $this->admin();
-
-        foreach (['admin.permintaansik', 'admin.permintaansikpgo'] as $route) {
-            $plain = $this->actingAs($admin)->get(route($route));
-            $plain->assertOk();
-            $plain->assertSee('data-filter-modal', false);
-            $plain->assertSee('aria-label="Buka filter"', false);
-            $plain->assertSee('name="search"', false);
-            $plain->assertDontSee('filter aktif');
-
-            $filtered = $this->actingAs($admin)->get(route($route, ['search' => 'abc', 'bulan_dari' => 3, 'kondisi' => 'revisi']));
-            $filtered->assertOk();
-            $filtered->assertSee('<b>2</b> filter aktif', false);
-            $filtered->assertSee('Hapus filter');
-            // kondisi (tab) ikut terkirim saat filter diterapkan
-            $filtered->assertSee('name="kondisi" value="revisi"', false);
-        }
-    }
 }

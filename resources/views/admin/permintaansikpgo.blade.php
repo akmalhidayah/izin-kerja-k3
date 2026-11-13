@@ -18,8 +18,8 @@
         </div>
     </div>
 
-    <x-admin.filter-modal :action="route('admin.permintaansikpgo')" :reset-url="route('admin.permintaansikpgo')"
-        :active-keys="['search','admin','status','bulan_dari','tahun_dari','bulan_sampai','tahun_sampai']" title="Filter Permintaan Karyawan">
+    <form method="GET" action="{{ route('admin.permintaansikpgo') }}"
+        class="grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur mb-6 sm:p-4 md:grid-cols-2 xl:grid-cols-3">
         @if (request('kondisi'))<input type="hidden" name="kondisi" value="{{ request('kondisi') }}">@endif
 
         <div class="relative">
@@ -125,7 +125,24 @@
                 </select>
             </div>
         </div>
-    </x-admin.filter-modal>
+
+        <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+            <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-xs text-white hover:bg-amber-700 sm:w-auto">
+                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 6h16M7 12h10M10 18h4" />
+                </svg>
+                Filter
+            </button>
+            <a href="{{ route('admin.permintaansikpgo') }}"
+               class="inline-flex items-center justify-center gap-1.5 self-center text-xs text-gray-600 underline hover:text-blue-600 sm:justify-start">
+                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M4 12a8 8 0 1 0 8-8" />
+                    <path d="M4 4v4h4" />
+                </svg>
+                Reset
+            </a>
+        </div>
+    </form>
 
     @include('admin.partials.kondisi-tabs', ['routeName' => 'admin.permintaansikpgo'])
 

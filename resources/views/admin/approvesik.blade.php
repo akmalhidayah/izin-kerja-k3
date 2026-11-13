@@ -19,16 +19,28 @@
 
     <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
-            <x-admin.filter-modal :action="route('admin.approvesik.index')" :reset-url="route('admin.approvesik.index')"
-                :active-keys="['search','bulan','tahun']" title="Filter Approve SIK">
+            <form method="GET" class="flex flex-wrap gap-2 items-center">
                 @if (request('usertype'))
                     <input type="hidden" name="usertype" value="{{ request('usertype') }}">
                 @endif
-                <input type="text" name="search" value="{{ request('search') }}"
-                    placeholder="Cari nomor, nama, deskripsi..."
-                    class="w-full rounded-lg border px-3 py-2 text-xs">
-                <div class="grid grid-cols-2 gap-2">
-                    <select name="bulan" class="w-full rounded-lg border px-3 py-2 text-xs">
+                <div class="relative">
+                    <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="m21 21-4.35-4.35" />
+                            <circle cx="11" cy="11" r="7" />
+                        </svg>
+                    </span>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Cari nomor, nama, deskripsi..."
+                        class="w-64 max-w-full pl-9 pr-3 py-2 border rounded-lg text-xs">
+                </div>
+                <div class="relative">
+                    <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M7 3v3M17 3v3M3 9h18M5 7h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
+                        </svg>
+                    </span>
+                    <select name="bulan" class="pl-9 pr-3 py-2 border rounded-lg text-xs">
                         <option value="">Bulan</option>
                         @for ($i = 1; $i <= 12; $i++)
                             <option value="{{ $i }}" {{ request('bulan', now()->month) == $i ? 'selected' : '' }}>
@@ -36,13 +48,34 @@
                             </option>
                         @endfor
                     </select>
-                    <select name="tahun" class="w-full rounded-lg border px-3 py-2 text-xs">
+                </div>
+                <div class="relative">
+                    <span class="pointer-events-none absolute left-3 top-2.5 text-gray-400">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M4 7h16M7 3v3M17 3v3M5 11h14v8H5z" />
+                        </svg>
+                    </span>
+                    <select name="tahun" class="pl-9 pr-3 py-2 border rounded-lg text-xs">
                         @for ($y = now()->year; $y >= 2023; $y--)
-                            <option value="{{ $y }}" {{ request('tahun', now()->year) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                            <option value="{{ $y }}" {{ request('tahun', now()->year) == $y ? 'selected' : '' }}>
+                                {{ $y }}
+                            </option>
                         @endfor
                     </select>
                 </div>
-            </x-admin.filter-modal>
+                <button type="submit" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-xs rounded-lg">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 6h16M7 12h10M10 18h4" />
+                    </svg>
+                    Filter
+                </button>
+                @if(request()->hasAny(['search', 'bulan', 'tahun', 'usertype']))
+                    <a href="{{ route('admin.approvesik.index') }}"
+                        class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 text-xs rounded-lg">
+                        Reset
+                    </a>
+                @endif
+            </form>
             <div class="text-[11px] text-gray-500">
                 Total: {{ $vendorRows->count() + $pgoRows->count() }}
             </div>

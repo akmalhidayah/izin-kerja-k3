@@ -179,7 +179,6 @@ Legacy tanpa controller/route: `WorkPermitLifeSaving` (`work_permit_life_saving`
 |---|---|
 | `layouts/app.blade.php` + `layouts/navigation.blade.php` | `<x-app-layout>` dashboard user/PGO, profil |
 | `layouts/admin.blade.php` | `<x-admin-layout>` semua halaman admin (navbar + dropdown notifikasi admin). Sidebar merah melayang (`.sidebar-rail`, menu aktif `.nav-active` berlekuk), grup menu dari `$navGroups`, badge dari view composer `sidebarBadges` di `AppServiceProvider` |
-| `components/admin/filter-modal.blade.php` | `<x-admin.filter-modal>`: tombol filter melayang + modal untuk daftar admin (vendor, karyawan, Approve SIK, Role & Permission) |
 | `layouts/guest.blade.php` | auth Breeze |
 | `layouts/sign.blade.php` | form token publik |
 
