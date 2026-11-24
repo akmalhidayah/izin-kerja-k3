@@ -5,6 +5,38 @@ import SignaturePad from 'signature_pad'; // ⬅️ ini penting!
 window.Alpine = Alpine;
 window.SignaturePad = SignaturePad; // ⬅️ supaya bisa dipakai di komponen modal
 
+Alpine.data('ongoingJobs', (pageCount) => {
+    let rotationTimer;
+
+    return {
+        who: 'vendor',
+        page: 0,
+        paused: false,
+        hovered: false,
+        focusWithin: false,
+        tabVisible: !document.hidden,
+
+        scheduleRotation() {
+            window.clearTimeout(rotationTimer);
+
+            if (pageCount <= 1 || this.who !== 'vendor' || this.paused || this.hovered || this.focusWithin || !this.tabVisible) {
+                return;
+            }
+
+            const nextPage = (this.page + 1) % pageCount;
+            rotationTimer = window.setTimeout(() => { this.page = nextPage; }, 10_000);
+        },
+
+        movePage(direction) {
+            this.page = (this.page + direction + pageCount) % pageCount;
+        },
+
+        destroy() {
+            window.clearTimeout(rotationTimer);
+        },
+    };
+});
+
 // ⬇️ Tambah Alpine store di sini
 Alpine.store('signatureModal', {
     show(role) {

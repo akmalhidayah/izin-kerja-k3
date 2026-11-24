@@ -491,8 +491,49 @@ class AdminDashboardTest extends TestCase
 
         // Dropdown default Vendor: set karyawan tersembunyi saat halaman dibuka.
         $html = $response->getContent();
-        $this->assertStringContainsString("x-data=\"{ who: 'vendor' }\"", $html);
+        $this->assertStringContainsString('x-data="ongoingJobs(1)"', $html);
+        $response->assertDontSee('ongoing-vendor-jobs');
         $this->assertMatchesRegularExpression('/data-ongoing-set="pgo"/', $html);
         $this->assertMatchesRegularExpression('/x-show="who === \'pgo\'"\s+x-cloak/', $html);
+    }
+
+    public function test_ongoing_today_pages_all_vendor_jobs_and_keeps_the_pgo_preview(): void
+    {
+        $admin = $this->admin();
+        $vendor = User::factory()->create(['usertype' => 'user']);
+        $pgo = User::factory()->create(['usertype' => 'pgo']);
+        $today = now()->toDateString();
+
+        foreach (range(1, 8) as $workers) {
+            DataKontraktor::create([
+                'notification_id' => $this->notification($vendor)->id,
+                'nama_perusahaan' => 'Vendor Lapangan '.$workers,
+                'tanggal_mulai' => $today,
+                'tanggal_selesai' => $today,
+                'tenaga_kerja' => [['jumlah' => $workers]],
+            ]);
+            WorkPermitDetail::create([
+                'notification_id' => $this->notification($pgo)->id,
+                'permit_type' => 'umum',
+                'location' => 'Area Karyawan '.$workers,
+                'work_date' => $today,
+                'worker_count' => $workers,
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('x-data="ongoingJobs(2)"', false)
+            ->assertSee('Halaman pekerjaan vendor berikutnya')
+            ->assertSeeInOrder(['Vendor Lapangan 8', 'Vendor Lapangan 2', 'Vendor Lapangan 1'])
+            ->assertSee('Area Karyawan 2')
+            ->assertDontSee('Area Karyawan 1');
+
+        $ongoing = $response->viewData('ongoing');
+        $this->assertCount(8, $ongoing['vendor']['rows']);
+        $this->assertSame(8, $ongoing['vendor']['total']);
+        $this->assertSame(36, $ongoing['vendor']['workers']);
+        $this->assertCount(7, $ongoing['pgo']['rows']);
+        $this->assertSame(8, $ongoing['pgo']['total']);
     }
 }

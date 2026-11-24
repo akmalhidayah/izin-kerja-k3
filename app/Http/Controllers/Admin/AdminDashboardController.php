@@ -477,17 +477,18 @@ class AdminDashboardController extends Controller
             $subset = $subset->values();
 
             return [
-                'rows' => $subset->take(7)->values(),
+                'rows' => $subset,
                 'total' => $subset->count(),
                 'workers' => (int) $subset->sum(fn ($r) => $r->workers ?? 0),
                 'risk' => $subset->where('risk', true)->count(),
             ];
         };
 
-        return [
-            'vendor' => $summary($rows->where('usertype', 'user')),
-            'pgo' => $summary($rows->where('usertype', 'pgo')),
-        ];
+        $vendor = $summary($rows->where('usertype', 'user'));
+        $pgo = $summary($rows->where('usertype', 'pgo'));
+        $pgo['rows'] = $pgo['rows']->take(7);
+
+        return ['vendor' => $vendor, 'pgo' => $pgo];
     }
 
     /** Jumlahkan kolom "jumlah" daftar tenaga kerja; dukung data lama yang ter-encode dua kali. */

@@ -175,14 +175,19 @@
                 {{-- Pekerjaan berlangsung hari ini: dropdown Vendor / Karyawan (default Vendor) --}}
                 @php
                     $ongoingSets = ['vendor' => $ongoing['vendor'], 'pgo' => $ongoing['pgo']];
+                    $vendorPageSize = 7;
+                    $vendorPages = $ongoing['vendor']['rows']->chunk($vendorPageSize);
                 @endphp
-                <div x-data="{ who: 'vendor' }" class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div x-data="ongoingJobs({{ $vendorPages->count() }})"
+                     x-effect="scheduleRotation()"
+                     @visibilitychange.document="tabVisible = !document.hidden"
+                     class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="mb-3 flex items-center gap-2">
                         <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
                             <i class="fas fa-helmet-safety text-xs"></i>
                         </span>
                         <h2 class="min-w-0 text-xs font-bold uppercase tracking-wide text-slate-800">Pekerjaan Berlangsung Hari Ini</h2>
-                        <select x-model="who" aria-label="Jenis pemohon"
+                        <select x-model="who" @change="page = 0" aria-label="Jenis pemohon"
                                 class="ml-auto shrink-0 rounded-lg border border-slate-200 bg-white py-1 pl-2 pr-7 text-[11px] font-semibold text-slate-700 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200">
                             <option value="vendor">Vendor</option>
                             <option value="pgo">Karyawan</option>
@@ -190,6 +195,10 @@
                     </div>
 
                     @foreach ($ongoingSets as $setKey => $set)
+                        @php
+                            $pages = $setKey === 'vendor' ? $vendorPages : collect([$set['rows']])->filter(fn ($rows) => $rows->isNotEmpty());
+                            $canRotate = $setKey === 'vendor' && $pages->count() > 1;
+                        @endphp
                         <div x-show="who === '{{ $setKey }}'" @if ($setKey !== 'vendor') x-cloak @endif data-ongoing-set="{{ $setKey }}">
                             <div class="mb-3 grid grid-cols-3 gap-2">
                                 <div class="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
@@ -206,32 +215,47 @@
                                 </div>
                             </div>
 
-                            <div class="space-y-1.5">
-                                @forelse ($set['rows'] as $job)
-                                    <a href="{{ route('admin.permintaansik.show', $job->notification_id) }}"
-                                       class="block rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100 transition hover:bg-slate-100">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <p class="min-w-0 truncate text-[11px] font-semibold text-gray-800">{{ $job->name }}</p>
-                                            <span class="shrink-0 text-[10px] font-semibold text-emerald-700">
-                                                {{ $job->workers !== null ? $job->workers.' org' : '-' }}
-                                            </span>
-                                        </div>
-                                        <p class="mt-0.5 truncate text-[10px] text-gray-500">
-                                            <i class="fas fa-location-dot text-[9px] text-gray-400"></i>
-                                            {{ $job->location ?: 'Lokasi belum diisi' }}
-                                            @if ($job->until)<span class="text-gray-400"> · s.d. {{ $job->until }}</span>@endif
-                                        </p>
-                                        @if ($job->types)
-                                            <div class="mt-1 flex flex-wrap gap-1">
-                                                @foreach (array_slice($job->types, 0, 3) as $type)
-                                                    <span class="rounded-full px-1.5 py-0.5 text-[9px] font-semibold text-white" style="background: {{ $type['color'] }}">{{ $type['label'] }}</span>
-                                                @endforeach
-                                                @if (count($job->types) > 3)
-                                                    <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">+{{ count($job->types) - 3 }}</span>
+                            <div class="grid"
+                                 @if ($canRotate)
+                                     id="ongoing-vendor-jobs"
+                                     @pointerenter="hovered = $event.pointerType === 'mouse'"
+                                     @pointerleave="hovered = false"
+                                     @focusin="focusWithin = true"
+                                     @focusout="focusWithin = $el.contains($event.relatedTarget)"
+                                 @endif>
+                                @forelse ($pages as $jobs)
+                                    <div class="col-start-1 row-start-1 space-y-1.5"
+                                         @if ($canRotate)
+                                             :class="{ invisible: page !== {{ $loop->index }} }"
+                                             @unless ($loop->first) x-cloak @endunless
+                                         @endif>
+                                        @foreach ($jobs as $job)
+                                            <a href="{{ route('admin.permintaansik.show', $job->notification_id) }}"
+                                               class="block rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100 transition hover:bg-slate-100">
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <p class="min-w-0 truncate text-[11px] font-semibold text-gray-800">{{ $job->name }}</p>
+                                                    <span class="shrink-0 text-[10px] font-semibold text-emerald-700">
+                                                        {{ $job->workers !== null ? $job->workers.' org' : '-' }}
+                                                    </span>
+                                                </div>
+                                                <p class="mt-0.5 truncate text-[10px] text-gray-500">
+                                                    <i class="fas fa-location-dot text-[9px] text-gray-400"></i>
+                                                    {{ $job->location ?: 'Lokasi belum diisi' }}
+                                                    @if ($job->until)<span class="text-gray-400"> · s.d. {{ $job->until }}</span>@endif
+                                                </p>
+                                                @if ($job->types)
+                                                    <div class="mt-1 flex flex-wrap gap-1">
+                                                        @foreach (array_slice($job->types, 0, 3) as $type)
+                                                            <span class="rounded-full px-1.5 py-0.5 text-[9px] font-semibold text-white" style="background: {{ $type['color'] }}">{{ $type['label'] }}</span>
+                                                        @endforeach
+                                                        @if (count($job->types) > 3)
+                                                            <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">+{{ count($job->types) - 3 }}</span>
+                                                        @endif
+                                                    </div>
                                                 @endif
-                                            </div>
-                                        @endif
-                                    </a>
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 @empty
                                     <div class="py-6 text-center text-[11px] text-gray-500">
                                         Tidak ada pekerjaan {{ $setKey === 'pgo' ? 'karyawan' : 'vendor' }} yang dijadwalkan hari ini.
@@ -239,7 +263,28 @@
                                 @endforelse
                             </div>
 
-                            @if ($set['total'] > $set['rows']->count())
+                            @if ($canRotate)
+                                <div x-cloak class="mt-2 flex flex-wrap items-center justify-between gap-2">
+                                    <p class="text-[10px] font-semibold tabular-nums text-emerald-700"
+                                       x-text="`${page * {{ $vendorPageSize }} + 1}–${Math.min((page + 1) * {{ $vendorPageSize }}, {{ $set['total'] }})} dari {{ $set['total'] }}`"></p>
+                                    <div class="flex items-center gap-1">
+                                        <button type="button" @click="movePage(-1)" aria-label="Halaman pekerjaan vendor sebelumnya"
+                                                aria-controls="ongoing-vendor-jobs"
+                                                class="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-xs text-slate-700 hover:bg-slate-100">
+                                            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                                        </button>
+                                        <button type="button" @click="paused = !paused" x-text="paused ? 'Lanjutkan' : 'Jeda'"
+                                                :aria-label="paused ? 'Lanjutkan pergantian otomatis' : 'Jeda pergantian otomatis'"
+                                                aria-controls="ongoing-vendor-jobs"
+                                                class="h-8 w-20 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-700 hover:bg-slate-100"></button>
+                                        <button type="button" @click="movePage(1)" aria-label="Halaman pekerjaan vendor berikutnya"
+                                                aria-controls="ongoing-vendor-jobs"
+                                                class="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-xs text-slate-700 hover:bg-slate-100">
+                                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            @elseif ($set['total'] > $set['rows']->count())
                                 <p class="mt-2 text-right text-[10px] font-semibold text-emerald-700/80">
                                     +{{ $set['total'] - $set['rows']->count() }} lainnya
                                 </p>
