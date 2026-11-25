@@ -24,6 +24,12 @@
         ];
     @endphp
 
+    @if (session('expired_form'))
+        <div role="alert" class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            {{ session('expired_form') }}
+        </div>
+    @endif
+
     {{-- ===== KARTU RINGKAS: HP 2x2 ringkas, desktop 4 sejajar ===== --}}
     <div class="mb-4 grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4">
         @foreach ($cardDefs as $key => $def)

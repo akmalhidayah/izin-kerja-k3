@@ -223,7 +223,7 @@ Tanda tangan uji: gunakan PNG 1x1 base64 yang valid (lihat `JsaSignatureTest` un
 | Tombol Approve SIK ditolak | status step `sik` harus `disetujui` dulu |
 | Form permit tidak muncul di modal | periksa response `working-permit.form` (403 jika bukan owner, 404 jika kunci tidak ada di `PERMITS`) |
 | Nomor JSA bentrok | unique index `jsas_no_jsa_unique`; `store()` retry 3x dengan `lockForUpdate` |
-| 419 setelah idle | sesi habis; handler di `bootstrap/app.php` mengarahkan ke login |
+| 419 setelah idle | formulir lama memakai token CSRF yang berbeda dari sesi aktif. Untuk login dan halaman autentikasi, handler di `bootstrap/app.php` membuka dashboard sesuai akun atau halaman login baru. |
 
 ## 8. Area yang sengaja belum dirapikan
 

@@ -11,7 +11,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const USERTYPE_ADMIN = 'admin';
+
     public const USERTYPE_USER = 'user';
+
     public const USERTYPE_PGO = 'pgo';
 
     /**
@@ -62,6 +64,15 @@ class User extends Authenticatable
         return $this->usertype === self::USERTYPE_PGO;
     }
 
+    public function dashboardUrl(): string
+    {
+        return match ($this->usertype) {
+            self::USERTYPE_ADMIN => route('admin.dashboard'),
+            self::USERTYPE_USER, self::USERTYPE_PGO => route('dashboard'),
+            default => url('/'),
+        };
+    }
+
     /**
      * Relasi ke Role (many-to-one)
      */
@@ -69,11 +80,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
-// di User.php
-public function handledNotifications()
-{
-    return $this->hasMany(Notification::class, 'assigned_admin_id');
-}
 
-
+    // di User.php
+    public function handledNotifications()
+    {
+        return $this->hasMany(Notification::class, 'assigned_admin_id');
+    }
 }

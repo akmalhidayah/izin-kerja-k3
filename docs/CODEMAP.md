@@ -40,7 +40,7 @@ app/
     PreventBackHistory.php    # header no-cache, dipasang ke semua route web
   Models/                     # lihat bagian 4
   Providers/AppServiceProvider.php  # alias <x-admin-layout>, directive @carbon, defaultStringLength(191)
-bootstrap/app.php             # registrasi middleware alias + handler TokenMismatchException (419 -> login)
+bootstrap/app.php             # middleware, tujuan dashboard, pemulihan 419 untuk login dan halaman autentikasi
 config/permit_tokens.php      # expires_in_days (env PERMIT_TOKEN_EXPIRES_IN_DAYS, default 3)
 database/
   migrations/                 # 29 migration, lihat bagian 4

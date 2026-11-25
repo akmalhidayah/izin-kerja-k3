@@ -37,6 +37,11 @@
             @endisset
 
             <main>
+                @if (session('expired_form'))
+                    <div role="alert" class="mx-auto mt-4 max-w-7xl rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                        {{ session('expired_form') }}
+                    </div>
+                @endif
                 {{ $slot }}
             </main>
         </div>
